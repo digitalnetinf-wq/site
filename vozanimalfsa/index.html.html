@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Justiça Animal | Roteiro Jurídico</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0; /* Slate 200 */
+        }
+        
+        h1, h2, h3, .serif-font {
+            font-family: 'Merriweather', serif;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-btn.active {
+            background-color: #3b82f6; /* Blue 500 */
+            color: white;
+            border-bottom: 3px solid #60a5fa;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Hero / Header -->
+    <header class="relative h-96 w-full overflow-hidden">
+        <div class="absolute inset-0">
+            <img src="https://conhecimentocientifico.r7.com/wp-content/uploads/2020/01/animais-domesticos-destaque.jpg" alt="Animais domésticos destaque" class="w-full h-full object-cover opacity-40">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/70 to-transparent"></div>
+        </div>
+        
+        <div class="relative z-10 container mx-auto px-4 h-full flex flex-col justify-end pb-8">
+            <span class="text-blue-400 font-bold tracking-wider uppercase text-sm mb-2">Manual de Defesa Animal</span>
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
+                Do Flagrante à <span class="text-blue-500">Condenação</span>
+            </h1>
+            <p class="text-lg md:text-xl text-gray-300 max-w-2xl serif-font italic">
+                "Não basta denunciar; é preciso fornecer ao Estado provas robustas que resistam ao processo judicial."
+            </p>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="sticky top-0 z-50 bg-[#1e293b] shadow-lg border-b border-gray-700 overflow-x-auto">
+        <div class="container mx-auto px-2 md:px-4">
+            <div class="flex space-x-1 min-w-max">
+                <button onclick="switchTab('tab1')" id="btn-tab1" class="nav-btn active px-6 py-4 text-sm font-semibold hover:bg-slate-700 transition-colors flex items-center gap-2">
+                    <i class="fas fa-hand-holding-heart"></i> 1. As 5 Liberdades
+                </button>
+                <button onclick="switchTab('tab2')" id="btn-tab2" class="nav-btn px-6 py-4 text-sm font-semibold hover:bg-slate-700 transition-colors flex items-center gap-2">
+                    <i class="fas fa-camera"></i> 2. Evidências
+                </button>
+                <button onclick="switchTab('tab3')" id="btn-tab3" class="nav-btn px-6 py-4 text-sm font-semibold hover:bg-slate-700 transition-colors flex items-center gap-2">
+                    <i class="fas fa-stethoscope"></i> 3. Perícia
+                </button>
+                <button onclick="switchTab('tab4')" id="btn-tab4" class="nav-btn px-6 py-4 text-sm font-semibold hover:bg-slate-700 transition-colors flex items-center gap-2">
+                    <i class="fas fa-book-open"></i> 4. Ciência Jurídica
+                </button>
+                <button onclick="switchTab('tab5')" id="btn-tab5" class="nav-btn px-6 py-4 text-sm font-semibold hover:bg-slate-700 transition-colors flex items-center gap-2">
+                    <i class="fas fa-file-contract"></i> 5. Documentos
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+
+        <!-- TAB 1: AS 5 LIBERDADES -->
+        <div id="tab1" class="tab-content active">
+            <div class="flex flex-col md:flex-row items-center justify-between mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-white mb-2">Etapa 1: Identificação Técnica</h2>
+                    <p class="text-gray-400">O crime de maus-tratos é configurado quando uma das Cinco Liberdades é violada.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Card 1 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden card-hover group">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRfyky9FaNq3cpLQLanCBvqBcp-AUnA2gUozQ&s" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Cão se alimentando">
+                        <div class="absolute bottom-0 left-0 bg-blue-600 text-white px-3 py-1 text-xs font-bold uppercase">Fundamental</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-blue-400 mb-2">1. Liberdade Nutricional</h3>
+                        <p class="text-gray-300 text-sm">Ausência de fome, sede e má-nutrição. O animal deve ter acesso constante a água fresca e uma dieta que mantenha sua saúde plena.</p>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden card-hover group">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Abrigo de animais">
+                        <div class="absolute bottom-0 left-0 bg-green-600 text-white px-3 py-1 text-xs font-bold uppercase">Conforto</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-blue-400 mb-2">2. Liberdade Ambiental</h3>
+                        <p class="text-gray-300 text-sm">Livre de desconforto. Deve haver abrigo contra intempéries (sol/chuva) e uma área de descanso adequada e limpa.</p>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden card-hover group">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="https://media.gazetadopovo.com.br/2022/08/29120811/shutterstock_275877062-16x9-2-960x540.jpg" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Veterinário examinando">
+                        <div class="absolute bottom-0 left-0 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase">Saúde</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-blue-400 mb-2">3. Liberdade Sanitária</h3>
+                        <p class="text-gray-300 text-sm">Livre de dor, ferimentos e doenças. A negligência no acesso ao tratamento veterinário configura crime.</p>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden card-hover group">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1534361960057-19889db9621e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Cão correndo">
+                        <div class="absolute bottom-0 left-0 bg-purple-600 text-white px-3 py-1 text-xs font-bold uppercase">Natureza</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-blue-400 mb-2">4. Liberdade Comportamental</h3>
+                        <p class="text-gray-300 text-sm">Espaço suficiente para expressar o comportamento natural da espécie (correr, brincar, interagir).</p>
+                    </div>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden card-hover group">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMepeywR4ytQXM5G317yCfhKe-6tMyEABoRg&s" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Cão assustado">
+                        <div class="absolute bottom-0 left-0 bg-orange-600 text-white px-3 py-1 text-xs font-bold uppercase">Psiquê</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-blue-400 mb-2">5. Liberdade Psicológica</h3>
+                        <p class="text-gray-300 text-sm">Livre de medo e estresse. Animais submetidos a castigos constantes, gritos ou ameaças sofrem violência psicológica.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: EVIDÊNCIAS -->
+        <div id="tab2" class="tab-content">
+            <h2 class="text-3xl font-bold text-white mb-6">Etapa 2: Documentação de Evidências</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Coluna 1 -->
+                <div class="bg-slate-800 p-6 rounded-xl border-l-4 border-blue-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-blue-900/50 flex items-center justify-center text-blue-400 text-xl mr-4">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">Fotos e Vídeos</h3>
+                    </div>
+                    <ul class="space-y-3 text-gray-300">
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i> Capture o estado físico do animal (magreza, feridas).</li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i> Filme o ambiente: potes vazios, fezes acumuladas.</li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i> Mostre correntes curtas ou falta de abrigo.</li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i> <strong>Dica:</strong> Inclua pontos de referência (placas de rua, casas vizinhas) para provar o local.</li>
+                    </ul>
+                </div>
+
+                <!-- Coluna 2 -->
+                <div class="bg-slate-800 p-6 rounded-xl border-l-4 border-purple-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-purple-900/50 flex items-center justify-center text-purple-400 text-xl mr-4">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">Testemunhas</h3>
+                    </div>
+                    <ul class="space-y-3 text-gray-300">
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i> Identifique vizinhos que ouvem os maus-tratos.</li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i> Transeuntes que presenciaram agressões físicas.</li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i> <strong>Ação:</strong> Peça nomes completos e telefones. Depoimentos corroboram as imagens.</li>
+                    </ul>
+                </div>
+
+                <!-- Coluna 3 -->
+                <div class="bg-slate-800 p-6 rounded-xl border-l-4 border-red-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-red-900/50 flex items-center justify-center text-red-400 text-xl mr-4">
+                            <i class="fas fa-file-medical"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">Laudo Inicial</h3>
+                    </div>
+                    <ul class="space-y-3 text-gray-300">
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i> Se houver resgate imediato, leve ao veterinário.</li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i> Solicite um atestado/laudo clínico detalhado.</li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mt-1 mr-2"></i> Este documento funciona como uma 'pré-perícia' para a polícia.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-8 relative h-64 rounded-xl overflow-hidden">
+                 <img src="https://images.unsplash.com/photo-1589829085413-56de8ae18c73?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Processo Legal" class="w-full h-full object-cover opacity-50">
+                 <div class="absolute inset-0 flex items-center justify-center bg-black/60">
+                     <p class="text-2xl font-serif italic text-center max-w-2xl text-white">"A qualidade da prova define o sucesso da condenação."</p>
+                 </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: PERÍCIA -->
+        <div id="tab3" class="tab-content">
+            <h2 class="text-3xl font-bold text-white mb-6">Etapa 3: O Exame de Corpo de Delito</h2>
+            <p class="text-gray-300 mb-8 text-lg">O Exame Médico Veterinário Legal é a <strong class="text-yellow-400">prova rainha</strong> do processo penal.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-slate-800 rounded-xl p-8 flex flex-col justify-center">
+                    <h3 class="text-2xl font-bold text-blue-400 mb-4">O que o exame busca?</h3>
+                    <div class="space-y-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0 mt-1">
+                                <i class="fas fa-link text-yellow-500 text-lg"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="text-lg font-bold text-white">Nexo Causal</h4>
+                                <p class="text-sm text-gray-400">Provar cientificamente que o ferimento ou estado do animal foi causado por ação humana direta ou negligência.</p>
+                            </div>
+                        </div>
+                        <div class="flex">
+                            <div class="flex-shrink-0 mt-1">
+                                <i class="fas fa-shield-alt text-yellow-500 text-lg"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="text-lg font-bold text-white">Cadeia de Custódia</h4>
+                                <p class="text-sm text-gray-400">Garantia jurídica de que as provas (projéteis, fotos, substâncias tóxicas) não foram alteradas desde a coleta até o julgamento.</p>
+                            </div>
+                        </div>
+                        <div class="flex">
+                            <div class="flex-shrink-0 mt-1">
+                                <i class="fas fa-heart-broken text-yellow-500 text-lg"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="text-lg font-bold text-white">Diagnóstico de Dor</h4>
+                                <p class="text-sm text-gray-400">Avaliação do sofrimento não apenas físico, mas psicológico e comportamental.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-rows-2 gap-4">
+                    <div class="relative rounded-xl overflow-hidden group">
+                        <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Microscópio" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90"></div>
+                        <div class="absolute bottom-4 left-4">
+                            <h4 class="text-xl font-bold">Ciência Forense</h4>
+                            <p class="text-xs text-gray-300">Análise de tecidos e substâncias.</p>
+                        </div>
+                    </div>
+                    <div class="relative rounded-xl overflow-hidden group">
+                        <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Raio X Veterinário" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90"></div>
+                        <div class="absolute bottom-4 left-4">
+                            <h4 class="text-xl font-bold">Imagem Diagnóstica</h4>
+                            <p class="text-xs text-gray-300">Provas internas de fraturas por agressão.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: CIÊNCIA JURÍDICA E LEGISLAÇÃO -->
+        <div id="tab4" class="tab-content">
+            <h2 class="text-3xl font-bold text-white mb-6">Legislação e Ciência Jurídica</h2>
+            
+            <!-- Nova Seção: Pilares Legais -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Lei 9.605 -->
+                <div class="bg-slate-800 p-6 rounded-xl border-t-4 border-blue-500 hover:bg-slate-750 transition-colors shadow-lg">
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-gavel text-blue-400 text-xl mr-2"></i>
+                        <h3 class="text-lg font-bold text-white">Lei de Crimes Ambientais</h3>
+                    </div>
+                    <p class="text-xs text-blue-300 mb-3 font-mono">Lei nº 9.605/1998 - Art. 32</p>
+                    <p class="text-gray-300 text-sm mb-4">Norma central. Crime praticar abuso, maus-tratos, ferir ou mutilar animais silvestres, domésticos ou domesticados.</p>
+                    <div class="bg-black/30 p-3 rounded text-xs text-gray-400">
+                        <p><strong>Pena:</strong> Detenção de 3 meses a 1 ano + multa.</p>
+                        <p class="mt-1 text-red-400"><strong>Agravante:</strong> Aumenta de 1/6 a 1/3 se ocorrer morte.</p>
+                    </div>
+                </div>
+
+                <!-- Lei Sansão -->
+                <div class="bg-slate-800 p-6 rounded-xl border-t-4 border-red-600 relative overflow-hidden shadow-lg group">
+                    <div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fas fa-dog text-6xl text-red-500"></i>
+                    </div>
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-exclamation-circle text-red-500 text-xl mr-2"></i>
+                        <h3 class="text-lg font-bold text-white">Lei Sansão</h3>
+                    </div>
+                    <p class="text-xs text-red-400 mb-3 font-mono">Lei nº 14.064/2020</p>
+                    <p class="text-gray-300 text-sm mb-4">Alterou a lei anterior criando rigor específico para <strong>Cães e Gatos</strong>.</p>
+                    <div class="bg-red-900/20 border border-red-500/30 p-3 rounded text-xs text-gray-300">
+                        <p class="text-white font-bold mb-1">Pena: Reclusão de 2 a 5 anos</p>
+                        <p>+ Multa e perda da guarda. Permite prisão em flagrante e sem fiança imediata na delegacia.</p>
+                    </div>
+                </div>
+
+                <!-- Constituição Federal -->
+                <div class="bg-slate-800 p-6 rounded-xl border-t-4 border-green-500 hover:bg-slate-750 transition-colors shadow-lg">
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-landmark text-green-400 text-xl mr-2"></i>
+                        <h3 class="text-lg font-bold text-white">Constituição Federal</h3>
+                    </div>
+                    <p class="text-xs text-green-300 mb-3 font-mono">Artigo 225</p>
+                    <p class="text-gray-300 text-sm mb-4">O Estado deve proteger a fauna e a flora, proibindo práticas que submetam os animais a crueldade.</p>
+                    <div class="bg-black/30 p-3 rounded text-xs text-gray-400 italic">
+                        "Incumbe ao Poder Público proteger a fauna e a flora, vedadas, na forma da lei, as práticas que coloquem em risco sua função ecológica..."
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nova Seção: Definição de Maus-Tratos -->
+            <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700 mb-10">
+                <div class="flex items-center mb-4">
+                    <div class="bg-yellow-600/20 p-2 rounded-lg mr-3">
+                        <i class="fas fa-list-ul text-yellow-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">O que configura Maus-Tratos?</h3>
+                </div>
+                <p class="text-sm text-gray-400 mb-4 ml-1">Baseado na Resolução CFMV nº 1.236/2018 e entendimento jurídico:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex items-start p-3 bg-slate-800 rounded hover:bg-slate-700 transition">
+                        <i class="fas fa-ban text-red-500 mt-1 mr-3"></i>
+                        <span class="text-sm text-gray-300">Abandono em vias públicas ou locais isolados.</span>
+                    </div>
+                    <div class="flex items-start p-3 bg-slate-800 rounded hover:bg-slate-700 transition">
+                        <i class="fas fa-link text-red-500 mt-1 mr-3"></i>
+                        <span class="text-sm text-gray-300">Manter preso a correntes curtas ou sem higiene/ventilação.</span>
+                    </div>
+                    <div class="flex items-start p-3 bg-slate-800 rounded hover:bg-slate-700 transition">
+                        <i class="fas fa-utensils text-red-500 mt-1 mr-3"></i>
+                        <span class="text-sm text-gray-300">Negar assistência médica, alimento ou água.</span>
+                    </div>
+                    <div class="flex items-start p-3 bg-slate-800 rounded hover:bg-slate-700 transition">
+                        <i class="fas fa-fist-raised text-red-500 mt-1 mr-3"></i>
+                        <span class="text-sm text-gray-300">Agressão física, mutilação ou uso em rinhas.</span>
+                    </div>
+                    <div class="flex items-start p-3 bg-slate-800 rounded hover:bg-slate-700 transition">
+                        <i class="fas fa-horse-head text-red-500 mt-1 mr-3"></i>
+                        <span class="text-sm text-gray-300">Exposição a esforço excessivo (animais de tração).</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Highlight Teoria do Elo (Existente) -->
+            <div class="bg-gradient-to-r from-purple-900 to-slate-900 rounded-2xl p-8 mb-10 shadow-2xl border border-purple-500/30 flex flex-col md:flex-row items-center gap-8">
+                <div class="w-full md:w-1/3">
+                    <img src="https://meusanimais.com.br/wp-content/uploads/2018/08/veterinario-para-animais-maltratados.jpg?auto=format%2Ccompress&quality=75&width=3840&height=2160&fit=cover&gravity=center&sharp=true&progressive=true" class="rounded-lg shadow-lg rotate-2 hover:rotate-0 transition-transform duration-500 w-full object-cover border-4 border-slate-800" alt="Cenário de maus-tratos">
+                </div>
+                <div class="w-full md:w-2/3">
+                    <h3 class="text-3xl font-serif text-white mb-4">Criminologia e a Teoria do Elo</h3>
+                    <p class="text-gray-300 mb-4 leading-relaxed">
+                        A "Link Theory" (Teoria do Elo) é reconhecida mundialmente pelo FBI e pela polícia brasileira. Ela estabelece que <strong class="text-purple-400">quem maltrata animais tem alta propensão a cometer crimes violentos contra humanos</strong>, especialmente violência doméstica e abuso infantil.
+                    </p>
+                    <div class="bg-black/30 p-4 rounded-lg border-l-4 border-purple-500">
+                        <p class="text-sm italic text-gray-400">"Ao denunciar maus-tratos a um animal, você pode estar salvando uma mulher ou uma criança que vive na mesma residência."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-slate-800 p-6 rounded-xl">
+                    <h3 class="text-xl font-bold text-blue-400 mb-3"><i class="fas fa-paw mr-2"></i>O Animal como Sujeito de Direito</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Entenda a mudança jurídica de 'coisa' (semovente) para 'sujeito de direito'. No Brasil, a Lei Sansão aumentou a pena para cães e gatos, e o animal passou a ter sua dignidade tutelada pelo Estado, independente de ter um dono ou não.
+                    </p>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-xl">
+                    <h3 class="text-xl font-bold text-green-400 mb-3"><i class="fas fa-microscope mr-2"></i>Medicina Veterinária Forense</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Uma carreira em ascensão. O perito veterinário utiliza técnicas de autópsia, balística e tanatologia para resolver crimes, atuando diretamente com delegados e juízes para garantir que a justiça seja feita.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: DOCUMENTOS -->
+        <div id="tab5" class="tab-content">
+            <h2 class="text-3xl font-bold text-white mb-6">Modelos e Documentos Necessários</h2>
+            <p class="text-gray-300 mb-8 max-w-3xl">Para garantir que sua denúncia seja aceita imediatamente, prepare o "Kit Denúncia" antes de se dirigir à delegacia.</p>
+
+            <!-- Checklist -->
+            <div class="bg-slate-800 p-6 rounded-xl mb-10 border-l-4 border-yellow-500 shadow-xl">
+                <div class="flex items-center mb-6">
+                    <div class="bg-yellow-500/20 p-3 rounded-full mr-4">
+                        <i class="fas fa-clipboard-list text-yellow-500 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white">Checklist para Delegacia</h3>
+                        <p class="text-sm text-gray-400">Leve estes itens para agilizar o Boletim de Ocorrência</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-300">
+                    <div class="flex items-center bg-slate-700/50 p-3 rounded hover:bg-slate-700 transition">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i> 
+                        <span class="text-sm">Documento Pessoal (RG/CPF)</span>
+                    </div>
+                    <div class="flex items-center bg-slate-700/50 p-3 rounded hover:bg-slate-700 transition">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i> 
+                        <span class="text-sm">Comprovante de Residência</span>
+                    </div>
+                    <div class="flex items-center bg-slate-700/50 p-3 rounded hover:bg-slate-700 transition">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i> 
+                        <span class="text-sm">Provas Impressas (Fotos)</span>
+                    </div>
+                    <div class="flex items-center bg-slate-700/50 p-3 rounded hover:bg-slate-700 transition">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i> 
+                        <span class="text-sm">Pen Drive com Vídeos</span>
+                    </div>
+                    <div class="flex items-center bg-slate-700/50 p-3 rounded hover:bg-slate-700 transition">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i> 
+                        <span class="text-sm">Lista de Testemunhas (Nome/Tel)</span>
+                    </div>
+                    <div class="flex items-center bg-slate-700/50 p-3 rounded hover:bg-slate-700 transition">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i> 
+                        <span class="text-sm">Laudo Veterinário (se houver)</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold text-white mb-6">Modelos Jurídicos</h3>
+            <!-- Modelos Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Card Modelo Notícia Crime -->
+                <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 p-8 rounded-xl hover:border-red-500/50 transition cursor-pointer group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                        <i class="fas fa-bullhorn text-8xl text-red-500"></i>
+                    </div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="bg-red-500/20 p-3 rounded-lg">
+                            <i class="fas fa-newspaper text-2xl text-red-400"></i>
+                        </div>
+                        <span class="text-xs font-mono text-gray-500 border border-gray-700 px-2 py-1 rounded">TEXTO</span>
+                    </div>
+                    <h3 class="font-bold text-white text-xl mb-2 group-hover:text-red-400 transition">Modelo de Notícia/Resgate</h3>
+                    <p class="text-gray-400 text-sm mb-6 leading-relaxed">
+                        Modelo focado no resgate e investigação para gerar conscientização e relatar o salvamento.
+                    </p>
+                    <button onclick="openModal('modalNoticia')" class="w-full bg-slate-700 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                        <i class="fas fa-eye"></i> Visualizar Modelo
+                    </button>
+                </div>
+
+                <!-- Card Termo de Tutela (ATUALIZADO) -->
+                <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 p-8 rounded-xl hover:border-blue-500/50 transition cursor-pointer group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                        <i class="fas fa-file-signature text-8xl text-blue-500"></i>
+                    </div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="bg-blue-500/20 p-3 rounded-lg">
+                            <i class="fas fa-balance-scale text-2xl text-blue-400"></i>
+                        </div>
+                        <span class="text-xs font-mono text-gray-500 border border-gray-700 px-2 py-1 rounded">TEXTO</span>
+                    </div>
+                    <h3 class="font-bold text-white text-xl mb-2 group-hover:text-blue-400 transition">Termo de Tutela</h3>
+                    <p class="text-gray-400 text-sm mb-6 leading-relaxed">
+                        Formaliza a guarda judicial do animal resgatado. O guardião assume responsabilidade civil e criminal.
+                    </p>
+                    <button onclick="openModal('modalTermo')" class="w-full bg-slate-700 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                        <i class="fas fa-eye"></i> Visualizar Modelo
+                    </button>
+                </div>
+
+                <!-- Card Laudo Pericial -->
+                <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 p-8 rounded-xl hover:border-green-500/50 transition cursor-pointer group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                        <i class="fas fa-user-md text-8xl text-green-500"></i>
+                    </div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="bg-green-500/20 p-3 rounded-lg">
+                            <i class="fas fa-stethoscope text-2xl text-green-400"></i>
+                        </div>
+                        <span class="text-xs font-mono text-gray-500 border border-gray-700 px-2 py-1 rounded">TEXTO</span>
+                    </div>
+                    <h3 class="font-bold text-white text-xl mb-2 group-hover:text-green-400 transition">Laudo Pericial Médico</h3>
+                    <p class="text-gray-400 text-sm mb-6 leading-relaxed">
+                        Estrutura técnica para veterinários. Descreve anamnese, exame físico, score corporal e parecer legal.
+                    </p>
+                    <button onclick="openModal('modalLaudo')" class="w-full bg-slate-700 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                        <i class="fas fa-eye"></i> Visualizar Modelo
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Aviso Legal -->
+            <div class="mt-8 text-center">
+                <p class="text-xs text-gray-600 italic">
+                    * Os modelos acima são sugestões padronizadas. Para casos complexos, consulte um advogado animalista.
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal Notícia Crime / Resgate -->
+    <div id="modalNoticia" class="fixed inset-0 bg-black/80 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white text-slate-900 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
+            <!-- Header do Modal -->
+            <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center z-10">
+                <h3 class="text-xl font-bold text-slate-800"><i class="fas fa-newspaper mr-2 text-red-600"></i> Modelo: Foco no Resgate e Investigação</h3>
+                <button onclick="closeModal('modalNoticia')" class="text-gray-500 hover:text-red-500 transition-colors">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            
+            <!-- Conteúdo da Notícia -->
+            <div class="p-8 font-serif leading-relaxed space-y-6">
+                <div class="bg-blue-50 p-4 rounded border border-blue-100 mb-6">
+                    <p class="text-sm text-blue-800 italic"><strong>Nota:</strong> Este modelo foca na condição do animal e no trabalho de salvamento, muito usado para gerar conscientização pública e pressão social.</p>
+                </div>
+
+                <div class="text-center pb-4 mb-4">
+                    <h2 class="text-2xl font-bold uppercase text-slate-900">Manchete: Fim do sofrimento: [Tipo do Animal] é resgatado de situação de abandono em [Cidade]</h2>
+                </div>
+
+                <div class="space-y-4 text-lg text-slate-700">
+                    <p>
+                        Uma operação conjunta entre a Polícia e a equipe de proteção animal <strong>[Nome da ONG ou Órgão]</strong> salvou a vida de <strong>[Nome do animal, se tiver, ou "um cão/gato"]</strong> nesta <strong>[Data]</strong>. O animal foi encontrado em estado grave de negligência em uma residência na zona <strong>[Norte/Sul/Leste/Oeste]</strong> de <strong>[Cidade]</strong>.
+                    </p>
+                    
+                    <p>
+                        Testemunhas relataram que o animal passava dias <strong>[descrever o sofrimento, ex: chorando de fome]</strong>. "A situação era desoladora. O animal estava extremamente debilitado e sequer conseguia ficar em pé", relatou <strong>[Nome de uma fonte oficial ou testemunha]</strong>.
+                    </p>
+
+                    <p>
+                        O responsável pelo imóvel não estava no local/foi detido para prestar esclarecimentos. A Polícia Civil abriu um inquérito para investigar o caso.
+                    </p>
+
+                    <p>
+                        Agora sob cuidados veterinários, o animal recebe tratamento para <strong>[listar problemas de saúde]</strong>. Quem tiver informações sobre outros casos de abuso pode denunciar anonimamente pelo telefone <strong>[Número do Disque-Denúncia, 181 ou 190]</strong>.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Footer do Modal -->
+            <div class="sticky bottom-0 bg-gray-100 p-4 border-t border-gray-200 flex justify-end gap-3 z-10">
+                <button onclick="copyToClipboard('modalNoticia')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition-colors">
+                    <i class="fas fa-copy mr-2"></i> Copiar Texto
+                </button>
+                <button onclick="closeModal('modalNoticia')" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded transition-colors">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Termo de Tutela (ATUALIZADO) -->
+    <div id="modalTermo" class="fixed inset-0 bg-black/80 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white text-slate-900 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
+            <!-- Header do Modal -->
+            <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center z-10">
+                <h3 class="text-xl font-bold text-slate-800"><i class="fas fa-file-signature mr-2 text-blue-600"></i> Termo de Tutela</h3>
+                <button onclick="closeModal('modalTermo')" class="text-gray-500 hover:text-red-500 transition-colors">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            
+            <!-- Conteúdo do Termo -->
+            <div class="p-8 font-serif leading-relaxed space-y-6">
+                
+                <div class="text-center border-b-2 border-black pb-4 mb-6">
+                    <h2 class="text-2xl font-bold uppercase">TERMO DE TUTELA E RESPONSABILIDADE</h2>
+                    <p class="text-sm mt-2">Referente ao Laudo Pericial nº: ____________________</p>
+                </div>
+
+                <!-- 1. Qualificação -->
+                <div class="bg-gray-50 p-4 rounded border border-gray-200">
+                    <h4 class="font-bold text-lg mb-2 border-b border-gray-300 pb-1">1. QUALIFICAÇÃO DO TUTOR (Quem recebe a tutela)</h4>
+                    <p class="mb-2"><strong>Nome/Instituição:</strong> ___________________________________________________________</p>
+                    <p class="mb-2"><strong>RG/CNPJ:</strong> ________________________ | <strong>CPF:</strong> _____________________________</p>
+                    <p class="mb-2"><strong>Endereço Completo:</strong> ________________________________________________________</p>
+                    <p><strong>Telefone de Contato:</strong> ( ) __________________</p>
+                </div>
+
+                <!-- 2. Descrição -->
+                <div class="bg-gray-50 p-4 rounded border border-gray-200">
+                    <h4 class="font-bold text-lg mb-2 border-b border-gray-300 pb-1">2. DESCRIÇÃO DO ANIMAL</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <p><strong>Espécie:</strong> Canina | <strong>Sexo:</strong> Fêmea | <strong>Raça:</strong> SRD</p>
+                        <p class="col-span-2"><strong>Características:</strong> Curta, cor caramelo, 6,5 kg.</p>
+                        <p class="col-span-2"><strong>Estado de Saúde no Ato da Entrega:</strong> Animal resgatado em estado de caquexia, desidratação e com lesão cervical ulcerada, necessitando de cuidados médicos imediatos.</p>
+                    </div>
+                </div>
+
+                <!-- 3. Obrigações -->
+                <div>
+                    <h4 class="font-bold text-lg mb-2 border-b border-gray-300 pb-1">3. DAS OBRIGAÇÕES E RESPONSABILIDADES</h4>
+                    <p class="mb-4">Pelo presente termo, o <strong>TUTOR</strong> acima qualificado assume a guarda do animal, declarando estar ciente de suas responsabilidades civis e criminais, comprometendo-se a:</p>
+                    <ul class="list-disc pl-5 space-y-3">
+                        <li><strong>Zelar pelo bem-estar:</strong> Fornecer alimentação adequada, água limpa, abrigo protegido e assistência médico-veterinária constante até a recuperação total.</li>
+                        <li><strong>Não alienar:</strong> Não vender, doar ou transferir a posse do animal a terceiros sem prévia autorização judicial ou do órgão fiscalizador.</li>
+                        <li><strong>Apresentação:</strong> Apresentar o animal às autoridades sempre que solicitado para novas perícias ou averiguações.</li>
+                        <li><strong>Comunicação de Óbito ou Fuga:</strong> Informar imediatamente à autoridade policial ou judiciária caso o animal venha a falecer ou em caso de fuga, mediante apresentação de laudo médico se for o caso.</li>
+                    </ul>
+                </div>
+
+                <!-- 4. Advertência -->
+                <div class="bg-red-50 p-4 rounded border border-red-200">
+                    <h4 class="font-bold text-lg mb-2 border-b border-red-300 pb-1 text-red-800">4. ADVERTÊNCIA LEGAL</h4>
+                    <p class="text-slate-800">
+                        O descumprimento das obrigações aqui pactuadas poderá configurar o crime de <strong>Apropriação Indébita</strong> (Art. 168 do Código Penal) e sujeitar o tutor às sanções previstas na <strong>Lei de Crimes Ambientais (Lei 9.605/98)</strong>.
+                    </p>
+                </div>
+
+                <!-- 5. Assinaturas -->
+                <div class="mt-12 text-center space-y-12">
+                    <p>[Cidade - UF], ______ de ________________ de 2026.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div class="border-t border-black pt-2">
+                            <p class="font-bold">Assinatura do Tutor</p>
+                            <p class="text-sm">(Tutela)</p>
+                        </div>
+                        <div class="border-t border-black pt-2">
+                            <p class="font-bold">Assinatura da Autoridade</p>
+                            <p class="text-sm">(Médico Veterinário Perito)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dica Prática -->
+                <div class="mt-8 bg-yellow-50 p-4 rounded-lg border border-yellow-200 text-sm text-yellow-800">
+                    <p class="font-bold mb-2"><i class="fas fa-lightbulb mr-2"></i>Dica Prática para o Resgate:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Fotos:</strong> Anexe fotos coloridas e datadas do animal no momento da entrega ao tutor. Isso documenta o "estado inicial".</li>
+                        <li><strong>Cópia do Laudo:</strong> Sempre entregue uma cópia do laudo anterior para o tutor, para orientar o tratamento.</li>
+                    </ul>
+                </div>
+
+            </div>
+            
+            <!-- Footer do Modal -->
+            <div class="sticky bottom-0 bg-gray-100 p-4 border-t border-gray-200 flex justify-end gap-3 z-10">
+                <button onclick="copyToClipboard('modalTermo')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition-colors">
+                    <i class="fas fa-copy mr-2"></i> Copiar Texto
+                </button>
+                <button onclick="closeModal('modalTermo')" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded transition-colors">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Laudo Pericial -->
+    <div id="modalLaudo" class="fixed inset-0 bg-black/80 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white text-slate-900 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
+            <!-- Header do Modal -->
+            <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center z-10">
+                <h3 class="text-xl font-bold text-slate-800"><i class="fas fa-file-medical mr-2 text-green-600"></i> Modelo de Laudo Pericial</h3>
+                <button onclick="closeModal('modalLaudo')" class="text-gray-500 hover:text-red-500 transition-colors">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            
+            <!-- Conteúdo do Laudo -->
+            <div class="p-8 font-serif leading-relaxed space-y-6">
+                
+                <div class="text-center border-b-2 border-black pb-4 mb-6">
+                    <h2 class="text-2xl font-bold uppercase">Laudo Pericial Médico-Veterinário</h2>
+                    <p class="text-sm mt-2">Protocolo/Processo nº: ____________________</p>
+                </div>
+
+                <!-- 1. Identificação -->
+                <div class="bg-gray-50 p-4 rounded border border-gray-200">
+                    <h4 class="font-bold text-lg mb-2 border-b border-gray-300 pb-1">1. IDENTIFICAÇÃO DO PERITO</h4>
+                    <p><strong>Nome Completo:</strong> ________________________________________________________________</p>
+                    <p><strong>CRMV:</strong> _________________ / <strong>UF:</strong> _______</p>
+                    <p><strong>Estabelecimento/Cargo:</strong> ____________________________________________________________________________________________________________</p>
+                </div>
+
+                <!-- 2. Animal -->
+                <div class="bg-gray-50 p-4 rounded border border-gray-200">
+                    <h4 class="font-bold text-lg mb-2 border-b border-gray-300 pb-1">2. IDENTIFICAÇÃO DO ANIMAL</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <p><strong>Nome:</strong> ______________________________________</p>
+                        <p><strong>Espécie:</strong> ______________ | <strong>Raça:</strong> _______________ (SRD)</p>
+                        <p><strong>Sexo:</strong> ( ) Macho ( ) Fêmea</p>
+                        <p><strong>Idade Estimada:</strong> ______________</p>
+                        <p><strong>Pelagem:</strong> ______________</p>
+                        <p><strong>Peso:</strong> _______ kg</p>
+                        <p class="col-span-2"><strong>Escore de Condição Corporal:</strong> 2/9 (Magro)</p>
+                        <p class="col-span-2"><strong>Identificação:</strong> ____________________________________________________ (Microchip/Cicatrizes)</p>
+                    </div>
+                </div>
+
+                <!-- 3. Histórico -->
+                <div>
+                    <h4 class="font-bold text-lg mb-2 border-b border-gray-300 pb-1">3. HISTÓRICO (ANAMNESE)</h4>
+                    <p class="mb-2"><strong>Motivo do Exame:</strong> Denúncia de abandono em imóvel fechado.</p>
+                    <p>Conforme consta no Boletim de Ocorrência nº _________________________________________________, o animal encontrava-se em situação de privação de água e alimento por período indeterminado.</p>
+                </div>
+
+                <!-- 4. Exame Físico -->
+                <div>
+                    <h4 class="font-bold text-lg mb-2 border-b border-gray-300 pb-1">4. EXAME FÍSICO E SINAIS CLÍNICOS</h4>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>Estado Nutricional:</strong> Caquexia (Magreza acentuada). Presença de proeminências ósseas visíveis; ausência total de gordura palpável.</li>
+                        <li><strong>Nível de Hidratação:</strong> Desidratação estimada em 8%. Turgor cutâneo persistente, mucosas secas, TPC > 3s.</li>
+                        <li><strong>Sistema Tegumentar:</strong> Infestação severa por ectoparasitas (carrapatos/pulgas). Dermatite Alérgica (DAPE) com alopecia.</li>
+                        <li><strong>Lesões Traumáticas:</strong> Ferida ulcerada na região cervical, compatível com uso prolongado de corrente curta.</li>
+                        <li><strong>Avaliação Etológica:</strong> Sinais de sofrimento psicológico (medo excessivo, esquiva, apatia).</li>
+                    </ul>
+                </div>
+
+                <!-- 5. Exames -->
+                <div>
+                    <h4 class="font-bold text-lg mb-2 border-b border-gray-300 pb-1">5. EXAMES COMPLEMENTARES</h4>
+                    <p><strong>Hemograma:</strong> Anemia normocítica normocrômica e Leucocitose.</p>
+                    <p><strong>Bioquímico:</strong> Hipoproteinemia (desnutrição).</p>
+                </div>
+
+                <!-- 6. Conclusão -->
+                <div class="bg-red-50 p-4 rounded border border-red-200">
+                    <h4 class="font-bold text-lg mb-2 border-b border-red-300 pb-1 text-red-800">6. CONCLUSÃO E PARECER TÉCNICO</h4>
+                    <p class="mb-2">Diante dos achados, este perito conclui que:</p>
+                    <ul class="list-disc pl-5 space-y-2 text-slate-800">
+                        <li>O animal apresenta quadro de <strong>maus-tratos por omissão e negligência severa</strong> (privação alimentar/hídrica).</li>
+                        <li>Houve <strong>negligência sanitária</strong> (parasitas e dermatite).</li>
+                        <li>Houve <strong>maus-tratos físicos diretos</strong> (lesão cervical por contenção).</li>
+                    </ul>
+                    <p class="mt-4 font-semibold text-red-700">
+                        Os fatos infringem o Art. 32 da Lei Federal nº 9.605/1998, com agravante pela Lei 14.064/2020 (Lei Sansão).
+                    </p>
+                </div>
+
+                <!-- 7. Assinatura -->
+                <div class="mt-12 text-center">
+                    <p>[_______________________], ______ de ________________ de 2026.</p>
+                    <div class="mt-12 border-t border-black w-2/3 mx-auto pt-2">
+                        <p class="font-bold">Assinatura e Carimbo do Médico Veterinário</p>
+                    </div>
+                </div>
+
+            </div>
+            
+            <!-- Footer do Modal -->
+            <div class="sticky bottom-0 bg-gray-100 p-4 border-t border-gray-200 flex justify-end gap-3 z-10">
+                <button onclick="copyToClipboard('modalLaudo')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition-colors">
+                    <i class="fas fa-copy mr-2"></i> Copiar Texto
+                </button>
+                <button onclick="closeModal('modalLaudo')" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded transition-colors">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-[#0f172a] border-t border-gray-800 mt-auto py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-500 text-sm mb-2">Proteção Animal é um dever do Estado e da coletividade (Art. 225, CF).</p>
+            <p class="text-xs text-gray-600">Este site é um material informativo para apoio jurídico em Feira de Santana - BA.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        function switchTab(tabId) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-600', 'text-white');
+            });
+
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.add('active');
+            
+            if (window.innerWidth < 768) {
+                window.scrollTo({
+                    top: document.querySelector('nav').offsetTop,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+
+        // Close modal on clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('fixed')) {
+                event.target.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Copy Text Function
+        function copyToClipboard(modalId) {
+            // Select the text content of the modal body
+            const content = document.querySelector('#' + modalId + ' .p-8').innerText;
+            navigator.clipboard.writeText(content).then(() => {
+                alert('Conteúdo copiado para a área de transferência!');
+            }).catch(err => {
+                console.error('Erro ao copiar: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
