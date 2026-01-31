@@ -872,13 +872,13 @@
                             <div class="grid grid-cols-1 gap-5">
                                 <div>
                                     <label for="address" class="block text-xs font-semibold text-slate-400 uppercase mb-2">Endereço Completo*</label>
-                                    <input type="text" id="address" required 
+                                    <input type="text" id="address" name="endereco" required 
                                         placeholder="Rua, número, bairro e cidade"
                                         class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all">
                                 </div>
                                 <div>
                                     <label for="reference" class="block text-xs font-semibold text-slate-400 uppercase mb-2">Ponto de Referência</label>
-                                    <input type="text" id="reference" 
+                                    <input type="text" id="reference" name="referencia"
                                         placeholder="Ex: Próximo à padaria, casa de portão azul"
                                         class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all">
                                 </div>
@@ -894,7 +894,7 @@
                             </div>
                             <div>
                                 <label for="description" class="block text-xs font-semibold text-slate-400 uppercase mb-2">Descrição dos Factos*</label>
-                                <textarea id="description" rows="5" required
+                                <textarea id="description" name="descricao" rows="5" required
                                     placeholder="Descreva o estado do animal e o que está a acontecer..."
                                     class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all resize-none"></textarea>
                             </div>
@@ -913,9 +913,9 @@
 
                         <div class="pt-6">
                             <button type="submit" id="submitBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-green-900/20 transition-all flex items-center justify-center gap-2 group active:scale-[0.98]">
-                                <span id="btnText">ENVIAR PARA GRUPO VOZ ANIMAL FSA</span>
+                                <span id="btnText">ENVIAR (WHATSAPP + E-MAIL)</span>
                                 <div id="btnLoader" class="hidden loader w-5 h-5 border-2 border-white/30 border-t-white rounded-full"></div>
-                                <i data-lucide="message-circle" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                                <i data-lucide="send" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
                             </button>
                         </div>
                     </form>
@@ -924,10 +924,11 @@
                         <div class="w-24 h-24 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
                             <i data-lucide="external-link" class="w-12 h-12"></i>
                         </div>
-                        <h2 class="text-3xl font-bold text-white mb-3">Redirecionando para o Grupo...</h2>
+                        <h2 class="text-3xl font-bold text-white mb-3">Dados Enviados!</h2>
                         <div class="bg-slate-800 p-4 rounded-xl mb-8 border border-slate-700 max-w-sm mx-auto">
-                            <p class="text-green-400 font-bold mb-1"><i class="fas fa-check-circle mr-2"></i>Texto da denúncia copiado!</p>
-                            <p class="text-slate-400 text-sm">Entre no grupo e <strong>COLE</strong> a mensagem para enviar.</p>
+                            <p class="text-green-400 font-bold mb-1"><i class="fas fa-check-circle mr-2"></i>Tentativa de envio por E-mail</p>
+                            <p class="text-green-400 font-bold mb-1"><i class="fas fa-check-circle mr-2"></i>Texto copiado para WhatsApp</p>
+                            <p class="text-slate-400 text-sm mt-3 border-t border-slate-600 pt-3">Agora, entre no grupo e <strong>COLE</strong> a mensagem para finalizar.</p>
                         </div>
                         <div>
                             <a id="manualLink" href="#" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-xl text-sm font-bold transition-colors inline-block">
@@ -953,6 +954,7 @@
             <div class="max-w-4xl mx-auto px-4 text-center">
                 <span class="font-bold text-sm tracking-tight text-white uppercase opacity-50 mb-4 block">Voz Animal</span>
                 <p class="text-slate-600 text-xs mb-2">Esta ferramenta gera uma mensagem formatada para facilitar a denúncia via WhatsApp.</p>
+                <a href="mailto:vozanimalfsa@gmail.com" class="text-xs text-blue-500 hover:text-blue-400 transition-colors mb-4 inline-block">vozanimalfsa@gmail.com</a>
                 <p class="text-xs text-slate-700">Desenvolvido por <span class="text-slate-500 font-bold">F.R</span></p>
             </div>
         </footer>
@@ -1315,19 +1317,16 @@ Os achados são compatíveis com a configuração de maus-tratos por negligênci
 
         // Gerenciamento de Visualização (Navegação entre "sites")
         function showView(viewName, sectionId = null) {
-            // Esconder todas as visualizações
             document.querySelectorAll('.view-container').forEach(view => {
                 view.classList.remove('active');
             });
             
-            // Mostrar a visualização solicitada
             const targetView = document.getElementById('view-' + viewName);
             if (targetView) {
                 targetView.classList.add('active');
                 window.scrollTo({ top: 0, behavior: 'instant' });
             }
 
-            // Ocultar navegação principal quando estiver na view 'denuncia'
             const mainNav = document.getElementById('main-nav');
             if (viewName === 'denuncia') {
                 mainNav.classList.add('hidden');
@@ -1335,14 +1334,12 @@ Os achados são compatíveis com a configuração de maus-tratos por negligênci
                 mainNav.classList.remove('hidden');
             }
 
-            // Mudar classe do body para estilos específicos
             if (viewName === 'judicial') {
                 document.body.classList.add('judicial-view-active');
             } else {
                 document.body.classList.remove('judicial-view-active');
             }
 
-            // Se tiver uma seção específica no portal principal, rolar até ela
             if (sectionId) {
                 setTimeout(() => {
                     const targetSection = document.getElementById(sectionId);
@@ -1383,7 +1380,6 @@ Os achados são compatíveis com a configuração de maus-tratos por negligênci
         // Nova Função de Impressão
         function printContent(modalId) {
             const contentHtml = document.querySelector('#' + modalId + ' .p-10').innerHTML;
-            
             const printWindow = window.open('', '', 'height=600,width=800');
             printWindow.document.write('<html><head><title>Imprimir Documento - Voz Animal FSA</title>');
             printWindow.document.write('</head><body style="font-family: serif; white-space: pre-wrap; padding: 40px; line-height: 1.6; color: #000;">');
@@ -1391,8 +1387,6 @@ Os achados são compatíveis com a configuração de maus-tratos por negligênci
             printWindow.document.write('</body></html>');
             printWindow.document.close();
             printWindow.focus();
-            
-            // Pequeno delay para garantir carregamento
             setTimeout(() => {
                 printWindow.print();
                 printWindow.close();
@@ -1415,8 +1409,11 @@ Os achados são compatíveis com a configuração de maus-tratos por negligênci
             }
         }
 
-        // --- CONFIGURAÇÃO DO NÚMERO ---
+        // --- CONFIGURAÇÃO ---
         const GROUP_LINK = "https://chat.whatsapp.com/KZ2eh9ZeZsc8cQao5dVYaa";
+        // ID do Formspree fornecido
+        const FORMSPREE_ID = "xeezjezl"; 
+        const FORMSPREE_ENDPOINT = `https://formspree.io/f/${FORMSPREE_ID}`;
 
         const form = document.getElementById('complaintForm');
         const submitBtn = document.getElementById('submitBtn');
@@ -1439,21 +1436,52 @@ Os achados são compatíveis com a configuração de maus-tratos por negligênci
             }
             inputs.forEach(input => input.addEventListener('input', updateProgress));
 
-            form.addEventListener('submit', (e) => {
+            form.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
                 const endereco = document.getElementById('address').value;
                 const referencia = document.getElementById('reference').value || "Não informada";
                 const descricao = document.getElementById('description').value;
 
-                // Criar mensagem formatada
+                // 1. Preparar Dados do Formulário para E-mail
+                const formData = new FormData(form);
+                formData.delete('arquivos'); // Remove arquivos para não bloquear o envio gratuito
+                // Adiciona um assunto para o email ficar organizado
+                formData.append("_subject", `Nova Denúncia: ${endereco.substring(0, 30)}...`);
+
+                // 2. Preparar mensagem para WhatsApp
                 const message = `*DENÚNCIA PARA GRUPO VOZ ANIMAL FSA*\n\n` +
                                 `📍 *Local:* ${endereco}\n` +
                                 `🏢 *Referência:* ${referencia}\n\n` +
                                 `📝 *Descrição:* ${descricao}\n\n` +
                                 `_Estou pronto para enviar fotos e vídeos em seguida._`;
 
-                // Copiar para a área de transferência (Fallback para navegadores móveis)
+                // Bloquear UI
+                btnText.classList.add('hidden');
+                btnLoader.classList.remove('hidden');
+                submitBtn.disabled = true;
+                progressBar.style.width = "80%";
+
+                // 3. Tentar Enviar E-mail (Prioridade 1)
+                try {
+                    const response = await fetch(FORMSPREE_ENDPOINT, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        console.log("E-mail enviado com sucesso.");
+                    } else {
+                        console.warn("O serviço de e-mail respondeu com erro, mas prosseguindo para WhatsApp.");
+                    }
+                } catch (error) {
+                    console.error("Erro técnico ao enviar e-mail:", error);
+                }
+
+                // 4. Copiar Texto para WhatsApp (Prioridade 2)
                 const textArea = document.createElement("textarea");
                 textArea.value = message;
                 document.body.appendChild(textArea);
@@ -1461,16 +1489,12 @@ Os achados são compatíveis com a configuração de maus-tratos por negligênci
                 try {
                     document.execCommand('copy');
                 } catch (err) {
-                    console.error('Erro ao copiar automaticamente', err);
+                    console.error('Erro ao copiar', err);
                 }
                 document.body.removeChild(textArea);
 
-                // Feedback visual
-                btnText.classList.add('hidden');
-                btnLoader.classList.remove('hidden');
-                submitBtn.disabled = true;
+                // 5. Finalizar e Redirecionar
                 progressBar.style.width = "100%";
-
                 setTimeout(() => {
                     form.classList.add('hidden');
                     successScreen.classList.remove('hidden');
@@ -1478,7 +1502,7 @@ Os achados são compatíveis com a configuração de maus-tratos por negligênci
                     
                     // Abre o Grupo numa nova aba
                     window.open(GROUP_LINK, '_blank');
-                }, 1500);
+                }, 1000);
             });
         }
     </script>
