@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voz Animal FSA | Proteção e Justiça</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600&family=Inter:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -19,31 +19,41 @@
             background-position: center; 
         }
 
-        /* Estilos do Roteiro Judicial (Novo Site) */
-        .judicial-view-active {
-            font-family: 'Inter', sans-serif;
-        }
+        /* Estilos do Roteiro Judicial */
+        .judicial-view-active { font-family: 'Inter', sans-serif; }
+        .tab-content-roteiro { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .tab-content-roteiro.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-btn-roteiro.active { background-color: #3b82f6; color: white; border-bottom: 3px solid #60a5fa; }
 
-        .tab-content-roteiro {
-            display: none;
-            animation: fadeIn 0.4s ease-in-out;
+        /* Estilos da Denúncia (Novo) */
+        .glass-morphism {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .tab-content-roteiro.active {
-            display: block;
+        .loader {
+            border-top-color: #22c55e;
+            animation: spinner 0.6s linear infinite;
         }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        input[type="file"]::file-selector-button {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #f1f5f9;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            margin-right: 1rem;
+            transition: all 0.2s;
+        }
+        input[type="file"]::file-selector-button:hover { background: #334155; }
+        ::placeholder { color: #64748b !important; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .nav-btn-roteiro.active {
-            background-color: #3b82f6;
-            color: white;
-            border-bottom: 3px solid #60a5fa;
-        }
-
-        /* Custom Scrollbar */
+        /* Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -56,7 +66,7 @@
 <body class="bg-slate-950 text-slate-100">
 
     <!-- Navegação Global -->
-    <nav class="sticky top-0 z-50 bg-slate-900 shadow-xl border-b border-slate-800">
+    <nav id="main-nav" class="sticky top-0 z-50 bg-slate-900 shadow-xl border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center gap-2 cursor-pointer" onclick="showView('landing')">
@@ -86,7 +96,7 @@
                 <h1 class="text-4xl md:text-6xl font-800 mb-6 leading-tight uppercase tracking-tighter">Proteger um Animal é um Dever de Justiça.</h1>
                 <p class="text-lg md:text-xl mb-8 text-slate-300">Transformando suspeitas em ações reais através da cidadania e denúncia correta em Feira de Santana.</p>
                 <div class="flex justify-center gap-4">
-                    <a href="javascript:void(0)" onclick="showView('landing', 'orgaos')" class="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-full font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-red-900/20">
+                    <a href="javascript:void(0)" onclick="showView('denuncia')" class="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-full font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-red-900/20 hover:scale-105 transform duration-200">
                         <i data-lucide="phone-call" class="w-5 h-5"></i> DENUNCIAR AGORA
                     </a>
                 </div>
@@ -156,7 +166,7 @@
                     </div>
                     <div class="pt-4 border-t border-slate-800">
                         <p class="font-bold text-blue-500 mb-1">Emergência</p>
-                        <p class="text-xs text-slate-400 uppercase">Polícia Militar</p>
+                        <p class="text-xs text-slate-500 uppercase">Polícia Militar</p>
                     </div>
                 </div>
 
@@ -234,12 +244,13 @@
                     <span class="font-title font-800 text-lg tracking-tighter text-white">VOZ ANIMAL FSA</span>
                 </div>
                 <p class="text-sm mb-4">Portal informativo para a cidadania e proteção animal em Feira de Santana - BA.</p>
-                <p class="text-xs opacity-50 uppercase tracking-widest">&copy; 2024 - Justiça para quem não tem voz</p>
+                <p class="text-xs opacity-50 uppercase tracking-widest mb-2">&copy; 2024 - Justiça para quem não tem voz</p>
+                <p class="text-xs text-slate-600">Desenvolvido por <span class="text-emerald-500 font-bold">Felix Rilton</span></p>
             </div>
         </footer>
     </div>
 
-    <!-- VIEW 2: ROTEIRO JUDICIAL (ESTILO SITE NOVO) -->
+    <!-- VIEW 2: ROTEIRO JUDICIAL -->
     <div id="view-judicial" class="view-container">
         <!-- Hero Interno -->
         <div class="relative h-screen md:h-[60vh] w-full overflow-hidden flex items-end">
@@ -372,7 +383,7 @@
             <div id="tab4" class="tab-content-roteiro text-center">
                 <div class="max-w-4xl mx-auto">
                     <h3 class="text-3xl font-bold text-white mb-12">Ciência do Direito Animal</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
                         <div class="bg-gradient-to-br from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-700 shadow-xl">
                             <h4 class="text-xl font-bold text-blue-500 mb-4">Teoria do Elo (Link Theory)</h4>
                             <p class="text-slate-400 text-sm leading-relaxed">Conexão comprovada pela criminologia: a crueldade contra animais é um indicador precoce de violência interpessoal, especialmente em crimes domésticos e abuso infantil.</p>
@@ -380,6 +391,46 @@
                         <div class="bg-gradient-to-br from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-700 shadow-xl">
                             <h4 class="text-xl font-bold text-blue-500 mb-4">Sujetividade Jurídica</h4>
                             <p class="text-slate-400 text-sm leading-relaxed">A transição do animal como "coisa" para "sujeito de direitos". Essa mudança no entendimento jurídico brasileiro impacta diretamente na severidade das sentenças.</p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-3xl font-bold text-white mb-8 border-t border-slate-800 pt-12">Legislação Aplicada</h3>
+                    
+                    <div class="space-y-6 text-left">
+                        <div class="bg-slate-900 p-8 rounded-3xl border-l-4 border-emerald-500 border-y border-r border-slate-800 shadow-lg">
+                            <h4 class="text-xl font-bold text-emerald-500 mb-4">Lei de Crimes Ambientais (Lei nº 9.605/1998)</h4>
+                            <p class="text-slate-400 text-sm mb-4">Lei mais importante que define sanções penais e administrativas.</p>
+                            <ul class="list-disc pl-5 space-y-2 text-slate-300 text-sm">
+                                <li><strong class="text-white">Fauna Silvestre:</strong> Proíbe matar, perseguir, caçar ou utilizar espécimes sem autorização.</li>
+                                <li><strong class="text-white">Flora:</strong> Crime destruir florestas de preservação ou usar fogo sem licença.</li>
+                                <li><strong class="text-white">Maus-tratos (Art. 32):</strong> Abuso contra animais domésticos, domesticados ou silvestres.</li>
+                            </ul>
+                            <div class="mt-4 bg-emerald-900/20 p-4 rounded-xl border border-emerald-500/30">
+                                <p class="text-sm text-emerald-300"><strong class="uppercase">Importante:</strong> A <strong>Lei Sansão (14.064/2020)</strong> aumentou a pena para cães e gatos: reclusão de 2 a 5 anos.</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-900 p-8 rounded-3xl border-l-4 border-blue-500 border-y border-r border-slate-800 shadow-lg">
+                            <h4 class="text-xl font-bold text-blue-500 mb-2">Lei de Proteção à Fauna (Lei nº 5.197/1967)</h4>
+                            <p class="text-slate-300 text-sm mb-2">Dispõe especificamente sobre a fauna silvestre brasileira.</p>
+                            <ul class="list-disc pl-5 space-y-1 text-slate-400 text-sm">
+                                <li>Animais silvestres, ninhos e abrigos são propriedade do Estado.</li>
+                                <li>Proíbe a caça profissional e o comércio de espécimes, salvo exceções regulamentadas.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-slate-900 p-8 rounded-3xl border-l-4 border-yellow-500 border-y border-r border-slate-800 shadow-lg">
+                            <h4 class="text-xl font-bold text-yellow-500 mb-2">Sistema Nacional de Unidades de Conservação - SNUC</h4>
+                            <p class="text-slate-400 text-sm">Lei nº 9.985/2000. Cria regras para Parques Nacionais, Reservas Biológicas e APAs, essenciais para proteção de habitats.</p>
+                        </div>
+
+                        <div class="bg-slate-900 p-8 rounded-3xl border-l-4 border-purple-500 border-y border-r border-slate-800 shadow-lg">
+                            <h4 class="text-xl font-bold text-purple-500 mb-2">Constituição Federal de 1988 (Art. 225)</h4>
+                            <p class="text-slate-300 text-sm mb-2">O Poder Público deve:</p>
+                            <ul class="list-disc pl-5 space-y-1 text-slate-400 text-sm">
+                                <li>Proteger a fauna e a flora.</li>
+                                <li>Proibir práticas que coloquem em risco sua função ecológica, provoquem extinção ou submetam animais a crueldade.</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -421,7 +472,129 @@
         <footer class="bg-slate-950 text-slate-500 py-12 border-t border-slate-900">
             <div class="max-w-7xl mx-auto px-4 text-center">
                 <p class="text-sm font-bold text-blue-500 mb-2 uppercase tracking-widest">Manual Jurídico de Proteção Animal</p>
-                <p class="text-xs opacity-50">Feira de Santana - BA | 2026</p>
+                <p class="text-xs opacity-50 mb-2">Feira de Santana - BA | 2026</p>
+                <p class="text-xs text-slate-600">Desenvolvido por <span class="text-blue-500/70 font-bold">Felix Rilton</span></p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- VIEW 3: DENÚNCIA WHATSAPP (NOVO) -->
+    <div id="view-denuncia" class="view-container">
+        <!-- Cabeçalho Específico da Denúncia -->
+        <header class="bg-slate-900/50 border-b border-slate-800 sticky top-0 z-50 backdrop-blur-md">
+            <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-2 cursor-pointer" onclick="showView('landing')">
+                    <div class="bg-red-600 p-2 rounded-lg">
+                        <i data-lucide="shield-alert" class="text-white w-6 h-6"></i>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-white uppercase">Voz <span class="text-red-500">Animal</span></span>
+                </div>
+                <nav class="hidden md:flex gap-6 text-sm font-medium text-slate-400">
+                    <a href="javascript:void(0)" onclick="showView('landing')" class="hover:text-red-500 transition-colors">Voltar ao Início</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="flex-grow py-12 px-4">
+            <div class="max-w-2xl mx-auto">
+                <div class="text-center mb-10">
+                    <h1 class="text-3xl font-extrabold text-white mb-3">Denúncia via WhatsApp</h1>
+                    <p class="text-slate-400">Preencha os dados e clique para iniciar a conversa segura com a nossa equipa.</p>
+                </div>
+
+                <div id="form-card" class="glass-morphism rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="h-1 w-full bg-slate-800">
+                        <div id="progress" class="h-full bg-green-500 w-1/3 transition-all duration-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
+                    </div>
+
+                    <form id="complaintForm" class="p-8 space-y-8">
+                        <div class="space-y-5">
+                            <div class="flex items-center gap-2 text-green-500 font-semibold">
+                                <i data-lucide="map-pin" class="w-5 h-5"></i>
+                                <h2 class="uppercase tracking-wider text-sm">Localização do Ocorrido</h2>
+                            </div>
+                            <div class="grid grid-cols-1 gap-5">
+                                <div>
+                                    <label for="address" class="block text-xs font-semibold text-slate-400 uppercase mb-2">Endereço Completo*</label>
+                                    <input type="text" id="address" required 
+                                        placeholder="Rua, número, bairro e cidade"
+                                        class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all">
+                                </div>
+                                <div>
+                                    <label for="reference" class="block text-xs font-semibold text-slate-400 uppercase mb-2">Ponto de Referência</label>
+                                    <input type="text" id="reference" 
+                                        placeholder="Ex: Próximo à padaria, casa de portão azul"
+                                        class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="h-px bg-slate-800"></div>
+
+                        <div class="space-y-5">
+                            <div class="flex items-center gap-2 text-green-500 font-semibold">
+                                <i data-lucide="file-text" class="w-5 h-5"></i>
+                                <h2 class="uppercase tracking-wider text-sm">Detalhes do Caso</h2>
+                            </div>
+                            <div>
+                                <label for="description" class="block text-xs font-semibold text-slate-400 uppercase mb-2">Descrição dos Factos*</label>
+                                <textarea id="description" rows="5" required
+                                    placeholder="Descreva o estado do animal e o que está a acontecer..."
+                                    class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all resize-none"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="h-px bg-slate-800"></div>
+
+                        <!-- Aviso de Ficheiros -->
+                        <div class="p-4 bg-blue-900/20 border border-blue-800/50 rounded-xl flex gap-3">
+                            <i data-lucide="info" class="text-blue-400 w-5 h-5 flex-shrink-0"></i>
+                            <p class="text-xs text-blue-200/80">
+                                <strong>Atenção:</strong> Por motivos técnicos, as fotos e vídeos não podem ser enviados automaticamente. 
+                                Por favor, <strong>anexe as provas manualmente</strong> assim que a conversa do WhatsApp abrir.
+                            </p>
+                        </div>
+
+                        <div class="pt-6">
+                            <button type="submit" id="submitBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-green-900/20 transition-all flex items-center justify-center gap-2 group active:scale-[0.98]">
+                                <span id="btnText">DENUNCIAR NO WHATSAPP</span>
+                                <div id="btnLoader" class="hidden loader w-5 h-5 border-2 border-white/30 border-t-white rounded-full"></div>
+                                <i data-lucide="message-circle" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="success-screen" class="hidden p-16 text-center animate-in fade-in duration-700">
+                        <div class="w-24 h-24 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
+                            <i data-lucide="external-link" class="w-12 h-12"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold text-white mb-3">A abrir WhatsApp...</h2>
+                        <p class="text-slate-400 mb-10 max-w-sm mx-auto">Se a conversa não abrir automaticamente em alguns segundos, clique no botão abaixo.</p>
+                        <div>
+                            <a id="manualLink" href="#" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-xl text-sm font-bold transition-colors inline-block">
+                                CLIQUE AQUI PARA ABRIR
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-10 bg-slate-900 border border-slate-800 rounded-2xl p-6 text-white flex flex-col md:flex-row items-center gap-6">
+                    <div class="bg-red-600/10 p-4 rounded-xl">
+                        <i data-lucide="phone-forwarded" class="w-8 h-8 text-red-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg leading-tight mb-1 text-red-500">Risco de Vida Imediato?</h3>
+                        <p class="text-slate-400 text-sm">Ligue para as autoridades locais ou para a Polícia Militar no <strong>190</strong>.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="bg-slate-950 border-t border-slate-900 py-12">
+            <div class="max-w-4xl mx-auto px-4 text-center">
+                <span class="font-bold text-sm tracking-tight text-white uppercase opacity-50 mb-4 block">Voz Animal</span>
+                <p class="text-slate-600 text-xs mb-2">Esta ferramenta gera uma mensagem formatada para facilitar a denúncia via WhatsApp.</p>
+                <p class="text-xs text-slate-700">Desenvolvido por <span class="text-slate-500 font-bold">Felix Rilton</span></p>
             </div>
         </footer>
     </div>
@@ -524,6 +697,14 @@ Os achados são compatíveis com a configuração de maus-tratos por negligênci
                 window.scrollTo({ top: 0, behavior: 'instant' });
             }
 
+            // Ocultar navegação principal quando estiver na view 'denuncia'
+            const mainNav = document.getElementById('main-nav');
+            if (viewName === 'denuncia') {
+                mainNav.classList.add('hidden');
+            } else {
+                mainNav.classList.remove('hidden');
+            }
+
             // Mudar classe do body para estilos específicos
             if (viewName === 'judicial') {
                 document.body.classList.add('judicial-view-active');
@@ -604,6 +785,64 @@ Os achados são compatíveis com a configuração de maus-tratos por negligênci
                 nav.classList.toggle('p-6');
                 nav.classList.toggle('shadow-xl');
             }
+        }
+
+        // --- CONFIGURAÇÃO DO NÚMERO ---
+        const WHATSAPP_NUMBER = "5575981404714"; // Coloque o seu número com DDI e DDD aqui
+
+        const form = document.getElementById('complaintForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoader = document.getElementById('btnLoader');
+        const successScreen = document.getElementById('success-screen');
+        const progressBar = document.getElementById('progress');
+        const manualLink = document.getElementById('manualLink');
+
+        if(form) {
+            // Atualização da barra de progresso
+            const inputs = form.querySelectorAll('input[required], textarea[required]');
+            function updateProgress() {
+                let filled = 0;
+                inputs.forEach(input => {
+                    if (input.value.trim() !== '') filled++;
+                });
+                const progressValue = ((filled / inputs.length) * 70) + 30;
+                progressBar.style.width = `${progressValue}%`;
+            }
+            inputs.forEach(input => input.addEventListener('input', updateProgress));
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const endereco = document.getElementById('address').value;
+                const referencia = document.getElementById('reference').value || "Não informada";
+                const descricao = document.getElementById('description').value;
+
+                // Criar mensagem formatada
+                const message = `*DENÚNCIA DE MAUS-TRATOS (VOZ ANIMAL)*\n\n` +
+                                `📍 *Local:* ${endereco}\n` +
+                                `🏢 *Referência:* ${referencia}\n\n` +
+                                `📝 *Descrição:* ${descricao}\n\n` +
+                                `_Estou pronto para enviar fotos e vídeos em seguida._`;
+
+                const encodedMessage = encodeURIComponent(message);
+                const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+
+                // Feedback visual
+                btnText.classList.add('hidden');
+                btnLoader.classList.remove('hidden');
+                submitBtn.disabled = true;
+                progressBar.style.width = "100%";
+
+                setTimeout(() => {
+                    form.classList.add('hidden');
+                    successScreen.classList.remove('hidden');
+                    manualLink.href = waUrl;
+                    
+                    // Abre o WhatsApp numa nova aba
+                    window.open(waUrl, '_blank');
+                }, 1000);
+            });
         }
     </script>
 </body>
