@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -78,6 +79,7 @@
                     <a href="javascript:void(0)" onclick="showView('judicial')" class="text-slate-300 hover:text-blue-400 transition flex items-center gap-2">
                         <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span> Roteiro Judicial
                     </a>
+                    <a href="javascript:void(0)" onclick="showView('media')" class="text-slate-300 hover:text-purple-400 transition">Mídia</a>
                     <a href="javascript:void(0)" onclick="showView('landing', 'orgaos')" class="text-slate-300 hover:text-emerald-400 transition">Como Denunciar</a>
                     <a href="javascript:void(0)" onclick="showView('landing', 'orgaos')" class="hover:text-emerald-400 transition text-red-500 font-bold">Emergência</a>
                 </div>
@@ -245,7 +247,7 @@
                 </div>
                 <p class="text-sm mb-4">Portal informativo para a cidadania e proteção animal em Feira de Santana - BA.</p>
                 <p class="text-xs opacity-50 uppercase tracking-widest mb-2">&copy; 2024 - Justiça para quem não tem voz</p>
-                <p class="text-xs text-slate-600">Desenvolvido por <span class="text-emerald-500 font-bold">F.R</span></p>
+                <p class="text-xs text-slate-600">Desenvolvido por <span class="text-emerald-500 font-bold">F.R.B.S</span></p>
             </div>
         </footer>
     </div>
@@ -829,7 +831,7 @@
             <div class="max-w-7xl mx-auto px-4 text-center">
                 <p class="text-sm font-bold text-blue-500 mb-2 uppercase tracking-widest">Manual Jurídico de Proteção Animal</p>
                 <p class="text-xs opacity-50 mb-2">Feira de Santana - BA | 2026</p>
-                <p class="text-xs text-slate-600">Desenvolvido por <span class="text-blue-500/70 font-bold">F.R</span></p>
+                <p class="text-xs text-slate-600">Desenvolvido por <span class="text-blue-500/70 font-bold">F.R.B.S</span></p>
             </div>
         </footer>
     </div>
@@ -955,7 +957,132 @@
                 <span class="font-bold text-sm tracking-tight text-white uppercase opacity-50 mb-4 block">Voz Animal</span>
                 <p class="text-slate-600 text-xs mb-2">Esta ferramenta gera uma mensagem formatada para facilitar a denúncia via WhatsApp.</p>
                 <a href="mailto:vozanimalfsa@gmail.com" class="text-xs text-blue-500 hover:text-blue-400 transition-colors mb-4 inline-block">vozanimalfsa@gmail.com</a>
-                <p class="text-xs text-slate-700">Desenvolvido por <span class="text-slate-500 font-bold">F.R</span></p>
+                <p class="text-xs text-slate-700">Desenvolvido por <span class="text-slate-500 font-bold">F.R.B.S</span></p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- VIEW 4: MÍDIA (NOVO) -->
+    <div id="view-media" class="view-container">
+        <!-- Hero Interno -->
+        <div class="relative h-[50vh] w-full overflow-hidden flex items-end">
+            <div class="absolute inset-0">
+                <img src="https://images.unsplash.com/photo-1450778869180-41d0601e046e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover opacity-30">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
+            </div>
+            
+            <div class="relative z-10 max-w-7xl mx-auto px-4 w-full pb-12">
+                <div class="flex flex-col md:flex-row justify-between items-end gap-6">
+                    <div class="max-w-2xl">
+                        <span class="bg-purple-600/20 text-purple-400 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-purple-500/30 mb-4 inline-block">Galeria & Educação</span>
+                        <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 serif-font">Mídia <span class="text-purple-500">Consciente</span></h2>
+                        <p class="text-slate-300 text-lg serif-font italic leading-relaxed">
+                            "A informação é a primeira linha de defesa contra a crueldade. Compartilhe o conhecimento."
+                        </p>
+                    </div>
+                    <button onclick="showView('landing')" class="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl font-bold transition flex items-center gap-2 border border-slate-700">
+                        <i class="fas fa-arrow-left"></i> Voltar ao Portal
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 py-16 min-h-screen">
+            
+            <!-- Secção 1: Campanhas em Vídeo -->
+            <div class="mb-20">
+                <h3 class="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+                    <i class="fas fa-play-circle text-purple-500"></i> Campanhas Educativas
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Card Vídeo 1 -->
+                    <div class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 hover:border-purple-500 transition group cursor-pointer">
+                        <div class="relative h-48 bg-black">
+                            <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i class="fas fa-play text-4xl text-white opacity-80 group-hover:scale-110 transition"></i>
+                            </div>
+                            <span class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">2:30</span>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-white font-bold mb-2 group-hover:text-purple-400 transition">Como identificar maus-tratos?</h4>
+                            <p class="text-slate-400 text-sm">Aprenda a reconhecer os sinais sutis de negligência e abuso animal no dia a dia.</p>
+                        </div>
+                    </div>
+
+                    <!-- Card Vídeo 2 -->
+                    <div class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 hover:border-purple-500 transition group cursor-pointer">
+                        <div class="relative h-48 bg-black">
+                            <img src="https://images.unsplash.com/photo-1623387641168-d9803ddd3f3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i class="fas fa-play text-4xl text-white opacity-80 group-hover:scale-110 transition"></i>
+                            </div>
+                            <span class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">1:45</span>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-white font-bold mb-2 group-hover:text-purple-400 transition">A Lei Sansão Explicada</h4>
+                            <p class="text-slate-400 text-sm">Entenda as implicações legais e as penas para quem maltrata cães e gatos.</p>
+                        </div>
+                    </div>
+
+                    <!-- Card Vídeo 3 -->
+                    <div class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 hover:border-purple-500 transition group cursor-pointer">
+                        <div class="relative h-48 bg-black">
+                            <img src="https://images.unsplash.com/photo-1599443015574-be5fe8a05783?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i class="fas fa-play text-4xl text-white opacity-80 group-hover:scale-110 transition"></i>
+                            </div>
+                            <span class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">3:15</span>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-white font-bold mb-2 group-hover:text-purple-400 transition">História de Resgate: Thor</h4>
+                            <p class="text-slate-400 text-sm">Do abandono à adoção. Acompanhe a recuperação emocionante deste guerreiro.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secção 2: Galeria de Fotos -->
+            <div class="mb-20">
+                <h3 class="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+                    <i class="fas fa-camera text-blue-500"></i> Galeria de Resgates
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="relative group overflow-hidden rounded-xl h-64">
+                        <img src="https://images.unsplash.com/photo-1517423568366-eb51fb598475?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-end p-4">
+                            <p class="text-white text-sm font-bold">Ação Bairro Tomba</p>
+                        </div>
+                    </div>
+                    <div class="relative group overflow-hidden rounded-xl h-64">
+                        <img src="https://images.unsplash.com/photo-1596492784531-6e6eb5ea9205?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-end p-4">
+                            <p class="text-white text-sm font-bold">Resgate Felino</p>
+                        </div>
+                    </div>
+                    <div class="relative group overflow-hidden rounded-xl h-64">
+                        <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-end p-4">
+                            <p class="text-white text-sm font-bold">Apoio Policial</p>
+                        </div>
+                    </div>
+                    <div class="relative group overflow-hidden rounded-xl h-64">
+                        <img src="https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-end p-4">
+                            <p class="text-white text-sm font-bold">Recuperação</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer da Mídia -->
+        <footer class="bg-slate-950 text-slate-500 py-12 border-t border-slate-900">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <p class="text-sm font-bold text-purple-500 mb-2 uppercase tracking-widest">Galeria Voz Animal FSA</p>
+                <p class="text-xs opacity-50 mb-2">Imagens e vídeos protegidos por direitos autorais.</p>
+                <p class="text-xs text-slate-600">Desenvolvido por <span class="text-purple-500/70 font-bold">F.R.B.S</span></p>
             </div>
         </footer>
     </div>
@@ -1334,10 +1461,12 @@ Os achados são compatíveis com a configuração de maus-tratos por negligênci
                 mainNav.classList.remove('hidden');
             }
 
+            // Remove classes específicas primeiro
+            document.body.classList.remove('judicial-view-active');
+
+            // Adiciona classes conforme a view
             if (viewName === 'judicial') {
                 document.body.classList.add('judicial-view-active');
-            } else {
-                document.body.classList.remove('judicial-view-active');
             }
 
             if (sectionId) {
