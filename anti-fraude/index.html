@@ -46,6 +46,7 @@
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
                         <button onclick="navigateTo('home')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition" data-page="home">Início</button>
+                        <button onclick="navigateTo('sobre')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition" data-page="sobre">Sobre o Crime</button>
                         <button onclick="navigateTo('ranking')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition" data-page="ranking">Ranking</button>
                         <button onclick="navigateTo('golpes')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition" data-page="golpes">Biblioteca</button>
                         <button onclick="navigateTo('prevencao')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition" data-page="prevencao">Prevenção</button>
@@ -66,6 +67,7 @@
         <div id="mobile-menu" class="hidden md:hidden bg-zinc-900 border-b border-zinc-800">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <button onclick="navigateTo('home')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Início</button>
+                <button onclick="navigateTo('sobre')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Sobre o Crime</button>
                 <button onclick="navigateTo('ranking')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Ranking</button>
                 <button onclick="navigateTo('golpes')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Biblioteca</button>
                 <button onclick="navigateTo('prevencao')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Prevenção</button>
@@ -129,6 +131,159 @@
             </section>
         </div>
 
+        <!-- SOBRE O CRIME PAGE (UPDATED) -->
+        <div id="page-sobre" class="page-section hidden fade-in py-20 bg-zinc-950 px-4">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex items-center justify-center gap-3 mb-10">
+                    <i data-lucide="scale" class="w-8 h-8 text-zinc-100"></i>
+                    <h2 class="text-3xl font-bold text-white text-center">Entendendo o Cibercrime e Estelionato</h2>
+                </div>
+                
+                <!-- Intro Layout -->
+                <div class="grid md:grid-cols-2 gap-8 mb-16">
+                    <div class="bg-zinc-900/50 p-8 rounded-2xl border border-zinc-800">
+                        <h3 class="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                            <i data-lucide="info" class="w-5 h-5"></i> O que é Cibercrime?
+                        </h3>
+                        <p class="text-zinc-400 leading-relaxed mb-6">
+                            Cibercrime é qualquer atividade criminosa que envolva um computador, dispositivo em rede ou uma rede. 
+                            Embora o termo seja usado frequentemente para ataques de hackers, ele também abrange fraudes tradicionais 
+                            cometidas através da internet (como estelionato).
+                        </p>
+                        <h3 class="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                            <i data-lucide="gavel" class="w-5 h-5"></i> Leis Principais
+                        </h3>
+                        <ul class="space-y-3 text-zinc-300 text-sm">
+                            <li class="flex items-start gap-2"><span class="text-blue-500 font-bold">•</span><span><strong>Lei Carolina Dieckmann (12.737/2012):</strong> Invasão de dispositivos.</span></li>
+                            <li class="flex items-start gap-2"><span class="text-blue-500 font-bold">•</span><span><strong>Lei Fraudes Eletrônicas (14.155/2021):</strong> Endurecimento de penas.</span></li>
+                            <li class="flex items-start gap-2"><span class="text-blue-500 font-bold">•</span><span><strong>Marco Civil da Internet (12.965/2014):</strong> Direitos e deveres na rede.</span></li>
+                        </ul>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-zinc-900 p-5 rounded-xl border-l-4 border-red-500">
+                            <h4 class="font-bold text-white text-lg">Invasão de Dispositivo</h4>
+                            <p class="text-zinc-400 text-sm mt-1">Acesso não autorizado a celular/PC (ex: Mão Fantasma). Pena: Detenção 3 meses a 1 ano.</p>
+                        </div>
+                        <div class="bg-zinc-900 p-5 rounded-xl border-l-4 border-purple-500">
+                            <h4 class="font-bold text-white text-lg">Extorsão Digital</h4>
+                            <p class="text-zinc-400 text-sm mt-1">Constrangimento mediante ameaça para vantagem econômica (ex: Sextorsão). Pena: Reclusão 4 a 10 anos.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalhamento Artigo 171 -->
+                <div class="border-t border-zinc-800 pt-12">
+                    <h3 class="text-2xl font-bold text-white mb-8 text-center flex items-center justify-center gap-2">
+                        <i data-lucide="book-open" class="w-6 h-6 text-blue-500"></i>
+                        Tipificação do Estelionato (Art. 171 CP)
+                    </h3>
+                    
+                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+                        <!-- Card 1 -->
+                        <div class="bg-zinc-900 p-6 rounded-xl border border-zinc-800 hover:border-zinc-600 transition">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-white text-lg">1. Simples (Caput)</h4>
+                                <span class="bg-zinc-800 text-zinc-300 text-xs px-2 py-1 rounded">Básico</span>
+                            </div>
+                            <p class="text-zinc-400 text-sm mb-3"><strong>Conduta:</strong> Obter vantagem ilícita, induzindo alguém em erro mediante artifício ou fraude.</p>
+                            <p class="text-blue-400 text-sm font-mono font-bold">Pena: Reclusão 1 a 5 anos</p>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="bg-zinc-900 p-6 rounded-xl border border-zinc-800 hover:border-zinc-600 transition">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-white text-lg">2. Privilegiado (§ 1º)</h4>
+                                <span class="bg-green-900/30 text-green-400 text-xs px-2 py-1 rounded border border-green-900">Benefício</span>
+                            </div>
+                            <p class="text-zinc-400 text-sm mb-3"><strong>Requisitos:</strong> Réu primário e prejuízo de pequeno valor (até 1 salário mínimo).</p>
+                            <p class="text-blue-400 text-sm font-mono font-bold">Pena: Reduzida (Detenção ou Multa)</p>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="bg-zinc-900 p-6 rounded-xl border border-zinc-800 hover:border-zinc-600 transition">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-white text-lg">3. Equiparado (§ 2º)</h4>
+                                <span class="bg-zinc-800 text-zinc-300 text-xs px-2 py-1 rounded">Específico</span>
+                            </div>
+                            <p class="text-zinc-400 text-sm mb-3"><strong>Casos:</strong> Venda de coisa alheia, defraudação de penhor, fraude no seguro, fraude no cheque.</p>
+                            <p class="text-blue-400 text-sm font-mono font-bold">Pena: Reclusão 1 a 5 anos</p>
+                        </div>
+
+                        <!-- Card 4 (Importante) -->
+                        <div class="bg-zinc-900 p-6 rounded-xl border border-red-900/50 hover:border-red-500 transition relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-16 h-16 bg-red-600/10 rounded-bl-full -mr-8 -mt-8"></div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-red-400 text-lg">4. Fraude Eletrônica (§ 2º-A)</h4>
+                                <i data-lucide="wifi" class="w-4 h-4 text-red-500"></i>
+                            </div>
+                            <p class="text-zinc-300 text-sm mb-3"><strong>Conduta:</strong> Fraude com dados fornecidos pela vítima via redes sociais, telefone ou e-mail.</p>
+                            <p class="text-red-400 text-sm font-mono font-bold">Pena: Reclusão 4 a 8 anos</p>
+                        </div>
+
+                        <!-- Card 5 -->
+                        <div class="bg-zinc-900 p-6 rounded-xl border border-zinc-800 hover:border-zinc-600 transition md:col-span-2 lg:col-span-2">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-white text-lg">5. Majorantes (Aumento de Pena)</h4>
+                                <span class="bg-orange-900/30 text-orange-400 text-xs px-2 py-1 rounded border border-orange-900">Agravantes</span>
+                            </div>
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-zinc-300 text-sm font-bold">Servidor no Exterior (§ 2º-B)</p>
+                                    <p class="text-zinc-500 text-xs">Crime eletrônico usando servidor fora do Brasil.</p>
+                                    <p class="text-orange-400 text-xs font-mono mt-1">+ 1/3 a 2/3 da pena</p>
+                                </div>
+                                <div>
+                                    <p class="text-zinc-300 text-sm font-bold">Contra Idoso ou Vulnerável (§ 4º)</p>
+                                    <p class="text-zinc-500 text-xs">Vítima > 60 anos ou vulnerável.</p>
+                                    <p class="text-orange-400 text-xs font-mono mt-1">Pena em DOBRO</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela Resumo -->
+                    <div class="overflow-x-auto rounded-xl border border-zinc-800">
+                        <table class="w-full text-sm text-left text-zinc-400">
+                            <thead class="text-xs text-zinc-200 uppercase bg-zinc-900 border-b border-zinc-800">
+                                <tr>
+                                    <th class="px-6 py-3">Variação</th>
+                                    <th class="px-6 py-3">Artigo/Parágrafo</th>
+                                    <th class="px-6 py-3">Pena Base</th>
+                                    <th class="px-6 py-3">Fator Chave</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-zinc-800">
+                                <tr class="bg-black hover:bg-zinc-900/50">
+                                    <td class="px-6 py-4 font-medium text-white">Simples</td>
+                                    <td class="px-6 py-4">Art. 171, caput</td>
+                                    <td class="px-6 py-4">1 a 5 anos</td>
+                                    <td class="px-6 py-4">Fraude genérica</td>
+                                </tr>
+                                <tr class="bg-zinc-900/20 hover:bg-zinc-900/50">
+                                    <td class="px-6 py-4 font-medium text-white">Privilegiado</td>
+                                    <td class="px-6 py-4">§ 1º</td>
+                                    <td class="px-6 py-4 text-green-400">Reduzida</td>
+                                    <td class="px-6 py-4">Primário + Pequeno valor</td>
+                                </tr>
+                                <tr class="bg-black hover:bg-zinc-900/50">
+                                    <td class="px-6 py-4 font-medium text-white">Fraude Eletrônica</td>
+                                    <td class="px-6 py-4">§ 2º-A</td>
+                                    <td class="px-6 py-4 text-red-400 font-bold">4 a 8 anos</td>
+                                    <td class="px-6 py-4">Internet, Telefone, Redes</td>
+                                </tr>
+                                <tr class="bg-zinc-900/20 hover:bg-zinc-900/50">
+                                    <td class="px-6 py-4 font-medium text-white">Contra Idoso</td>
+                                    <td class="px-6 py-4">§ 4º</td>
+                                    <td class="px-6 py-4 text-orange-400 font-bold">Dobro</td>
+                                    <td class="px-6 py-4">Vítima > 60 anos ou Vulnerável</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- RANKING PAGE -->
         <div id="page-ranking" class="page-section hidden fade-in py-20 bg-zinc-950 px-4">
             <div class="max-w-7xl mx-auto">
@@ -151,7 +306,7 @@
                         <i data-lucide="alert-triangle" class="w-8 h-8 text-zinc-100"></i>
                         <h2 class="text-3xl font-bold text-white text-center">Biblioteca de Golpes</h2>
                     </div>
-                    <p class="text-zinc-400 text-center max-w-2xl">Conheça as táticas mais usadas pelos criminosos.</p>
+                    <p class="text-zinc-400 text-center max-w-2xl">Conheça as táticas mais usadas pelos criminosos. (Exibindo 40 modalidades detalhadas)</p>
                 </div>
                 
                 <!-- Filters -->
