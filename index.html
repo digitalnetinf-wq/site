@@ -1,21 +1,45 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Digital Net Info</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>DIRPINFSA :: ACCESS</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body style="font-family: Arial; background:#0f172a; color:white; text-align:center; padding:40px;">
-    <h1>🚀 Digital Net Info</h1>
-    <p>Site hospedado no Cloudflare Pages</p>
 
-    <hr style="margin:30px 0;">
+<body class="bg-black text-green-400 flex items-center justify-center min-h-screen font-mono">
 
-    <p>Meu primeiro site online 😄</p>
+<div class="border border-green-500 p-8 w-full max-w-md text-center">
+  <h1 class="text-2xl mb-6 tracking-widest">DIRPINFSA</h1>
 
-    <a href="https://github.com/digitalnetinf-wq"
-       style="color:#38bdf8; text-decoration:none; font-size:18px;">
-       GitHub
-    </a>
+  <input id="senha" type="password" placeholder="ACCESS KEY"
+    class="w-full p-3 bg-black border border-green-500 text-center mb-4">
+
+  <button onclick="login()"
+    class="w-full p-3 bg-green-500 text-black font-bold">
+    ENTER
+  </button>
+
+  <p id="erro" class="text-red-500 mt-4"></p>
+</div>
+
+<script>
+function login() {
+  const senha = document.getElementById("senha").value.toLowerCase();
+
+  const rotas = {
+    "feira123": "feira/index.html",
+    "serrinha123": "serrinha/index.html",
+    "alagoinhas123": "alagoinhas/index.html",
+    "saj123": "saj/index.html"
+  };
+
+  if (rotas[senha]) {
+    window.location.href = rotas[senha];
+  } else {
+    document.getElementById("erro").innerText = "ACCESS DENIED";
+  }
+}
+</script>
+
 </body>
 </html>

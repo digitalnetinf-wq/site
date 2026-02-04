@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Anti-Fraude - Segurança Digital 2026</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #18181b; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Modal Backdrop */
+        .modal-backdrop { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-black border-b border-zinc-800 sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('home')">
+                    <i data-lucide="shield" class="w-8 h-8 text-white"></i>
+                    <span class="font-bold text-xl tracking-tight">Anti-Fraude</span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <button onclick="navigateTo('home')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition" data-page="home">Início</button>
+                        <button onclick="navigateTo('sobre')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition" data-page="sobre">Sobre o Crime</button>
+                        <button onclick="navigateTo('ranking')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition" data-page="ranking">Ranking</button>
+                        <button onclick="navigateTo('golpes')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition" data-page="golpes">Biblioteca</button>
+                        <button onclick="navigateTo('prevencao')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition" data-page="prevencao">Prevenção</button>
+                        <button onclick="navigateTo('emergencia')" class="bg-red-700 hover:bg-red-800 animate-pulse border border-red-500 text-white px-3 py-2 rounded-md text-sm font-medium transition">Emergência</button>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="-mr-2 flex md:hidden">
+                    <button onclick="toggleMobileMenu()" class="inline-flex items-center justify-center p-2 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 focus:outline-none">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-zinc-900 border-b border-zinc-800">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <button onclick="navigateTo('home')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Início</button>
+                <button onclick="navigateTo('sobre')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Sobre o Crime</button>
+                <button onclick="navigateTo('ranking')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Ranking</button>
+                <button onclick="navigateTo('golpes')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Biblioteca</button>
+                <button onclick="navigateTo('prevencao')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Prevenção</button>
+                <button onclick="navigateTo('emergencia')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-500 hover:bg-zinc-800">Emergência</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENT SECTIONS -->
+    <main id="content-container" class="flex-grow">
+        
+        <!-- HOME PAGE -->
+        <div id="page-home" class="page-section fade-in">
+            <section class="relative text-white py-20 lg:py-32 px-4 border-b border-zinc-800 overflow-hidden min-h-[85vh] flex items-center">
+                <div class="absolute inset-0 z-0">
+                    <div class="absolute inset-0 bg-black/90 z-10"></div>
+                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1920" class="w-full h-full object-cover opacity-30">
+                </div>
+                <div class="max-w-7xl mx-auto w-full relative z-20">
+                    <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 mb-6 backdrop-blur-md">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                </span>
+                                <span class="text-sm font-medium text-blue-300 uppercase tracking-wider">Segurança Digital 2026</span>
+                            </div>
+                            <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-tight leading-tight">
+                                Portal <br/>
+                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500">Anti-Fraude</span>
+                            </h1>
+                            <p class="text-xl text-zinc-400 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                                Não seja a próxima vítima. Informe-se sobre as <span class="text-white font-bold">40 fraudes mais comuns</span> do momento e aprenda a blindar sua vida financeira.
+                            </p>
+                            <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                                <button onclick="navigateTo('golpes')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full transition shadow-lg transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                                    <i data-lucide="search" class="w-5 h-5"></i> Biblioteca de Golpes
+                                </button>
+                                <button onclick="navigateTo('prevencao')" class="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-bold py-4 px-8 rounded-full transition flex items-center justify-center gap-2">
+                                    <i data-lucide="lock" class="w-5 h-5"></i> Como me Proteger
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex-1 relative w-full max-w-lg lg:max-w-xl mt-10 lg:mt-0">
+                            <div class="relative group">
+                                <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                                <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=1000" alt="Cyber Security" class="relative rounded-2xl shadow-2xl border border-zinc-800 bg-zinc-900 w-full object-cover aspect-[4/3]">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="py-20 bg-black px-4 border-b border-zinc-900">
+                <div class="max-w-4xl mx-auto text-center">
+                    <h2 class="text-3xl font-bold text-white mb-6">O que é Estelionato?</h2>
+                    <p class="text-lg text-zinc-400 leading-relaxed">
+                        Juridicamente (Art. 171 do Código Penal), estelionato é a prática de <span class="font-bold text-white">obter vantagem ilícita, em prejuízo alheio, induzindo ou mantendo alguém em erro</span>, mediante artifício, ardil ou qualquer outro meio fraudulento.
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <!-- SOBRE O CRIME PAGE (UPDATED) -->
+        <div id="page-sobre" class="page-section hidden fade-in py-20 bg-zinc-950 px-4">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex items-center justify-center gap-3 mb-10">
+                    <i data-lucide="scale" class="w-8 h-8 text-zinc-100"></i>
+                    <h2 class="text-3xl font-bold text-white text-center">Entendendo o Cibercrime e Estelionato</h2>
+                </div>
+                
+                <!-- Intro Layout -->
+                <div class="grid md:grid-cols-2 gap-8 mb-16">
+                    <div class="bg-zinc-900/50 p-8 rounded-2xl border border-zinc-800">
+                        <h3 class="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                            <i data-lucide="info" class="w-5 h-5"></i> O que é Cibercrime?
+                        </h3>
+                        <p class="text-zinc-400 leading-relaxed mb-6">
+                            Cibercrime é qualquer atividade criminosa que envolva um computador, dispositivo em rede ou uma rede. 
+                            Embora o termo seja usado frequentemente para ataques de hackers, ele também abrange fraudes tradicionais 
+                            cometidas através da internet (como estelionato).
+                        </p>
+                        <h3 class="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                            <i data-lucide="gavel" class="w-5 h-5"></i> Leis Principais
+                        </h3>
+                        <ul class="space-y-3 text-zinc-300 text-sm">
+                            <li class="flex items-start gap-2"><span class="text-blue-500 font-bold">•</span><span><strong>Lei Carolina Dieckmann (12.737/2012):</strong> Invasão de dispositivos.</span></li>
+                            <li class="flex items-start gap-2"><span class="text-blue-500 font-bold">•</span><span><strong>Lei Fraudes Eletrônicas (14.155/2021):</strong> Endurecimento de penas.</span></li>
+                            <li class="flex items-start gap-2"><span class="text-blue-500 font-bold">•</span><span><strong>Marco Civil da Internet (12.965/2014):</strong> Direitos e deveres na rede.</span></li>
+                        </ul>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-zinc-900 p-5 rounded-xl border-l-4 border-red-500">
+                            <h4 class="font-bold text-white text-lg">Invasão de Dispositivo</h4>
+                            <p class="text-zinc-400 text-sm mt-1">Acesso não autorizado a celular/PC (ex: Mão Fantasma). Pena: Detenção 3 meses a 1 ano.</p>
+                        </div>
+                        <div class="bg-zinc-900 p-5 rounded-xl border-l-4 border-purple-500">
+                            <h4 class="font-bold text-white text-lg">Extorsão Digital</h4>
+                            <p class="text-zinc-400 text-sm mt-1">Constrangimento mediante ameaça para vantagem econômica (ex: Sextorsão). Pena: Reclusão 4 a 10 anos.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalhamento Artigo 171 -->
+                <div class="border-t border-zinc-800 pt-12">
+                    <h3 class="text-2xl font-bold text-white mb-8 text-center flex items-center justify-center gap-2">
+                        <i data-lucide="book-open" class="w-6 h-6 text-blue-500"></i>
+                        Tipificação do Estelionato (Art. 171 CP)
+                    </h3>
+                    
+                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+                        <!-- Card 1 -->
+                        <div class="bg-zinc-900 p-6 rounded-xl border border-zinc-800 hover:border-zinc-600 transition">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-white text-lg">1. Simples (Caput)</h4>
+                                <span class="bg-zinc-800 text-zinc-300 text-xs px-2 py-1 rounded">Básico</span>
+                            </div>
+                            <p class="text-zinc-400 text-sm mb-3"><strong>Conduta:</strong> Obter vantagem ilícita, induzindo alguém em erro mediante artifício ou fraude.</p>
+                            <p class="text-blue-400 text-sm font-mono font-bold">Pena: Reclusão 1 a 5 anos</p>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="bg-zinc-900 p-6 rounded-xl border border-zinc-800 hover:border-zinc-600 transition">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-white text-lg">2. Privilegiado (§ 1º)</h4>
+                                <span class="bg-green-900/30 text-green-400 text-xs px-2 py-1 rounded border border-green-900">Benefício</span>
+                            </div>
+                            <p class="text-zinc-400 text-sm mb-3"><strong>Requisitos:</strong> Réu primário e prejuízo de pequeno valor (até 1 salário mínimo).</p>
+                            <p class="text-blue-400 text-sm font-mono font-bold">Pena: Reduzida (Detenção ou Multa)</p>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="bg-zinc-900 p-6 rounded-xl border border-zinc-800 hover:border-zinc-600 transition">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-white text-lg">3. Equiparado (§ 2º)</h4>
+                                <span class="bg-zinc-800 text-zinc-300 text-xs px-2 py-1 rounded">Específico</span>
+                            </div>
+                            <p class="text-zinc-400 text-sm mb-3"><strong>Casos:</strong> Venda de coisa alheia, defraudação de penhor, fraude no seguro, fraude no cheque.</p>
+                            <p class="text-blue-400 text-sm font-mono font-bold">Pena: Reclusão 1 a 5 anos</p>
+                        </div>
+
+                        <!-- Card 4 (Importante) -->
+                        <div class="bg-zinc-900 p-6 rounded-xl border border-red-900/50 hover:border-red-500 transition relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-16 h-16 bg-red-600/10 rounded-bl-full -mr-8 -mt-8"></div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-red-400 text-lg">4. Fraude Eletrônica (§ 2º-A)</h4>
+                                <i data-lucide="wifi" class="w-4 h-4 text-red-500"></i>
+                            </div>
+                            <p class="text-zinc-300 text-sm mb-3"><strong>Conduta:</strong> Fraude com dados fornecidos pela vítima via redes sociais, telefone ou e-mail.</p>
+                            <p class="text-red-400 text-sm font-mono font-bold">Pena: Reclusão 4 a 8 anos</p>
+                        </div>
+
+                        <!-- Card 5 -->
+                        <div class="bg-zinc-900 p-6 rounded-xl border border-zinc-800 hover:border-zinc-600 transition md:col-span-2 lg:col-span-2">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-bold text-white text-lg">5. Majorantes (Aumento de Pena)</h4>
+                                <span class="bg-orange-900/30 text-orange-400 text-xs px-2 py-1 rounded border border-orange-900">Agravantes</span>
+                            </div>
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-zinc-300 text-sm font-bold">Servidor no Exterior (§ 2º-B)</p>
+                                    <p class="text-zinc-500 text-xs">Crime eletrônico usando servidor fora do Brasil.</p>
+                                    <p class="text-orange-400 text-xs font-mono mt-1">+ 1/3 a 2/3 da pena</p>
+                                </div>
+                                <div>
+                                    <p class="text-zinc-300 text-sm font-bold">Contra Idoso ou Vulnerável (§ 4º)</p>
+                                    <p class="text-zinc-500 text-xs">Vítima > 60 anos ou vulnerável.</p>
+                                    <p class="text-orange-400 text-xs font-mono mt-1">Pena em DOBRO</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela Resumo -->
+                    <div class="overflow-x-auto rounded-xl border border-zinc-800">
+                        <table class="w-full text-sm text-left text-zinc-400">
+                            <thead class="text-xs text-zinc-200 uppercase bg-zinc-900 border-b border-zinc-800">
+                                <tr>
+                                    <th class="px-6 py-3">Variação</th>
+                                    <th class="px-6 py-3">Artigo/Parágrafo</th>
+                                    <th class="px-6 py-3">Pena Base</th>
+                                    <th class="px-6 py-3">Fator Chave</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-zinc-800">
+                                <tr class="bg-black hover:bg-zinc-900/50">
+                                    <td class="px-6 py-4 font-medium text-white">Simples</td>
+                                    <td class="px-6 py-4">Art. 171, caput</td>
+                                    <td class="px-6 py-4">1 a 5 anos</td>
+                                    <td class="px-6 py-4">Fraude genérica</td>
+                                </tr>
+                                <tr class="bg-zinc-900/20 hover:bg-zinc-900/50">
+                                    <td class="px-6 py-4 font-medium text-white">Privilegiado</td>
+                                    <td class="px-6 py-4">§ 1º</td>
+                                    <td class="px-6 py-4 text-green-400">Reduzida</td>
+                                    <td class="px-6 py-4">Primário + Pequeno valor</td>
+                                </tr>
+                                <tr class="bg-black hover:bg-zinc-900/50">
+                                    <td class="px-6 py-4 font-medium text-white">Fraude Eletrônica</td>
+                                    <td class="px-6 py-4">§ 2º-A</td>
+                                    <td class="px-6 py-4 text-red-400 font-bold">4 a 8 anos</td>
+                                    <td class="px-6 py-4">Internet, Telefone, Redes</td>
+                                </tr>
+                                <tr class="bg-zinc-900/20 hover:bg-zinc-900/50">
+                                    <td class="px-6 py-4 font-medium text-white">Contra Idoso</td>
+                                    <td class="px-6 py-4">§ 4º</td>
+                                    <td class="px-6 py-4 text-orange-400 font-bold">Dobro</td>
+                                    <td class="px-6 py-4">Vítima > 60 anos ou Vulnerável</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RANKING PAGE -->
+        <div id="page-ranking" class="page-section hidden fade-in py-20 bg-zinc-950 px-4">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-center gap-3 mb-10">
+                    <i data-lucide="bar-chart" class="w-8 h-8 text-zinc-100"></i>
+                    <h2 class="text-3xl font-bold text-white text-center">Top 100 - Golpes Mais Frequentes de 2025</h2>
+                </div>
+                <div id="ranking-list" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
+                    <!-- Javascript will populate this -->
+                </div>
+                <p class="text-center text-zinc-600 mt-10 text-sm">*Estimativa baseada em relatórios de segurança digital.</p>
+            </div>
+        </div>
+
+        <!-- GOLPES (LIBRARY) PAGE -->
+        <div id="page-golpes" class="page-section hidden fade-in py-20 bg-black px-4">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col items-center justify-center gap-3 mb-10">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="alert-triangle" class="w-8 h-8 text-zinc-100"></i>
+                        <h2 class="text-3xl font-bold text-white text-center">Biblioteca de Golpes</h2>
+                    </div>
+                    <p class="text-zinc-400 text-center max-w-2xl">Conheça as táticas mais usadas pelos criminosos. (Exibindo 40 modalidades detalhadas)</p>
+                </div>
+                
+                <!-- Filters -->
+                <div id="category-filters" class="flex flex-wrap justify-center gap-2 mb-10">
+                    <!-- JS Populated -->
+                </div>
+
+                <!-- Grid -->
+                <div id="scams-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- JS Populated -->
+                </div>
+            </div>
+        </div>
+
+        <!-- PREVENCAO PAGE -->
+        <div id="page-prevencao" class="page-section hidden fade-in py-20 bg-zinc-900 text-white px-4">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-3xl font-bold text-center mb-12">20 Mandamentos da Prevenção</h2>
+                <div id="prevention-grid" class="grid md:grid-cols-2 gap-6">
+                    <!-- JS Populated -->
+                </div>
+            </div>
+        </div>
+
+        <!-- EMERGENCIA PAGE -->
+        <div id="page-emergencia" class="page-section hidden fade-in py-20 bg-black px-4 relative overflow-hidden">
+            <div class="absolute inset-0 z-0">
+                <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1920" class="w-full h-full object-cover opacity-20">
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/90 to-red-950/40"></div>
+            </div>
+            <div class="max-w-4xl mx-auto text-center relative z-10">
+                <div class="inline-block p-4 bg-red-900/20 rounded-full mb-6 border border-red-900/50 backdrop-blur-sm">
+                    <i data-lucide="alert-triangle" class="w-12 h-12 text-red-500"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-red-500 mb-6 drop-shadow-lg">Fui vítima, e agora?</h2>
+                <p class="text-lg text-zinc-300 mb-12 max-w-2xl mx-auto">Agir rápido é fundamental. O tempo é crucial.</p>
+                <div id="emergency-grid" class="grid md:grid-cols-3 gap-6 text-left">
+                    <!-- JS Populated -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black text-zinc-500 py-8 px-4 text-center border-t border-zinc-900 mt-auto">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-center gap-2 mb-4">
+                <i data-lucide="shield" class="w-6 h-6 text-zinc-600"></i>
+            </div>
+            <p class="text-sm mb-2">&copy; <span id="year"></span> Anti-Fraude. Todos os direitos reservados.</p>
+            <p class="text-xs text-zinc-700 mb-4">Este site é meramente informativo. Em caso de dúvidas legais, consulte um advogado. Em emergências, ligue 190.</p>
+            <p class="text-xs text-zinc-800 font-mono mt-6 pt-4 border-t border-zinc-900/50 inline-block px-4">Desenvolvido por F.R.B.S</p>
+        </div>
+    </footer>
+
+    <!-- MODAL COMPONENT (Hidden by default) -->
+    <div id="modal" class="fixed inset-0 z-[60] hidden modal-backdrop flex items-center justify-center p-4">
+        <div class="bg-zinc-900 w-full max-w-2xl rounded-2xl border border-zinc-700 shadow-2xl overflow-hidden relative animate-[zoomIn_0.2s_ease-out] max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal()" class="absolute top-4 right-4 p-2 rounded-full bg-black/50 hover:bg-zinc-800 text-zinc-400 hover:text-white transition z-20">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <div id="modal-content">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA ---
+        
+        const categories = ["Todos", "Digitais e Financeiros", "Engenharia Social", "Turísticos e de Rua", "Comércio e Utilitários", "Benefícios Sociais"];
+
+        const scams = [
+            // I. Golpes Digitais e Financeiros
+            { id: 1, category: "Digitais e Financeiros", title: "Urubu do Pix / Bug do Pix", description: "Promessa em redes sociais de que transferir um valor (ex: R$ 50) retorna o décuplo (R$ 500). É pirâmide; o dinheiro nunca volta.", prevention: "Não existe dinheiro fácil ou bug de sistema que devolve dinheiro em dobro. Bloqueie o perfil.", icon: "trending-up", riskLevel: "Altíssimo" },
+            { id: 2, category: "Digitais e Financeiros", title: "Golpe do Pix Agendado", description: "O golpista envia um comprovante de agendamento como se fosse pagamento real. O vendedor entrega o produto, e o golpista cancela o agendamento depois.", prevention: "Só entregue o produto quando o dinheiro estiver LIBERADO na conta, não apenas agendado.", icon: "clock", riskLevel: "Alto" },
+            { id: 3, category: "Digitais e Financeiros", title: "Falsa Central de Segurança (0800)", description: "SMS ou ligação afirmando que houve uma compra suspeita no seu cartão. Pedem para ligar num 0800 falso, onde 'atendentes' roubam seus dados.", prevention: "Nunca ligue para números recebidos por SMS. Ligue apenas para o número no verso do seu cartão.", icon: "phone", riskLevel: "Altíssimo" },
+            { id: 4, category: "Digitais e Financeiros", title: "Mão Fantasma (Acesso Remoto)", description: "O falso atendente convence a vítima a instalar um app (TeamViewer, AnyDesk) para 'limpar vírus'. Eles assumem o controle do celular e limpam as contas.", prevention: "Bancos nunca pedem para instalar apps de suporte remoto. Desligue imediatamente.", icon: "monitor", riskLevel: "Altíssimo" },
+            { id: 5, category: "Digitais e Financeiros", title: "Golpe do Falso Motoboy", description: "O banco liga dizendo que o cartão foi clonado e manda um motoboy buscar o cartão cortado na sua casa. O chip (que contém os dados) é roubado intacto.", prevention: "Bancos NUNCA enviam pessoas para buscar cartões. Destrua o chip se for descartar.", icon: "truck", riskLevel: "Alto" },
+            { id: 6, category: "Digitais e Financeiros", title: "Troca de Cartão (Ambulantes)", description: "O vendedor pega seu cartão, passa na máquina, e devolve um cartão idêntico (do mesmo banco) mas que pertence a outra pessoa, ficando com o seu e a senha.", prevention: "Nunca entregue o cartão na mão de ninguém. Insira você mesmo e confira o nome ao receber de volta.", icon: "credit-card", riskLevel: "Médio" },
+            { id: 7, category: "Digitais e Financeiros", title: "Golpe da Maquininha (Visor)", description: "O vendedor diz que o visor está ruim, você digita a senha achando que é R$ 10,00, mas a cobrança é de R$ 1.000,00.", prevention: "Confira o valor no visor ou peça o comprovante antes de digitar a senha. Ative notificações de compra.", icon: "alert-triangle", riskLevel: "Alto" },
+            { id: 8, category: "Digitais e Financeiros", title: "Pix Errado (Fraude do MED)", description: "O golpista deposita dinheiro 'por engano' e pede estorno. Você devolve via Pix. Depois, ele aciona o MED dizendo que foi golpe, e o banco retira o valor de novo.", prevention: "Não devolva manualmente. Avise seu banco e peça para eles estornarem via mecanismo oficial.", icon: "alert-circle", riskLevel: "Médio" },
+            { id: 9, category: "Digitais e Financeiros", title: "Clonagem de WhatsApp", description: "Roubam seu acesso (via código SMS) e pedem dinheiro aos seus contatos fingindo ser você.", prevention: "Ative a confirmação em duas etapas e nunca compartilhe códigos SMS de 6 dígitos.", icon: "message-square", riskLevel: "Altíssimo" },
+            { id: 10, category: "Digitais e Financeiros", title: "Perfil Falso (Novo Número)", description: "Usam sua foto em um número qualquer e dizem aos seus parentes: 'Mudei de número, apaga o antigo'. Logo depois, pedem dinheiro.", prevention: "Alerte sua família. Se alguém pedir dinheiro por número novo, ligue para o número antigo para confirmar.", icon: "user", riskLevel: "Médio" },
+            { id: 11, category: "Digitais e Financeiros", title: "Golpe do Delivery (Taxa Extra)", description: "O entregador diz que a taxa de entrega não foi paga no app e cobra na maquininha dele. O visor é adulterado ou clonam o cartão.", prevention: "Se pediu por app, tudo é pago pelo app. Não aceite cobranças extras na porta.", icon: "truck", riskLevel: "Alto" },
+            { id: 12, category: "Digitais e Financeiros", title: "Phishing de Pontos/Milhas", description: "E-mail ou SMS dizendo que seus pontos do cartão vão expirar hoje. O link leva a um site falso para roubar senhas.", prevention: "Não clique em links. Acesse o site do programa de fidelidade diretamente pelo navegador.", icon: "plane", riskLevel: "Médio" },
+            
+            // II. Engenharia Social
+            { id: 13, category: "Engenharia Social", title: "Golpe da Facção / 'Talarico'", description: "Ligam dizendo que você está mexendo com mulher de traficante ou denunciando a boca. Exigem Pix para não 'invadir sua casa'.", prevention: "É golpe de presídio. Eles pegam seus dados na internet. Desligue e bloqueie.", icon: "alert-triangle", riskLevel: "Altíssimo" },
+            { id: 14, category: "Engenharia Social", title: "Golpe do Nudes / Sextorsão", description: "Perfil jovem troca fotos íntimas. Depois, um 'falso delegado' ou 'pai' liga exigindo dinheiro para não prender a vítima.", prevention: "Não mande nudes para desconhecidos. Não pague chantagem, eles sempre pedirão mais.", icon: "camera", riskLevel: "Alto" },
+            { id: 15, category: "Engenharia Social", title: "Falso Sequestro", description: "Ligação com gritos ao fundo, dizendo que sequestraram seu filho. Clássico, mas ainda muito aplicado.", prevention: "Tente contatar o familiar por outro telefone. Peça o nome do filho (eles não sabem).", icon: "phone", riskLevel: "Alto" },
+            { id: 16, category: "Engenharia Social", title: "Estelionato Afetivo ('Don Juan')", description: "Golpista namora a vítima virtualmente, ganha confiança e pede dinheiro para 'investimentos' ou 'saúde'.", prevention: "Cuidado com amores virtuais que pedem dinheiro rápido. Nunca transfira sem conhecer pessoalmente.", icon: "user", riskLevel: "Médio" },
+            { id: 17, category: "Engenharia Social", title: "Falso Emprego (RH Falso)", description: "Anúncios de vagas. Cobram taxa para 'exame admissional' ou 'curso obrigatório' antes da contratação.", prevention: "Nenhuma empresa séria cobra dinheiro do candidato para trabalhar.", icon: "briefcase", riskLevel: "Alto" },
+            { id: 18, category: "Engenharia Social", title: "Falso Advogado (Precatórios)", description: "Clonam o perfil do advogado da vítima e pedem adiantamento de 'custas' para liberar o valor de um processo real.", prevention: "Ligue no escritório oficial do seu advogado. Não negocie por WhatsApp desconhecido.", icon: "gavel", riskLevel: "Alto" },
+            { id: 19, category: "Engenharia Social", title: "Golpe da Falsa Doação", description: "Criam vaquinhas online para tratar crianças ou animais doentes usando fotos roubadas de casos reais antigos.", prevention: "Pesquise a imagem no Google (Busca Reversa). Doe apenas para instituições conhecidas.", icon: "gift", riskLevel: "Médio" },
+
+            // III. Turísticos e de Rua
+            { id: 20, category: "Turísticos e de Rua", title: "Pintura Corporal Abusiva", description: "Em pontos turísticos, pintam o turista 'de graça' ou à força e coagem a pagar valores altos sob ameaça.", prevention: "Seja firme no 'NÃO'. Evite parar para conversar com quem oferece serviços insistentes na rua.", icon: "user", riskLevel: "Médio" },
+            { id: 21, category: "Turísticos e de Rua", title: "Fitinha do Bonfim 'Paga'", description: "Amarram a fitinha dizendo ser presente, mas depois cobram agressivamente uma 'ajuda' para o santo.", prevention: "Recuse educadamente brindes de desconhecidos em locais turísticos.", icon: "gift", riskLevel: "Baixo" },
+            { id: 22, category: "Turísticos e de Rua", title: "Mala Trocada (Aeroporto)", description: "Distração para furtar bagagens ou trocar etiquetas de malas no desembarque.", prevention: "Use fitas coloridas ou tags para identificar sua mala. Não tire os olhos da bagagem.", icon: "briefcase", riskLevel: "Médio" },
+            { id: 23, category: "Turísticos e de Rua", title: "Táxi sem Taxímetro", description: "O motorista diz que é 'preço fechado' (muito mais caro) ou roda com bandeira 2 em horário indevido.", prevention: "Exija o taxímetro ligado ou use aplicativos de transporte oficiais.", icon: "car", riskLevel: "Médio" },
+            { id: 24, category: "Turísticos e de Rua", title: "Aluguel Fantasma", description: "Casas maravilhosas com preço baixo. O turista paga 50% e, ao chegar, a casa não existe ou já está ocupada.", prevention: "Use plataformas seguras (Airbnb, Booking). Peça chamada de vídeo dentro do imóvel.", icon: "home", riskLevel: "Alto" },
+            { id: 25, category: "Turísticos e de Rua", title: "Falsa Reserva de Pousada", description: "Clonam o perfil do Instagram de pousadas famosas e vendem pacotes falsos via Pix.", prevention: "Verifique se o perfil é o oficial. Ligue para o número fixo da pousada disponível no Google.", icon: "home", riskLevel: "Médio" },
+            { id: 26, category: "Turísticos e de Rua", title: "Falso Guia Turístico", description: "Pessoas sem credencial cobram para levar a lugares que são gratuitos ou perigosos.", prevention: "Exija a credencial do Cadastur (Ministério do Turismo).", icon: "map-pin", riskLevel: "Baixo" },
+            { id: 27, category: "Turísticos e de Rua", title: "Abadá/Camarote Falso", description: "Venda de ingressos de Carnaval impressos ou QR Codes que já foram usados ou são falsos.", prevention: "Compre apenas nos canais oficiais ou bilheterias credenciadas.", icon: "file-text", riskLevel: "Alto" },
+            { id: 28, category: "Turísticos e de Rua", title: "Golpe do 'Achadinho'", description: "Alguém deixa cair carteira, você avisa. Um comparsa aparece, agradece e te leva numa loja para gastar dinheiro como recompensa.", prevention: "Não aceite recompensas ou convites de estranhos na rua.", icon: "dollar-sign", riskLevel: "Médio" },
+            { id: 29, category: "Turísticos e de Rua", title: "Bilhete Premiado", description: "O clássico golpe onde um 'humilde' pede ajuda para sacar prêmio milionário e pede garantia em dinheiro.", prevention: "Não existe dinheiro fácil na rua. Se fosse verdade, a pessoa não precisaria de você.", icon: "dollar-sign", riskLevel: "Médio" },
+
+            // IV. Comércio e Utilitários
+            { id: 30, category: "Comércio e Utilitários", title: "Golpe do Intermediário (OLX)", description: "Engana comprador e vendedor simultaneamente. Fica com o dinheiro do comprador e o vendedor sem o produto.", prevention: "Não negocie com terceiros ('primos', 'sócios'). Confirme o nome na conta bancária.", icon: "shopping-bag", riskLevel: "Alto" },
+            { id: 31, category: "Comércio e Utilitários", title: "Leilão Falso (Detran)", description: "Sites patrocinados que vendem carros muito baratos. O site é falso e o pagamento vai para laranjas.", prevention: "Visite o pátio presencialmente. O site oficial termina sempre em .gov.br.", icon: "gavel", riskLevel: "Alto" },
+            { id: 32, category: "Comércio e Utilitários", title: "Venda de Carro 'Pokemon' (NP)", description: "Venda de carros financiados com dívidas enormes como se fossem quitados ou legais.", prevention: "Consulte o histórico do veículo pelo Renavam antes de comprar.", icon: "car", riskLevel: "Alto" },
+            { id: 33, category: "Comércio e Utilitários", title: "Falso Boleto (Coelba/Embasa)", description: "Envio de contas falsas por e-mail/WhatsApp com QR Code Pix direcionado a golpistas.", prevention: "Pegue a 2ª via apenas no site oficial da concessionária.", icon: "file-text", riskLevel: "Médio" },
+            { id: 34, category: "Comércio e Utilitários", title: "Falso Suporte Técnico", description: "Ligam dizendo ser da operadora para 'trocar o modem' e pedem dados ou acesso à rede.", prevention: "Não passe dados se não solicitou visita. Ligue para a operadora.", icon: "wifi", riskLevel: "Médio" },
+            { id: 35, category: "Comércio e Utilitários", title: "Golpe da Compra Confirmada", description: "Vendedor recebe e-mail falso 'Venda Aprovada, envie o produto'. Envia sem conferir saldo.", prevention: "Confira o status da venda no painel do site (Mercado Livre/OLX), nunca só por e-mail.", icon: "check-circle", riskLevel: "Alto" },
+
+            // V. Benefícios Sociais
+            { id: 36, category: "Benefícios Sociais", title: "Golpe do Empréstimo Consignado", description: "Falsários contratam empréstimos no nome de aposentados sem eles saberem, ou ligam oferecendo 'renegociação'.", prevention: "Bloqueie a opção de empréstimo no app Meu INSS se não for usar.", icon: "landmark", riskLevel: "Alto" },
+            { id: 37, category: "Benefícios Sociais", title: "Revisão da Vida Toda", description: "Advogados falsos cobram taxas antecipadas prometendo aumento na aposentadoria.", prevention: "Não pague nada antecipado. Consulte a Defensoria Pública ou advogados de confiança.", icon: "file-text", riskLevel: "Médio" },
+            { id: 38, category: "Benefícios Sociais", title: "Prova de Vida Online Falsa", description: "Ligam dizendo ser do INSS para fazer prova de vida pelo WhatsApp, pedindo foto do rosto e documentos.", prevention: "INSS não faz prova de vida por videochamada de WhatsApp.", icon: "user", riskLevel: "Alto" },
+            { id: 39, category: "Benefícios Sociais", title: "Golpe do Bolsa Família (Link)", description: "Mensagens prometendo 'Bônus de Natal' ou 'Recadastramento' que instalam vírus.", prevention: "Não clique em links. Informações oficiais estão no app Bolsa Família ou CadÚnico.", icon: "landmark", riskLevel: "Alto" },
+            { id: 40, category: "Benefícios Sociais", title: "Falsos Fiscais (Prefeitura)", description: "Pessoas com crachás falsos tentam entrar em casas alegando ser agentes de endemias (dengue) para furtar.", prevention: "Ligue para a Secretaria de Saúde para confirmar a visita ou peça identificação oficial.", icon: "user", riskLevel: "Médio" }
+        ];
+
+        const ranking = [
+            { position: 1, name: "Urubu do Pix / Robô do Pix", percentage: "32.0%" },
+            { position: 2, name: "Falsa Central de Segurança (0800)", percentage: "28.5%" },
+            { position: 3, name: "Clonagem de WhatsApp (Pedido de Dinheiro)", percentage: "25.2%" },
+            { position: 4, name: "Golpe do Intermediário (OLX/Vendas)", percentage: "22.8%" },
+            { position: 5, name: "Mão Fantasma (Acesso Remoto)", percentage: "19.5%" },
+            { position: 6, name: "Falso Leilão de Veículos (Sites falsos)", percentage: "17.1%" },
+            { position: 7, name: "Aluguel Fantasma (Férias/Temporada)", percentage: "15.4%" },
+            { position: 8, name: "Falso Emprego / Taxa de RH", percentage: "14.2%" },
+            { position: 9, name: "Golpe do Empréstimo Consignado", percentage: "12.8%" },
+            { position: 10, name: "Estelionato Afetivo / Don Juan", percentage: "11.5%" },
+            { position: 11, name: "Boleto Falso (Contas de consumo)", percentage: "10.9%" },
+            { position: 12, name: "Phishing: Taxa dos Correios", percentage: "10.2%" },
+            { position: 13, name: "Phishing: Pontos/Milhas Expirando", percentage: "9.8%" },
+            { position: 14, name: "Golpe do Falso Motoboy (Cartão)", percentage: "9.5%" },
+            { position: 15, name: "Troca de Cartão (Ambulantes)", percentage: "9.1%" },
+            { position: 16, name: "Maquininha com Visor Queimado", percentage: "8.7%" },
+            { position: 17, name: "Pix Errado (Golpe do MED)", percentage: "8.4%" },
+            { position: 18, name: "Perfil Falso com Novo Número", percentage: "8.0%" },
+            { position: 19, name: "Golpe do Delivery (Taxa Extra na porta)", percentage: "7.8%" },
+            { position: 20, name: "Falso Advogado (Precatórios)", percentage: "7.5%" },
+            { position: 21, name: "Golpe da Falsa Doação / Vaquinha", percentage: "7.2%" },
+            { position: 22, name: "Sextorsão / Golpe do Nudes", percentage: "7.0%" },
+            { position: 23, name: "Falso Sequestro (Ligação)", percentage: "6.8%" },
+            { position: 24, name: "Golpe da Facção / 'Talarico'", percentage: "6.5%" },
+            { position: 25, name: "Pintura Corporal Abusiva (Turismo)", percentage: "6.2%" },
+            { position: 26, name: "Fitinha do Bonfim 'Paga'", percentage: "5.9%" },
+            { position: 27, name: "Mala Trocada (Aeroporto)", percentage: "5.7%" },
+            { position: 28, name: "Táxi sem Taxímetro / Bandeira 2", percentage: "5.5%" },
+            { position: 29, name: "Falsa Reserva de Pousada (Instagram)", percentage: "5.3%" },
+            { position: 30, name: "Falso Guia Turístico", percentage: "5.1%" },
+            { position: 31, name: "Abadá / Ingresso Falso", percentage: "4.9%" },
+            { position: 32, name: "Golpe do 'Achadinho' (Recompensa)", percentage: "4.7%" },
+            { position: 33, name: "Bilhete Premiado", percentage: "4.5%" },
+            { position: 34, name: "Venda de Carro 'Pokemon' (NP)", percentage: "4.3%" },
+            { position: 35, name: "Falso Suporte Técnico (Internet)", percentage: "4.2%" },
+            { position: 36, name: "Golpe da Compra Confirmada (E-mail)", percentage: "4.0%" },
+            { position: 37, name: "Revisão da Vida Toda (INSS)", percentage: "3.9%" },
+            { position: 38, name: "Prova de Vida Online Falsa", percentage: "3.8%" },
+            { position: 39, name: "Golpe do Bolsa Família (Link)", percentage: "3.7%" },
+            { position: 40, name: "Falsos Fiscais (Prefeitura/Saúde)", percentage: "3.6%" },
+            { position: 41, name: "Investimento Day Trade Falso", percentage: "3.5%" },
+            { position: 42, name: "Grupos de Sinais (Telegram)", percentage: "3.4%" },
+            { position: 43, name: "Falso Influenciador (Sorteio)", percentage: "3.3%" },
+            { position: 44, name: "Instagram Hackeado (Venda Móveis)", percentage: "3.2%" },
+            { position: 45, name: "Golpe do Voucher (Jantar Grátis)", percentage: "3.1%" },
+            { position: 46, name: "Sim Swap (Troca de Chip)", percentage: "3.0%" },
+            { position: 47, name: "Ransomware (Sequestro de Dados)", percentage: "2.9%" },
+            { position: 48, name: "CEO Fraud (E-mail Corporativo)", percentage: "2.8%" },
+            { position: 49, name: "Falso Fornecedor (Boleto Empresarial)", percentage: "2.7%" },
+            { position: 50, name: "Site Falso (Clone de E-commerce)", percentage: "2.6%" },
+            { position: 51, name: "Venda de Milhas Falsa", percentage: "2.5%" },
+            { position: 52, name: "Pacotes de Viagem Irreais (Hurb)", percentage: "2.4%" },
+            { position: 53, name: "Golpe do Sugar Daddy", percentage: "2.3%" },
+            { position: 54, name: "Chantagem por Webcam", percentage: "2.2%" },
+            { position: 55, name: "Golpe da Novinha (Falso Delegado)", percentage: "2.1%" },
+            { position: 56, name: "Romance Militar Americano", percentage: "2.0%" },
+            { position: 57, name: "Golpe do Encontro (Tinder/Sequestro)", percentage: "1.9%" },
+            { position: 58, name: "Golpe da Gasolina (Adulterada)", percentage: "1.8%" },
+            { position: 59, name: "Furto por Aproximação (Multidão)", percentage: "1.7%" },
+            { position: 60, name: "Chupa-cabra (Caixa Eletrônico)", percentage: "1.6%" },
+            { position: 61, name: "Golpe do Troco Errado", percentage: "1.5%" },
+            { position: 62, name: "Passagem de Nota Falsa", percentage: "1.4%" },
+            { position: 63, name: "Falso Mecânico na Estrada", percentage: "1.3%" },
+            { position: 64, name: "Golpe da Batida de Carro (Extorsão)", percentage: "1.2%" },
+            { position: 65, name: "Golpe do Retrovisor Quebrado", percentage: "1.1%" },
+            { position: 66, name: "Falso Padre/Pastor (Pedido de Doação)", percentage: "1.0%" },
+            { position: 67, name: "Golpe do Dízimo via Pix", percentage: "0.9%" },
+            { position: 68, name: "Falso Vendedor Porta a Porta", percentage: "0.8%" },
+            { position: 69, name: "Dedetização com Valor Abusivo", percentage: "0.8%" },
+            { position: 70, name: "Falso Teste de Covid/Vacina", percentage: "0.7%" },
+            { position: 71, name: "Golpe do Auxílio Emergencial", percentage: "0.7%" },
+            { position: 72, name: "Golpe da Restituição do IR", percentage: "0.6%" },
+            { position: 73, name: "Site Falso do Desenrola Brasil", percentage: "0.6%" },
+            { position: 74, name: "Golpe do PIS/PASEP", percentage: "0.6%" },
+            { position: 75, name: "Golpe do Saque Aniversário FGTS", percentage: "0.5%" },
+            { position: 76, name: "Falso Empréstimo para Negativado", percentage: "0.5%" },
+            { position: 77, name: "Taxa Antecipada de Empréstimo", percentage: "0.5%" },
+            { position: 78, name: "Golpe do Consórcio Contemplado", percentage: "0.4%" },
+            { position: 79, name: "Golpe da Carta de Crédito", percentage: "0.4%" },
+            { position: 80, name: "Venda de TCC/Diploma Falso", percentage: "0.4%" },
+            { position: 81, name: "Falso Curso Online (Certificado inválido)", percentage: "0.3%" },
+            { position: 82, name: "Vaga de Modelo Falsa (Agência)", percentage: "0.3%" },
+            { position: 83, name: "Golpe do Casting (Fotos pagas)", percentage: "0.3%" },
+            { position: 84, name: "Mula Financeira (Trabalho em casa)", percentage: "0.3%" },
+            { position: 85, name: "Pirâmide de Marketing Multinível", percentage: "0.2%" },
+            { position: 86, name: "Golpe do NFT Falso", percentage: "0.2%" },
+            { position: 87, name: "Token Falso (Honeypot)", percentage: "0.2%" },
+            { position: 88, name: "Airdrop Falso (Criptomoedas)", percentage: "0.2%" },
+            { position: 89, name: "Carteira Fria Falsa (Ledger falsificada)", percentage: "0.1%" },
+            { position: 90, name: "Smishing Genérico (SMS)", percentage: "0.1%" },
+            { position: 91, name: "Phishing Genérico (E-mail)", percentage: "0.1%" },
+            { position: 92, name: "Quishing (QR Code Malicioso)", percentage: "0.1%" },
+            { position: 93, name: "Wi-Fi Público Malicioso", percentage: "0.1%" },
+            { position: 94, name: "Juice Jacking (Carregador Público)", percentage: "0.1%" },
+            { position: 95, name: "App Falso na Loja Oficial", percentage: "0.1%" },
+            { position: 96, name: "Extensão de Navegador Maliciosa", percentage: "0.1%" },
+            { position: 97, name: "Download de Software Pirata (Vírus)", percentage: "0.1%" },
+            { position: 98, name: "Suporte Microsoft Falso (Pop-up)", percentage: "0.1%" },
+            { position: 99, name: "Golpe da Tela Azul (Bloqueio PC)", percentage: "0.1%" },
+            { position: 100, name: "Golpe do Falso Sequestro de Dados", percentage: "0.1%" },
+        ];
+
+        const preventionTips = [
+            { id: 1, title: "Ative a autenticação de 2 fatores (2FA)", short: "Ative a autenticação de 2 fatores (2FA) em todos os apps.", description: "A autenticação de dois fatores cria uma camada extra de segurança. Mesmo que alguém descubra sua senha, não conseguirá acessar sua conta sem o segundo código. Prefira aplicativos autenticadores (como Google Authenticator ou Microsoft Authenticator) em vez de SMS.", icon: "lock" },
+            { id: 2, title: "Senhas e Códigos SMS", short: "Nunca forneça senhas ou códigos recebidos por SMS.", description: "Golpistas frequentemente ligam fingindo ser de empresas e pedem o código que chegou no seu celular. Esse código geralmente serve para roubar seu WhatsApp ou trocar a senha de suas contas. Empresas legítimas NUNCA pedem códigos de verificação por telefone. Se pedirem, desligue.", icon: "message-square" },
+            { id: 3, title: "Ofertas 'Milagrosas'", short: "Desconfie de ofertas muito abaixo do valor de mercado.", description: "Se um iPhone ou carro está custando metade do preço, é golpe. Criminosos usam a ganância e o senso de urgência ('só hoje', 'última peça') para fazer você pagar rápido. Verifique a reputação da loja no Reclame Aqui e compare preços em outros sites confiáveis.", icon: "dollar-sign" },
+            { id: 4, title: "Links Suspeitos", short: "Não clique em links estranhos, mesmo de amigos.", description: "Vírus e páginas falsas (phishing) são espalhados por links maliciosos. Se receber um link solto de um amigo sem contexto ('veja essa foto', 'minha nova dieta'), desconfie: a conta dele pode ter sido invadida. Pergunte sobre o que se trata antes de clicar.", icon: "external-link" },
+            { id: 5, title: "Verifique o Remetente", short: "Verifique o remetente do e-mail clicando no nome dele.", description: "Criminosos falsificam o nome de exibição (ex: 'Suporte Banco X', 'Receita Federal'), mas o endereço de e-mail real costuma ser aleatório ou suspeito (ex: 'contato@gmail.com' ou 'sac@dominioestranho.com'). Sempre expanda os detalhes do remetente para ver o e-mail real.", icon: "mail" },
+            { id: 6, title: "Confira o Destinatário do Pix", short: "Em pagamentos via Pix, confira sempre o nome do destinatário.", description: "Antes de digitar a senha, leia com atenção o nome de quem vai receber o dinheiro. Em golpes de leilão falsos ou intermediários, o nome geralmente é de uma pessoa física desconhecida (laranja) e não da empresa ou loja oficial que você acha que está pagando.", icon: "credit-card" },
+            { id: 7, title: "Conta Bancária Pessoal", short: "Não empreste sua conta bancária para terceiros.", description: "Emprestar sua conta para receber dinheiro de origem desconhecida pode fazer de você um 'laranja' em crimes financeiros. Você pode responder criminalmente e ter sua conta encerrada pelo banco por suspeita de fraude. Seu nome é sua responsabilidade.", icon: "user" },
+            { id: 8, title: "Privacidade nas Redes", short: "Bloqueie e denuncie perfis suspeitos nas redes sociais.", description: "Golpistas usam perfis falsos para monitorar sua rotina, saber onde você frequenta e aplicar golpes (sequestro, roubo). Mantenha suas redes privadas para amigos e não aceite desconhecidos sem verificar quem são ou se têm amigos em comum reais.", icon: "user" },
+            { id: 9, title: "Ligações de Bancos", short: "Cuidado com ligações de 'Bancos' pedindo confirmação de dados.", description: "Bancos podem ligar para confirmar transações suspeitas, mas eles NUNCA pedem senhas, tokens, instalação de aplicativos ou pedem para você fazer transferências/testes. Na dúvida, desligue e ligue você mesmo para o número que está atrás do seu cartão.", icon: "phone" },
+            { id: 10, title: "Segurança do Dispositivo", short: "Mantenha o antivírus e o sistema do celular atualizados.", description: "As atualizações de sistema (Android/iOS) corrigem falhas de segurança que hackers usam para invadir aparelhos. Ter um antivírus confiável ajuda a bloquear instalação de apps maliciosos e links perigosos. Não ignore os avisos de atualização.", icon: "shield" },
+            { id: 11, title: "Anexos Perigosos", short: "Não baixe anexos suspeitos (.zip, .exe) de desconhecidos.", description: "Arquivos enviados por e-mail ou WhatsApp podem conter malwares que roubam dados. Se receber um 'comprovante.zip' ou 'foto.exe' não solicitado, apague imediatamente. Bancos e empresas sérias enviam comprovantes em PDF.", icon: "mail" },
+            { id: 12, title: "Senhas Fortes", short: "Use senhas complexas e únicas para cada serviço.", description: "Evite '123456' ou datas de nascimento. Crie senhas longas com letras maiúsculas, minúsculas, números e símbolos. Use um Gerenciador de Senhas para não precisar decorar todas. Se uma senha vazar, as outras contas estarão seguras.", icon: "lock" },
+            { id: 13, title: "Cartão Virtual", short: "Use sempre o Cartão Virtual temporário em compras online.", description: "A maioria dos bancos oferece cartões virtuais que mudam o código de segurança (CVV) periodicamente ou servem para uma única compra. Se o site for invadido ou falso, o golpista não conseguirá usar seus dados no futuro.", icon: "credit-card" },
+            { id: 14, title: "Pressão Psicológica", short: "Pare e respire se alguém criar senso de urgência.", description: "Golpistas usam frases como 'sua conta será bloqueada agora' ou 'promoção acaba em 5 minutos' para desligar seu senso crítico. Se sentir pressionado a agir rápido, é um sinal claro de golpe. Encerre o contato e verifique com calma.", icon: "alert-triangle" },
+            { id: 15, title: "Sites Seguros (HTTPS)", short: "Verifique se o site tem o cadeado e começa com HTTPS.", description: "Antes de digitar senha ou cartão, olhe a barra de endereços. Sites de bancos e e-commerce sérios usam criptografia (cadeado fechado). Atenção a erros de português ou layouts estranhos na página.", icon: "search" },
+            { id: 16, title: "Limite do Pix Noturno", short: "Ajuste seus limites de transferência para o período noturno.", description: "No aplicativo do seu banco, reduza o limite de Pix e transferências entre 20h e 6h. Em caso de sequestro relâmpago ou roubo do celular à noite, o prejuízo será limitado. O aumento de limite demora 24h a 48h para ser aprovado.", icon: "clock" },
+            { id: 17, title: "Wi-Fi Público", short: "Evite acessar bancos em redes Wi-Fi abertas.", description: "Redes de shoppings, aeroportos ou cafés podem ser interceptadas por hackers para ler seus dados. Se precisar usar o banco na rua, desligue o Wi-Fi e use os dados móveis (4G/5G) da sua operadora, que são mais seguros.", icon: "wifi" },
+            { id: 18, title: "Valor na Maquininha", short: "Confira sempre o valor no visor antes de aproximar o cartão.", description: "Nunca entregue seu cartão para o vendedor passar longe de você. Olhe o visor: verifique se o valor está correto e se não há mensagem de erro forçada para fazer você passar o cartão duas vezes.", icon: "shopping-bag" },
+            { id: 19, title: "Proteção de Dados", short: "Não envie fotos de documentos por apps de mensagem.", description: "Evite enviar fotos de RG, CPF ou cartão de crédito por WhatsApp, mesmo para conhecidos. Se o celular deles for clonado, seus documentos cairão na mão de criminosos para abrir contas falsas.", icon: "file-text" },
+            { id: 20, title: "Confirmação de Voz", short: "Amigo pediu dinheiro? Ligue para confirmar a identidade.", description: "Se um amigo ou parente pedir dinheiro urgente por mensagem, não transfira de imediato. Faça uma chamada de voz ou vídeo para confirmar se é realmente a pessoa. A inteligência artificial já consegue imitar vozes, então perguntas pessoais ajudam.", icon: "phone" }
+        ];
+
+        const emergencySteps = [
+            { id: 1, title: "1. Acione o MED (Pix)", short: "Se foi Pix, acione o Mecanismo Especial de Devolução imediatamente.", description: "**O que fazer:**\n1. Entre em contato com o **seu banco** (via Chat do App ou SAC) imediatamente. O tempo ideal é em até 30 minutos após a transferência.\n2. Informe que foi vítima de golpe e solicite a abertura de uma notificação de infração pelo **MED (Mecanismo Especial de Devolução)**.\n3. Forneça a chave Pix do golpista, o valor e o horário exato.\n4. **Anote o Protocolo.**\n\n**Como funciona:** O seu banco avisa o banco do golpista para bloquear o valor cautelarmente por 72h para análise. Se for comprovada a fraude e houver saldo, o dinheiro é devolvido.", icon: "rotate-ccw", image: "https://images.unsplash.com/photo-1616077168079-7e09a677fb2c?auto=format&fit=crop&q=80&w=800" },
+            { id: 2, title: "2. Boletim de Ocorrência", short: "Registre o B.O. online com todas as provas digitais.", description: "**O que fazer:**\n1. Acesse a **Delegacia Virtual** do seu estado (busque no Google: \"Delegacia Virtual [Nome do Estado]\") ou dirija-se a uma delegacia física.\n2. Registre a ocorrência como **Estelionato** ou Fraude Eletrônica.\n3. **Anexe provas:** Prints das conversas, comprovantes de pagamento, link do perfil do golpista e números de telefone usados.\n4. Salve o PDF do B.O. finalizado. Ele será exigido pelo banco para processos de contestação.", icon: "file-text", image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=800" },
+            { id: 3, title: "3. Proteção e Bloqueios", short: "Bloqueie contas, cartões e avise contatos.", description: "**Checklist de Segurança:**\n* **Bancos:** Peça o bloqueio preventivo dos cartões e das senhas de acesso.\n* **Senhas:** Troque imediatamente a senha do seu e-mail principal e das redes sociais.\n* **WhatsApp Roubado?** Envie um e-mail para **support@whatsapp.com** com o assunto \"Perdido/Roubado: Por favor, desative minha conta\" e o seu número (+55 DD XXXXX-XXXX) no corpo do e-mail.\n* **Avise:** Publique em outras redes que sofreu um golpe para que amigos não caiam em pedidos de dinheiro feitos em seu nome.", icon: "lock", image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=800" }
+        ];
+
+        // --- FUNCTIONS ---
+
+        function init() {
+            lucide.createIcons();
+            document.getElementById('year').textContent = new Date().getFullYear();
+            
+            renderRanking();
+            renderScams('Todos');
+            renderPrevention();
+            renderEmergency();
+            renderCategoryFilters();
+        }
+
+        // Navigation
+        function navigateTo(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-section').forEach(el => el.classList.add('hidden'));
+            
+            // Show target page
+            const target = document.getElementById('page-' + pageId);
+            if (target) target.classList.remove('hidden');
+            
+            // Update active nav button
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.dataset.page === pageId) {
+                    btn.classList.add('bg-zinc-800', 'text-white');
+                    btn.classList.remove('text-zinc-400');
+                } else {
+                    btn.classList.remove('bg-zinc-800', 'text-white');
+                    btn.classList.add('text-zinc-400');
+                }
+            });
+
+            // Close mobile menu if open
+            document.getElementById('mobile-menu').classList.add('hidden');
+            
+            window.scrollTo(0, 0);
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        // Rendering Functions
+        
+        function renderRanking() {
+            const container = document.getElementById('ranking-list');
+            container.innerHTML = ranking.map(item => `
+                <div class="bg-zinc-900 p-4 rounded-lg border border-zinc-800 flex items-center hover:border-zinc-600 transition group">
+                    <div class="bg-black w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg text-white border border-zinc-700 mr-3 shrink-0 group-hover:border-blue-500 transition-colors">
+                        #${item.position}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-bold text-sm text-white truncate pr-2" title="${item.name}">${item.name}</h3>
+                        <div class="w-full bg-zinc-800 rounded-full h-1.5 mt-2">
+                            <div class="bg-white h-1.5 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.4)] group-hover:bg-blue-500 transition-colors" style="width: ${parseFloat(item.percentage) > 10 ? item.percentage : '10%'}"></div>
+                        </div>
+                    </div>
+                    <span class="ml-3 font-mono font-bold text-xs text-zinc-400 group-hover:text-white transition-colors">${item.percentage}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderCategoryFilters() {
+            const container = document.getElementById('category-filters');
+            container.innerHTML = categories.map(cat => `
+                <button 
+                    onclick="renderScams('${cat}')" 
+                    class="filter-btn px-4 py-2 rounded-full text-sm font-medium transition-all ${cat === 'Todos' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 border border-zinc-800'}"
+                >${cat}</button>
+            `).join('');
+        }
+
+        function renderScams(category) {
+            // Update filter styles
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if(btn.textContent === category) {
+                    btn.className = "filter-btn px-4 py-2 rounded-full text-sm font-medium transition-all bg-blue-600 text-white shadow-lg shadow-blue-900/50";
+                } else {
+                    btn.className = "filter-btn px-4 py-2 rounded-full text-sm font-medium transition-all bg-zinc-900 text-zinc-400 hover:bg-zinc-800 border border-zinc-800";
+                }
+            });
+
+            const filtered = category === 'Todos' ? scams : scams.filter(s => s.category === category);
+            const container = document.getElementById('scams-grid');
+            
+            container.innerHTML = filtered.map(scam => `
+                <div onclick="openScamModal(${scam.id})" class="group cursor-pointer bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 hover:border-zinc-500 hover:shadow-2xl hover:shadow-zinc-900/50 hover:scale-[1.02] transition-all duration-300 relative">
+                    <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i data-lucide="maximize-2" class="w-5 h-5 text-zinc-500"></i>
+                    </div>
+                    <div class="p-6 h-full flex flex-col">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-3 bg-black rounded-lg border border-zinc-800">
+                                <i data-lucide="${scam.icon}" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-bold uppercase border 
+                                ${scam.riskLevel === 'Altíssimo' ? 'bg-red-900/30 text-red-400 border-red-900' : 
+                                  scam.riskLevel === 'Alto' ? 'bg-orange-900/30 text-orange-400 border-orange-900' : 
+                                  scam.riskLevel === 'Médio' ? 'bg-yellow-900/30 text-yellow-400 border-yellow-900' : 'bg-blue-900/30 text-blue-400 border-blue-900'}">
+                                ${scam.riskLevel}
+                            </span>
+                        </div>
+                        <span class="text-xs text-zinc-500 mb-1 font-mono uppercase tracking-widest">${scam.category}</span>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">${scam.title}</h3>
+                        <p class="text-zinc-400 mb-4 text-sm leading-relaxed flex-grow line-clamp-3">${scam.description}</p>
+                        <div class="mt-auto pt-4 border-t border-zinc-800/50">
+                            <span class="text-xs text-zinc-500 font-medium uppercase tracking-wider group-hover:text-zinc-300 transition-colors">Clique para ver detalhes</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function renderPrevention() {
+            const container = document.getElementById('prevention-grid');
+            container.innerHTML = preventionTips.map(tip => `
+                <div onclick="openPreventionModal(${tip.id})" class="flex items-start gap-4 p-4 bg-black border border-zinc-800 rounded-lg hover:border-blue-500 transition group cursor-pointer relative">
+                    <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i data-lucide="info" class="w-4 h-4 text-blue-500"></i>
+                    </div>
+                    <i data-lucide="check-circle" class="w-6 h-6 text-green-500 shrink-0 mt-1 group-hover:text-green-400"></i>
+                    <div>
+                        <p class="text-lg font-medium text-zinc-300 group-hover:text-white transition-colors">${tip.short}</p>
+                        <p class="text-xs text-zinc-600 mt-2 group-hover:text-blue-400 transition-colors uppercase font-bold tracking-wider">Clique para saber mais</p>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function renderEmergency() {
+            const container = document.getElementById('emergency-grid');
+            container.innerHTML = emergencySteps.map(step => `
+                <div onclick="openEmergencyModal(${step.id})" class="bg-zinc-900/80 backdrop-blur-md p-6 rounded-lg border border-zinc-800 hover:border-red-500/50 hover:bg-zinc-800/90 transition flex flex-col cursor-pointer group relative overflow-hidden">
+                    <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i data-lucide="info" class="w-5 h-5 text-red-500"></i>
+                    </div>
+                    <div class="flex items-center gap-2 font-bold text-red-500 mb-3">
+                        <h3 class="text-xl">${step.title}</h3>
+                    </div>
+                    <p class="text-zinc-400 text-sm mb-4 flex-grow group-hover:text-zinc-300 transition-colors">${step.short}</p>
+                    <div class="p-3 bg-red-900/20 rounded border border-red-900/30 text-xs text-red-300 font-medium text-center uppercase tracking-wide group-hover:bg-red-600 group-hover:text-white transition-all">Ver Instruções</div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // --- MODAL FUNCTIONS ---
+
+        function openScamModal(id) {
+            const scam = scams.find(s => s.id === id);
+            const modalContent = document.getElementById('modal-content');
+            
+            modalContent.innerHTML = `
+                <div class="p-8 pb-0">
+                    <div class="flex flex-col sm:flex-row items-start gap-6">
+                        <div class="p-4 bg-black rounded-xl border border-zinc-800 shrink-0">
+                            <i data-lucide="${scam.icon}" class="w-12 h-12 text-white"></i>
+                        </div>
+                        <div>
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase border ${scam.riskLevel === 'Altíssimo' ? 'bg-red-900/30 text-red-400 border-red-900' : scam.riskLevel === 'Alto' ? 'bg-orange-900/30 text-orange-400 border-orange-900' : 'bg-blue-900/30 text-blue-400 border-blue-900'}">Nível de Risco: ${scam.riskLevel}</span>
+                                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase border bg-zinc-800 border-zinc-700 text-zinc-300">${scam.category}</span>
+                            </div>
+                            <h3 class="text-2xl sm:text-3xl font-bold text-white leading-tight">${scam.title}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-8 space-y-8">
+                    <div>
+                        <h4 class="flex items-center gap-2 text-zinc-400 text-sm font-bold uppercase tracking-wider mb-3"><i data-lucide="alert-circle" class="w-4 h-4"></i> Como funciona o golpe</h4>
+                        <p class="text-zinc-200 text-lg leading-relaxed">${scam.description}</p>
+                    </div>
+                    <div class="bg-blue-950/30 p-6 rounded-xl border border-blue-900/50">
+                        <h4 class="flex items-center gap-2 font-bold text-blue-400 mb-3 text-lg"><i data-lucide="shield" class="w-5 h-5"></i> Como se Proteger</h4>
+                        <p class="text-blue-100/80 text-lg leading-relaxed">${scam.prevention}</p>
+                    </div>
+                </div>
+                <div class="bg-black/50 px-8 py-4 border-t border-zinc-800 flex justify-end">
+                    <button onclick="closeModal()" class="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg font-medium transition">Fechar</button>
+                </div>
+            `;
+            lucide.createIcons();
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function openPreventionModal(id) {
+            const tip = preventionTips.find(t => t.id === id);
+            const modalContent = document.getElementById('modal-content');
+            
+            modalContent.innerHTML = `
+                <div class="p-8">
+                    <div class="w-12 h-12 bg-green-900/30 rounded-full flex items-center justify-center mb-4 border border-green-900/50">
+                        <i data-lucide="${tip.icon}" class="w-6 h-6 text-green-500"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">${tip.title}</h3>
+                    <p class="text-zinc-300 text-lg leading-relaxed">${tip.description}</p>
+                    <div class="mt-8 flex justify-end">
+                        <button onclick="closeModal()" class="px-6 py-2 bg-green-700 hover:bg-green-600 text-white rounded-lg font-medium transition">Entendi</button>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function openEmergencyModal(id) {
+            const step = emergencySteps.find(s => s.id === id);
+            const modalContent = document.getElementById('modal-content');
+            
+            // Convert newline to <br> and bold markdown to <strong> for basic formatting
+            const formattedDesc = step.description
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+
+            modalContent.innerHTML = `
+                <div class="h-48 w-full relative">
+                    <img src="${step.image}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-zinc-900 to-transparent"></div>
+                    <div class="absolute bottom-4 left-6 flex items-center gap-3">
+                        <div class="p-2 bg-red-600 rounded-lg shadow-lg">
+                            <i data-lucide="${step.icon}" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white shadow-black drop-shadow-md">${step.title}</h3>
+                    </div>
+                </div>
+                <div class="p-8 pt-4">
+                    <div class="bg-black/30 p-6 rounded-xl border border-zinc-800">
+                        <p class="text-zinc-300 text-base leading-relaxed">${formattedDesc}</p>
+                    </div>
+                    <div class="mt-6 flex justify-center">
+                        <button onclick="closeModal()" class="w-full sm:w-auto px-8 py-3 bg-red-700 hover:bg-red-600 text-white rounded-lg font-bold transition shadow-lg shadow-red-900/30 flex items-center justify-center gap-2">
+                            Entendi, vou agir agora
+                        </button>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        // Initialize
+        window.onload = init;
+
+    </script>
+</body>
+</html>
