@@ -1,45 +1,164 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>DIRPINFSA :: ACCESS</title>
-<script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COORPIN :: ACCESS CONTROL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'JetBrains+Mono', monospace;
+            background-color: #050505;
+            color: #22c55e;
+            overflow: hidden;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 4px;
+            background: rgba(34, 197, 94, 0.05);
+            position: absolute;
+            top: 0;
+            z-index: 10;
+            animation: scan 6s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .glow-text {
+            text-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
+        }
+
+        .terminal-container {
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            background: linear-gradient(180deg, rgba(10, 10, 10, 1) 0%, rgba(0, 0, 0, 1) 100%);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(34, 197, 94, 0.05);
+        }
+
+        .cyber-input {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .cyber-input:focus {
+            border-color: #22c55e;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+            outline: none;
+        }
+
+        .glitch-hover:hover {
+            animation: glitch 0.2s infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+    </style>
 </head>
+<body class="flex items-center justify-center min-h-screen p-6">
+    <div class="scanline"></div>
 
-<body class="bg-black text-green-400 flex items-center justify-center min-h-screen font-mono">
+    <div class="max-w-md w-full terminal-container p-10 rounded-sm relative border-t-4 border-t-green-500">
+        <!-- Logo/Header -->
+        <div class="text-center mb-10">
+            <div class="inline-block mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-green-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.312-2.841.872-4.084" />
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold tracking-[0.3em] text-green-500 glow-text mb-2 uppercase">COORPIN</h1>
+            <p class="text-[11px] text-green-900 uppercase tracking-[0.1em] font-bold">Coloque a senha da sua Coorpin</p>
+        </div>
 
-<div class="border border-green-500 p-8 w-full max-w-md text-center">
-  <h1 class="text-2xl mb-6 tracking-widest">DIRPINFSA</h1>
+        <!-- Terminal Status -->
+        <div class="mb-6 bg-green-500/5 p-3 border-l-2 border-green-500 text-[11px] space-y-1">
+            <div class="flex justify-between">
+                <span>STATUS:</span>
+                <span class="animate-pulse">WAITING_ENCRYPTION_KEY</span>
+            </div>
+            <div class="flex justify-between">
+                <span>DATE:</span>
+                <span id="terminal-date">---</span>
+            </div>
+        </div>
 
-  <input id="senha" type="password" placeholder="ACCESS KEY"
-    class="w-full p-3 bg-black border border-green-500 text-center mb-4">
+        <!-- Form -->
+        <div class="space-y-4">
+            <div class="relative">
+                <input type="password" id="senha" placeholder="SENHA DE ACESSO" 
+                    class="w-full cyber-input p-4 text-center text-green-400 placeholder:text-green-900 tracking-[0.8em] text-xl rounded-sm">
+            </div>
 
-  <button onclick="login()"
-    class="w-full p-3 bg-green-500 text-black font-bold">
-    ENTER
-  </button>
+            <button onclick="login()" 
+                class="glitch-hover w-full py-4 bg-green-500 text-black font-bold uppercase tracking-widest hover:bg-green-400 transition-all active:scale-[0.97]">
+                ENTRAR NO SISTEMA
+            </button>
 
-  <p id="erro" class="text-red-500 mt-4"></p>
-</div>
+            <p id="erro" class="text-red-500 text-[11px] text-center font-bold h-4 tracking-tighter uppercase"></p>
+        </div>
 
-<script>
-function login() {
-  const senha = document.getElementById("senha").value.toLowerCase();
+        <!-- Footer Decoration -->
+        <div class="mt-10 pt-4 border-t border-green-500/10 flex justify-between items-center text-[9px] text-green-900 uppercase">
+            <span>Auth v4.2.0</span>
+            <span>0xCOORPIN_SECURE</span>
+        </div>
+    </div>
 
-  const rotas = {
-    "feira123": "feira/index.html",
-    "serrinha123": "serrinha/index.html",
-    "alagoinhas123": "alagoinhas/index.html",
-    "saj123": "saj/index.html"
-  };
+    <script>
+        // Atualiza a data do terminal
+        document.getElementById('terminal-date').textContent = new Date().toLocaleDateString('pt-BR');
 
-  if (rotas[senha]) {
-    window.location.href = rotas[senha];
-  } else {
-    document.getElementById("erro").innerText = "ACCESS DENIED";
-  }
-}
-</script>
+        // Atalho para o Enter
+        document.getElementById('senha').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') login();
+        });
 
+        function login() {
+            const senhaInput = document.getElementById("senha");
+            const senha = senhaInput.value.toLowerCase().trim();
+            const erroEl = document.getElementById("erro");
+
+const rotas = {
+  "feira123": "feira/index.html",
+  "serrinha123": "serrinha/index.html",
+  "alagoinhas123": "alagoinhas/index.html",
+  "santoamaro123": "santoamaro/index.html",
+  "santoantonio123": "santoantonio/index.html"
+};
+
+
+            // Limpa erro anterior
+            erroEl.innerText = "";
+
+            if (rotas[senha]) {
+                erroEl.classList.replace('text-red-500', 'text-green-500');
+                erroEl.innerText = "ACESSO CONCEDIDO. REDIRECIONANDO...";
+                
+                setTimeout(() => {
+                    window.location.href = rotas[senha];
+                }, 800);
+            } else {
+                erroEl.innerText = "ACESSO NEGADO - CREDENCIAIS INVÁLIDAS";
+                senhaInput.value = "";
+                
+                // Efeito visual de erro
+                const container = document.querySelector('.terminal-container');
+                container.classList.add('animate-bounce');
+                setTimeout(() => container.classList.remove('animate-bounce'), 300);
+            }
+        }
+    </script>
 </body>
 </html>
