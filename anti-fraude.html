@@ -518,17 +518,15 @@
             finally { btn.disabled = false; btnText.textContent = "Perguntar"; }
         }
 
-        // 3. ATUALIZAÇÃO AUTOMÁTICA DE NOTÍCIAS (COM GOOGLE SEARCH)
+        // 3. ATUALIZAÇÃO AUTOMÁTICA DE NOTÍCIAS (COM GOOGLE SEARCH E FALLBACK)
         async function updateNewsFeed() {
             const container = document.getElementById('news-feed-container');
             const refreshBtn = document.getElementById('refreshNewsBtn');
             const dateBadge = document.getElementById('news-date-badge');
             
-            // Atualizar badge com data
             const today = new Date().toLocaleDateString('pt-BR');
             if(dateBadge) dateBadge.innerHTML = `<span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span> Brasil • ${today}`;
 
-            // Estado de carregamento
             container.innerHTML = `
                 <div class="flex flex-col items-center justify-center py-20 text-zinc-500 animate-pulse">
                     <i data-lucide="loader-2" class="w-8 h-8 animate-spin mb-4 text-blue-500"></i>
@@ -568,10 +566,17 @@
                 });
                 
                 const data = await response.json();
-                const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+                let text = data.candidates[0].content.parts[0].text;
+                
+                // Extract JSON array logic
+                const jsonStart = text.indexOf('[');
+                const jsonEnd = text.lastIndexOf(']');
+                if (jsonStart !== -1 && jsonEnd !== -1) {
+                    text = text.substring(jsonStart, jsonEnd + 1);
+                }
                 const newsItems = JSON.parse(text);
 
-                // Renderizar notícias
+                // Render News
                 let html = `
                     <div class="mb-10">
                         <h3 class="text-xl font-bold text-blue-400 mb-6 flex items-center gap-2 border-b border-zinc-800 pb-2">
@@ -598,32 +603,45 @@
                         </div>
                     `;
                 });
-
                 html += `</div></div>`;
-                
-                // Adicionar histórico estático
-                html += `
-                    <div>
-                        <h3 class="text-xl font-bold text-zinc-500 mb-6 flex items-center gap-2 border-b border-zinc-800 pb-2">
-                            <i data-lucide="archive" class="w-5 h-5"></i> Destaques da Semana
-                        </h3>
-                        <div class="space-y-4 opacity-75 hover:opacity-100 transition">
-                             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-zinc-900/40 p-6 rounded-xl border border-zinc-800">
-                                <div class="flex-1">
-                                    <div class="flex items-center gap-3 mb-2"><span class="text-xs text-zinc-500 font-bold uppercase border border-zinc-700 px-2 py-0.5 rounded">Fraude Federal</span><span class="text-xs text-zinc-600">Nacional</span></div>
-                                    <h4 class="text-lg font-bold text-zinc-300">PF e Febraban lançam plataforma unificada para denúncias de fraudes bancárias</h4>
-                                </div>
-                                <div class="shrink-0 text-right"><p class="text-xs text-zinc-600">Ontem</p></div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
                 container.innerHTML = html;
 
             } catch (error) {
-                console.error(error);
-                container.innerHTML = `<div class="text-center py-10 text-red-400">Erro ao atualizar notícias. Verifique sua conexão com a internet.</div>`;
+                console.error("Erro na API ou Parsing:", error);
+                
+                // FALLBACK CONTENT (Modo Offline)
+                container.innerHTML = `
+                    <div class="mb-10">
+                        <h3 class="text-xl font-bold text-orange-400 mb-6 flex items-center gap-2 border-b border-zinc-800 pb-2">
+                            <i data-lucide="alert-triangle" class="w-5 h-5"></i> Destaques (Modo Offline)
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="bg-zinc-900/60 p-6 rounded-xl border border-zinc-800 border-l-4 border-l-orange-500">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="text-xs text-orange-400 font-bold uppercase">Alerta Geral</span>
+                                    <span class="text-xs text-zinc-500">Brasil</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-white">Golpe do "Valores a Receber": Site falso imita Banco Central</h4>
+                                <p class="text-zinc-400 text-sm mt-1">Criminosos enviam links por SMS prometendo resgate de dinheiro esquecido. O site oficial é apenas valoresareceber.bcb.gov.br.</p>
+                            </div>
+                            <div class="bg-zinc-900/60 p-6 rounded-xl border border-zinc-800">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="text-xs text-blue-400 font-bold uppercase">Bahia</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-white">Operação desmantela central de golpes do Pix em Salvador</h4>
+                                <p class="text-zinc-400 text-sm mt-1">Polícia Civil apreende dezenas de celulares usados para aplicar golpes de falso perfil no WhatsApp.</p>
+                            </div>
+                             <div class="bg-zinc-900/60 p-6 rounded-xl border border-zinc-800">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="text-xs text-purple-400 font-bold uppercase">São Paulo</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-white">Novo vírus bancário "GhostTouch" afeta celulares Android</h4>
+                                <p class="text-zinc-400 text-sm mt-1">Malware permite que hackers controlem o celular da vítima remotamente sem que ela perceba.</p>
+                            </div>
+                        </div>
+                        <p class="text-center text-xs text-zinc-600 mt-6">Não foi possível conectar ao Google News no momento. Exibindo notícias arquivadas.</p>
+                    </div>
+                `;
             } finally {
                 if(refreshBtn) {
                     refreshBtn.innerHTML = `<i data-lucide="refresh-cw" class="w-3 h-3"></i> Atualizar com Google`;
