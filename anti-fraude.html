@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -257,15 +256,15 @@
                         <i data-lucide="newspaper" class="w-8 h-8 text-zinc-100"></i>
                         <h2 class="text-3xl font-bold text-white text-center">Notícias e Atualizações</h2>
                     </div>
-                    <span class="inline-flex items-center rounded-md bg-blue-900/50 px-2 py-1 text-xs font-medium text-blue-300 ring-1 ring-inset ring-blue-700/50 ml-2 animate-pulse">
-                        <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span> Brasil - Atualização Diária
+                    <span id="news-date-badge" class="inline-flex items-center rounded-md bg-blue-900/30 px-3 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-700/50 ml-2 animate-pulse">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span> Google News • Brasil
                     </span>
                 </div>
 
                 <!-- Botão de Atualização Manual -->
                 <div class="flex justify-end mb-4">
                     <button onclick="updateNewsFeed()" id="refreshNewsBtn" class="text-xs text-zinc-500 hover:text-blue-400 flex items-center gap-1 transition">
-                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> Atualizar agora
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> Atualizar com Google
                     </button>
                 </div>
 
@@ -273,8 +272,8 @@
                     <!-- Feed de Notícias (Gerado por JS) -->
                     <div id="news-feed-container">
                         <div class="flex flex-col items-center justify-center py-20 text-zinc-500">
-                            <div class="loading-dots text-2xl font-bold mb-2">Carregando Notícias Nacionais</div>
-                            <p class="text-sm">Consultando fontes de segurança pelo Brasil...</p>
+                            <div class="loading-dots text-2xl font-bold mb-2">Conectando ao Google News</div>
+                            <p class="text-sm">Buscando ocorrências reais em todo o Brasil...</p>
                         </div>
                     </div>
                 </div>
@@ -519,40 +518,40 @@
             finally { btn.disabled = false; btnText.textContent = "Perguntar"; }
         }
 
-        // 3. ATUALIZAÇÃO AUTOMÁTICA DE NOTÍCIAS
+        // 3. ATUALIZAÇÃO AUTOMÁTICA DE NOTÍCIAS (COM GOOGLE SEARCH)
         async function updateNewsFeed() {
             const container = document.getElementById('news-feed-container');
             const refreshBtn = document.getElementById('refreshNewsBtn');
+            const dateBadge = document.getElementById('news-date-badge');
             
+            // Atualizar badge com data
+            const today = new Date().toLocaleDateString('pt-BR');
+            if(dateBadge) dateBadge.innerHTML = `<span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span> Brasil • ${today}`;
+
             // Estado de carregamento
             container.innerHTML = `
                 <div class="flex flex-col items-center justify-center py-20 text-zinc-500 animate-pulse">
                     <i data-lucide="loader-2" class="w-8 h-8 animate-spin mb-4 text-blue-500"></i>
-                    <p class="text-sm">Consultando fontes de segurança pelo Brasil...</p>
+                    <p class="text-sm">Buscando notícias reais no Google News...</p>
                 </div>
             `;
             if(refreshBtn) {
-                refreshBtn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Atualizando...`;
+                refreshBtn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Buscando...`;
                 refreshBtn.disabled = true;
             }
             lucide.createIcons();
 
             const prompt = `
-                Atue como um agregador de notícias de segurança cibernética no Brasil.
-                Hoje é ${new Date().toLocaleDateString('pt-BR')}.
-                Gere um array JSON com 4 notícias fictícias mas extremamente realistas (contexto de 2026) sobre:
-                - Golpes digitais (Pix, WhatsApp, IA deepfake)
-                - Estelionato e fraudes financeiras em nível nacional
-                - Ocorrências em diferentes estados do Brasil.
-                
+                Busque no Google Search por notícias reais e recentes (últimos 3 dias) sobre "golpe", "estelionato", "fraude eletrônica" e "prisão estelionatário" no Brasil.
+                Com base nos resultados da busca, gere um array JSON com 4 notícias reais encontradas.
                 Estrutura do JSON:
                 [
                   {
-                    "titulo": "Manchete chamativa",
-                    "data": "Dia/Mês",
-                    "local": "Estado/Cidade",
-                    "tipo": "Tipo do Golpe",
-                    "resumo": "Resumo de 1 frase."
+                    "titulo": "Manchete real (max 15 palavras)",
+                    "data": "Data aproximada (ex: Hoje, Ontem, 04/02)",
+                    "local": "Estado/Cidade mencionado",
+                    "tipo": "Categoria (ex: Pix, WhatsApp, Cartão)",
+                    "resumo": "Resumo informativo de 1 frase."
                   }
                 ]
                 Retorne APENAS o JSON puro, sem markdown.
@@ -562,7 +561,10 @@
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    body: JSON.stringify({ 
+                        contents: [{ parts: [{ text: prompt }] }],
+                        tools: [{ google_search: {} }]
+                    })
                 });
                 
                 const data = await response.json();
@@ -573,7 +575,7 @@
                 let html = `
                     <div class="mb-10">
                         <h3 class="text-xl font-bold text-blue-400 mb-6 flex items-center gap-2 border-b border-zinc-800 pb-2">
-                            <i data-lucide="zap" class="w-5 h-5"></i> Últimas do Plantão (Brasil)
+                            <i data-lucide="zap" class="w-5 h-5"></i> Plantão Nacional (Google News)
                         </h3>
                         <div class="space-y-4">
                 `;
@@ -584,14 +586,14 @@
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
                                     <span class="text-xs text-blue-400 font-bold uppercase bg-blue-950/30 px-2 py-0.5 rounded border border-blue-900/50">${item.tipo}</span>
-                                    <span class="text-xs text-zinc-500 font-mono">${item.local}</span>
+                                    <span class="text-xs text-zinc-500 font-mono flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> ${item.local}</span>
                                 </div>
                                 <h4 class="text-lg font-bold text-white group-hover:text-blue-300 transition-colors">${item.titulo}</h4>
                                 <p class="text-zinc-400 text-sm mt-1 line-clamp-2">${item.resumo}</p>
                             </div>
                             <div class="shrink-0 text-right sm:text-right w-full sm:w-auto border-t sm:border-t-0 border-zinc-800 pt-3 sm:pt-0">
                                 <p class="text-xs text-zinc-500 font-medium">${item.data}</p>
-                                <span class="text-xs text-blue-500 group-hover:underline flex items-center gap-1 justify-end mt-1">Ver detalhes <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
+                                <span class="text-xs text-blue-500 group-hover:underline flex items-center gap-1 justify-end mt-1">Ver no Google <i data-lucide="external-link" class="w-3 h-3"></i></span>
                             </div>
                         </div>
                     `;
@@ -599,19 +601,19 @@
 
                 html += `</div></div>`;
                 
-                // Adicionar histórico estático (Janeiro)
+                // Adicionar histórico estático
                 html += `
                     <div>
                         <h3 class="text-xl font-bold text-zinc-500 mb-6 flex items-center gap-2 border-b border-zinc-800 pb-2">
-                            <i data-lucide="archive" class="w-5 h-5"></i> Arquivo: Janeiro 2026
+                            <i data-lucide="archive" class="w-5 h-5"></i> Destaques da Semana
                         </h3>
                         <div class="space-y-4 opacity-75 hover:opacity-100 transition">
                              <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-zinc-900/40 p-6 rounded-xl border border-zinc-800">
                                 <div class="flex-1">
-                                    <div class="flex items-center gap-3 mb-2"><span class="text-xs text-zinc-500 font-bold uppercase border border-zinc-700 px-2 py-0.5 rounded">Fraude Federal</span><span class="text-xs text-zinc-600">Brasil</span></div>
-                                    <h4 class="text-lg font-bold text-zinc-300">PF desarticula quadrilha internacional de clonagem de cartões em SP e RJ</h4>
+                                    <div class="flex items-center gap-3 mb-2"><span class="text-xs text-zinc-500 font-bold uppercase border border-zinc-700 px-2 py-0.5 rounded">Fraude Federal</span><span class="text-xs text-zinc-600">Nacional</span></div>
+                                    <h4 class="text-lg font-bold text-zinc-300">PF e Febraban lançam plataforma unificada para denúncias de fraudes bancárias</h4>
                                 </div>
-                                <div class="shrink-0 text-right"><p class="text-xs text-zinc-600">29 Jan 2026</p></div>
+                                <div class="shrink-0 text-right"><p class="text-xs text-zinc-600">Ontem</p></div>
                             </div>
                         </div>
                     </div>
@@ -621,10 +623,10 @@
 
             } catch (error) {
                 console.error(error);
-                container.innerHTML = `<div class="text-center py-10 text-red-400">Erro ao atualizar notícias. Verifique sua conexão.</div>`;
+                container.innerHTML = `<div class="text-center py-10 text-red-400">Erro ao atualizar notícias. Verifique sua conexão com a internet.</div>`;
             } finally {
                 if(refreshBtn) {
-                    refreshBtn.innerHTML = `<i data-lucide="refresh-cw" class="w-3 h-3"></i> Atualizar agora`;
+                    refreshBtn.innerHTML = `<i data-lucide="refresh-cw" class="w-3 h-3"></i> Atualizar com Google`;
                     refreshBtn.disabled = false;
                 }
                 lucide.createIcons();
