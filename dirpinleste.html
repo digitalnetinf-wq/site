@@ -12,7 +12,7 @@
         :root {
             --police-blue: #1d4ed8;
             --police-dark: #0f172a;
-            --police-black: #000000; /* Alterado para preto puro */
+            --police-black: #000000;
         }
 
         body { 
@@ -23,22 +23,22 @@
         }
 
         .police-gradient { 
-            background: radial-gradient(circle at top right, #1e293b 0%, #000000 100%); /* Gradiente ajustado para preto */
+            background: radial-gradient(circle at top right, #1e293b 0%, #000000 100%);
         }
 
         /* Efeito de Vidro */
         .glass {
-            background: rgba(0, 0, 0, 0.8); /* Vidro mais escuro */
+            background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         /* Lógica de Abas */
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: slideUp 0.5s ease-out; }
+        .tab-content.active { display: block; animation: fadeIn 0.5s ease-out; }
         
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -49,20 +49,10 @@
         }
 
         /* Scrollbar Personalizada */
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #000000; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
-
-        .shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-            background-size: 200% 100%;
-            animation: shimmer 2s infinite;
-        }
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
 
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
@@ -76,17 +66,6 @@
             50% { transform: translateY(-20px); }
         }
 
-        /* Animação de Erro */
-        .shake {
-            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-        }
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
-        }
-        
         /* Loading Spinner */
         .loader {
             border: 3px solid rgba(255,255,255,0.1);
@@ -101,54 +80,19 @@
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <!-- Modal de Login (Área Restrita) -->
-    <div id="login-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/95 backdrop-blur-xl">
-        <div class="w-full max-w-md bg-neutral-900 border border-white/10 rounded-3xl p-8 relative overflow-hidden shadow-2xl">
-            <!-- Background Glow -->
-            <div class="absolute -top-20 -right-20 w-40 h-40 bg-blue-600/20 blur-[60px] rounded-full"></div>
-            <div class="absolute -bottom-20 -left-20 w-40 h-40 bg-red-600/10 blur-[60px] rounded-full"></div>
-
-            <button onclick="closeLoginModal()" class="absolute top-6 right-6 text-neutral-500 hover:text-white transition">
-                <i data-lucide="x" class="w-6 h-6"></i>
+    <div id="image-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 bg-black/95 backdrop-blur-xl" onclick="closeImageModal()">
+        <div class="relative w-full max-w-7xl h-full max-h-[90vh] flex flex-col items-center justify-center" onclick="event.stopPropagation()">
+            <button onclick="closeImageModal()" class="absolute -top-12 right-0 md:top-4 md:right-4 p-2 text-white hover:text-blue-400 transition bg-black/50 rounded-full z-50">
+                <i data-lucide="x" class="w-8 h-8"></i>
             </button>
-
-            <div class="text-center mb-10">
-                <div class="w-16 h-16 bg-blue-600/10 rounded-2xl flex items-center justify-center text-blue-500 mx-auto mb-6 border border-blue-500/20">
-                    <i data-lucide="lock" class="w-8 h-8"></i>
-                </div>
-                <h3 class="text-2xl font-black text-white uppercase tracking-tighter mb-2">Área Restrita</h3>
-                <p class="text-neutral-500 text-sm font-medium">Acesso exclusivo para servidores autorizados da DIRPIN Leste.</p>
+            <h3 id="image-modal-title" class="text-white font-bold text-xl mb-4 uppercase tracking-widest text-center">Visualização do Mapa</h3>
+            <div class="w-full h-full bg-neutral-900 rounded-xl overflow-hidden flex items-center justify-center border border-white/10">
+                <img id="image-modal-src" src="" alt="Mapa Ampliado" class="max-w-full max-h-full object-contain">
             </div>
-
-            <form onsubmit="handleLogin(event)" class="space-y-6 relative z-10">
-                <div class="space-y-2">
-                    <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-widest ml-1">Senha de Acesso</label>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-neutral-500 group-focus-within:text-blue-500 transition-colors">
-                            <i data-lucide="key" class="w-5 h-5"></i>
-                        </div>
-                        <input type="password" id="password-input" class="w-full bg-black/40 border border-white/10 text-white text-sm rounded-xl py-4 pl-12 pr-4 outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder-neutral-700" placeholder="Digite sua credencial..." required>
-                    </div>
-                </div>
-                
-                <div id="login-error" class="hidden items-center gap-2 text-red-400 text-xs font-bold bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
-                    <span>Credencial inválida. Acesso negado.</span>
-                </div>
-
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 group">
-                    <span>ACESSAR SISTEMA</span>
-                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-                </button>
-            </form>
-            
-            <div class="mt-8 text-center">
-                <p class="text-[10px] text-neutral-600 uppercase tracking-widest">Monitoramento de IP Ativo</p>
-            </div>
+            <p class="text-neutral-500 text-xs mt-4">Clique fora da imagem para fechar</p>
         </div>
     </div>
 
-    <!-- Modal de Informação Global -->
     <div id="info-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/90 backdrop-blur-md" onclick="closeInfoModal()">
         <div class="bg-neutral-900 border border-white/10 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl transition-all scale-95 opacity-0" id="modal-box" onclick="event.stopPropagation()">
             <div class="relative p-6 md:p-10">
@@ -174,8 +118,7 @@
         </div>
     </div>
 
-    <!-- Navegação Superior -->
-    <nav class="glass sticky top-0 z-50 border-b border-white/5" id="main-nav">
+    <nav class="glass sticky top-0 z-50" id="main-nav">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
                 <div class="flex items-center gap-3 cursor-pointer group" onclick="showTab('inicio')">
@@ -190,21 +133,19 @@
                 
                 <div class="hidden lg:flex items-center space-x-1" id="public-links">
                     <button onclick="showTab('inicio')" class="nav-link px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-white transition active" id="btn-inicio">Início</button>
-                    <button onclick="showTab('conheca')" class="nav-link px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-white transition" id="btn-conheca">Conheça a DIRPIN</button>
+                    <button onclick="showTab('conheca')" class="nav-link px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-white transition" id="btn-conheca">Conheça</button>
                     <button onclick="showTab('atuacao')" class="nav-link px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-white transition" id="btn-atuacao">Área de Atuação</button>
                     <button onclick="showTab('noticias')" class="nav-link px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-white transition" id="btn-noticias">Notícias</button>
                     <button onclick="showTab('ascom')" class="nav-link px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-white transition" id="btn-ascom">ASCOM</button>
-                    <button onclick="showTab('telefones')" class="nav-link px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-white transition" id="btn-telefones">Telefones</button>
+                    <button onclick="showTab('telefones')" class="nav-link px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-white transition" id="btn-telefones">Contatos</button>
                     <button onclick="showTab('institucional')" class="nav-link px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-white transition" id="btn-institucional">Institucional</button>
+                    
+                    <a href="https://dirpinfsa.com.br/" target="_blank" class="ml-2 px-4 py-2 text-sm font-bold text-white bg-neutral-800 border border-white/10 hover:bg-blue-600 hover:border-blue-500 rounded-lg transition flex items-center gap-2 group shadow-lg">
+                        <i data-lucide="lock" class="w-3 h-3 text-neutral-400 group-hover:text-white transition"></i> Área Restrita
+                    </a>
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <button onclick="openLoginModal()" id="btn-login-trigger" class="hidden sm:flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-5 py-2.5 rounded-xl text-xs font-bold border border-white/10 transition">
-                        <i data-lucide="lock" class="w-3.5 h-3.5"></i> ÁREA RESTRITA
-                    </button>
-                    <button onclick="logoutRestricted()" id="btn-logout" class="hidden items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-5 py-2.5 rounded-xl text-xs font-bold border border-red-500/20 transition">
-                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i> SAIR
-                    </button>
                     <button class="lg:hidden p-2 text-neutral-400" onclick="toggleMobileMenu()">
                         <i data-lucide="menu" id="menu-icon"></i>
                     </button>
@@ -212,26 +153,25 @@
             </div>
         </div>
 
-        <div id="mobile-menu" class="hidden absolute top-20 inset-x-0 bg-black border-b border-white/10 p-6 flex-col gap-4 lg:hidden">
+        <div id="mobile-menu" class="hidden absolute top-20 inset-x-0 bg-black border-b border-white/10 p-6 flex-col gap-4 lg:hidden shadow-2xl">
             <button onclick="showTab('inicio'); toggleMobileMenu()" class="text-left py-3 px-4 rounded-xl hover:bg-white/5 text-neutral-300 font-bold">Início</button>
             <button onclick="showTab('conheca'); toggleMobileMenu()" class="text-left py-3 px-4 rounded-xl hover:bg-white/5 text-neutral-300 font-bold">Conheça a DIRPIN</button>
             <button onclick="showTab('atuacao'); toggleMobileMenu()" class="text-left py-3 px-4 rounded-xl hover:bg-white/5 text-neutral-300 font-bold">Área de Atuação</button>
             <button onclick="showTab('noticias'); toggleMobileMenu()" class="text-left py-3 px-4 rounded-xl hover:bg-white/5 text-neutral-300 font-bold">Notícias</button>
             <button onclick="showTab('ascom'); toggleMobileMenu()" class="text-left py-3 px-4 rounded-xl hover:bg-white/5 text-neutral-300 font-bold">ASCOM</button>
-            <button onclick="showTab('telefones'); toggleMobileMenu()" class="text-left py-3 px-4 rounded-xl hover:bg-white/5 text-neutral-300 font-bold">Telefones</button>
+            <button onclick="showTab('telefones'); toggleMobileMenu()" class="text-left py-3 px-4 rounded-xl hover:bg-white/5 text-neutral-300 font-bold">Contatos</button>
             <button onclick="showTab('institucional'); toggleMobileMenu()" class="text-left py-3 px-4 rounded-xl hover:bg-white/5 text-neutral-300 font-bold">Institucional</button>
-            <div class="h-px bg-white/10 my-2"></div>
-            <button onclick="openLoginModal(); toggleMobileMenu()" class="text-left py-3 px-4 rounded-xl bg-blue-600/10 text-blue-400 font-bold flex items-center gap-2">
-                <i data-lucide="lock" class="w-4 h-4"></i> Área Restrita
-            </button>
+            
+            <a href="https://dirpinfsa.com.br/" target="_blank" class="text-left py-3 px-4 rounded-xl bg-neutral-900 border border-white/5 hover:bg-blue-900/30 text-white font-bold flex items-center gap-3">
+                <i data-lucide="lock" class="w-4 h-4 text-blue-400"></i> Área Restrita
+            </a>
         </div>
     </nav>
 
     <main class="flex-grow">
         
-        <!-- SEÇÃO: INÍCIO -->
         <section id="tab-inicio" class="tab-content active">
-            <header class="police-gradient py-24 md:py-40 relative overflow-hidden">
+            <header class="police-gradient py-24 md:py-32 relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-1/2 h-full bg-blue-600/5 blur-[120px] rounded-full"></div>
                 <div class="absolute -bottom-24 -left-24 w-1/2 h-full bg-red-600/5 blur-[120px] rounded-full"></div>
 
@@ -248,16 +188,80 @@
                             <h2 class="text-5xl md:text-8xl font-black text-white mb-8 tracking-tighter leading-none">
                                 Segurança com <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-200">Inteligência.</span>
                             </h2>
-                            <p class="text-lg md:text-xl text-neutral-400 mb-12 leading-relaxed font-medium">
+                            <p class="text-lg md:text-xl text-neutral-400 mb-8 leading-relaxed font-medium">
                                 Portal oficial da Diretoria Integrada de Polícia Civil - Área Leste. Atuando com 5 Coordenadorias Regionais para servir e proteger o cidadão baiano através da gestão de delegacias territoriais.
                             </p>
-                            <div class="flex flex-wrap gap-4">
+                            <div class="flex flex-wrap gap-4 mb-12">
                                 <button onclick="showTab('conheca')" class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black transition-all shadow-xl shadow-blue-900/20 flex items-center gap-3">
                                     <i data-lucide="info" class="w-5 h-5"></i> CONHEÇA A DIRPIN
                                 </button>
                                 <button onclick="showTab('telefones')" class="px-8 py-4 bg-neutral-800 hover:bg-neutral-700 text-white rounded-2xl font-black transition flex items-center gap-3 border border-white/5">
-                                    <i data-lucide="phone" class="w-5 h-5"></i> CONTACTOS ÚTEIS
+                                    <i data-lucide="phone" class="w-5 h-5"></i> CONTATOS ÚTEIS
                                 </button>
+                            </div>
+
+                            <div class="pt-8 border-t border-white/5">
+                                <h3 class="text-white font-bold text-sm uppercase tracking-widest mb-6 flex items-center gap-2">
+                                    <i data-lucide="map" class="w-4 h-4 text-blue-500"></i> Mapas Operacionais
+                                </h3>
+                                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                    
+                                    <div onclick="openImageModal('MAPA COORDENADORIAS.jpeg', 'Mapa Geral - Coordenadorias')" class="group cursor-pointer">
+                                        <div class="aspect-square bg-neutral-800 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden relative group-hover:border-blue-500/50 transition">
+                                            <i data-lucide="maximize-2" class="w-6 h-6 text-neutral-500 group-hover:text-blue-500 z-10 transition"></i>
+                                            <img src="MAPA COORDENADORIAS.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition duration-500 hover:scale-105" alt="Mapa Geral" onerror="this.style.opacity='0'">
+                                        </div>
+                                        <p class="text-[10px] text-neutral-400 mt-2 font-bold text-center group-hover:text-white transition">Geral COORPINs</p>
+                                    </div>
+
+                                    <div onclick="openImageModal('MAPA COORDENADORIAS MUNICIPIOS.jpeg', 'Mapa Geral - Municípios')" class="group cursor-pointer">
+                                        <div class="aspect-square bg-neutral-800 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden relative group-hover:border-blue-500/50 transition">
+                                            <i data-lucide="maximize-2" class="w-6 h-6 text-neutral-500 group-hover:text-blue-500 z-10 transition"></i>
+                                            <img src="MAPA COORDENADORIAS MUNICIPIOS.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition duration-500 hover:scale-105" alt="Mapa Municípios" onerror="this.style.opacity='0'">
+                                        </div>
+                                        <p class="text-[10px] text-neutral-400 mt-2 font-bold text-center group-hover:text-white transition">Geral Municípios</p>
+                                    </div>
+
+                                    <div onclick="openImageModal('MAPA_FEIRA DE SANTANA.jpeg', '1.ª COORPIN - Feira de Santana')" class="group cursor-pointer">
+                                        <div class="aspect-square bg-neutral-800 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden relative group-hover:border-yellow-500/50 transition">
+                                            <i data-lucide="maximize-2" class="w-6 h-6 text-neutral-500 group-hover:text-yellow-500 z-10 transition"></i>
+                                            <img src="MAPA_FEIRA DE SANTANA.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition duration-500 hover:scale-105" alt="1ª COORPIN" onerror="this.style.opacity='0'">
+                                        </div>
+                                        <p class="text-[10px] text-neutral-400 mt-2 font-bold text-center group-hover:text-white transition">1ª Feira de Santana</p>
+                                    </div>
+
+                                    <div onclick="openImageModal('MAPA_ALAGOINHAS.jpeg', '2.ª COORPIN - Alagoinhas')" class="group cursor-pointer">
+                                        <div class="aspect-square bg-neutral-800 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden relative group-hover:border-red-500/50 transition">
+                                            <i data-lucide="maximize-2" class="w-6 h-6 text-neutral-500 group-hover:text-red-500 z-10 transition"></i>
+                                            <img src="MAPA_ALAGOINHAS.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition duration-500 hover:scale-105" alt="2ª COORPIN" onerror="this.style.opacity='0'">
+                                        </div>
+                                        <p class="text-[10px] text-neutral-400 mt-2 font-bold text-center group-hover:text-white transition">2ª Alagoinhas</p>
+                                    </div>
+
+                                    <div onclick="openImageModal('MAPA_SANTO_AMARO.jpeg', '3.ª COORPIN - Santo Amaro')" class="group cursor-pointer">
+                                        <div class="aspect-square bg-neutral-800 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden relative group-hover:border-blue-400/50 transition">
+                                            <i data-lucide="maximize-2" class="w-6 h-6 text-neutral-500 group-hover:text-blue-400 z-10 transition"></i>
+                                            <img src="MAPA_SANTO_AMARO.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition duration-500 hover:scale-105" alt="3ª COORPIN" onerror="this.style.opacity='0'">
+                                        </div>
+                                        <p class="text-[10px] text-neutral-400 mt-2 font-bold text-center group-hover:text-white transition">3ª Santo Amaro</p>
+                                    </div>
+
+                                    <div onclick="openImageModal('MAPA_SANTO_ANTONIO_DE_JESUS.jpeg', '4.ª COORPIN - Santo Antônio de Jesus')" class="group cursor-pointer">
+                                        <div class="aspect-square bg-neutral-800 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden relative group-hover:border-green-500/50 transition">
+                                            <i data-lucide="maximize-2" class="w-6 h-6 text-neutral-500 group-hover:text-green-500 z-10 transition"></i>
+                                            <img src="MAPA_SANTO_ANTONIO_DE_JESUS.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition duration-500 hover:scale-105" alt="4ª COORPIN" onerror="this.style.opacity='0'">
+                                        </div>
+                                        <p class="text-[10px] text-neutral-400 mt-2 font-bold text-center group-hover:text-white transition">4ª SAJ</p>
+                                    </div>
+
+                                    <div onclick="openImageModal('MAPA_SERRINHA.jpeg', '15.ª COORPIN - Serrinha')" class="group cursor-pointer">
+                                        <div class="aspect-square bg-neutral-800 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden relative group-hover:border-orange-500/50 transition">
+                                            <i data-lucide="maximize-2" class="w-6 h-6 text-neutral-500 group-hover:text-orange-500 z-10 transition"></i>
+                                            <img src="MAPA_SERRINHA.jpeg" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-100 transition duration-500 hover:scale-105" alt="15ª COORPIN" onerror="this.style.opacity='0'">
+                                        </div>
+                                        <p class="text-[10px] text-neutral-400 mt-2 font-bold text-center group-hover:text-white transition">15ª Serrinha</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -304,7 +308,6 @@
             </div>
         </section>
 
-        <!-- SEÇÃO: CONHEÇA A DIRPIN LESTE -->
         <section id="tab-conheca" class="tab-content py-24">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="text-center mb-16">
@@ -313,7 +316,6 @@
                 </div>
 
                 <div class="grid lg:grid-cols-3 gap-12 mb-24">
-                    <!-- Coluna da Esquerda: Papel e Coordenadorias -->
                     <div class="lg:col-span-2 space-y-8">
                         <div class="glass p-8 md:p-12 rounded-[40px] border border-white/5">
                             <h3 class="text-2xl font-black text-white mb-6 uppercase tracking-tight flex items-center gap-3">
@@ -325,10 +327,8 @@
                             </div>
                         </div>
 
-                        <!-- Grid das Coordenadorias (Janelas Detalhadas) -->
                         <div class="grid md:grid-cols-2 gap-6">
                             
-                            <!-- 1ª COORPIN -->
                             <div onclick="openInfoModal('coorpin1')" class="p-6 bg-neutral-900 border border-white/5 rounded-[32px] group hover:border-blue-500/30 transition cursor-pointer">
                                 <div class="flex items-center gap-4 mb-4">
                                     <div class="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center text-blue-500 group-hover:scale-110 transition">
@@ -343,7 +343,6 @@
                                 <span class="text-[10px] text-blue-400 font-bold uppercase flex items-center gap-1 group-hover:gap-2 transition-all">Ver estrutura completa <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
                             </div>
 
-                            <!-- 2ª COORPIN -->
                             <div onclick="openInfoModal('coorpin2')" class="p-6 bg-neutral-900 border border-white/5 rounded-[32px] group hover:border-blue-500/30 transition cursor-pointer">
                                 <div class="flex items-center gap-4 mb-4">
                                     <div class="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center text-blue-500 group-hover:scale-110 transition">
@@ -358,7 +357,6 @@
                                 <span class="text-[10px] text-blue-400 font-bold uppercase flex items-center gap-1 group-hover:gap-2 transition-all">Ver estrutura completa <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
                             </div>
 
-                            <!-- 3ª COORPIN -->
                             <div onclick="openInfoModal('coorpin3')" class="p-6 bg-neutral-900 border border-white/5 rounded-[32px] group hover:border-blue-500/30 transition cursor-pointer">
                                 <div class="flex items-center gap-4 mb-4">
                                     <div class="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center text-blue-500 group-hover:scale-110 transition">
@@ -373,7 +371,6 @@
                                 <span class="text-[10px] text-blue-400 font-bold uppercase flex items-center gap-1 group-hover:gap-2 transition-all">Ver estrutura completa <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
                             </div>
 
-                            <!-- 4ª COORPIN -->
                             <div onclick="openInfoModal('coorpin4')" class="p-6 bg-neutral-900 border border-white/5 rounded-[32px] group hover:border-blue-500/30 transition cursor-pointer">
                                 <div class="flex items-center gap-4 mb-4">
                                     <div class="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center text-blue-500 group-hover:scale-110 transition">
@@ -388,7 +385,6 @@
                                 <span class="text-[10px] text-blue-400 font-bold uppercase flex items-center gap-1 group-hover:gap-2 transition-all">Ver estrutura completa <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
                             </div>
 
-                            <!-- 15ª COORPIN -->
                             <div onclick="openInfoModal('coorpin15')" class="p-6 bg-neutral-900 border border-white/5 rounded-[32px] group hover:border-blue-500/30 transition cursor-pointer md:col-span-2">
                                 <div class="flex items-center gap-4 mb-4">
                                     <div class="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center text-blue-500 group-hover:scale-110 transition">
@@ -406,7 +402,6 @@
                         </div>
                     </div>
 
-                    <!-- Coluna da Direita: Estatísticas -->
                     <div class="space-y-6">
                         <div class="glass p-8 rounded-[40px] border border-blue-500/20">
                             <h4 class="text-white font-black uppercase tracking-tight mb-6 flex items-center gap-2">
@@ -428,7 +423,6 @@
             </div>
         </section>
 
-        <!-- SEÇÃO: ÁREA DE ATUAÇÃO -->
         <section id="tab-atuacao" class="tab-content py-24 bg-black">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="text-center mb-16">
@@ -466,113 +460,147 @@
             </div>
         </section>
 
-        <!-- SEÇÃO: ÁREA RESTRITA (DASHBOARD) -->
-        <section id="tab-restrita" class="tab-content py-24">
-             <header class="max-w-7xl mx-auto px-4 mb-12">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-600/10 border border-red-500/20 text-red-400 text-[10px] font-bold uppercase tracking-widest mb-2">
-                            Acesso Administrativo
-                        </div>
-                        <h2 class="text-3xl font-black text-white uppercase tracking-tighter">Painel de Controle</h2>
-                        <p class="text-neutral-400">Bem-vindo, Administrador.</p>
-                    </div>
-                    <div class="hidden md:block">
-                        <div class="text-right">
-                             <div class="text-[10px] text-neutral-500 font-bold uppercase">Último Acesso</div>
-                             <div class="text-white font-mono text-sm" id="last-login-time">--:--</div>
-                        </div>
-                    </div>
+        <section id="tab-noticias" class="tab-content py-24">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="mb-12 border-l-4 border-blue-600 pl-6">
+                    <h2 class="text-4xl font-black text-white uppercase tracking-tighter mb-2">Notícias <span class="text-blue-600">Regionais</span></h2>
+                    <p class="text-neutral-400 text-sm font-medium">Acompanhe as últimas operações e destaques da segurança pública na região.</p>
                 </div>
-             </header>
+                
+                <div id="news-loader" class="hidden flex justify-center py-20">
+                    <div class="loader w-12 h-12 border-4 border-blue-600 border-l-transparent"></div>
+                </div>
 
-             <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                 <!-- Card 1 -->
-                 <div class="bg-neutral-900 border border-white/10 rounded-3xl p-6 hover:border-blue-500/30 transition cursor-pointer group">
-                     <div class="flex justify-between items-start mb-4">
-                         <div class="w-12 h-12 bg-blue-600/20 rounded-xl flex items-center justify-center text-blue-500 group-hover:scale-110 transition">
-                             <i data-lucide="file-text" class="w-6 h-6"></i>
-                         </div>
-                         <span class="bg-green-500/10 text-green-400 text-[10px] font-bold px-2 py-1 rounded-lg">Online</span>
-                     </div>
-                     <h3 class="text-white font-bold text-lg mb-2">Relatórios Operacionais</h3>
-                     <p class="text-neutral-500 text-xs mb-4">Acesso aos relatórios diários de ocorrências das 5 Coordenadorias.</p>
-                     <div class="w-full bg-neutral-800 h-1.5 rounded-full overflow-hidden">
-                         <div class="bg-blue-500 h-full w-3/4"></div>
-                     </div>
-                     <div class="flex justify-between mt-2 text-[10px] text-neutral-400 font-medium">
-                         <span>Atualizado hoje</span>
-                         <span>75% Concluído</span>
-                     </div>
-                 </div>
-
-                 <!-- Card 2 -->
-                 <div class="bg-neutral-900 border border-white/10 rounded-3xl p-6 hover:border-blue-500/30 transition cursor-pointer group">
-                     <div class="flex justify-between items-start mb-4">
-                         <div class="w-12 h-12 bg-purple-600/20 rounded-xl flex items-center justify-center text-purple-500 group-hover:scale-110 transition">
-                             <i data-lucide="users" class="w-6 h-6"></i>
-                         </div>
-                         <span class="bg-blue-500/10 text-blue-400 text-[10px] font-bold px-2 py-1 rounded-lg">Gestão</span>
-                     </div>
-                     <h3 class="text-white font-bold text-lg mb-2">Escala de Plantão</h3>
-                     <p class="text-neutral-500 text-xs mb-4">Gerenciamento de efetivo e escalas das unidades territoriais.</p>
-                     <button class="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-bold text-white transition">Visualizar Escala</button>
-                 </div>
-
-                 <!-- Card 3 -->
-                 <div class="bg-neutral-900 border border-white/10 rounded-3xl p-6 hover:border-blue-500/30 transition cursor-pointer group">
-                     <div class="flex justify-between items-start mb-4">
-                         <div class="w-12 h-12 bg-orange-600/20 rounded-xl flex items-center justify-center text-orange-500 group-hover:scale-110 transition">
-                             <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-                         </div>
-                         <span class="bg-orange-500/10 text-orange-400 text-[10px] font-bold px-2 py-1 rounded-lg">Crítico</span>
-                     </div>
-                     <h3 class="text-white font-bold text-lg mb-2">Alertas de Inteligência</h3>
-                     <p class="text-neutral-500 text-xs mb-4">Boletins confidenciais e mandados de prisão prioritários.</p>
-                     <div class="flex -space-x-2">
-                         <div class="w-8 h-8 rounded-full bg-neutral-700 border-2 border-neutral-900 flex items-center justify-center text-[10px] font-bold text-white">JD</div>
-                         <div class="w-8 h-8 rounded-full bg-neutral-700 border-2 border-neutral-900 flex items-center justify-center text-[10px] font-bold text-white">AS</div>
-                         <div class="w-8 h-8 rounded-full bg-neutral-800 border-2 border-neutral-900 flex items-center justify-center text-[10px] font-bold text-neutral-400">+3</div>
-                     </div>
-                 </div>
-             </div>
-             
-             <!-- NOVA SEÇÃO: ASSISTENTE DE RELATÓRIOS COM GEMINI -->
-             <div class="max-w-7xl mx-auto px-4 mt-8">
-                <div class="bg-neutral-900 border border-white/10 rounded-3xl p-8 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-4 opacity-10">
-                        <i data-lucide="bot" class="w-32 h-32 text-blue-500"></i>
+                <div id="news-grid" class="grid grid-cols-1 gap-4">
                     </div>
-                    <h3 class="text-2xl font-bold text-white mb-2 flex items-center gap-2">
-                        Assistente de Relatórios <span class="text-blue-500">Inteligente</span> ✨
-                    </h3>
-                    <p class="text-neutral-400 text-sm mb-6 max-w-2xl">
-                        Utilize nossa IA para redigir minutas de relatórios operacionais, boletins ou comunicados internos. Basta inserir os tópicos principais abaixo.
-                    </p>
+            </div>
+        </section>
+
+        <section id="tab-ascom" class="tab-content py-24">
+             <div class="max-w-7xl mx-auto px-4">
+                <div class="mb-12 border-l-4 border-yellow-500 pl-6">
+                    <h2 class="text-4xl font-black text-white uppercase tracking-tighter mb-2">Comunicação <span class="text-yellow-500">Oficial</span></h2>
+                    <p class="text-neutral-400 text-sm font-medium">Notas oficiais e comunicados da Assessoria de Comunicação da PCBA.</p>
+                </div>
+                
+                <div id="ascom-loader" class="hidden flex justify-center py-20">
+                    <div class="loader w-12 h-12 border-4 border-yellow-500 border-l-transparent"></div>
+                </div>
+
+                <div id="ascom-news-grid" class="grid grid-cols-1 gap-4">
+                      </div>
+            </div>
+        </section>
+
+        <section id="tab-telefones" class="tab-content py-24">
+             <div class="max-w-7xl mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-black text-white mb-4 uppercase tracking-tighter">Contatos <span class="text-blue-500">Úteis</span></h2>
+                    <p class="text-neutral-400">Canais de comunicação direta com as unidades regionais.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-neutral-900 border border-white/5 p-6 rounded-3xl hover:border-blue-500/50 transition group">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 bg-blue-600/10 rounded-full flex items-center justify-center text-blue-500">
+                                <i data-lucide="phone" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="text-white font-bold">1ª COORPIN</h3>
+                        </div>
+                        <p class="text-neutral-500 text-xs uppercase font-bold tracking-widest mb-1">Feira de Santana</p>
+                        <p class="text-white text-lg font-mono mb-4">(75) 3602-3500</p>
+                        <a href="tel:7536023500" class="text-blue-400 text-xs font-bold uppercase hover:underline">Ligar Agora</a>
+                    </div>
+
+                    <div class="bg-neutral-900 border border-white/5 p-6 rounded-3xl hover:border-blue-500/50 transition group">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 bg-blue-600/10 rounded-full flex items-center justify-center text-blue-500">
+                                <i data-lucide="phone" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="text-white font-bold">2ª COORPIN</h3>
+                        </div>
+                        <p class="text-neutral-500 text-xs uppercase font-bold tracking-widest mb-1">Alagoinhas</p>
+                        <p class="text-white text-lg font-mono mb-4">(75) 3423-8250</p>
+                        <a href="tel:7534238250" class="text-blue-400 text-xs font-bold uppercase hover:underline">Ligar Agora</a>
+                    </div>
+
+                    <div class="bg-neutral-900 border border-white/5 p-6 rounded-3xl hover:border-blue-500/50 transition group">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 bg-blue-600/10 rounded-full flex items-center justify-center text-blue-500">
+                                <i data-lucide="phone" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="text-white font-bold">3ª COORPIN</h3>
+                        </div>
+                        <p class="text-neutral-500 text-xs uppercase font-bold tracking-widest mb-1">Santo Amaro</p>
+                        <p class="text-white text-lg font-mono mb-4">(75) 3241-1150</p>
+                        <a href="tel:7532411150" class="text-blue-400 text-xs font-bold uppercase hover:underline">Ligar Agora</a>
+                    </div>
                     
-                    <div class="space-y-4 relative z-10">
-                        <textarea id="report-input" rows="4" class="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white text-sm focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 outline-none transition" placeholder="Ex: Operação Amanhecer, data 04/02, local Feira de Santana, apreensão de 2kg de substância análoga a cocaína, prisão de 2 suspeitos, equipe da DTE..."></textarea>
-                        
-                        <button id="btn-generate-report" onclick="generateReport()" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-bold rounded-xl transition shadow-lg shadow-blue-900/20 flex items-center gap-2">
-                            Gerar Minuta com IA ✨
-                        </button>
-
-                        <div id="output-container" class="hidden mt-6 bg-black/30 rounded-xl p-6 border border-white/5">
-                            <h4 class="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3">Resultado Gerado:</h4>
-                            <div id="report-output" class="text-neutral-300 text-sm leading-relaxed whitespace-pre-wrap font-mono"></div>
-                            <button onclick="copyToClipboard()" class="mt-4 text-xs text-blue-400 hover:text-white flex items-center gap-2 transition">
-                                <i data-lucide="copy" class="w-3 h-3"></i> Copiar Texto
-                            </button>
+                    <div class="bg-neutral-900 border border-white/5 p-6 rounded-3xl hover:border-blue-500/50 transition group">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 bg-blue-600/10 rounded-full flex items-center justify-center text-blue-500">
+                                <i data-lucide="phone" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="text-white font-bold">4ª COORPIN</h3>
                         </div>
+                        <p class="text-neutral-500 text-xs uppercase font-bold tracking-widest mb-1">Sto. Antônio de Jesus</p>
+                        <p class="text-white text-lg font-mono mb-4">(75) 3631-5000</p>
+                        <a href="tel:7536315000" class="text-blue-400 text-xs font-bold uppercase hover:underline">Ligar Agora</a>
+                    </div>
+
+                    <div class="bg-neutral-900 border border-white/5 p-6 rounded-3xl hover:border-blue-500/50 transition group">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 bg-blue-600/10 rounded-full flex items-center justify-center text-blue-500">
+                                <i data-lucide="phone" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="text-white font-bold">15ª COORPIN</h3>
+                        </div>
+                        <p class="text-neutral-500 text-xs uppercase font-bold tracking-widest mb-1">Serrinha</p>
+                        <p class="text-white text-lg font-mono mb-4">(75) 3261-7800</p>
+                        <a href="tel:7532617800" class="text-blue-400 text-xs font-bold uppercase hover:underline">Ligar Agora</a>
+                    </div>
+
+                    <div class="bg-red-600/10 border border-red-500/20 p-6 rounded-3xl hover:bg-red-600/20 transition group">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white">
+                                <i data-lucide="siren" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="text-red-500 font-bold">Emergência</h3>
+                        </div>
+                        <p class="text-red-400/60 text-xs uppercase font-bold tracking-widest mb-1">Plantão Policial</p>
+                        <p class="text-white text-lg font-mono mb-4">197 / 190</p>
+                        <a href="tel:197" class="text-red-400 text-xs font-bold uppercase hover:underline">Ligar Agora</a>
                     </div>
                 </div>
-             </div>
+            </div>
+        </section>
 
-             <div class="max-w-7xl mx-auto px-4 mt-8">
-                 <div class="p-6 rounded-3xl bg-neutral-800/50 border border-white/5 flex items-center justify-center text-neutral-500 text-sm">
-                     <i data-lucide="lock" class="w-4 h-4 mr-2"></i> Conteúdo Classificado - Apenas uso interno
-                 </div>
-             </div>
+        <section id="tab-institucional" class="tab-content py-24">
+            <div class="max-w-4xl mx-auto px-4">
+                 <div class="text-center mb-12">
+                    <h2 class="text-3xl font-black text-white mb-4 uppercase tracking-tighter">Polícia Civil da Bahia</h2>
+                    <p class="text-neutral-400">"Na defesa da sociedade, a certeza da justiça."</p>
+                </div>
+                
+                <div class="bg-neutral-900 border border-white/5 rounded-3xl p-8 md:p-12 space-y-8">
+                      <div>
+                          <h3 class="text-xl font-bold text-white mb-4">Estrutura Organizacional</h3>
+                          <p class="text-neutral-400 text-sm leading-relaxed">
+                              A Polícia Civil da Bahia é órgão do sistema de segurança pública ao qual compete, nos termos do art. 144, § 4º, da Constituição Federal, as funções de polícia judiciária e a apuração de infrações penais, exceto as militares. Subordina-se ao Governador do Estado, integrando a estrutura da Secretaria da Segurança Pública.
+                          </p>
+                      </div>
+                      <div class="h-px bg-white/5"></div>
+                      <div>
+                          <h3 class="text-xl font-bold text-white mb-4">Princípios Institucionais</h3>
+                          <ul class="space-y-3 text-neutral-400 text-sm">
+                              <li class="flex gap-3"><i data-lucide="check" class="text-blue-500 w-5 h-5"></i> <span>Hierarquia e Disciplina</span></li>
+                              <li class="flex gap-3"><i data-lucide="check" class="text-blue-500 w-5 h-5"></i> <span>Legalidade e Impessoalidade</span></li>
+                              <li class="flex gap-3"><i data-lucide="check" class="text-blue-500 w-5 h-5"></i> <span>Respeito aos Direitos Humanos</span></li>
+                              <li class="flex gap-3"><i data-lucide="check" class="text-blue-500 w-5 h-5"></i> <span>Unidade de Doutrina e de Procedimentos</span></li>
+                          </ul>
+                      </div>
+                </div>
+            </div>
         </section>
 
     </main>
@@ -815,6 +843,27 @@
             }, 300);
         }
 
+        // --- Funções de Image Modal (Lightbox) ---
+        function openImageModal(src, title) {
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('image-modal-src');
+            const modalTitle = document.getElementById('image-modal-title');
+            
+            modalImg.src = src;
+            modalTitle.textContent = title;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('image-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
         // --- Funções de Navegação e Abas ---
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -859,163 +908,8 @@
             lucide.createIcons();
         }
 
-        // --- Lógica de Área Restrita / Login ---
-
-        function openLoginModal() {
-            const modal = document.getElementById('login-modal');
-            const input = document.getElementById('password-input');
-            const error = document.getElementById('login-error');
-            
-            // Reset
-            input.value = '';
-            error.classList.remove('flex');
-            error.classList.add('hidden');
-            
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            
-            // Foco no input
-            setTimeout(() => input.focus(), 100);
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeLoginModal() {
-            const modal = document.getElementById('login-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            document.body.style.overflow = 'auto';
-        }
-
-        function handleLogin(e) {
-            e.preventDefault();
-            const password = document.getElementById('password-input').value;
-            const error = document.getElementById('login-error');
-            const modalBox = document.querySelector('#login-modal > div');
-
-            // Senha Simples para Demonstração: "admin"
-            if (password === 'admin') {
-                // Sucesso
-                closeLoginModal();
-                enterRestrictedArea();
-            } else {
-                // Erro
-                error.classList.remove('hidden');
-                error.classList.add('flex');
-                modalBox.classList.add('shake');
-                setTimeout(() => modalBox.classList.remove('shake'), 500);
-            }
-        }
-
-        function enterRestrictedArea() {
-            // Ocultar links públicos
-            document.getElementById('public-links').classList.add('hidden');
-            document.getElementById('btn-login-trigger').classList.add('hidden');
-            
-            // Mostrar botão de logout
-            document.getElementById('btn-logout').classList.remove('hidden');
-            document.getElementById('btn-logout').classList.add('flex');
-
-            // Setar hora
-            const now = new Date();
-            document.getElementById('last-login-time').innerText = now.toLocaleTimeString();
-
-            // Ativar aba restrita
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            const restrita = document.getElementById('tab-restrita');
-            restrita.classList.add('active');
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function logoutRestricted() {
-             // Mostrar links públicos
-            document.getElementById('public-links').classList.remove('hidden');
-            document.getElementById('btn-login-trigger').classList.remove('hidden');
-            
-            // Ocultar botão de logout
-            document.getElementById('btn-logout').classList.add('hidden');
-            document.getElementById('btn-logout').classList.remove('flex');
-
-            // Voltar para início
-            showTab('inicio');
-        }
-
-        // --- GEMINI AI INTEGRATION ---
-        
-        const apiKey = ""; // Chave fornecida pelo ambiente
-
-        async function generateReport() {
-            const input = document.getElementById('report-input').value;
-            const output = document.getElementById('report-output');
-            const btn = document.getElementById('btn-generate-report');
-            const container = document.getElementById('output-container');
-
-            if (!input.trim()) return;
-
-            // UI Loading state
-            btn.innerHTML = `<span class="loader w-4 h-4 border-2 border-white/20 border-l-white mr-2"></span> Gerando...`;
-            btn.disabled = true;
-            output.innerText = '';
-            container.classList.remove('hidden');
-
-            try {
-                const prompt = `Atue como um assistente da Polícia Civil da Bahia. Redija um relatório operacional formal, técnico e impessoal com base nestes dados: ${input}. O relatório deve ter cabeçalho, introdução, desenvolvimento dos fatos e conclusão. Use termos técnicos policiais adequados.`;
-
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{ text: prompt }]
-                        }]
-                    })
-                });
-
-                const data = await response.json();
-                const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Erro ao gerar o relatório. Por favor, tente novamente com mais detalhes.";
-                
-                output.innerText = text;
-            } catch (error) {
-                console.error(error);
-                output.innerText = "Erro de conexão com o serviço de inteligência artificial. Verifique sua conexão.";
-            } finally {
-                btn.innerHTML = `Gerar Minuta com IA ✨`;
-                btn.disabled = false;
-            }
-        }
-
-        function copyToClipboard() {
-            const text = document.getElementById('report-output').innerText;
-            const el = document.createElement('textarea');
-            el.value = text;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            alert('Relatório copiado para a área de transferência!');
-        }
-
         // --- SISTEMA DE NOTÍCIAS DINÂMICO ---
         
-        // Lista completa de cidades da jurisdição
-        const jurisdictionCities = [
-            "Feira de Santana", "Rafael Jambeiro", "São Gonçalo dos Campos", "Tanquinho", "Santo Estevão",
-            "Anguera", "Antônio Cardoso", "Ipecaetá", "Serra Preta", "Alagoinhas", "Acajutiba",
-            "Água Fria", "Aporá", "Araçás", "Aramari", "Cardeal da Silva", "Catu", "Conde",
-            "Crisópolis", "Entre Rios", "Esplanada", "Inhambupe", "Irará", "Itanagra", "Itapicuru",
-            "Jandaíra", "Olindina", "Ouriçangas", "Pedrão", "Rio Real", "Sátiro Dias", "Santo Amaro",
-            "Amélia Rodrigues", "Conceição da Feira", "Conceição do Jacuípe", "Coração de Maria",
-            "Saubara", "Teodoro Sampaio", "Terra Nova", "Santo Antônio de Jesus", "Amargosa", "Aratuípe",
-            "Cabaceiras do Paraguaçu", "Cachoeira", "Castro Alves", "Conceição do Almeida", "Cruz das Almas",
-            "Dom Macêdo Costa", "Elísio Medrado", "Governador Mangabeira", "Jaguaripe", "Jiquiriçá", "Laje",
-            "Maragogipe", "Muniz Ferreira", "Muritiba", "Mutuípe", "Nazaré", "Santa Terezinha", "São Felipe",
-            "São Félix", "São Miguel das Matas", "Sapeaçu", "Ubaíra", "Varzedo", "Cairú", "Camamu",
-            "Gandú", "Igrapiúna", "Itamari", "Ituberá", "Morro de São Paulo", "Nilo Peçanha", "Nova Ibiá",
-            "Piraí do Norte", "Pres. Tancredo Neves", "Taperoá", "Teolândia", "Wenceslau Guimarães"
-        ];
-
         // Fallback News (Caso a API falhe)
         const mockNews = [
             {
@@ -1110,7 +1004,7 @@
                 // Tenta buscar notícias publicadas nas últimas 24h (when:1d) relacionadas à PCBA.
                 // Obs: O Google News pode não indexar o Instagram diretamente via RSS, então buscamos a repercussão
                 // e o site oficial para garantir conteúdo "de hoje".
-                const queryTerms = `("Polícia Civil da Bahia") AND ("ASCOM" OR "Nota" OR "Oficial" OR "Bahia") when:1d`;
+                const queryTerms = `("Polícia Civil da Bahia") AND ("ASCOM" OR "Nota" OR "Oficial" OR "Bahia") when:2d`;
                 
                 const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(queryTerms)}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
                 const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
@@ -1137,7 +1031,6 @@
                             count++;
                         });
                     } else {
-                        // Se não houver notícias de HOJE (comum em fins de semana), exibe mensagem e fallback
                         throw new Error("Nenhuma notícia encontrada nas últimas 24h via RSS.");
                     }
                 } else {
@@ -1183,7 +1076,7 @@
                     ${!image ? `<i data-lucide="newspaper" class="w-12 h-12 text-white/20"></i>` : ''}
                     <div class="absolute top-4 left-4 px-2 py-1 bg-neutral-900/80 backdrop-blur-md border ${tagColor} text-[10px] font-bold uppercase rounded-lg shadow-lg">${tagLabel}</div>
                 </div>
-                <div class="flex flex-col justify-center">
+                <div class="flex flex-col justify-center w-full">
                     <div class="flex items-center gap-2 mb-3 text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
                         <span>${date}</span>
                         <span>•</span>
