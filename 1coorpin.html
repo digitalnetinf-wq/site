@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Início - 1ª COORPIN</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #000; color: #f4f4f5; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #09090b; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d97706; }
+
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .nav-active { color: #f59e0b !important; font-weight: 700 !important; }
+        
+        /* Accordion transition */
+        .details-content { transition: all 0.3s ease-in-out; overflow: hidden; }
+
+        /* Chat Widget Animations */
+        .chat-enter { animation: slideUp 0.3s ease-out forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        
+        /* News List Item Hover */
+        .news-list-item { border-bottom: 1px solid #18181b; transition: all 0.2s ease; }
+        .news-list-item:hover { background-color: #09090b; border-left: 4px solid #f59e0b; padding-left: 1.5rem; }
+    </style>
+</head>
+<body class="selection:bg-amber-500 selection:text-black overflow-x-hidden">
+
+    <!-- Navbar -->
+    <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 py-6 bg-transparent">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <!-- Logo (Reseta para Home) -->
+            <div class="flex items-center gap-3 group cursor-pointer" onclick="navigateTo('home')">
+                <div class="relative">
+                    <i data-lucide="shield" class="w-10 h-10 text-amber-500 fill-zinc-900 group-hover:animate-pulse"></i>
+                    <div class="absolute inset-0 bg-amber-500 blur-lg opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tighter text-white uppercase">1ª COORPIN</h1>
+                    <p class="text-[10px] text-amber-500 tracking-widest uppercase font-semibold">Feira de Santana</p>
+                </div>
+            </div>
+
+            <!-- Desktop Menu -->
+            <div class="hidden lg:flex items-center gap-6">
+                <!-- Botão Início Explícito -->
+                <button onclick="navigateTo('home')" class="nav-link text-xs font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wide cursor-pointer" data-page="home">Início</button>
+                
+                <button onclick="navigateTo('estrutura')" class="nav-link text-xs font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wide cursor-pointer" data-page="estrutura">Estrutura</button>
+                <button onclick="navigateTo('atuacao')" class="nav-link text-xs font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wide cursor-pointer" data-page="atuacao">Área de Atuação</button>
+                <button onclick="navigateTo('servicos')" class="nav-link text-xs font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wide cursor-pointer" data-page="servicos">Serviços</button>
+                <button onclick="navigateTo('ascom')" class="nav-link text-xs font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wide cursor-pointer" data-page="ascom">ASCOM</button>
+                <button onclick="navigateTo('noticias')" class="nav-link text-xs font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wide cursor-pointer" data-page="noticias">Notícias</button>
+                <button onclick="navigateTo('telefones')" class="nav-link text-xs font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wide cursor-pointer" data-page="telefones">Telefones</button>
+                <button onclick="navigateTo('ajudaia')" class="nav-link text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-1 cursor-pointer" data-page="ajudaia">
+                    <i data-lucide="sparkles" class="w-3 h-3"></i> Atendimento IA
+                </button>
+                
+                <button class="bg-amber-600 hover:bg-amber-500 text-black px-4 py-2 rounded-sm font-black text-[10px] transition-all transform hover:scale-105 flex items-center gap-2 uppercase cursor-pointer">
+                    <i data-lucide="alert-triangle" class="w-3 h-3"></i> DISQUE 181
+                </button>
+            </div>
+
+            <!-- Mobile Toggle -->
+            <button class="lg:hidden text-zinc-300 hover:text-white" onclick="toggleMobileMenu()">
+                <i data-lucide="menu" class="w-7 h-7"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 z-40 bg-zinc-950 hidden flex-col items-center justify-center gap-8 lg:hidden">
+        <button onclick="mobileNavigate('home')" class="text-2xl font-bold text-zinc-300 hover:text-amber-500 tracking-tighter">Início</button>
+        <button onclick="mobileNavigate('estrutura')" class="text-2xl font-bold text-zinc-300 hover:text-amber-500 tracking-tighter">Estrutura</button>
+        <button onclick="mobileNavigate('atuacao')" class="text-2xl font-bold text-zinc-300 hover:text-amber-500 tracking-tighter">Área de Atuação</button>
+        <button onclick="mobileNavigate('servicos')" class="text-2xl font-bold text-zinc-300 hover:text-amber-500 tracking-tighter">Serviços</button>
+        <button onclick="mobileNavigate('ascom')" class="text-2xl font-bold text-zinc-300 hover:text-amber-500 tracking-tighter">ASCOM</button>
+        <button onclick="mobileNavigate('noticias')" class="text-2xl font-bold text-zinc-300 hover:text-amber-500 tracking-tighter">Notícias</button>
+        <button onclick="mobileNavigate('telefones')" class="text-2xl font-bold text-zinc-300 hover:text-amber-500 tracking-tighter">Telefones</button>
+        <button onclick="mobileNavigate('ajudaia')" class="text-2xl font-bold text-amber-500 hover:text-amber-400 tracking-tighter flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5"></i> Atendimento IA</button>
+        
+        <button class="absolute top-6 right-6 text-zinc-400 hover:text-white" onclick="toggleMobileMenu()">
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </button>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
+    <main id="main-content">
+        <!-- Content inject by JS -->
+    </main>
+
+    <!-- GEMINI CHAT WIDGET -->
+    <div id="gemini-chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
+        <div id="chat-window" class="bg-zinc-900 border border-zinc-700 rounded-2xl w-80 md:w-96 h-[500px] shadow-2xl mb-4 hidden pointer-events-auto flex flex-col overflow-hidden chat-enter">
+            <div class="bg-gradient-to-r from-zinc-900 to-zinc-800 p-4 border-b border-zinc-700 flex justify-between items-center relative">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span class="font-bold text-white text-sm">Assistente 1ª COORPIN ✨</span>
+                </div>
+                <!-- Botão de Fechar (X) -->
+                <button onclick="toggleChat()" class="text-zinc-300 hover:text-white hover:bg-red-600 p-2 rounded-full transition-all flex items-center justify-center" aria-label="Fechar">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4 bg-black/50">
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center flex-shrink-0 text-black font-bold text-xs"><i data-lucide="bot" class="w-5 h-5"></i></div>
+                    <div class="bg-zinc-800 p-3 rounded-lg rounded-tl-none text-sm text-zinc-200 border border-zinc-700">
+                        Olá! Sou o assistente virtual da Polícia Civil em Feira de Santana. Como posso ajudar você hoje? 
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 bg-zinc-900 border-t border-zinc-800">
+                <div class="relative">
+                    <input type="text" id="chat-input" placeholder="Digite sua dúvida..." class="w-full bg-black border border-zinc-700 text-white rounded-full py-2 pl-4 pr-10 focus:outline-none focus:border-amber-500 text-sm" onkeypress="handleChatKey(event)">
+                    <button onclick="sendUserMessage()" class="absolute right-2 top-1/2 -translate-y-1/2 text-amber-500 hover:text-white p-1">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="toggleChat()" class="pointer-events-auto bg-amber-600 hover:bg-amber-500 text-black p-4 rounded-full shadow-lg shadow-amber-900/20 transform hover:scale-110 transition-all flex items-center gap-2 group">
+            <i data-lucide="message-square" class="w-6 h-6"></i>
+            <span class="font-bold text-sm hidden group-hover:block transition-all">Atendimento IA ✨</span>
+        </button>
+    </div>
+
+    <!-- TEMPLATES -->
+    
+    <!-- HOME PAGE TEMPLATE -->
+    <template id="tmpl-home">
+        <header class="relative h-screen flex items-center justify-center overflow-hidden fade-in">
+            <div class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-30" style="background-image: url('https://images.unsplash.com/photo-1543165365-07232fe12224?q=80&w=2070&auto=format&fit=crop');"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent z-10"></div>
+            <div class="absolute inset-0 z-20"><canvas id="particle-canvas"></canvas></div>
+
+            <div class="relative z-30 container mx-auto px-6 text-center mt-10">
+                <div class="inline-block mb-4 px-3 py-1 border border-amber-500/30 bg-amber-500/10 rounded-full">
+                    <span class="text-amber-400 text-xs font-bold tracking-[0.2em] uppercase">Polícia Civil da Bahia</span>
+                </div>
+                <h1 class="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tighter leading-tight">
+                    SERVIR E <br />
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-700">PROTEGER</span>
+                </h1>
+                <p class="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                    A 1ª Coordenadoria Regional de Polícia do Interior atua com inteligência e precisão no combate ao crime em Feira de Santana e região.
+                </p>
+                
+                <div class="flex flex-col md:flex-row gap-4 justify-center">
+                    <button onclick="navigateTo('servicos')" class="group relative px-8 py-4 bg-zinc-100 hover:bg-white text-black font-bold transition-all overflow-hidden rounded-sm cursor-pointer">
+                        <span class="relative z-10 flex items-center gap-2">
+                            ACESSAR SERVIÇOS <i data-lucide="external-link" class="w-4 h-4"></i>
+                        </span>
+                    </button>
+                    <!-- Botão Site Oficial -->
+                    <a href="https://www.ba.gov.br/" target="_blank" class="px-8 py-4 border border-zinc-700 hover:border-amber-500 text-zinc-300 hover:text-amber-500 font-bold transition-all rounded-sm flex items-center justify-center gap-2 uppercase cursor-pointer">
+                        <i data-lucide="globe" class="w-4 h-4"></i> Site Oficial
+                    </a>
+                    <button onclick="navigateTo('estrutura')" class="px-8 py-4 border border-zinc-700 hover:border-amber-500 text-zinc-300 hover:text-amber-500 font-bold transition-all rounded-sm flex items-center justify-center gap-2 cursor-pointer">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i> ESTRUTURA
+                    </button>
+                </div>
+
+                <!-- Stats Block -->
+                <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center border-t border-zinc-800/50 pt-8">
+                    <div>
+                        <span class="block text-4xl font-black text-white count-up" data-target="24">0</span>
+                        <span class="text-xs text-amber-500 font-bold uppercase tracking-widest">Horas Plantão</span>
+                    </div>
+                    <div>
+                        <span class="block text-4xl font-black text-white count-up" data-target="100">0</span>
+                        <span class="text-xs text-amber-500 font-bold uppercase tracking-widest">Cobertura</span>
+                    </div>
+                    <div>
+                        <span class="block text-4xl font-black text-white count-up" data-target="18">0</span>
+                        <span class="text-xs text-amber-500 font-bold uppercase tracking-widest">Municípios</span>
+                    </div>
+                    <div>
+                        <span class="block text-4xl font-black text-white count-up" data-target="98">0</span>
+                        <span class="text-xs text-amber-500 font-bold uppercase tracking-widest">Resolução</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Área de Informações Institucionais -->
+        <section class="bg-black py-12 border-b border-zinc-800 relative z-30 -mt-20 fade-in">
+             <div class="container mx-auto px-6">
+                <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                    <div class="p-6 bg-zinc-900/80 backdrop-blur border border-zinc-800 rounded-xl hover:border-amber-500/30 transition-all text-center">
+                        <i data-lucide="map-pin" class="w-8 h-8 text-amber-500 mx-auto mb-3"></i>
+                        <h3 class="text-white font-bold uppercase text-sm mb-1">Sede Administrativa</h3>
+                        <p class="text-zinc-400 text-xs">Complexo Policial do Sobradinho<br>R. Landulfo Alves, s/n</p>
+                    </div>
+                    <div class="p-6 bg-zinc-900/80 backdrop-blur border border-zinc-800 rounded-xl hover:border-amber-500/30 transition-all text-center">
+                        <i data-lucide="clock" class="w-8 h-8 text-amber-500 mx-auto mb-3"></i>
+                        <h3 class="text-white font-bold uppercase text-sm mb-1">Funcionamento</h3>
+                        <p class="text-zinc-400 text-xs">Plantão: 24 Horas<br>Admin: 08h às 18h</p>
+                    </div>
+                    <div class="p-6 bg-zinc-900/80 backdrop-blur border border-zinc-800 rounded-xl hover:border-amber-500/30 transition-all text-center">
+                        <i data-lucide="phone" class="w-8 h-8 text-amber-500 mx-auto mb-3"></i>
+                        <h3 class="text-white font-bold uppercase text-sm mb-1">Contato Geral</h3>
+                        <p class="text-zinc-400 text-xs">(75) 3602-3500<br>Emergência: 190</p>
+                    </div>
+                </div>
+             </div>
+        </section>
+    </template>
+
+    <!-- STRUCTURE PAGE TEMPLATE -->
+    <template id="tmpl-estrutura">
+        <section class="py-32 bg-black min-h-screen fade-in">
+            <div class="container mx-auto px-6">
+                <div class="max-w-4xl mx-auto">
+                    <div>
+                        <span class="text-amber-500 font-bold tracking-widest text-xs uppercase mb-2 block">Jurisdição & Unidades</span>
+                        <h2 class="text-4xl font-bold text-white mb-6">Estrutura Operacional <br/>Feira de Santana</h2>
+                        <p class="text-zinc-400 mb-12 leading-relaxed">
+                            A 1ª COORPIN coordena as ações da Polícia Civil em Feira e municípios circunvizinhos. Clique nas janelas abaixo para ver os detalhes de cada complexo e unidade.
+                        </p>
+
+                        <div class="space-y-6">
+                            <!-- 1. Complexo do Sobradinho -->
+                            <div class="flex flex-col border border-amber-500/20 bg-zinc-900 rounded-xl shadow-[0_0_15px_rgba(245,158,11,0.1)] relative overflow-hidden group">
+                                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-600 to-transparent"></div>
+                                <!-- Header Clickable -->
+                                <div class="p-6 cursor-pointer flex justify-between items-center relative z-10 hover:bg-zinc-800/50 transition-colors" onclick="toggleDetails('det-sobradinho', this)">
+                                    <div class="flex items-center gap-4">
+                                        <div class="bg-amber-500/10 p-3 rounded-full text-amber-500 h-fit border border-amber-500/20"><i data-lucide="shield-alert" class="w-6 h-6"></i></div>
+                                        <div>
+                                            <h4 class="font-bold text-white text-lg tracking-tight">Complexo do Sobradinho</h4>
+                                            <p class="text-xs text-amber-500 font-bold uppercase tracking-widest">Base Operacional Principal</p>
+                                            <p class="text-[10px] text-zinc-400 mt-1 flex items-center gap-1 group-hover:text-zinc-300 transition-colors">
+                                                <i data-lucide="map-pin" class="w-3 h-3"></i> R. Landulfo Alves, s/n - Sobradinho, Feira de Santana - BA, 44021-405
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <i data-lucide="chevron-down" class="text-zinc-500 w-5 h-5 transform transition-transform duration-300"></i>
+                                </div>
+                                <!-- Content (Hidden by default) -->
+                                <div id="det-sobradinho" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3 p-6 pt-0 relative z-10 border-t border-zinc-800/50 mt-2">
+                                    <div class="col-span-1 md:col-span-2 p-3 rounded bg-amber-950/30 border border-amber-900/50 flex items-center gap-3 mt-4">
+                                        <i data-lucide="siren" class="w-5 h-5 text-amber-500 animate-pulse"></i>
+                                        <div>
+                                            <div class="font-bold text-sm text-white">Central de Flagantes</div>
+                                            <div class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Plantão 24h</div>
+                                        </div>
+                                    </div>
+                                    <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3">
+                                        <i data-lucide="building-2" class="w-4 h-4 text-zinc-500 mt-0.5"></i>
+                                        <div>
+                                            <div class="font-bold text-sm text-zinc-200">Sede da Coordenadoria</div>
+                                            <div class="text-[10px] text-zinc-500">Administrativo</div>
+                                        </div>
+                                    </div>
+                                    <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3">
+                                        <i data-lucide="map-pin" class="w-4 h-4 text-zinc-500 mt-0.5"></i>
+                                        <div>
+                                            <div class="font-bold text-sm text-zinc-200">2ª Delegacia</div>
+                                            <div class="text-[10px] text-zinc-500">Territorial</div>
+                                        </div>
+                                    </div>
+                                    <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3">
+                                        <i data-lucide="crosshair" class="w-4 h-4 text-zinc-500 mt-0.5"></i>
+                                        <div>
+                                            <div class="font-bold text-sm text-zinc-200">DRFR / DEIC</div>
+                                            <div class="text-[10px] text-zinc-500">Furtos e Roubos</div>
+                                        </div>
+                                    </div>
+                                    <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3">
+                                        <i data-lucide="truck" class="w-4 h-4 text-zinc-500 mt-0.5"></i>
+                                        <div>
+                                            <div class="font-bold text-sm text-zinc-200">DECARGA / DEIC</div>
+                                            <div class="text-[10px] text-zinc-500">Cargas</div>
+                                        </div>
+                                    </div>
+                                    <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3">
+                                        <i data-lucide="baby" class="w-4 h-4 text-zinc-500 mt-0.5"></i>
+                                        <div>
+                                            <div class="font-bold text-sm text-zinc-200">DAÍ / DPMCV</div>
+                                            <div class="text-[10px] text-zinc-500">Infância e Juventude</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 2. Complexo do Jomafa -->
+                            <div class="flex flex-col border border-zinc-800 bg-zinc-900/80 rounded-xl hover:border-amber-500/30 transition-all group relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-zinc-600 to-transparent"></div>
+                                <div class="p-6 cursor-pointer flex justify-between items-center relative z-10 hover:bg-zinc-800/50 transition-colors" onclick="toggleDetails('det-jomafa', this)">
+                                    <div class="flex items-center gap-4">
+                                         <div class="bg-zinc-800 p-3 rounded-full text-zinc-400 h-fit group-hover:text-amber-500 transition-colors"><i data-lucide="crosshair" class="w-6 h-6"></i></div>
+                                         <div>
+                                              <h4 class="font-bold text-white text-lg">Complexo do Jomafa</h4>
+                                              <p class="text-xs text-zinc-500 uppercase tracking-widest group-hover:text-amber-500 transition-colors">Especializadas, 1ª DT & DPT</p>
+                                              <p class="text-[10px] text-zinc-400 mt-1 flex items-center gap-1 group-hover:text-zinc-300 transition-colors">
+                                                  <i data-lucide="map-pin" class="w-3 h-3"></i> Rua Soteropolitano, Feira de Santana
+                                              </p>
+                                         </div>
+                                    </div>
+                                    <i data-lucide="chevron-down" class="text-zinc-500 w-5 h-5 transform transition-transform duration-300"></i>
+                                </div>
+                                <div id="det-jomafa" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3 p-6 pt-0 relative z-10 border-t border-zinc-800/50 mt-2">
+                                     <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3 mt-4">
+                                         <i data-lucide="map-pin" class="w-4 h-4 text-amber-600 mt-0.5"></i>
+                                         <div>
+                                              <div class="font-bold text-sm text-zinc-200">1ª Delegacia</div>
+                                              <div class="text-[10px] text-zinc-500">Territorial</div>
+                                         </div>
+                                     </div>
+                                     <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3 mt-4">
+                                         <i data-lucide="skull" class="w-4 h-4 text-amber-600 mt-0.5"></i>
+                                         <div>
+                                              <div class="font-bold text-sm text-zinc-200">DH / DHPP</div>
+                                              <div class="text-[10px] text-zinc-500">Homicídios</div>
+                                         </div>
+                                     </div>
+                                     <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3">
+                                         <i data-lucide="alert-octagon" class="w-4 h-4 text-amber-600 mt-0.5"></i>
+                                         <div>
+                                              <div class="font-bold text-sm text-zinc-200">DTE / DENARC</div>
+                                              <div class="text-[10px] text-zinc-500">Tóxicos e Entorpecentes</div>
+                                         </div>
+                                     </div>
+                                     <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3">
+                                         <i data-lucide="microscope" class="w-4 h-4 text-amber-600 mt-0.5"></i>
+                                         <div>
+                                              <div class="font-bold text-sm text-zinc-200">DPT</div>
+                                              <div class="text-[10px] text-zinc-500">Departamento de Polícia Técnica</div>
+                                         </div>
+                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. DEAM / Maria Quitéria -->
+                            <div class="flex flex-col border border-zinc-800 bg-zinc-900/80 rounded-xl hover:border-pink-500/30 transition-all group relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-700 to-transparent"></div>
+                                <div class="p-6 cursor-pointer flex justify-between items-center relative z-10 hover:bg-zinc-800/50 transition-colors" onclick="toggleDetails('det-deam', this)">
+                                    <div class="flex items-center gap-4">
+                                         <div class="bg-zinc-800 p-3 rounded-full text-zinc-400 h-fit group-hover:text-pink-500 transition-colors"><i data-lucide="heart-handshake" class="w-6 h-6"></i></div>
+                                         <div>
+                                              <h4 class="font-bold text-white text-lg">DEAM - Feira de Santana</h4>
+                                              <p class="text-xs text-zinc-500 uppercase tracking-widest group-hover:text-pink-500 transition-colors">Proteção à Mulher</p>
+                                              <p class="text-[10px] text-zinc-400 mt-1 flex items-center gap-1 group-hover:text-zinc-300 transition-colors text-left">
+                                                  <i data-lucide="map-pin" class="w-3 h-3 flex-shrink-0"></i> R. Soteropolitano, n° 38 - Jomafa - Brasília, Feira de Santana - BA, 44009-060
+                                              </p>
+                                         </div>
+                                    </div>
+                                    <i data-lucide="chevron-down" class="text-zinc-500 w-5 h-5 transform transition-transform duration-300"></i>
+                                </div>
+                                <div id="det-deam" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3 p-6 pt-0 relative z-10 border-t border-zinc-800/50 mt-2">
+                                     <div class="col-span-1 md:col-span-2 p-3 rounded bg-pink-950/10 border border-pink-900/20 flex items-center gap-3 mt-4">
+                                         <i data-lucide="shield-check" class="w-5 h-5 text-pink-600"></i>
+                                         <div>
+                                              <div class="font-bold text-sm text-white">DEAM / DPMCV</div>
+                                              <div class="text-[10px] text-pink-400 uppercase">Delegacia Especializada de Atendimento à Mulher</div>
+                                         </div>
+                                     </div>
+                                     <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3">
+                                         <i data-lucide="scale" class="w-4 h-4 text-zinc-500 mt-0.5"></i>
+                                         <div>
+                                              <div class="font-bold text-sm text-zinc-200">Medidas Protetivas</div>
+                                              <div class="text-[10px] text-zinc-500">Setor Jurídico</div>
+                                         </div>
+                                     </div>
+                                     <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3">
+                                         <i data-lucide="users" class="w-4 h-4 text-zinc-500 mt-0.5"></i>
+                                         <div>
+                                              <div class="font-bold text-sm text-zinc-200">Apoio Psicossocial</div>
+                                              <div class="text-[10px] text-zinc-500">Atendimento Humanizado</div>
+                                         </div>
+                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- 4. Posto Policial - HGCA -->
+                            <div class="flex flex-col border border-zinc-800 bg-zinc-900/80 rounded-xl hover:border-red-500/30 transition-all group relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-700 to-transparent"></div>
+                                <div class="p-6 cursor-pointer flex justify-between items-center relative z-10 hover:bg-zinc-800/50 transition-colors" onclick="toggleDetails('det-hgca', this)">
+                                    <div class="flex items-center gap-4">
+                                         <div class="bg-zinc-800 p-3 rounded-full text-zinc-400 h-fit group-hover:text-red-500 transition-colors"><i data-lucide="activity" class="w-6 h-6"></i></div>
+                                         <div>
+                                              <h4 class="font-bold text-white text-lg">Posto Policial Civil do Hospital Geral Clériston Andrade (HGCA)</h4>
+                                              <p class="text-xs text-zinc-500 uppercase tracking-widest group-hover:text-red-500 transition-colors">Plantão Hospitalar</p>
+                                              <p class="text-[10px] text-zinc-400 mt-1 flex items-center gap-1 group-hover:text-zinc-300 transition-colors text-left">
+                                                  <i data-lucide="map-pin" class="w-3 h-3 flex-shrink-0"></i> Av. Eduardo Fróes da Mota, s/n - 35º BI, Feira de Santana - BA, 44089-340
+                                              </p>
+                                         </div>
+                                    </div>
+                                    <i data-lucide="chevron-down" class="text-zinc-500 w-5 h-5 transform transition-transform duration-300"></i>
+                                </div>
+                                <div id="det-hgca" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3 p-6 pt-0 relative z-10 border-t border-zinc-800/50 mt-2">
+                                     <div class="col-span-1 md:col-span-2 p-3 rounded bg-red-950/10 border border-red-900/20 flex items-center gap-3 mt-4">
+                                         <i data-lucide="siren" class="w-5 h-5 text-red-600"></i>
+                                         <div>
+                                              <div class="font-bold text-sm text-white">Plantão 24h</div>
+                                              <div class="text-[10px] text-red-400 uppercase">Atendimento de Ocorrências Hospitalares</div>
+                                         </div>
+                                     </div>
+                                     <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3">
+                                         <i data-lucide="file-plus" class="w-4 h-4 text-zinc-500 mt-0.5"></i>
+                                         <div>
+                                              <div class="font-bold text-sm text-zinc-200">Guia de Lesões</div>
+                                              <div class="text-[10px] text-zinc-500">Emissão para Perícia</div>
+                                         </div>
+                                     </div>
+                                     <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3">
+                                         <i data-lucide="file-text" class="w-4 h-4 text-zinc-500 mt-0.5"></i>
+                                         <div>
+                                              <div class="font-bold text-sm text-zinc-200">Registro de Óbito</div>
+                                              <div class="text-[10px] text-zinc-500">Procedimentos Iniciais</div>
+                                         </div>
+                                     </div>
+                                     <!-- Adicionado Registro de BO -->
+                                     <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3">
+                                         <i data-lucide="clipboard-edit" class="w-4 h-4 text-zinc-500 mt-0.5"></i>
+                                         <div>
+                                              <div class="font-bold text-sm text-zinc-200">Registro de BO</div>
+                                              <div class="text-[10px] text-zinc-500">Boletim de Ocorrência</div>
+                                         </div>
+                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- 5. 3ª Delegacia Territorial -->
+                            <div class="flex flex-col border border-zinc-800 bg-zinc-900/80 rounded-xl hover:border-blue-500/30 transition-all group relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-700 to-transparent"></div>
+                                <div class="p-6 cursor-pointer flex justify-between items-center relative z-10 hover:bg-zinc-800/50 transition-colors" onclick="toggleDetails('det-3dt', this)">
+                                    <div class="flex items-center gap-4">
+                                         <div class="bg-zinc-800 p-3 rounded-full text-zinc-400 h-fit group-hover:text-blue-500 transition-colors"><i data-lucide="shield" class="w-6 h-6"></i></div>
+                                         <div>
+                                              <h4 class="font-bold text-white text-lg">3ª Delegacia Territorial</h4>
+                                              <p class="text-xs text-zinc-500 uppercase tracking-widest group-hover:text-blue-500 transition-colors">Delegacia de Polícia</p>
+                                              <p class="text-[10px] text-zinc-400 mt-1 flex items-center gap-1 group-hover:text-zinc-300 transition-colors text-left">
+                                                  <i data-lucide="map-pin" class="w-3 h-3 flex-shrink-0"></i> Rua Cônego Olímpio, Feira de Santana - BA
+                                              </p>
+                                         </div>
+                                    </div>
+                                    <i data-lucide="chevron-down" class="text-zinc-500 w-5 h-5 transform transition-transform duration-300"></i>
+                                </div>
+                                <div id="det-3dt" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3 p-6 pt-0 relative z-10 border-t border-zinc-800/50 mt-2">
+                                     <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3 mt-4">
+                                         <i data-lucide="file-text" class="w-4 h-4 text-zinc-500 mt-0.5"></i>
+                                         <div>
+                                              <div class="font-bold text-sm text-zinc-200">Atendimento Geral</div>
+                                              <div class="text-[10px] text-zinc-500">Registro de Ocorrências</div>
+                                         </div>
+                                     </div>
+                                     <div class="p-3 rounded bg-zinc-950/50 border border-zinc-800 hover:border-zinc-600 transition-colors flex items-start gap-3 mt-4">
+                                         <i data-lucide="search" class="w-4 h-4 text-zinc-500 mt-0.5"></i>
+                                         <div>
+                                              <div class="font-bold text-sm text-zinc-200">Investigação</div>
+                                              <div class="text-[10px] text-zinc-500">Área de Humildes</div>
+                                         </div>
+                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+    
+    <!-- ÁREA DE ATUAÇÃO PAGE -->
+    <template id="tmpl-atuacao">
+        <section class="py-32 bg-zinc-950 min-h-screen fade-in">
+            <div class="container mx-auto px-6 max-w-5xl">
+                <div class="mb-16">
+                    <span class="text-amber-500 font-bold tracking-widest text-[10px] uppercase mb-2 block">Alcance Geográfico</span>
+                    <h2 class="text-4xl font-black text-white mb-6 uppercase">Área de Atuação</h2>
+                    <p class="text-zinc-400 max-w-3xl leading-relaxed">A 1ª COORPIN exerce jurisdição sobre o município de Feira de Santana e toda a sua região metropolitana e distritos, coordenando as ações investigativas e preventivas da Polícia Civil na região.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8 mb-12">
+                    <div class="md:col-span-2 p-8 bg-zinc-900 border border-zinc-800 rounded-3xl relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform"><i data-lucide="map" class="w-40 h-40"></i></div>
+                        <h3 class="text-2xl font-black text-white mb-6 uppercase">Feira de Santana (Sede)</h3>
+                        <p class="text-zinc-400 mb-8">Responsável pelo núcleo urbano e operações estratégicas na região do Sertão e recôncavo baiano.</p>
+                        
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            <div class="p-4 bg-black/40 rounded-xl border border-zinc-800">
+                                <span class="text-amber-500 font-bold text-xs uppercase block mb-1">População</span>
+                                <span class="text-white font-black">+600 mil</span>
+                            </div>
+                            <div class="p-4 bg-black/40 rounded-xl border border-zinc-800">
+                                <span class="text-amber-500 font-bold text-xs uppercase block mb-1">Complexos</span>
+                                <span class="text-white font-black">02 Grandes</span>
+                            </div>
+                            <div class="p-4 bg-black/40 rounded-xl border border-zinc-800">
+                                <span class="text-amber-500 font-bold text-xs uppercase block mb-1">Segurança</span>
+                                <span class="text-white font-black">Regional</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-8 bg-amber-600 text-black rounded-3xl flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-2xl font-black uppercase mb-4">Distritos Cobertos</h3>
+                            <ul class="space-y-3 font-bold text-sm">
+                                <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Humildes</li>
+                                <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Maria Quitéria</li>
+                                <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Bonfim de Feira</li>
+                                <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Jaguara</li>
+                                <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Tiquaruçu</li>
+                                <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Jaíba</li>
+                                <li class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Ipuaçu</li>
+                            </ul>
+                        </div>
+                        <div class="mt-8 pt-6 border-t border-black/20">
+                            <p class="text-[10px] font-black uppercase tracking-widest">Monitoramento 24h</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nova Janela de Cidades da Jurisdição -->
+                <div class="mb-12 p-8 bg-zinc-900 border border-zinc-800 rounded-3xl group hover:border-amber-500/30 transition-all">
+                    <div class="flex items-center gap-4 mb-8">
+                        <div class="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center text-amber-500"><i data-lucide="globe" class="w-6 h-6"></i></div>
+                        <div>
+                            <h3 class="text-2xl font-black text-white uppercase">Municípios da Jurisdição</h3>
+                            <p class="text-zinc-500 text-sm">Cidades atendidas pela 1ª Coordenadoria Regional.</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="flex items-center gap-3 p-4 bg-black/20 rounded-xl border border-zinc-800/50 hover:border-amber-500/50 transition-colors">
+                            <i data-lucide="map-pin" class="text-amber-600 w-4 h-4"></i>
+                            <span class="text-zinc-300 font-bold">Feira de Santana</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-4 bg-black/20 rounded-xl border border-zinc-800/50 hover:border-amber-500/50 transition-colors">
+                            <i data-lucide="map-pin" class="text-zinc-600 w-4 h-4"></i>
+                            <span class="text-zinc-300 font-bold">Rafael Jambeiro</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-4 bg-black/20 rounded-xl border border-zinc-800/50 hover:border-amber-500/50 transition-colors">
+                            <i data-lucide="map-pin" class="text-zinc-600 w-4 h-4"></i>
+                            <span class="text-zinc-300 font-bold">São Gonçalo dos Campos</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-4 bg-black/20 rounded-xl border border-zinc-800/50 hover:border-amber-500/50 transition-colors">
+                            <i data-lucide="map-pin" class="text-zinc-600 w-4 h-4"></i>
+                            <span class="text-zinc-300 font-bold">Tanquinho</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-4 bg-black/20 rounded-xl border border-zinc-800/50 hover:border-amber-500/50 transition-colors">
+                            <i data-lucide="map-pin" class="text-zinc-600 w-4 h-4"></i>
+                            <span class="text-zinc-300 font-bold">Santo Estevão</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-4 bg-black/20 rounded-xl border border-zinc-800/50 hover:border-amber-500/50 transition-colors">
+                            <i data-lucide="map-pin" class="text-zinc-600 w-4 h-4"></i>
+                            <span class="text-zinc-300 font-bold">Anguera</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-4 bg-black/20 rounded-xl border border-zinc-800/50 hover:border-amber-500/50 transition-colors">
+                            <i data-lucide="map-pin" class="text-zinc-600 w-4 h-4"></i>
+                            <span class="text-zinc-300 font-bold">Antônio Cardoso</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-4 bg-black/20 rounded-xl border border-zinc-800/50 hover:border-amber-500/50 transition-colors">
+                            <i data-lucide="map-pin" class="text-zinc-600 w-4 h-4"></i>
+                            <span class="text-zinc-300 font-bold">Ipecaetá</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-4 bg-black/20 rounded-xl border border-zinc-800/50 hover:border-amber-500/50 transition-colors">
+                            <i data-lucide="map-pin" class="text-zinc-600 w-4 h-4"></i>
+                            <span class="text-zinc-300 font-bold">Serra Preta</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-10 bg-amber-600 rounded-3xl flex flex-col md:flex-row items-center gap-8 shadow-2xl shadow-amber-900/20">
+                    <div class="text-black">
+                        <h3 class="text-3xl font-black uppercase mb-2 leading-none tracking-tighter">Vigilância constante</h3>
+                        <p class="font-bold opacity-80">Monitoramento ativo em 100% da área urbana e distrital de Feira de Santana.</p>
+                    </div>
+                    <div class="w-px h-16 bg-black/20 hidden md:block"></div>
+                    <div class="text-black font-black text-4xl tracking-tighter">72h+</div>
+                </div>
+
+                <!-- Mapa da Jurisdição -->
+                <div class="mt-12 p-1 bg-zinc-800/50 border border-zinc-700/50 rounded-3xl overflow-hidden shadow-2xl group hover:border-amber-500/50 transition-all">
+                    <div class="relative">
+                        <img src="MAPA_FEIRA DE SANTANA.jpg" 
+                             alt="Mapa da Jurisdição 1ª COORPIN" 
+                             class="w-full h-auto object-cover hover:scale-[1.02] transition-transform duration-500 bg-white"
+                             onerror="this.src='https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83?q=80&w=2831&auto=format&fit=crop'">
+                        
+                        <!-- Overlay discreto para integrar com o tema dark se a imagem for muito clara -->
+                        <div class="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-3xl pointer-events-none"></div>
+                    </div>
+                    
+                    <div class="p-6 bg-zinc-900 border-t border-zinc-800 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i data-lucide="map" class="w-4 h-4 text-amber-500"></i> Mapa Territorial
+                            </h3>
+                            <p class="text-zinc-500 text-xs mt-1">Área de abrangência oficial da 1ª Coordenadoria</p>
+                        </div>
+                        <button class="text-xs font-bold text-amber-500 uppercase tracking-wider hover:text-white transition-colors" onclick="window.open('MAPA_FEIRA DE SANTANA.jpg', '_blank')">
+                            Expandir <i data-lucide="maximize-2" class="inline w-3 h-3 ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </template>
+
+    <!-- ASCOM PAGE -->
+    <template id="tmpl-ascom">
+        <section class="py-32 bg-black min-h-screen fade-in">
+            <div class="container mx-auto px-6 max-w-5xl">
+                <div class="mb-16 border-b border-zinc-800 pb-12 flex justify-between items-end">
+                    <div>
+                        <span class="text-amber-500 font-bold tracking-widest text-[10px] uppercase mb-2 block">Assessoria de Comunicação</span>
+                        <h2 class="text-4xl font-black text-white mb-2 uppercase">ASCOM - Polícia Civil</h2>
+                        <p class="text-zinc-400 max-w-2xl leading-relaxed">Acompanhe as notícias oficiais da Polícia Civil da Bahia.</p>
+                    </div>
+                    <button onclick="fetchAscomNews()" class="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-amber-500 hover:bg-zinc-800 hover:text-white transition-all text-[10px] font-bold uppercase tracking-widest">
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> Atualizar
+                    </button>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- News Container -->
+                    <div id="ascom-news-container" class="space-y-4">
+                        <div class="flex flex-col items-center justify-center py-20 gap-4 opacity-50">
+                            <div class="w-8 h-8 border-2 border-zinc-800 border-t-amber-500 rounded-full animate-spin"></div>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Carregando notícias...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Instagram Card -->
+                    <div class="p-8 bg-zinc-900 border border-zinc-800 rounded-3xl h-fit">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 rounded-xl flex items-center justify-center text-white"><i data-lucide="instagram"></i></div>
+                            <div>
+                                <h3 class="text-xl font-black text-white uppercase">Instagram Oficial</h3>
+                                <p class="text-zinc-500 text-xs">@policiacivilba</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-zinc-400 mb-8 leading-relaxed">Siga o perfil oficial da Polícia Civil da Bahia para atualizações em tempo real, fotos e vídeos das operações.</p>
+                        <a href="https://www.instagram.com/policiacivilba/" target="_blank" class="block w-full py-4 bg-white text-black font-black uppercase text-[10px] tracking-[0.2em] hover:bg-zinc-200 transition-all text-center rounded-lg shadow-xl">
+                            Acessar Instagram
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- SERVICES PAGE TEMPLATE -->
+    <template id="tmpl-servicos">
+        <section class="py-32 bg-zinc-950 min-h-screen relative overflow-hidden fade-in">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-amber-600/5 rounded-full blur-3xl"></div>
+            <div class="container mx-auto px-6 relative z-10">
+                <div class="mb-16">
+                    <span class="text-amber-500 font-bold tracking-widest text-xs uppercase mb-2 block">Utilidade Pública</span>
+                    <h2 class="text-4xl font-bold text-white mb-4">Serviços ao Cidadão</h2>
+                    <div class="h-1 w-20 bg-amber-500 mb-6"></div>
+                    <p class="text-zinc-400 max-w-2xl">
+                        Clique nos serviços abaixo para ver instruções, documentos necessários e canais de atendimento.
+                    </p>
+                </div>
+
+                <div class="space-y-4 max-w-4xl mx-auto">
+                    <!-- Service 1: Boletim de Ocorrência -->
+                    <div class="flex flex-col border border-zinc-800 bg-zinc-900 rounded-xl hover:border-amber-500/30 transition-all group relative overflow-hidden">
+                        <!-- Header -->
+                        <div class="p-6 cursor-pointer flex justify-between items-center relative z-10 hover:bg-zinc-800/50 transition-colors" onclick="toggleDetails('srv-bo', this)">
+                            <div class="flex items-center gap-6">
+                                <div class="w-12 h-12 bg-zinc-800 rounded-lg flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-black transition-colors">
+                                    <i data-lucide="file-text" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-white group-hover:text-amber-500 transition-colors">Boletim de Ocorrência</h3>
+                                    <p class="text-zinc-400 text-sm">Registre ocorrências online ou presencialmente.</p>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-down" class="text-zinc-500 w-5 h-5 transform transition-transform duration-300"></i>
+                        </div>
+                        <!-- Details -->
+                        <div id="srv-bo" class="hidden p-6 pt-0 border-t border-zinc-800/50 bg-black/20 text-sm">
+                            <div class="grid md:grid-cols-2 gap-8 mt-6">
+                                <!-- Coluna 1: Ocorrências Online -->
+                                <div>
+                                    <h4 class="text-green-500 font-bold mb-4 flex items-center gap-2 uppercase text-xs tracking-wider">
+                                        <i data-lucide="wifi" class="w-4 h-4"></i> Delegacia Virtual (Pode registrar)
+                                    </h4>
+                                    <ul class="space-y-3 text-zinc-400">
+                                        <li class="flex items-start gap-2">
+                                            <i data-lucide="check" class="w-3 h-3 text-green-500 mt-1 flex-shrink-0"></i>
+                                            <span><strong class="text-zinc-200">Perda ou extravio:</strong> Documentos, objetos, celular, placa de veículo.</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i data-lucide="check" class="w-3 h-3 text-green-500 mt-1 flex-shrink-0"></i>
+                                            <span><strong class="text-zinc-200">Furto simples:</strong> Subtração de objetos sem violência ou arrombamento.</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i data-lucide="check" class="w-3 h-3 text-green-500 mt-1 flex-shrink-0"></i>
+                                            <span><strong class="text-zinc-200">Estelionato/Golpes:</strong> Fraudes bancárias, Pix, redes sociais.</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i data-lucide="check" class="w-3 h-3 text-green-500 mt-1 flex-shrink-0"></i>
+                                            <span><strong class="text-zinc-200">Crimes contra a honra:</strong> Calúnia, difamação, injúria.</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i data-lucide="check" class="w-3 h-3 text-green-500 mt-1 flex-shrink-0"></i>
+                                            <span><strong class="text-zinc-200">Outros:</strong> Ameaça, Dano Simples, Acidente de trânsito (sem vítimas), Desaparecimento.</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <!-- Coluna 2: Presencial Obrigatório -->
+                                <div>
+                                    <h4 class="text-red-500 font-bold mb-4 flex items-center gap-2 uppercase text-xs tracking-wider">
+                                        <i data-lucide="user-x" class="w-4 h-4"></i> Presencial (NÃO pode online)
+                                    </h4>
+                                    <ul class="space-y-3 text-zinc-400">
+                                        <li class="flex items-start gap-2">
+                                            <i data-lucide="x" class="w-3 h-3 text-red-500 mt-1 flex-shrink-0"></i>
+                                            <span><strong class="text-zinc-200">Ocorrências com vítimas:</strong> Lesão corporal, homicídio, etc.</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i data-lucide="x" class="w-3 h-3 text-red-500 mt-1 flex-shrink-0"></i>
+                                            <span><strong class="text-zinc-200">Roubo:</strong> Subtração com violência ou ameaça direta ao indivíduo.</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i data-lucide="x" class="w-3 h-3 text-red-500 mt-1 flex-shrink-0"></i>
+                                            <span><strong class="text-zinc-200">Veículos:</strong> Furto ou roubo de veículos (exige maior averiguação).</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i data-lucide="x" class="w-3 h-3 text-red-500 mt-1 flex-shrink-0"></i>
+                                            <span><strong class="text-zinc-200">Outros:</strong> Arrombamento de locais, crimes com armas de fogo ou explosivos.</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Pontos Importantes & Ação -->
+                            <div class="mt-6 pt-6 border-t border-zinc-800">
+                                <h4 class="text-amber-500 font-bold mb-3 text-xs uppercase tracking-widest">Pontos Importantes</h4>
+                                <div class="grid md:grid-cols-3 gap-4 mb-6">
+                                    <div class="bg-zinc-950 p-3 rounded border border-zinc-800">
+                                        <p class="text-white font-bold text-xs mb-1">Validade Jurídica</p>
+                                        <p class="text-zinc-500 text-xs">O BO online tem o mesmo valor jurídico de um presencial.</p>
+                                    </div>
+                                    <div class="bg-zinc-950 p-3 rounded border border-zinc-800">
+                                        <p class="text-white font-bold text-xs mb-1">Falsa Comunicação</p>
+                                        <p class="text-zinc-500 text-xs">Registrar fatos falsos é crime previsto no Código Penal.</p>
+                                    </div>
+                                    <div class="bg-zinc-950 p-3 rounded border border-zinc-800">
+                                        <p class="text-white font-bold text-xs mb-1">Disponibilidade</p>
+                                        <p class="text-zinc-500 text-xs">Serviços via sistema Sinesp / Sistemas Estaduais.</p>
+                                    </div>
+                                </div>
+
+                                <a href="https://delegaciavirtual.sinesp.gov.br/portal/home" target="_blank" class="bg-amber-600 hover:bg-amber-500 text-black px-6 py-3 rounded-lg font-bold flex items-center justify-center gap-2 w-full md:w-auto transition-all transform hover:scale-105">
+                                    ACESSAR DELEGACIA VIRTUAL <i data-lucide="external-link" class="w-4 h-4"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 2: Denúncia Anônima -->
+                    <div class="flex flex-col border border-zinc-800 bg-zinc-900 rounded-xl hover:border-amber-500/30 transition-all group relative overflow-hidden">
+                        <!-- Header -->
+                        <div class="p-6 cursor-pointer flex justify-between items-center relative z-10 hover:bg-zinc-800/50 transition-colors" onclick="toggleDetails('srv-denuncia', this)">
+                            <div class="flex items-center gap-6">
+                                <div class="w-12 h-12 bg-zinc-800 rounded-lg flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-black transition-colors">
+                                    <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-white group-hover:text-amber-500 transition-colors">Denúncia Anônima</h3>
+                                    <p class="text-zinc-400 text-sm">Sigilo absoluto garantido pelo Estado.</p>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-down" class="text-zinc-500 w-5 h-5 transform transition-transform duration-300"></i>
+                        </div>
+                        <!-- Details -->
+                        <div id="srv-denuncia" class="hidden p-6 pt-0 border-t border-zinc-800/50 bg-black/20">
+                            <div class="flex flex-col md:flex-row gap-6 mt-4 items-center">
+                                <div class="flex-1">
+                                    <p class="text-zinc-400 text-sm mb-4 leading-relaxed">
+                                        Sua colaboração é vital para a segurança de Feira de Santana. Você não precisa se identificar. Todas as informações são verificadas pelo setor de inteligência antes de qualquer operação.
+                                    </p>
+                                    <div class="flex gap-2">
+                                        <span class="px-2 py-1 bg-zinc-800 rounded text-xs text-zinc-400 border border-zinc-700">Tráfico de Drogas</span>
+                                        <span class="px-2 py-1 bg-zinc-800 rounded text-xs text-zinc-400 border border-zinc-700">Homicídios</span>
+                                        <span class="px-2 py-1 bg-zinc-800 rounded text-xs text-zinc-400 border border-zinc-700">Violência Doméstica</span>
+                                    </div>
+                                </div>
+                                <div class="flex-shrink-0 text-center bg-zinc-950 p-4 rounded-lg border border-zinc-800">
+                                    <span class="block text-zinc-500 text-xs mb-1">Ligue Gratuitamente</span>
+                                    <span class="block text-3xl font-black text-amber-500">181</span>
+                                    <span class="block text-zinc-500 text-xs mt-1">Disponível 24h</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 3: Pessoas Desaparecidas -->
+                    <div class="flex flex-col border border-zinc-800 bg-zinc-900 rounded-xl hover:border-amber-500/30 transition-all group relative overflow-hidden">
+                        <!-- Header -->
+                        <div class="p-6 cursor-pointer flex justify-between items-center relative z-10 hover:bg-zinc-800/50 transition-colors" onclick="toggleDetails('srv-desaparecidos', this)">
+                            <div class="flex items-center gap-6">
+                                <div class="w-12 h-12 bg-zinc-800 rounded-lg flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-black transition-colors">
+                                    <i data-lucide="search" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-white group-hover:text-amber-500 transition-colors">Pessoas Desaparecidas</h3>
+                                    <p class="text-zinc-400 text-sm">Orientações imediatas e procedimentos de busca.</p>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-down" class="text-zinc-500 w-5 h-5 transform transition-transform duration-300"></i>
+                        </div>
+                        <!-- Details -->
+                        <div id="srv-desaparecidos" class="hidden p-6 pt-0 border-t border-zinc-800/50 bg-black/20">
+                            <!-- Warning -->
+                            <div class="bg-amber-900/10 border border-amber-900/30 p-4 rounded mb-6 mt-4">
+                                <p class="text-amber-500 text-sm font-bold flex items-center gap-2">
+                                    <i data-lucide="info" class="w-4 h-4"></i> NÃO É NECESSÁRIO ESPERAR 24 HORAS!
+                                </p>
+                                <p class="text-zinc-400 text-xs mt-1 pl-6">
+                                    O registro deve ser feito assim que a ausência injustificada for percebida. As primeiras horas são cruciais.
+                                </p>
+                            </div>
+
+                            <div class="space-y-6 text-sm text-zinc-300">
+                                <!-- 1. Ações Imediatas -->
+                                <div>
+                                    <h4 class="text-white font-bold mb-2 flex items-center gap-2"><div class="w-1.5 h-1.5 bg-amber-500 rounded-full"></div> 1. Ações Imediatas (Primeiras Horas)</h4>
+                                    <ul class="space-y-2 pl-4 border-l border-zinc-800 ml-1">
+                                        <li><strong class="text-zinc-200">Entre em contato:</strong> Verifique com amigos e familiares se a pessoa não avisou sobre mudança de planos.</li>
+                                        <li><strong class="text-zinc-200">Locais frequentes:</strong> Ligue ou vá a locais que a pessoa costuma frequentar (trabalho, escola, casa de amigos, academias).</li>
+                                        <li><strong class="text-zinc-200">Hospitais e IML:</strong> Verifique hospitais de emergência, UPAs e o Instituto Médico Legal (IML) da região.</li>
+                                        <li><strong class="text-zinc-200">Pertences:</strong> Procure bilhetes, agendas ou verifique computador/celular por pistas de destino ou intenções.</li>
+                                    </ul>
+                                </div>
+
+                                <!-- 2. Registro Policial -->
+                                <div>
+                                    <h4 class="text-white font-bold mb-2 flex items-center gap-2"><div class="w-1.5 h-1.5 bg-amber-500 rounded-full"></div> 2. Registro Policial (O que fazer)</h4>
+                                    <ul class="space-y-2 pl-4 border-l border-zinc-800 ml-1">
+                                        <li><strong class="text-zinc-200">Boletim de Ocorrência (BO):</strong> Vá imediatamente à delegacia mais próxima. Qualquer delegacia é obrigada a registrar.</li>
+                                        <li><strong class="text-zinc-200">BO Online:</strong> Utilize a Delegacia Virtual quando disponível.</li>
+                                        <li><strong class="text-zinc-200">Informações essenciais:</strong> Leve foto recente e clara, documentos da pessoa, descreva roupas usadas, características físicas (cicatrizes, tatuagens) e horário/local do último contato.</li>
+                                        <li><strong class="text-zinc-200">Não apague dados:</strong> Preserve mensagens e chamadas do celular da pessoa, pois podem ajudar na investigação.</li>
+                                    </ul>
+                                </div>
+
+                                <!-- 3. Ajuda Adicional -->
+                                <div>
+                                    <h4 class="text-white font-bold mb-2 flex items-center gap-2"><div class="w-1.5 h-1.5 bg-amber-500 rounded-full"></div> 3. Onde buscar ajuda adicional</h4>
+                                    <ul class="space-y-2 pl-4 border-l border-zinc-800 ml-1">
+                                        <li><strong class="text-zinc-200">Polícia Militar (190):</strong> Acione para busca imediata e rondas, especialmente se o desaparecimento for recente.</li>
+                                        <li><strong class="text-zinc-200">Conselho Tutelar:</strong> Em caso de crianças e adolescentes desaparecidos.</li>
+                                        <li><strong class="text-zinc-200">Delegacias Especializadas:</strong> Procure a DHPP ou delegacia de desaparecidos (funcionamento 24h).</li>
+                                        <li><strong class="text-zinc-200">Sinesp Cidadão:</strong> Utilize o app ou site (desaparecidos.mj.gov.br) para cadastro e verificação.</li>
+                                        <li><strong class="text-zinc-200">PRF:</strong> Ferramenta específica em desaparecidos.prf.gov.br.</li>
+                                    </ul>
+                                </div>
+
+                                <!-- 4. Divulgação -->
+                                <div>
+                                    <h4 class="text-white font-bold mb-2 flex items-center gap-2"><div class="w-1.5 h-1.5 bg-amber-500 rounded-full"></div> 4. Divulgação e Redes Sociais</h4>
+                                    <ul class="space-y-2 pl-4 border-l border-zinc-800 ml-1">
+                                        <li><strong class="text-zinc-200">Cartazes:</strong> Use a foto mais recente e, de preferência, os contatos da delegacia/polícia. Evite divulgar telefones pessoais para prevenir trotes e golpes.</li>
+                                        <li><strong class="text-zinc-200">Redes Sociais:</strong> Divulgue com cautela, priorizando informações corretas e sem espalhar pânico.</li>
+                                    </ul>
+                                </div>
+
+                                <!-- 5. Após Localização -->
+                                <div>
+                                    <h4 class="text-white font-bold mb-2 flex items-center gap-2"><div class="w-1.5 h-1.5 bg-amber-500 rounded-full"></div> 5. Após a Localização</h4>
+                                    <p class="pl-4 border-l border-zinc-800 ml-1">
+                                        <strong class="text-zinc-200">Comunicar a Polícia:</strong> É fundamental registrar o "encontrado" na delegacia onde o BO foi feito. Isso baixa a ocorrência no sistema e evita problemas legais futuros para a pessoa localizada.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 4: Veículo Roubado (NOVO) -->
+                    <div class="flex flex-col border border-zinc-800 bg-zinc-900 rounded-xl hover:border-amber-500/30 transition-all group relative overflow-hidden">
+                        <!-- Header -->
+                        <div class="p-6 cursor-pointer flex justify-between items-center relative z-10 hover:bg-zinc-800/50 transition-colors" onclick="toggleDetails('srv-veiculo', this)">
+                            <div class="flex items-center gap-6">
+                                <div class="w-12 h-12 bg-zinc-800 rounded-lg flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-black transition-colors">
+                                    <i data-lucide="car" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-white group-hover:text-amber-500 transition-colors">Veículo Roubado</h3>
+                                    <p class="text-zinc-400 text-sm">Procedimentos em caso de roubo ou furto.</p>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-down" class="text-zinc-500 w-5 h-5 transform transition-transform duration-300"></i>
+                        </div>
+                        <!-- Details -->
+                        <div id="srv-veiculo" class="hidden p-6 pt-0 border-t border-zinc-800/50 bg-black/20">
+                            <div class="space-y-6 text-sm text-zinc-300 mt-4">
+                                <!-- 1. Passo a passo -->
+                                <div>
+                                    <h4 class="text-white font-bold mb-2 flex items-center gap-2"><div class="w-1.5 h-1.5 bg-amber-500 rounded-full"></div> Passo a passo imediato:</h4>
+                                    <ul class="space-y-3 pl-4 border-l border-zinc-800 ml-1">
+                                        <li>
+                                            <strong class="text-zinc-200">1. Ligue para a Polícia (190):</strong> Comunique o roubo/furto imediatamente, informando local, hora, modelo e placa do veículo.
+                                        </li>
+                                        <li>
+                                            <strong class="text-zinc-200">2. Registro no Sistema SINAL (PRF):</strong> Acesse o site ou ligue 191 para inserir o veículo no Sistema Nacional de Alarmes, facilitando a localização em rodovias.
+                                        </li>
+                                        <li>
+                                            <strong class="text-zinc-200">3. Boletim de Ocorrência (B.O.):</strong> Vá a uma delegacia de Polícia Civil (preferencialmente DRFR) ou faça o registro online (se disponível para furto sem violência). Essencial para seguros.
+                                        </li>
+                                        <li>
+                                            <strong class="text-zinc-200">4. Acione a Seguradora:</strong> Comunique o sinistro para iniciar o processo de indenização.
+                                        </li>
+                                        <li>
+                                            <strong class="text-zinc-200">5. Bloqueio no DETRAN:</strong> Informe o roubo ao DETRAN para evitar multas, IPVA e outras cobranças indevidas.
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <!-- Docs e Pós -->
+                                <div class="grid md:grid-cols-2 gap-6 bg-zinc-950 p-4 rounded border border-zinc-800">
+                                    <div>
+                                        <h4 class="text-white font-bold mb-2 text-xs uppercase tracking-wide text-amber-500">Documentos Necessários</h4>
+                                        <ul class="space-y-1 list-disc list-inside text-zinc-400 text-xs">
+                                            <li>Documento de identidade (RG/CNH).</li>
+                                            <li>Certificado de Registro de Licenciamento de Veículo (CRLV) ou Registro do Veículo (CRV).</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-white font-bold mb-2 text-xs uppercase tracking-wide text-amber-500">Após o ocorrido</h4>
+                                        <ul class="space-y-2 text-zinc-400 text-xs">
+                                            <li><strong class="text-zinc-300">Financiamento:</strong> Entre em contato com o banco/financeira para informar o roubo.</li>
+                                            <li><strong class="text-zinc-300">IPVA:</strong> Solicite a dispensa na SEFAZ para garantir a proporcionalidade do valor.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- Recuperação -->
+                                <div class="bg-green-900/10 border border-green-900/30 p-3 rounded flex items-start gap-3">
+                                    <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-green-500 text-sm font-bold mb-1">SE O VEÍCULO FOR RECUPERADO:</p>
+                                        <p class="text-zinc-400 text-xs">Comunique imediatamente à delegacia onde o B.O. foi registrado e à seguradora para dar baixa na restrição de roubo.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service 5: Antecedentes Criminais -->
+                    <div class="flex flex-col border border-zinc-800 bg-zinc-900 rounded-xl hover:border-amber-500/30 transition-all group relative overflow-hidden">
+                         <!-- Header -->
+                         <div class="p-6 cursor-pointer flex justify-between items-center relative z-10 hover:bg-zinc-800/50 transition-colors" onclick="toggleDetails('srv-antecedentes', this)">
+                             <div class="flex items-center gap-6">
+                                 <div class="w-12 h-12 bg-zinc-800 rounded-lg flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-black transition-colors">
+                                     <i data-lucide="shield" class="w-6 h-6"></i>
+                                 </div>
+                                 <div>
+                                     <h3 class="text-xl font-bold text-white group-hover:text-amber-500 transition-colors">Antecedentes Criminais</h3>
+                                     <p class="text-zinc-400 text-sm">Emissão de atestado online.</p>
+                                 </div>
+                             </div>
+                             <i data-lucide="chevron-down" class="text-zinc-500 w-5 h-5 transform transition-transform duration-300"></i>
+                         </div>
+                         <!-- Details -->
+                         <div id="srv-antecedentes" class="hidden p-6 pt-0 border-t border-zinc-800/50 bg-black/20">
+                             <div class="mt-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                                 <p class="text-zinc-400 text-sm">
+                                     O Atestado de Antecedentes Criminais é um documento fornecido pela Secretaria da Segurança Pública (SSP-BA) que informa a existência ou não de registro criminal.
+                                 </p>
+                                 <a href="http://www1.ba.gov.br/antecedentes/solicitar_atestado.asp?erro=true" target="_blank" class="bg-zinc-100 hover:bg-white text-black px-4 py-2 rounded text-sm font-bold flex items-center gap-2 flex-shrink-0 transition-colors">
+                                     EMITIR ATESTADO <i data-lucide="printer" class="w-4 h-4"></i>
+                                 </a>
+                             </div>
+                             <p class="text-zinc-600 text-xs mt-3">*Para validade legal, o documento deve ser impresso no site oficial do Governo da Bahia.</p>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- NEWS PAGE TEMPLATE -->
+    <template id="tmpl-noticias">
+        <section class="py-32 bg-black min-h-screen fade-in">
+            <div class="container mx-auto px-6">
+                <div class="mb-12 border-b border-zinc-800 pb-8 flex justify-between items-end">
+                    <div>
+                        <h2 class="text-3xl font-bold text-white mb-4">Notícias</h2>
+                        <p class="text-zinc-400">Informações policiais e eventos das últimas 72 horas em Feira de Santana.</p>
+                    </div>
+                    <button onclick="fetchNews()" class="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-amber-500 hover:bg-zinc-800 hover:text-white transition-all text-[10px] font-bold uppercase tracking-widest">
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> Atualizar
+                    </button>
+                </div>
+
+                <!-- Bloco MOVIDO PARA CÁ (Notícias) -->
+                <div class="max-w-5xl mx-auto mb-10 p-10 bg-amber-600 rounded-3xl flex flex-col md:flex-row items-center gap-8 shadow-2xl shadow-amber-900/20">
+                    <div class="text-black">
+                        <h3 class="text-3xl font-black uppercase mb-2 leading-none tracking-tighter">Vigilância constante</h3>
+                        <p class="font-bold opacity-80">Monitoramento ativo em 100% da área urbana e distrital de Feira de Santana.</p>
+                    </div>
+                    <div class="w-px h-16 bg-black/20 hidden md:block"></div>
+                    <div class="text-black font-black text-4xl tracking-tighter">72h+</div>
+                </div>
+
+                <div class="max-w-5xl mx-auto bg-zinc-900/20 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl">
+                    <div id="news-list-container" class="divide-y divide-zinc-800">
+                        <!-- Carregamento -->
+                        <div class="flex items-center justify-center py-20">
+                            <div class="flex flex-col items-center gap-4">
+                                <div class="w-8 h-8 border-4 border-zinc-700 border-t-amber-500 rounded-full animate-spin"></div>
+                                <span class="text-zinc-500 text-sm font-medium">Sincronizando feed de notícias...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- PHONES PAGE TEMPLATE -->
+    <template id="tmpl-telefones">
+        <section class="py-32 bg-zinc-950 min-h-screen fade-in">
+            <div class="container mx-auto px-6">
+                <div class="mb-12 border-b border-zinc-800 pb-8">
+                    <span class="text-amber-500 font-bold tracking-widest text-xs uppercase mb-2 block">Canais de Comunicação</span>
+                    <h2 class="text-3xl font-bold text-white mb-4">Telefones Úteis</h2>
+                    <p class="text-zinc-400">Lista completa de contatos das unidades da 1ª COORPIN.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                    <!-- Emergência -->
+                    <div class="md:col-span-2 bg-gradient-to-r from-red-900/20 to-zinc-900 border border-red-900/30 rounded-xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div class="flex items-center gap-4">
+                            <div class="p-4 bg-red-600 rounded-full text-white">
+                                <i data-lucide="phone-call" class="w-8 h-8"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-white">Disque Denúncia</h3>
+                                <p class="text-red-400">Sigilo Absoluto • 24 Horas</p>
+                            </div>
+                        </div>
+                        <div class="text-5xl font-black text-white tracking-tighter">181</div>
+                    </div>
+
+                    <!-- Feira de Santana (Sede) -->
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-amber-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-800">
+                            <i data-lucide="map-pin" class="text-amber-500 w-6 h-6"></i>
+                            <h3 class="text-xl font-bold text-white">Feira de Santana</h3>
+                        </div>
+                        <ul class="space-y-4 text-sm">
+                            <li class="flex justify-between items-center group">
+                                <span class="text-zinc-400 group-hover:text-white transition-colors">Sede da Coordenadoria</span>
+                                <span class="font-mono text-amber-500 font-bold">(75) 3602-3544</span>
+                            </li>
+                            <li class="flex justify-between items-center group">
+                                <span class="text-zinc-400 group-hover:text-white transition-colors">Central de Flagrantes</span>
+                                <span class="font-mono text-zinc-300">(75) 3616-9565</span>
+                            </li>
+                            <li class="flex justify-between items-center group">
+                                <span class="text-zinc-400 group-hover:text-white transition-colors">1ª Delegacia (Jomafa)</span>
+                                <span class="font-mono text-zinc-300">(75) 3423-8259</span>
+                            </li>
+                            <li class="flex justify-between items-center group">
+                                <span class="text-zinc-400 group-hover:text-white transition-colors">2ª Delegacia (Sobradinho)</span>
+                                <span class="font-mono text-zinc-300">(75) 3602-9564</span>
+                            </li>
+                            <li class="flex justify-between items-center group">
+                                <span class="text-zinc-400 group-hover:text-white transition-colors">DEAM (Mulher)</span>
+                                <span class="font-mono text-zinc-300">(75) 3422-8451</span>
+                            </li>
+                            <li class="flex justify-between items-center group">
+                                <span class="text-zinc-400 group-hover:text-white transition-colors">DHPP (Homicídios)</span>
+                                <span class="font-mono text-zinc-300">(75) 3221-2976</span>
+                            </li>
+                            <li class="flex justify-between items-center group">
+                                <span class="text-zinc-400 group-hover:text-white transition-colors">DRFR (Furtos/Roubos)</span>
+                                <span class="font-mono text-zinc-300">(75) 3602-3512</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Municípios da Jurisdição -->
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-blue-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-800">
+                            <i data-lucide="globe" class="text-blue-500 w-6 h-6"></i>
+                            <h3 class="text-xl font-bold text-white">Municípios da Região</h3>
+                        </div>
+                        <ul class="space-y-3 text-sm">
+                            <li class="flex justify-between items-center border-b border-zinc-800/50 pb-2">
+                                <span class="text-zinc-400 font-bold uppercase text-xs">Rafael Jambeiro</span>
+                                <span class="font-mono text-zinc-300">(75) 3680-2129</span>
+                            </li>
+                            <li class="flex justify-between items-center border-b border-zinc-800/50 pb-2">
+                                <span class="text-zinc-400 font-bold uppercase text-xs">São Gonçalo dos Campos</span>
+                                <span class="font-mono text-zinc-300">(75) 3246-1528</span>
+                            </li>
+                            <li class="flex justify-between items-center border-b border-zinc-800/50 pb-2">
+                                <span class="text-zinc-400 font-bold uppercase text-xs">Tanquinho</span>
+                                <span class="font-mono text-zinc-300">(75) 3249-2077</span>
+                            </li>
+                            <li class="flex justify-between items-center border-b border-zinc-800/50 pb-2">
+                                <span class="text-zinc-400 font-bold uppercase text-xs">Santo Estevão</span>
+                                <span class="font-mono text-zinc-300">(75) 3245-1113</span>
+                            </li>
+                            <li class="flex justify-between items-center border-b border-zinc-800/50 pb-2">
+                                <span class="text-zinc-400 font-bold uppercase text-xs">Anguera</span>
+                                <span class="font-mono text-zinc-300">(75) 3239-2388</span>
+                            </li>
+                            <li class="flex justify-between items-center border-b border-zinc-800/50 pb-2">
+                                <span class="text-zinc-400 font-bold uppercase text-xs">Antônio Cardoso</span>
+                                <span class="font-mono text-zinc-300">(75) 3230-2188</span>
+                            </li>
+                            <li class="flex justify-between items-center border-b border-zinc-800/50 pb-2">
+                                <span class="text-zinc-400 font-bold uppercase text-xs">Ipecaetá</span>
+                                <span class="font-mono text-zinc-300">(75) 3685-2188</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span class="text-zinc-400 font-bold uppercase text-xs">Serra Preta</span>
+                                <span class="font-mono text-zinc-300">(75) 3609-1187</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Outros -->
+                    <div class="md:col-span-2 bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-colors flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="info" class="text-zinc-500 w-6 h-6"></i>
+                            <h3 class="text-lg font-bold text-white">Departamento de Polícia Técnica (DPT)</h3>
+                        </div>
+                        <span class="font-mono text-zinc-300 font-bold text-xl">(75) 3625-5020</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- AI HELP PAGE TEMPLATE -->
+    <template id="tmpl-ajudaia">
+        <section class="min-h-screen relative flex items-center justify-center overflow-hidden fade-in bg-black">
+            <!-- Background Elements -->
+            <div class="absolute inset-0 z-0">
+                <div class="absolute top-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-900/20 via-black to-black"></div>
+                <div class="absolute bottom-0 left-0 w-full h-1/2 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-zinc-800/20 via-black to-black"></div>
+            </div>
+            
+            <div class="container mx-auto px-6 relative z-10 py-32">
+                <div class="max-w-4xl mx-auto text-center">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 mb-8">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-xs font-bold text-zinc-300 uppercase tracking-widest">Inteligência Artificial Ativa</span>
+                    </div>
+                    
+                    <h1 class="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter">
+                        Como podemos <br/>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-700">ajudar você hoje?</span>
+                    </h1>
+                    
+                    <p class="text-xl text-zinc-400 mb-12 leading-relaxed max-w-2xl mx-auto">
+                        Nosso assistente virtual está treinado para orientar sobre registros de ocorrência, endereços de delegacias e procedimentos legais da 1ª COORPIN.
+                        <br><span class="text-sm text-zinc-500 mt-2 block">(Clique nos cartões abaixo para ver exemplos)</span>
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12 text-left">
+                        <!-- Card 1: Localização -->
+                        <div class="flex flex-col bg-zinc-900/50 border border-zinc-800 rounded-xl hover:border-amber-500/30 transition-all group overflow-hidden h-fit">
+                            <div class="p-6 cursor-pointer hover:bg-zinc-800/50 transition-colors" onclick="toggleDetails('help-loc', this)">
+                                <div class="flex justify-between items-start mb-4">
+                                    <i data-lucide="map-pin" class="text-amber-500 w-8 h-8"></i>
+                                    <i data-lucide="chevron-down" class="text-zinc-500 w-5 h-5 transform transition-transform duration-300"></i>
+                                </div>
+                                <h3 class="font-bold text-white mb-2">Localização</h3>
+                                <p class="text-sm text-zinc-500">Descubra qual unidade policial é a mais próxima ou indicada para o seu caso.</p>
+                            </div>
+                            <div id="help-loc" class="hidden p-6 pt-0 border-t border-zinc-800/50 bg-black/20 text-sm text-zinc-400">
+                                <p class="mt-4">O assistente conhece os bairros de Feira de Santana e pode indicar se você deve ir ao Complexo do Sobradinho, Jomafa ou DEAM.</p>
+                                <div class="mt-3 p-3 bg-zinc-950 rounded border border-zinc-800">
+                                    <p class="text-xs text-zinc-500 uppercase mb-1">Exemplo de pergunta:</p>
+                                    <p class="text-amber-500 italic">"Moro no bairro Tomba, qual a delegacia mais próxima?"</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Documentação -->
+                        <div class="flex flex-col bg-zinc-900/50 border border-zinc-800 rounded-xl hover:border-amber-500/30 transition-all group overflow-hidden h-fit">
+                            <div class="p-6 cursor-pointer hover:bg-zinc-800/50 transition-colors" onclick="toggleDetails('help-doc', this)">
+                                <div class="flex justify-between items-start mb-4">
+                                    <i data-lucide="file-text" class="text-amber-500 w-8 h-8"></i>
+                                    <i data-lucide="chevron-down" class="text-zinc-500 w-5 h-5 transform transition-transform duration-300"></i>
+                                </div>
+                                <h3 class="font-bold text-white mb-2">Documentação</h3>
+                                <p class="text-sm text-zinc-500">Saiba quais documentos são necessários para registrar seu boletim.</p>
+                            </div>
+                            <div id="help-doc" class="hidden p-6 pt-0 border-t border-zinc-800/50 bg-black/20 text-sm text-zinc-400">
+                                <p class="mt-4">Evite viagens perdidas. A IA lista os documentos obrigatórios para cada tipo de serviço (RG, Antecedentes, BO).</p>
+                                <div class="mt-3 p-3 bg-zinc-950 rounded border border-zinc-800">
+                                    <p class="text-xs text-zinc-500 uppercase mb-1">Exemplo de pergunta:</p>
+                                    <p class="text-amber-500 italic">"O que preciso levar para registrar perda de documento?"</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Orientações -->
+                        <div class="flex flex-col bg-zinc-900/50 border border-zinc-800 rounded-xl hover:border-amber-500/30 transition-all group overflow-hidden h-fit">
+                            <div class="p-6 cursor-pointer hover:bg-zinc-800/50 transition-colors" onclick="toggleDetails('help-ori', this)">
+                                <div class="flex justify-between items-start mb-4">
+                                    <i data-lucide="shield-check" class="text-amber-500 w-8 h-8"></i>
+                                    <i data-lucide="chevron-down" class="text-zinc-500 w-5 h-5 transform transition-transform duration-300"></i>
+                                </div>
+                                <h3 class="font-bold text-white mb-2">Orientações</h3>
+                                <p class="text-sm text-zinc-500">Tire dúvidas sobre procedimentos de segurança e denúncias.</p>
+                            </div>
+                            <div id="help-ori" class="hidden p-6 pt-0 border-t border-zinc-800/50 bg-black/20 text-sm text-zinc-400">
+                                <p class="mt-4">Receba um passo a passo inicial sobre como proceder em casos de golpes virtuais, violência doméstica ou furtos.</p>
+                                <div class="mt-3 p-3 bg-zinc-950 rounded border border-zinc-800">
+                                    <p class="text-xs text-zinc-500 uppercase mb-1">Exemplo de pergunta:</p>
+                                    <p class="text-amber-500 italic">"Sofri um golpe no WhatsApp, o que devo fazer agora?"</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="toggleChat()" class="group relative inline-flex items-center gap-3 px-8 py-4 bg-white text-black font-bold text-lg rounded-full hover:bg-zinc-200 transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                        <i data-lucide="message-square" class="w-6 h-6"></i>
+                        <span>INICIAR ATENDIMENTO</span>
+                        <div class="absolute inset-0 rounded-full border-2 border-white/20 animate-ping"></div>
+                    </button>
+                    
+                    <p class="mt-6 text-xs text-zinc-600">
+                        *Este é um serviço automatizado para orientação. Em caso de emergência, ligue 190.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- Footer -->
+    <footer class="bg-black border-t border-zinc-900 pt-16 pb-8">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center gap-3 mb-6">
+                        <i data-lucide="shield" class="w-8 h-8 text-amber-600"></i>
+                        <span class="text-xl font-bold text-white">1ª COORPIN</span>
+                    </div>
+                    <p class="text-zinc-500 text-sm max-w-sm leading-relaxed mb-6">
+                        Comprometidos com a verdade e a justiça. A Coordenadoria de Feira de Santana é referência em investigação policial no interior da Bahia.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-6">Contatos Úteis</h4>
+                    <ul class="space-y-4 text-sm text-zinc-500">
+                        <li class="flex items-start gap-3 hover:text-white transition-colors cursor-pointer group">
+                            <i data-lucide="phone" class="w-5 h-5 text-amber-600 flex-shrink-0 group-hover:text-amber-500 transition-colors"></i> 
+                            <span class="mt-0.5">(75) 3602-3545 / 48</span>
+                        </li>
+                        <li class="flex items-start gap-3 hover:text-white transition-colors cursor-pointer group">
+                            <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 flex-shrink-0 group-hover:text-amber-500 transition-colors"></i> 
+                            <span class="mt-0.5">Disque Denúncia: <strong class="text-white">181</strong></span>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-6">Endereço</h4>
+                    <p class="text-zinc-500 text-sm leading-relaxed">
+                        Complexo Policial do Sobradinho<br />
+                        R. Landulfo Alves, s/n<br />
+                        Sobradinho, Feira de Santana - BA<br />
+                        CEP: 44021-405
+                    </p>
+                </div>
+            </div>
+            <div class="border-t border-zinc-900 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-zinc-600">
+                <p>&copy; 2024 Polícia Civil da Bahia - 1ª COORPIN. Todos os direitos reservados.</p>
+                <div class="flex gap-6 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-zinc-400">Política de Privacidade</a>
+                    <a href="#" class="hover:text-zinc-400">Termos de Uso</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- Gemini Chatbot Logic ---
+        const apiKey = ""; // API Key injected by environment
+
+        async function askGemini(message) {
+            const chatMessages = document.getElementById('chat-messages');
+            
+            // Add User Message
+            const userDiv = document.createElement('div');
+            userDiv.className = "flex gap-2 justify-end";
+            userDiv.innerHTML = `
+                <div class="bg-amber-600 p-3 rounded-lg rounded-tr-none text-sm text-black font-medium border border-amber-500">
+                    ${message}
+                </div>
+                <div class="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center flex-shrink-0 text-white font-bold text-xs"><i data-lucide="user" class="w-5 h-5"></i></div>
+            `;
+            chatMessages.appendChild(userDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Add Typing Indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = "flex gap-2 loading-indicator";
+            typingDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center flex-shrink-0 text-black font-bold text-xs"><i data-lucide="bot" class="w-5 h-5"></i></div>
+                <div class="bg-zinc-800 p-3 rounded-lg rounded-tl-none text-sm text-zinc-200 border border-zinc-700 flex items-center gap-1 h-10">
+                    <div class="w-2 h-2 bg-zinc-500 rounded-full typing-dot"></div>
+                    <div class="w-2 h-2 bg-zinc-500 rounded-full typing-dot"></div>
+                    <div class="w-2 h-2 bg-zinc-500 rounded-full typing-dot"></div>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: message }]
+                        }],
+                        systemInstruction: {
+                            parts: [{ text: "Você é o Agente Virtual da 1ª COORPIN de Feira de Santana. Sua função é orientar o cidadão sobre serviços policiais. DADOS: Emergência=190. Denúncia Anônima=181. Registro Online=Delegacia Virtual. Complexo Sobradinho=Plantão Central 24h, 2ª DT. Complexo Jomafa=DHPP (Homicídios), DTE (Tóxicos), DRFR (Furtos/Roubos), 1ª DT, DPT. DEAM=Av. Maria Quitéria (Mulher). Responda de forma concisa, educada e direta em português." }]
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                const botText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Desculpe, não consegui processar sua solicitação no momento.";
+
+                // Remove typing indicator
+                chatMessages.removeChild(typingDiv);
+
+                // Add Bot Message
+                const botDiv = document.createElement('div');
+                botDiv.className = "flex gap-2";
+                botDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center flex-shrink-0 text-black font-bold text-xs"><i data-lucide="bot" class="w-5 h-5"></i></div>
+                    <div class="bg-zinc-800 p-3 rounded-lg rounded-tl-none text-sm text-zinc-200 border border-zinc-700">
+                        ${botText.replace(/\n/g, '<br>')}
+                    </div>
+                `;
+                chatMessages.appendChild(botDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            } catch (error) {
+                console.error("Erro na API:", error);
+                chatMessages.removeChild(typingDiv);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = "flex gap-2";
+                errorDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0 text-white font-bold text-xs">!</div>
+                    <div class="bg-red-900/50 p-3 rounded-lg rounded-tl-none text-sm text-red-200 border border-red-800">
+                        Erro ao conectar com o assistente. Tente novamente mais tarde.
+                    </div>
+                `;
+                chatMessages.appendChild(errorDiv);
+            }
+        }
+
+        function toggleChat() {
+            const chatWindow = document.getElementById('chat-window');
+            if (chatWindow.classList.contains('hidden')) {
+                chatWindow.classList.remove('hidden');
+                // Garante que os ícones (como o X) sejam renderizados se não foram antes
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } else {
+                chatWindow.classList.add('hidden');
+            }
+        }
+
+        function sendUserMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (message) {
+                askGemini(message);
+                input.value = '';
+            }
+        }
+
+        function handleChatKey(e) {
+            if (e.key === 'Enter') {
+                sendUserMessage();
+            }
+        }
+        
+        // --- News Fetcher Logic (FORMATO LISTA) ---
+        async function fetchAscomNews() {
+            const container = document.getElementById('ascom-news-container');
+            if (!container) return;
+
+            // FEEDBACK VISUAL: Mostrar carregando
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-20 gap-4 opacity-50">
+                    <div class="w-8 h-8 border-2 border-zinc-800 border-t-amber-500 rounded-full animate-spin"></div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest">Atualizando notícias...</span>
+                </div>
+            `;
+
+            const query = encodeURIComponent('"Polícia Civil da Bahia" OR site:ba.gov.br/policiacivil when:72h');
+            const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+            // Cache busting com timestamp
+            const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&t=${Date.now()}`;
+
+            try {
+                const res = await fetch(api);
+                const data = await res.json();
+                
+                if (data.status === 'ok' && data.items.length > 0) {
+                    container.innerHTML = '';
+                    data.items.forEach(item => {
+                        const dateFormatted = new Date(item.pubDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+                        container.insertAdjacentHTML('beforeend', `
+                            <div class="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-amber-500/30 transition-all cursor-pointer group" onclick="window.open('${item.link}', '_blank')">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="text-[9px] bg-amber-500/10 text-amber-500 font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-amber-500/20">Oficial</span>
+                                    <span class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">${dateFormatted}</span>
+                                </div>
+                                <h3 class="text-sm font-bold text-zinc-200 group-hover:text-amber-500 transition-colors line-clamp-2">${item.title}</h3>
+                            </div>
+                        `);
+                    });
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                } else {
+                    container.innerHTML = '<div class="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl text-center text-zinc-500 text-xs font-bold uppercase tracking-widest">Sem novas notas oficiais.</div>';
+                }
+            } catch (e) {
+                container.innerHTML = '<div class="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl text-center text-red-500 text-xs font-bold uppercase tracking-widest">Erro ao carregar feed.</div>';
+            }
+        }
+
+        async function fetchNews() {
+            const newsListContainer = document.getElementById('news-list-container');
+            if (!newsListContainer) return;
+
+            // FEEDBACK VISUAL: Mostrar carregando
+            newsListContainer.innerHTML = `
+                <div class="flex items-center justify-center py-20">
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="w-8 h-8 border-4 border-zinc-700 border-t-amber-500 rounded-full animate-spin"></div>
+                        <span class="text-zinc-500 text-sm font-medium">Buscando atualizações...</span>
+                    </div>
+                </div>
+            `;
+
+            const query = encodeURIComponent('polícia feira de santana when:72h');
+            const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+            // Cache busting com timestamp
+            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&t=${Date.now()}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (data.status === 'ok' && data.items.length > 0) {
+                    newsListContainer.innerHTML = ''; 
+                    
+                    data.items.forEach((item) => {
+                        const dateFormatted = new Date(item.pubDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+                        
+                        const listHTML = `
+                            <div class="news-list-item p-5 flex items-center justify-between gap-6 cursor-pointer" onclick="window.open('${item.link}', '_blank')">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-3 mb-1">
+                                        <span class="text-[10px] bg-amber-500/10 text-amber-500 font-black px-2 py-0.5 rounded uppercase tracking-widest border border-amber-500/20">Polícia</span>
+                                        <span class="text-[10px] text-zinc-500 font-medium uppercase">${dateFormatted}</span>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-zinc-100 group-hover:text-amber-500 transition-colors truncate pr-4">
+                                        ${item.title}
+                                    </h3>
+                                    <p class="text-zinc-500 text-xs truncate mt-1">Fonte: ${item.author || 'Portal de Notícias'}</p>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:bg-amber-600 hover:text-black transition-all">
+                                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        newsListContainer.insertAdjacentHTML('beforeend', listHTML);
+                    });
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                } else {
+                    newsListContainer.innerHTML = '<div class="text-center text-zinc-600 py-20 font-medium">Nenhum registro policial encontrado nas últimas 72h.</div>';
+                }
+            } catch (error) {
+                newsListContainer.innerHTML = '<div class="text-center text-red-500 py-20">Falha ao conectar com o servidor de notícias.</div>';
+            }
+        }
+
+        // --- Init Icons safely ---
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+
+        // Navigation Logic
+        const mainContent = document.getElementById('main-content');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const navbar = document.getElementById('navbar');
+
+        function loadPage(pageId) {
+            // Update Title based on Page
+            const titles = {
+                'home': 'Início - 1ª COORPIN',
+                'estrutura': 'Estrutura - 1ª COORPIN',
+                'atuacao': 'Área de Atuação - 1ª COORPIN',
+                'servicos': 'Serviços - 1ª COORPIN',
+                'ascom': 'ASCOM - 1ª COORPIN',
+                'noticias': 'Notícias - 1ª COORPIN',
+                'telefones': 'Telefones - 1ª COORPIN',
+                'ajudaia': 'Atendimento IA - 1ª COORPIN'
+            };
+            document.title = titles[pageId] || '1ª COORPIN - Feira de Santana';
+
+            // Remove active class from all links
+            navLinks.forEach(link => {
+                link.classList.remove('nav-active');
+                if(link.dataset.page === pageId) link.classList.add('nav-active');
+            });
+
+            // Get template
+            const template = document.getElementById(`tmpl-${pageId}`);
+            if(!template) return;
+
+            // Clear current content
+            mainContent.innerHTML = '';
+            
+            // Clone and append new content
+            const clone = template.content.cloneNode(true);
+            mainContent.appendChild(clone);
+
+            // Re-run scripts for specific pages with protections
+            if(pageId === 'home') {
+                try { initParticles(); } catch(e) { console.error("Particles error:", e); }
+                try { initStats(); } catch(e) { console.error("Stats error:", e); }
+            } else if (pageId === 'noticias') {
+                fetchNews(); // Auto-fetch news when tab opens
+            } else if (pageId === 'ascom') {
+                fetchAscomNews();
+            }
+
+            // Refresh icons for new content
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            // Scroll top
+            window.scrollTo(0,0);
+        }
+
+        function navigateTo(pageId) {
+            loadPage(pageId);
+            document.getElementById('mobile-menu').classList.add('hidden');
+            document.getElementById('mobile-menu').classList.remove('flex');
+            window.scrollTo(0, 0); // Force scroll to top
+        }
+        
+        function mobileNavigate(pageId) {
+            navigateTo(pageId);
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                menu.classList.add('flex');
+            } else {
+                menu.classList.add('hidden');
+                menu.classList.remove('flex');
+            }
+        }
+
+        // Toggle Details Accordion Logic - FIXED to preserve Grid layout
+        function toggleDetails(id, headerEl) {
+            const el = document.getElementById(id);
+            const chevron = headerEl.querySelector('.lucide-chevron-down');
+
+            if (el.classList.contains('hidden')) {
+                // Open
+                el.classList.remove('hidden');
+                // The display type (grid or block) is handled by the CSS classes present on the element itself
+                
+                if(chevron) chevron.style.transform = 'rotate(180deg)';
+                headerEl.classList.add('bg-zinc-800/50');
+            } else {
+                // Close
+                el.classList.add('hidden');
+                
+                if(chevron) chevron.style.transform = 'rotate(0deg)';
+                headerEl.classList.remove('bg-zinc-800/50');
+            }
+        }
+
+        // Navbar Scroll Effect
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-black/90', 'backdrop-blur-md', 'border-b', 'border-zinc-800', 'py-3');
+                navbar.classList.remove('py-6', 'bg-transparent');
+            } else {
+                navbar.classList.remove('bg-black/90', 'backdrop-blur-md', 'border-b', 'border-zinc-800', 'py-3');
+                navbar.classList.add('py-6', 'bg-transparent');
+            }
+        });
+
+        // Particle System
+        function initParticles() {
+            const canvas = document.getElementById('particle-canvas');
+            if(!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            const particles = [];
+            for(let i=0; i<80; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    size: Math.random() * 2
+                });
+            }
+
+            function animate() {
+                // Fix: Stop loop if THIS specific canvas is no longer in the document body
+                if(!canvas.isConnected) return; 
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'rgba(212, 175, 55, 0.3)';
+                
+                particles.forEach((p, i) => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    
+                    if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                    if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Lines
+                    for(let j=i; j<particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+                        if(dist < 100) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = `rgba(212, 175, 55, ${0.1 - dist/1000})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.stroke();
+                        }
+                    }
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // Stats Animation
+        function initStats() {
+            const counters = document.querySelectorAll('.count-up');
+            if(counters.length === 0) return; // Guard clause
+
+            const options = { threshold: 0.5 };
+            
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if(!entry.isIntersecting) return;
+                    
+                    const el = entry.target;
+                    const target = parseInt(el.getAttribute('data-target'));
+                    let count = 0;
+                    const duration = 2000;
+                    const increment = target / (duration / 16);
+                    
+                    const timer = setInterval(() => {
+                        count += increment;
+                        if(count >= target) {
+                            el.innerText = target + (target === 98 ? '%' : '+');
+                            clearInterval(timer);
+                        } else {
+                            el.innerText = Math.ceil(count) + (target === 98 ? '%' : '+');
+                        }
+                    }, 16);
+                    
+                    observer.unobserve(el);
+                });
+            }, options);
+
+            counters.forEach(counter => observer.observe(counter));
+        }
+
+        // Initial Load
+        loadPage('home');
+    </script>
+</body>
+</html>
