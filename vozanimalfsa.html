@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +14,7 @@
     <!-- Ícones -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <!-- Gemini API Import Map -->
     <script type="importmap">
       {
@@ -68,17 +68,6 @@
         
         /* Hover Effect for Clickable Cards */
         .clickable-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
-
-        /* IA Features Styles */
-        .ai-glow {
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
-            animation: pulse-purple 2s infinite;
-        }
-        @keyframes pulse-purple {
-            0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
-        }
 
         /* Toast Notification */
         #toast-container {
@@ -168,6 +157,7 @@
         </header>
         <footer class="bg-slate-900 text-slate-500 py-8 border-t border-slate-800 text-center text-xs">
             <p>&copy; 2024 Voz Animal FSA. Todos os direitos reservados.</p>
+            <p class="mt-2 text-slate-600 font-medium tracking-wide">Desenvolvido por Felix Rilton</p>
         </footer>
     </div>
 
@@ -181,7 +171,6 @@
         </div>
         <div class="max-w-7xl mx-auto px-4 py-16">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Cards das 5 Liberdades -->
                 <div onclick="showDetails('Liberdade Nutricional', 'Verifique se há costelas visíveis (escore corporal baixo), pelagem opaca ou sinais de desidratação (teste de turgor da pele). A água deve estar limpa e acessível, não verde ou com larvas. A falta de alimento ou água potável por si só já configura maus-tratos.')" class="bg-slate-900 p-8 rounded-2xl border-l-4 border-emerald-500 hover:bg-slate-800 transition shadow-xl group cursor-pointer clickable-card">
                     <div class="bg-emerald-500/10 w-14 h-14 rounded-xl flex items-center justify-center mb-6 border border-emerald-500/20 group-hover:scale-110 transition-transform">
                         <i data-lucide="utensils" class="text-emerald-500 w-6 h-6"></i>
@@ -225,6 +214,7 @@
         </div>
         <footer class="bg-slate-900 text-slate-500 py-8 border-t border-slate-800 text-center text-xs">
             <p>&copy; 2024 Voz Animal FSA. Proteção e Conscientização.</p>
+            <p class="mt-2 text-slate-600 font-medium tracking-wide">Desenvolvido por Felix Rilton</p>
         </footer>
     </div>
 
@@ -338,6 +328,7 @@
         </div>
         <footer class="bg-slate-900 text-slate-500 py-8 border-t border-slate-800 text-center text-xs">
             <p>&copy; 2024 Voz Animal FSA. Serviços de Utilidade Pública.</p>
+            <p class="mt-2 text-slate-600 font-medium tracking-wide">Desenvolvido por Felix Rilton</p>
         </footer>
     </div>
 
@@ -377,9 +368,6 @@
                     </button>
                     <button onclick="switchRoteiroTab('tab5')" id="btn-tab5" class="nav-btn-roteiro px-8 py-5 text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition flex items-center gap-3">
                         <i class="fas fa-file-contract text-blue-500"></i> 5. Documentos
-                    </button>
-                    <button onclick="switchRoteiroTab('tab6')" id="btn-tab6" class="nav-btn-roteiro px-8 py-5 text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition flex items-center gap-3 bg-purple-900/50 text-purple-200 border-purple-500">
-                        <i class="fas fa-robot text-purple-400"></i> 6. Consultor IA ✨
                     </button>
                 </div>
             </div>
@@ -536,47 +524,10 @@
                     </button>
                 </div>
             </div>
-
-            <!-- TAB 6: CONSULTOR IA -->
-            <div id="tab6" class="tab-content-roteiro">
-                <div class="max-w-3xl mx-auto">
-                    <div class="text-center mb-8">
-                        <span class="inline-block p-4 rounded-full bg-purple-900/30 text-purple-400 mb-4 ai-glow">
-                            <i class="fas fa-robot text-4xl"></i>
-                        </span>
-                        <h3 class="text-3xl font-bold text-white mb-2">Consultor Jurídico IA</h3>
-                        <p class="text-slate-400">Tire suas dúvidas sobre leis de proteção animal com nossa Inteligência Artificial.</p>
-                    </div>
-
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
-                        <div id="chat-history" class="h-96 overflow-y-auto p-6 space-y-4 bg-slate-900/50">
-                            <!-- Mensagem Inicial -->
-                            <div class="flex gap-4">
-                                <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-robot text-white"></i>
-                                </div>
-                                <div class="bg-slate-800 p-4 rounded-2xl rounded-tl-none border border-slate-700">
-                                    <p class="text-sm text-slate-300">Olá! Sou o assistente virtual do Voz Animal. Posso responder dúvidas sobre a Lei Sansão, crimes de maus-tratos ou como proceder em uma denúncia. Como posso ajudar?</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="p-4 bg-slate-950 border-t border-slate-800">
-                            <form id="ai-chat-form" class="flex gap-2">
-                                <input type="text" id="ai-chat-input" placeholder="Ex: Meu vizinho não dá comida pro cachorro..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition">
-                                <button type="submit" id="ai-chat-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-6 rounded-xl font-bold transition flex items-center gap-2">
-                                    <span class="hidden sm:inline">Perguntar</span>
-                                    <i class="fas fa-paper-plane"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                    <p class="text-center text-xs text-slate-600 mt-4">A IA pode cometer erros. Sempre consulte um advogado para casos complexos.</p>
-                </div>
-            </div>
         </div>
         <footer class="bg-slate-900 text-slate-500 py-8 border-t border-slate-900 text-center text-xs">
             <p>Manual desenvolvido por juristas e veterinários da causa animal.</p>
+            <p class="mt-2 text-slate-600 font-medium tracking-wide">Plataforma desenvolvida por Felix Rilton</p>
         </footer>
     </div>
 
@@ -597,20 +548,26 @@
         <div class="max-w-7xl mx-auto px-4 py-16">
             <div id="news-section" class="mb-20">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-                    <h3 class="text-2xl font-bold text-white flex items-center gap-3">
-                        <i class="fas fa-newspaper text-emerald-500"></i> Notícias da Bahia <span id="news-date-display" class="hidden md:inline text-sm font-normal text-slate-400 ml-2"></span>
+                    <h3 class="text-2xl font-bold text-white flex items-center flex-wrap gap-3">
+                        <span class="flex items-center gap-2"><i class="fas fa-newspaper text-emerald-500"></i> Notícias da Bahia</span>
+                        <!-- Badge de Data Dinâmica -->
+                        <span id="news-date-display" class="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-4 py-1.5 rounded-full text-sm font-semibold ml-0 sm:ml-3 capitalize">
+                           <!-- Data será inserida aqui via JS -->
+                        </span>
                     </h3>
                     <button onclick="fetchNews()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 border border-slate-700 shadow-lg active:scale-95">
                         <i class="fab fa-google text-emerald-500"></i> Atualizar com Google
                     </button>
                 </div>
-                <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Lista de Notícias (Flex-col em vez de Grid) -->
+                <div id="news-container" class="flex flex-col gap-4">
                     <div class="col-span-full text-center text-slate-500 animate-pulse">Buscando notícias recentes sobre proteção animal na Bahia...</div>
                 </div>
             </div>
         </div>
         <footer class="bg-slate-900 text-slate-500 py-8 border-t border-slate-900 text-center text-xs">
             <p>&copy; 2024 Galeria Voz Animal FSA.</p>
+            <p class="mt-2 text-slate-600 font-medium tracking-wide">Desenvolvido por Felix Rilton</p>
         </footer>
     </div>
 
@@ -630,7 +587,7 @@
             <div class="max-w-2xl mx-auto">
                 <div class="text-center mb-10">
                     <h1 class="text-3xl font-extrabold text-white mb-3">Relatar Ocorrência</h1>
-                    <p class="text-slate-400">Preencha os dados. Você será redirecionado para o WhatsApp do grupo oficial.</p>
+                    <p class="text-slate-400">Preencha os dados e anexe provas. O envio é feito diretamente pela plataforma.</p>
                 </div>
 
                 <div class="glass-morphism rounded-2xl shadow-2xl overflow-hidden border border-slate-700">
@@ -641,15 +598,15 @@
                     <form id="complaintForm" class="p-8 space-y-6">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Onde está acontecendo?</label>
-                            <input type="text" id="address" required placeholder="Endereço Completo (Rua, Número, Bairro)" class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:ring-2 focus:ring-green-500 outline-none">
+                            <input type="text" id="address" name="endereco" required placeholder="Endereço Completo (Rua, Número, Bairro)" class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:ring-2 focus:ring-green-500 outline-none">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Ponto de Referência</label>
-                            <input type="text" id="reference" placeholder="Ex: Casa azul, perto da padaria..." class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:ring-2 focus:ring-green-500 outline-none">
+                            <input type="text" id="reference" name="referencia" placeholder="Ex: Casa azul, perto da padaria..." class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:ring-2 focus:ring-green-500 outline-none">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2">O que está acontecendo?</label>
-                            <textarea id="description" rows="4" required placeholder="Descreva a situação do animal..." class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:ring-2 focus:ring-green-500 outline-none resize-none"></textarea>
+                            <textarea id="description" name="descricao" rows="4" required placeholder="Descreva a situação do animal..." class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 text-white focus:ring-2 focus:ring-green-500 outline-none resize-none"></textarea>
                             
                             <!-- Botão Mágico IA -->
                             <div class="mt-2 flex justify-end">
@@ -659,19 +616,36 @@
                             </div>
                         </div>
 
+                        <!-- Novo Campo de Upload de Ficheiros Restaurado -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Anexar Provas (Fotos, Vídeos, Áudio)</label>
+                            <div class="relative w-full bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-xl p-6 flex flex-col items-center justify-center hover:border-green-500 hover:bg-slate-800 transition-all cursor-pointer group" onclick="document.getElementById('mediaFiles').click()">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-slate-500 mb-3 group-hover:text-green-500 transition-colors"></i>
+                                <span class="text-sm text-slate-300 text-center font-semibold">Clique para selecionar os arquivos aqui</span>
+                                <span class="text-xs text-slate-500 mt-2 text-center">Tamanho máximo recomendado: 10MB no total.</span>
+                                <input type="file" id="mediaFiles" name="anexos" accept="image/*,video/*,audio/*" multiple class="hidden">
+                            </div>
+                            <!-- Lista de Arquivos Selecionados -->
+                            <div id="fileList" class="mt-3 flex flex-col gap-2 empty:hidden"></div>
+                        </div>
+
                         <div class="p-4 bg-blue-900/20 border border-blue-800/50 rounded-xl flex gap-3 text-xs text-blue-200">
                             <i data-lucide="info" class="w-5 h-5 flex-shrink-0"></i>
-                            <p>As fotos e vídeos deverão ser anexados manualmente no WhatsApp após clicar em enviar.</p>
+                            <p>Ao clicar em enviar, os seus arquivos e texto serão transmitidos de forma segura e anônima usando os servidores do Google.</p>
                         </div>
 
                         <button type="submit" id="submitBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                            <span id="btnText">ENVIAR PARA GRUPO WHATSAPP</span>
+                            <span id="btnText">ENVIAR DENÚNCIA</span>
                             <i data-lucide="send" class="w-5 h-5"></i>
                         </button>
                     </form>
                 </div>
             </div>
         </main>
+        <footer class="bg-slate-900 text-slate-500 py-8 border-t border-slate-800 text-center text-xs mt-auto">
+            <p>&copy; 2024 Canal de Denúncia Voz Animal FSA.</p>
+            <p class="mt-2 text-slate-600 font-medium tracking-wide">Desenvolvido por Felix Rilton</p>
+        </footer>
     </div>
 
     <!-- MODAIS DE DOCUMENTOS -->
@@ -690,8 +664,7 @@
         </div>
     </div>
 
-    <!-- Modais de Impressão (Simplificados na estrutura, conteúdo completo via JS se necessário) -->
-    <!-- Nota: Mantive os IDs usados no HTML para compatibilidade -->
+    <!-- Modais de Impressão -->
     <div id="modalNoticia" class="fixed inset-0 bg-black/95 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-md">
        <div class="bg-white text-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
            <div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white">
@@ -713,8 +686,6 @@ Agora sob cuidados veterinários especializados, o animal recebe o tratamento ne
        </div>
     </div>
     
-    <!-- (Outros modais seguem a mesma estrutura, omitidos para brevidade mas funcionais via JS OpenModal) -->
-    <!-- Modal Checklist -->
     <div id="modalChecklist" class="fixed inset-0 bg-black/95 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-md">
         <div class="bg-white text-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
             <div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white">
@@ -743,10 +714,11 @@ Agora sob cuidados veterinários especializados, o animal recebe o tratamento ne
         </div>
     </div>
 
-    <!-- Modal Fiel Depositário, Laudo, Adoção, etc... (Estrutura genérica para todos) -->
+    <!-- Outros Modais -->
     <div id="modalFielDepositario" class="fixed inset-0 bg-black/95 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-md"><div class="bg-white text-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto"><div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white"><h3 class="font-bold text-xl">Fiel Depositário</h3><button onclick="closeModal('modalFielDepositario')" class="text-slate-400 hover:text-red-500"><i class="fas fa-times text-2xl"></i></button></div><div class="p-10 font-serif text-sm leading-relaxed whitespace-pre-wrap">AUTO DE NOMEAÇÃO DE FIEL DEPOSITÁRIO... (Conteúdo Padrão)</div><div class="p-6 bg-slate-50 flex justify-end gap-3 border-t"><button onclick="printContent('modalFielDepositario')" class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold">IMPRIMIR</button></div></div></div>
     <div id="modalLaudo" class="fixed inset-0 bg-black/95 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-md"><div class="bg-white text-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto"><div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white"><h3 class="font-bold text-xl">Laudo Veterinário</h3><button onclick="closeModal('modalLaudo')" class="text-slate-400 hover:text-red-500"><i class="fas fa-times text-2xl"></i></button></div><div class="p-10 font-serif text-sm leading-relaxed whitespace-pre-wrap">LAUDO PERICIAL MÉDICO-VETERINÁRIO... (Conteúdo Padrão)</div><div class="p-6 bg-slate-50 flex justify-end gap-3 border-t"><button onclick="printContent('modalLaudo')" class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold">IMPRIMIR</button></div></div></div>
     <div id="modalAdocao" class="fixed inset-0 bg-black/95 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-md"><div class="bg-white text-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto"><div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white"><h3 class="font-bold text-xl">Termo de Adoção</h3><button onclick="closeModal('modalAdocao')" class="text-slate-400 hover:text-red-500"><i class="fas fa-times text-2xl"></i></button></div><div class="p-10 font-serif text-sm leading-relaxed whitespace-pre-wrap">TERMO DE ADOÇÃO RESPONSÁVEL... (Conteúdo Padrão)</div><div class="p-6 bg-slate-50 flex justify-end gap-3 border-t"><button onclick="printContent('modalAdocao')" class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold">IMPRIMIR</button></div></div></div>
+    
     <!-- Novos Modais -->
     <div id="modalLaudoConstatacao" class="fixed inset-0 bg-black/95 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-md"><div class="bg-white text-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto"><div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white"><h3 class="font-bold text-xl">Laudo Constatação</h3><button onclick="closeModal('modalLaudoConstatacao')" class="text-slate-400 hover:text-red-500"><i class="fas fa-times text-2xl"></i></button></div><div class="p-10 font-serif text-sm leading-relaxed whitespace-pre-wrap">LAUDO DE CONSTATAÇÃO DE MAUS-TRATOS... (Conteúdo Padrão)</div><div class="p-6 bg-slate-50 flex justify-end gap-3 border-t"><button onclick="printContent('modalLaudoConstatacao')" class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold">IMPRIMIR</button></div></div></div>
     <div id="modalFichaAPH" class="fixed inset-0 bg-black/95 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-md"><div class="bg-white text-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto"><div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white"><h3 class="font-bold text-xl">Ficha APH</h3><button onclick="closeModal('modalFichaAPH')" class="text-slate-400 hover:text-red-500"><i class="fas fa-times text-2xl"></i></button></div><div class="p-10 font-serif text-sm leading-relaxed whitespace-pre-wrap">FICHA DE ATENDIMENTO PRÉ-HOSPITALAR... (Conteúdo Padrão)</div><div class="p-6 bg-slate-50 flex justify-end gap-3 border-t"><button onclick="printContent('modalFichaAPH')" class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold">IMPRIMIR</button></div></div></div>
@@ -762,7 +734,7 @@ Agora sob cuidados veterinários especializados, o animal recebe o tratamento ne
         }
 
         // Inicializar Gemini API
-        const apiKey = ""; // Chave fornecida pelo ambiente
+        const apiKey = "";
         let genAI, model;
         
         if (apiKey) {
@@ -865,77 +837,6 @@ Agora sob cuidados veterinários especializados, o animal recebe o tratamento ne
             });
         }
 
-        // --- FUNCIONALIDADE 2: CONSULTOR JURÍDICO (IA) ---
-        const chatForm = document.getElementById('ai-chat-form');
-        const chatHistory = document.getElementById('chat-history');
-
-        if(chatForm) {
-            chatForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const input = document.getElementById('ai-chat-input');
-                const question = input.value.trim();
-                if (!question) return;
-
-                // Adiciona msg do usuário
-                chatHistory.innerHTML += `
-                    <div class="flex gap-4 justify-end">
-                        <div class="bg-blue-600 p-4 rounded-2xl rounded-tr-none text-white max-w-[80%]">
-                            <p class="text-sm">${question}</p>
-                        </div>
-                        <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-user text-slate-300"></i>
-                        </div>
-                    </div>
-                `;
-                input.value = '';
-                chatHistory.scrollTop = chatHistory.scrollHeight;
-
-                if (!model) {
-                     chatHistory.innerHTML += `<p class="text-center text-red-400 text-xs my-2">IA indisponível (Sem API Key).</p>`;
-                     return;
-                }
-
-                // Mostra "Digitando..."
-                const typingId = 'typing-' + Date.now();
-                chatHistory.innerHTML += `
-                    <div id="${typingId}" class="flex gap-4">
-                        <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-robot text-white animate-pulse"></i>
-                        </div>
-                        <div class="bg-slate-800 p-4 rounded-2xl rounded-tl-none border border-slate-700">
-                            <p class="text-sm text-slate-400">Analisando leis...</p>
-                        </div>
-                    </div>
-                `;
-                chatHistory.scrollTop = chatHistory.scrollHeight;
-
-                try {
-                    const prompt = `Você é um assistente jurídico especializado em proteção animal no Brasil (Voz Animal FSA). Responda à dúvida do usuário com base na Lei 9.605/98, Lei Sansão (14.064/20) e Constituição Federal. Seja prático, direto e encoraje a denúncia formal. Dúvida: "${question}"`;
-                    
-                    const result = await model.generateContent(prompt);
-                    const response = await result.response;
-                    const answer = response.text();
-
-                    document.getElementById(typingId).remove();
-                    chatHistory.innerHTML += `
-                        <div class="flex gap-4">
-                            <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-robot text-white"></i>
-                            </div>
-                            <div class="bg-slate-800 p-4 rounded-2xl rounded-tl-none border border-slate-700">
-                                <div class="text-sm text-slate-300 prose prose-invert max-w-none">${answer.replace(/\n/g, '<br>')}</div>
-                            </div>
-                        </div>
-                    `;
-                } catch (error) {
-                    console.error("Erro Chat IA:", error);
-                    document.getElementById(typingId).remove();
-                    chatHistory.innerHTML += `<p class="text-center text-red-400 text-xs my-2">Erro ao conectar com a IA.</p>`;
-                }
-                chatHistory.scrollTop = chatHistory.scrollHeight;
-            });
-        }
-
         // Lógica de Abas do Roteiro Judicial
         window.switchRoteiroTab = function(tabId) {
             document.querySelectorAll('.tab-content-roteiro').forEach(content => {
@@ -1008,21 +909,29 @@ Agora sob cuidados veterinários especializados, o animal recebe o tratamento ne
                 return;
             }
 
-            container.innerHTML = newsItems.slice(0, 6).map(item => `
-                <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-emerald-500 transition flex flex-col h-full">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded uppercase tracking-wider">Notícia</span>
-                        <span class="text-xs text-slate-500">${new Date(item.pubDate).toLocaleDateString('pt-BR')}</span>
+            container.innerHTML = newsItems.slice(0, 8).map(item => `
+                <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 hover:border-emerald-500 transition flex flex-col md:flex-row gap-4 items-start group">
+                    <div class="flex-shrink-0 text-center md:w-24 bg-slate-800 rounded-lg p-2">
+                        <span class="block text-xl font-bold text-emerald-500">${new Date(item.pubDate).getDate()}</span>
+                        <span class="block text-xs text-slate-400 uppercase">${new Date(item.pubDate).toLocaleDateString('pt-BR', {month:'short'}).replace('.','')}</span>
                     </div>
-                    <h4 class="font-bold text-white text-lg mb-3 line-clamp-2 hover:text-emerald-400">
-                        <a href="${item.link}" target="_blank">${item.title}</a>
-                    </h4>
-                    <div class="text-sm text-slate-400 line-clamp-3 mb-4 flex-grow">
-                        ${item.description ? item.description.replace(/<[^>]*>/g, '').substring(0, 150) : 'Clique para ler a matéria completa.'}...
+                    <div class="flex-grow">
+                        <h4 class="font-bold text-white text-lg mb-1 group-hover:text-emerald-400">
+                            <a href="${item.link}" target="_blank">${item.title}</a>
+                        </h4>
+                        <div class="flex items-center gap-3 text-xs text-slate-500 mb-2">
+                             <span><i class="far fa-clock"></i> ${new Date(item.pubDate).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</span>
+                             <span><i class="fas fa-tag"></i> Notícia</span>
+                        </div>
+                        <div class="text-sm text-slate-400 line-clamp-2">
+                            ${item.description ? item.description.replace(/<[^>]*>/g, '').substring(0, 150) : 'Clique para ler a matéria completa.'}...
+                        </div>
                     </div>
-                    <a href="${item.link}" target="_blank" class="text-sm font-bold text-emerald-500 hover:text-emerald-400 flex items-center gap-1 mt-auto">
-                        Ler completa <i class="fas fa-external-link-alt text-xs"></i>
-                    </a>
+                    <div class="flex-shrink-0 self-center hidden md:block">
+                         <a href="${item.link}" target="_blank" class="text-slate-600 hover:text-emerald-500 transition p-2">
+                            <i class="fas fa-chevron-right text-xl"></i>
+                         </a>
+                    </div>
                 </div>
             `).join('');
         }
@@ -1033,29 +942,51 @@ Agora sob cuidados veterinários especializados, o animal recebe o tratamento ne
                 container.innerHTML = '<div class="col-span-full text-center text-slate-500 animate-pulse py-12"><i class="fas fa-circle-notch fa-spin text-3xl mb-4 text-emerald-500"></i><br>Atualizando notícias da Bahia em tempo real...</div>';
             }
 
-            const query = 'animais bahia (abandono OR resgate OR policia OR justiça OR adoção OR maus-tratos) when:30d';
-            const cacheBuster = new Date().getTime();
-            const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=pt-BR&gl=BR&ceid=BR:pt-419&scoring=n&t=${cacheBuster}`;
-            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+            // Atualização da data dinâmica no badge ao buscar
+            const dateOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+            const today = new Date().toLocaleDateString('pt-BR', dateOptions);
+            const dateDisplay = document.getElementById('news-date-display');
+            if(dateDisplay) dateDisplay.textContent = today; // Ex: Sexta-feira, 06 de Fevereiro
+
+            const query = 'animais bahia (abandono OR resgate OR policia OR justiça OR adoção OR maus-tratos)';
+            const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+            
+            // Usar allorigins para contornar o CORS e processar o XML nativamente (evita limites do rss2json)
+            const apiUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
             
             try {
                 const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error("Erro na rede");
+                
                 const data = await response.json();
                 
-                if(data.status === 'ok') {
-                    const sortedItems = data.items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-                    renderNews(sortedItems);
-                } else {
-                     // Fallback mock se API falhar (comum em localhost sem proxy)
-                     throw new Error("API Limit");
+                if (data.contents) {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+                    
+                    const items = Array.from(xmlDoc.querySelectorAll("item")).map(item => ({
+                        title: item.querySelector("title")?.textContent || "Sem Título",
+                        link: item.querySelector("link")?.textContent || "#",
+                        pubDate: item.querySelector("pubDate")?.textContent || new Date().toISOString(),
+                        description: item.querySelector("description")?.textContent || ""
+                    }));
+
+                    if (items.length > 0) {
+                        const sortedItems = items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+                        renderNews(sortedItems);
+                        return; // Sucesso, sai da função
+                    }
                 }
+                
+                throw new Error("Nenhuma notícia encontrada na feed.");
             } catch (e) {
+                console.error("Erro ao buscar notícias:", e);
                 if(container) {
                     container.innerHTML = `
                         <div class="col-span-full text-center py-8">
                             <i class="fas fa-wifi text-slate-600 text-4xl mb-4"></i>
-                            <p class="text-slate-400 mb-4">Não foi possível carregar as notícias automaticamente.</p>
-                            <a href="https://news.google.com/search?q=animais+bahia+when:7d&hl=pt-BR&gl=BR&ceid=BR:pt-419" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-xl text-sm font-bold inline-flex items-center gap-2 transition">
+                            <p class="text-slate-400 mb-4">Não foi possível carregar as notícias automaticamente no momento.</p>
+                            <a href="https://news.google.com/search?q=${encodeURIComponent(query)}&hl=pt-BR&gl=BR&ceid=BR:pt-419" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-xl text-sm font-bold inline-flex items-center gap-2 transition">
                                 <i class="fab fa-google"></i> Ver no Google News
                             </a>
                         </div>
@@ -1064,50 +995,122 @@ Agora sob cuidados veterinários especializados, o animal recebe o tratamento ne
             }
         }
 
-        // WhatsApp Logic
+        // Lógica de Envio da Denúncia com Google Apps Script
         const form = document.getElementById('complaintForm');
-        const GROUP_LINK = "https://chat.whatsapp.com/KZ2eh9ZeZsc8cQao5dVYaa"; // Link exemplo
-        const FORMSPREE_ENDPOINT = "https://formspree.io/f/xeezjezl";
+        
+        // --- ATENÇÃO DESENVOLVEDOR ---
+        // COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT GERADA NO PASSO 2
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbywbiNjBO-HlOhC8lxS-ZSq_bNXHtFbq9bjd4qs49aVV6IoPPJy_Rr9oaImKY8H8I4/exec";
+
+        // Mostrar ficheiros selecionados na interface
+        const mediaFilesInput = document.getElementById('mediaFiles');
+        const fileListContainer = document.getElementById('fileList');
+
+        if (mediaFilesInput) {
+            mediaFilesInput.addEventListener('change', function() {
+                fileListContainer.innerHTML = '';
+                if (this.files.length > 0) {
+                    Array.from(this.files).forEach((file, index) => {
+                        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'text-xs text-slate-300 bg-slate-900/80 border border-slate-700 p-3 rounded-lg flex items-center justify-between';
+                        fileItem.innerHTML = `
+                            <span class="flex items-center gap-2 truncate pr-4">
+                                <i class="fas fa-file-alt text-green-500"></i>
+                                <span class="truncate">${file.name}</span>
+                            </span> 
+                            <span class="text-slate-500 whitespace-nowrap">${fileSize} MB</span>
+                        `;
+                        fileListContainer.appendChild(fileItem);
+                    });
+                }
+            });
+        }
+
+        // Converte arquivos para Base64 para envio JSON seguro
+        const getBase64 = (file) => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                // Remove o cabeçalho 'data:image/jpeg;base64,' e envia puro para o Google
+                let encoded = reader.result.toString().replace(/^data:(.*,)?/, '');
+                if ((encoded.length % 4) > 0) {
+                    encoded += '='.repeat(4 - (encoded.length % 4));
+                }
+                resolve({
+                    name: file.name,
+                    mimeType: file.type,
+                    base64: encoded
+                });
+            };
+            reader.onerror = error => reject(error);
+        });
 
         if(form) {
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const btn = document.getElementById('submitBtn');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = 'ENVIANDO...';
-                btn.disabled = true;
 
-                const address = document.getElementById('address').value;
-                const ref = document.getElementById('reference').value;
-                const desc = document.getElementById('description').value;
-
-                // Tenta enviar para Formspree (Silent fail se não configurar)
-                try {
-                    const formData = new FormData();
-                    formData.append('message', `LOCAL: ${address}\nREF: ${ref}\nDESC: ${desc}`);
-                    fetch(FORMSPREE_ENDPOINT, { method: 'POST', body: formData, headers: {'Accept': 'application/json'} });
-                } catch(err) { console.log(err); }
-
-                const whatsappText = `*DENÚNCIA VOZ ANIMAL FSA*\n📍 Local: ${address}\n🏢 Ref: ${ref}\n📝 Relato: ${desc}`;
-                
-                try {
-                    await navigator.clipboard.writeText(whatsappText);
-                    showToast("Texto copiado! Cole no grupo do WhatsApp.");
-                } catch (err) {
-                    const ta = document.createElement('textarea');
-                    ta.value = whatsappText;
-                    document.body.appendChild(ta);
-                    ta.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(ta);
-                    showToast("Texto copiado! Cole no grupo.");
+                if (GOOGLE_SCRIPT_URL === "COLE_A_SUA_URL_AQUI") {
+                    showToast("Por favor, cole a URL do Google Script no código do site.", "error");
+                    return;
                 }
 
-                setTimeout(() => {
-                    window.open(GROUP_LINK, '_blank');
-                    btn.innerHTML = originalText;
+                const btn = document.getElementById('submitBtn');
+                const btnText = document.getElementById('btnText');
+                const originalText = btnText.innerHTML;
+                
+                btnText.innerHTML = 'ANEXANDO E ENVIANDO...';
+                btn.disabled = true;
+
+                try {
+                    // Prepara os dados de texto
+                    const address = document.getElementById('address').value;
+                    const ref = document.getElementById('reference').value;
+                    const desc = document.getElementById('description').value;
+
+                    // Prepara os Anexos
+                    const filePromises = [];
+                    if (mediaFilesInput && mediaFilesInput.files.length > 0) {
+                        for (let file of mediaFilesInput.files) {
+                            filePromises.push(getBase64(file));
+                        }
+                    }
+                    const filesData = await Promise.all(filePromises);
+
+                    // Cria o "pacote" que vai para o Google
+                    const payload = {
+                        address: address,
+                        ref: ref,
+                        desc: desc,
+                        files: filesData
+                    };
+
+                    // Envia para o Google Apps Script usando text/plain para contornar bloqueios CORS
+                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: "POST",
+                        body: JSON.stringify(payload),
+                        headers: {
+                            "Content-Type": "text/plain;charset=utf-8"
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if(result.status === "success") {
+                        showToast("Denúncia e anexos enviados com sucesso!");
+                        form.reset();
+                        if(fileListContainer) fileListContainer.innerHTML = '';
+                    } else {
+                        console.error("Erro Script:", result.message);
+                        showToast("Ocorreu um erro ao processar. Arquivos muito pesados?", "error");
+                    }
+                } catch(err) { 
+                    console.error(err); 
+                    showToast("Erro durante o processo de envio. Verifique a internet.", "error");
+                } finally {
+                    btnText.innerHTML = originalText;
                     btn.disabled = false;
-                }, 1500);
+                }
             });
         }
     </script>
