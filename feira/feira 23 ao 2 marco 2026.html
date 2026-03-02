@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Análise Estratégica - DIRPIN LESTE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Chosen Palette: Policial Executivo (Slate Claro, Azul Marinho, Vermelho Alerta, Âmbar) -->
+    <!-- Application Structure Plan: O SPA utiliza uma abordagem de "Dashboard Executivo Policial". A estrutura foi desenhada para leitura rápida por decisores. Inclui um cabeçalho de inteligência, uma seção de Briefing com KPIs para impacto imediato, um painel visual com gráficos interativos para comparação de dados, uma área de análise dinâmica em abas para detalhar a mancha criminal sem poluição visual, e finaliza com a matriz de risco e a conclusão do investigador, garantindo uma navegação fluida e orientada à tomada de decisão tática. -->
+    <!-- Visualization & Content Choices: KPIs HTML para informar volumes críticos rapidamente. Gráfico de Rosca (Chart.js) para comparar a proporção do volume criminal. Gráfico de Barras Horizontais (Chart.js) para o ranking de produtividade das delegacias. Navegação em Abas (JS) para organizar os textos longos de "Mancha Criminal". Tabela HTML Estilizada para a Matriz de Risco. Tudo implementado usando HTML, CSS (Tailwind) e JS puro, garantindo total ausência de SVGs. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .chart-container.large-chart {
+                max-width: 100%;
+                height: 400px;
+            }
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .tab-btn.active {
+            border-bottom-width: 4px;
+            border-color: #1e3a8a;
+            color: #1e3a8a;
+            font-weight: 700;
+            background-color: #eff6ff;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stamp-reservado {
+            border: 3px solid #dc2626;
+            color: #dc2626;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.25rem 0.75rem;
+            transform: rotate(-5deg);
+            display: inline-block;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-blue-200 selection:text-blue-900">
+
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                <span class="text-3xl" aria-hidden="true">&#x1F4BE;</span>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">DIRPIN LESTE <span class="text-blue-400 font-normal">| Inteligência</span></h1>
+                    <p class="text-xs text-slate-400 font-mono">Painel de Análise Estratégica e Dinâmica Criminal 2026</p>
+                </div>
+            </div>
+            <div class="text-right flex flex-col items-end">
+                <div class="stamp-reservado text-xs mb-1">RESERVADO</div>
+                <p class="text-sm font-semibold text-slate-300">Ref: 23/02/2026 a 01/03/2026</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+        <section id="briefing" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+            <div class="flex flex-col md:flex-row gap-6">
+                <div class="md:w-2/3">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-3 flex items-center">
+                        <span class="mr-2 text-2xl">&#x26A0;&#xFE0F;</span> Sumário Executivo e Alerta de Risco
+                    </h2>
+                    <p class="text-slate-600 mb-4 leading-relaxed">
+                        Esta seção inicial estabelece o cenário macro da ambiência criminal na 1ª COORPIN - Feira de Santana. Seu propósito é fornecer aos tomadores de decisão um resumo imediato e quantitativo das ameaças, permitindo a rápida assimilação dos focos de crise antes da exploração aprofundada dos dados subsequentes.
+                    </p>
+                    <div class="bg-red-50 border-l-4 border-red-600 p-4 rounded-r-lg">
+                        <p class="text-slate-800 font-medium">
+                            A semana evidenciou um contraste brutal: uma <strong class="text-red-700">explosão nos registros de Estelionato/Fraude (156 casos)</strong>, demonstrando clara migração de quadrilhas para o cibercrime.
+                        </p>
+                        <p class="text-slate-700 mt-2 text-sm">
+                            Por outro lado, a PCBA performou de maneira positiva na contenção imediata, via flagrantes, dos Crimes Contra o Patrimônio com Violência (63 casos). A Violência Doméstica (60 casos) permanece como fator de atenção máxima, exigindo alta resiliência da DEAM. A letalidade (DH) contabilizou 4 CVLI, apontando estabilidade.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="md:w-1/3 bg-slate-50 p-5 rounded-lg border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-b pb-2">Mineração de Dados</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex items-start">
+                            <span class="text-red-500 mr-2 mt-0.5">&#x1F6A8;</span>
+                            <span><strong>Fonte Cicom (23/02):</strong> Latrocínio registrado mobiliza equipes da DRFR.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-amber-500 mr-2 mt-0.5">&#x1F4DD;</span>
+                            <span><strong>Fonte SSP/BA (26/02):</strong> Tentativa de homicídio/feminicídio com atuação imediata da DEAM.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2 mt-0.5">&#x1F4BB;</span>
+                            <span><strong>Fonte OSINT (28/02):</strong> Alerta sobre aumento expressivo de golpes digitais e falsas centrais de investimento.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+                <div class="bg-white border border-slate-200 rounded-lg p-4 flex items-center shadow-sm hover:shadow-md transition-shadow">
+                    <div class="p-3 bg-red-100 text-red-700 rounded-full mr-4 text-xl">&#x1F4BB;</div>
+                    <div>
+                        <p class="text-sm text-slate-500 font-semibold uppercase">Estelionatos</p>
+                        <p class="text-3xl font-black text-slate-800">156</p>
+                        <p class="text-xs text-red-600 font-bold mt-1">&#x2191; 1ª DT, 2ª DT, DRFR</p>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-lg p-4 flex items-center shadow-sm hover:shadow-md transition-shadow">
+                    <div class="p-3 bg-orange-100 text-orange-700 rounded-full mr-4 text-xl">&#x1F6B4;</div>
+                    <div>
+                        <p class="text-sm text-slate-500 font-semibold uppercase">Patrimônio (CVP)</p>
+                        <p class="text-3xl font-black text-slate-800">63</p>
+                        <p class="text-xs text-slate-500 font-medium mt-1">Roubo Majorado</p>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-lg p-4 flex items-center shadow-sm hover:shadow-md transition-shadow">
+                    <div class="p-3 bg-purple-100 text-purple-700 rounded-full mr-4 text-xl">&#x1F469;&#x200D;&#x1F466;</div>
+                    <div>
+                        <p class="text-sm text-slate-500 font-semibold uppercase">Violência Doméstica</p>
+                        <p class="text-3xl font-black text-slate-800">60</p>
+                        <p class="text-xs text-purple-600 font-bold mt-1">Alta Pressão na DEAM</p>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-lg p-4 flex items-center shadow-sm hover:shadow-md transition-shadow">
+                    <div class="p-3 bg-slate-800 text-white rounded-full mr-4 text-xl">&#x1F52B;</div>
+                    <div>
+                        <p class="text-sm text-slate-500 font-semibold uppercase">CVLI / Tentativas</p>
+                        <p class="text-3xl font-black text-slate-800">12</p>
+                        <p class="text-xs text-slate-500 font-medium mt-1">6 Consumados, 6 Tentados</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="graficos" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
+                <div class="mb-4">
+                    <h3 class="text-lg font-bold text-slate-900 flex items-center">
+                        <span class="mr-2 text-xl">&#x1F4CA;</span> Proporção da Mancha Criminal
+                    </h3>
+                    <p class="text-sm text-slate-500 mt-2">
+                        Esta visualização tem o objetivo de evidenciar a desproporção entre os crimes investigados na semana. Interaja passando o mouse sobre o gráfico para revelar os volumes exatos, comprovando o domínio quantitativo dos estelionatos frente às naturezas violentas.
+                    </p>
+                </div>
+                <div class="chart-container flex-grow">
+                    <canvas id="crimeDistributionChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
+                <div class="mb-4">
+                    <h3 class="text-lg font-bold text-slate-900 flex items-center">
+                        <span class="mr-2 text-xl">&#x1F3E2;</span> Demanda por Unidade Policial (Top 5)
+                    </h3>
+                    <p class="text-sm text-slate-500 mt-2">
+                        Este painel traduz a carga de trabalho recebida por cada delegacia. Ele permite identificar gargalos operacionais imediatos, destacando como a 1ª Delegacia Territorial e a DEAM estão absorvendo a maior parte da pressão criminal da região.
+                    </p>
+                </div>
+                <div class="chart-container flex-grow">
+                    <canvas id="unitWorkloadChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="analise-detalhada" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 md:px-8 md:pt-8 md:pb-4 border-b border-slate-200 bg-slate-50">
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center mb-2">
+                    <span class="mr-2 text-2xl">&#x1F50D;</span> Análise Detalhada (Modus Operandi)
+                </h2>
+                <p class="text-slate-600 text-sm">
+                    Esta seção agrupa a análise qualitativa das naturezas criminais. Utilize a navegação por abas abaixo para isolar e investigar a dinâmica delitiva, o impacto social e as ocorrências relevantes de cada eixo criminal, facilitando a leitura sem a necessidade de rolagem excessiva.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap border-b border-slate-200 bg-white px-2">
+                <button class="tab-btn active px-4 py-3 text-sm font-semibold text-slate-600 hover:text-blue-800 transition-colors duration-200 focus:outline-none" onclick="openTab(event, 'tab-fraude')">
+                    &#x1F4BB; Estelionato & Fraude
+                </button>
+                <button class="tab-btn px-4 py-3 text-sm font-semibold text-slate-600 hover:text-blue-800 transition-colors duration-200 focus:outline-none" onclick="openTab(event, 'tab-cvp')">
+                    &#x1F6B4; Patrimônio (CVP)
+                </button>
+                <button class="tab-btn px-4 py-3 text-sm font-semibold text-slate-600 hover:text-blue-800 transition-colors duration-200 focus:outline-none" onclick="openTab(event, 'tab-domestica')">
+                    &#x1F469;&#x200D;&#x1F466; Violência Doméstica
+                </button>
+                <button class="tab-btn px-4 py-3 text-sm font-semibold text-slate-600 hover:text-blue-800 transition-colors duration-200 focus:outline-none" onclick="openTab(event, 'tab-cvli')">
+                    &#x26B0;&#xFE0F; Vida (CVLI)
+                </button>
+            </div>
+
+            <div class="p-6 md:p-8">
+                
+                <div id="tab-fraude" class="tab-content active">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-blue-900 mb-4 border-l-4 border-blue-600 pl-3">Estelionatos e Fraudes (Cibernético e Engenharia Social)</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold text-slate-800 flex items-center"><span class="mr-2 text-blue-600">&#x2699;&#xFE0F;</span> Dinâmica (Modus Operandi)</h4>
+                                    <p class="text-sm text-slate-600 mt-1">Contas laranjas, falsas plataformas de investimento e clonagem de dados. Trata-se do crime de maior incidência absoluta do período.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                            <h4 class="font-bold text-slate-800 mb-3 border-b pb-2">Ocorrências Relevantes</h4>
+                            <div class="space-y-3">
+                                <div class="bg-white p-4 rounded border-l-4 border-red-500 shadow-sm">
+                                    <p class="text-xs font-mono text-slate-500 mb-1">BO 00145651/2026 | DRFR (23/02)</p>
+                                    <p class="text-sm text-slate-600">Fraude massiva envolvendo mais de 15 suspeitos listados, incluindo "Empresas de Limpeza" e pessoas físicas atuando como estrutura de lavagem/recebimento de recursos.</p>
+                                </div>
+                                <div class="bg-white p-4 rounded border-l-4 border-red-500 shadow-sm">
+                                    <p class="text-xs font-mono text-slate-500 mb-1">BO 00162024/2026 | CF (28/02)</p>
+                                    <p class="text-sm text-slate-600">Fraudes complexas documentais, incluindo cédulas de produto rural.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-cvp" class="tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-amber-600 mb-4 border-l-4 border-amber-500 pl-3">Crimes Contra o Patrimônio (CVP - Com Violência)</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold text-slate-800 flex items-center"><span class="mr-2 text-amber-500">&#x2699;&#xFE0F;</span> Dinâmica (Modus Operandi)</h4>
+                                    <p class="text-sm text-slate-600 mt-1">Prática reiterada de roubos em vias públicas com o concurso de duas ou mais pessoas ("arrastões" por duplas em motocicletas). Predominância do uso de arma de fogo.</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-slate-800 flex items-center"><span class="mr-2 text-amber-500">&#x1F6E1;&#xFE0F;</span> Destaques Operacionais</h4>
+                                    <p class="text-sm text-slate-600 mt-1">Pronto Emprego: Rápida resposta da Central de Flagrantes, consolidando prisões integradas com a PMBA (67ª CIPM, ocorrência BO 00163315/2026).</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                            <h4 class="font-bold text-slate-800 mb-3 border-b pb-2">Ocorrências Relevantes</h4>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded border-l-4 border-amber-400 shadow-sm">
+                                    <p class="text-xs font-mono text-slate-500 mb-1">BO 00164303/2026 | CF (01/03)</p>
+                                    <p class="text-sm text-slate-700">Roubo majorado pelo emprego de arma de fogo.</p>
+                                </div>
+                                <div class="bg-white p-3 rounded border-l-4 border-amber-400 shadow-sm">
+                                    <p class="text-xs font-mono text-slate-500 mb-1">BO 00152470/2026-A01 | CF (25/02)</p>
+                                    <p class="text-sm text-slate-700">Roubo com aumento de pena pelo concurso de 3 autores "Desconhecidos" contra múltiplas vítimas simultâneas.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-domestica" class="tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-purple-700 mb-4 border-l-4 border-purple-600 pl-3">Violência Doméstica (Lei Maria da Penha)</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold text-slate-800 flex items-center"><span class="mr-2 text-purple-600">&#x2699;&#xFE0F;</span> Dinâmica e Fator Social</h4>
+                                    <p class="text-sm text-slate-600 mt-1">Pico altíssimo durante o final de semana. Concentração em crimes de Ameaça, Injúria e Vias de Fato. Destaque para o crescimento do crime de Perseguição (Stalking). Repercussão crítica na base comunitária, refletindo dependência emocional e financeira das vítimas.</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-slate-800 flex items-center"><span class="mr-2 text-purple-600">&#x1F6E1;&#xFE0F;</span> Atendimento Especializado Ativo</h4>
+                                    <p class="text-sm text-slate-600 mt-1">O volume assustador de 56 ocorrências processadas pela DEAM em uma única semana evidencia o esforço homérico do efetivo em não deixar vítimas de gênero sem assistência cautelar e registro policial.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-5 rounded-lg border border-slate-200 overflow-y-auto max-h-[300px]">
+                            <h4 class="font-bold text-slate-800 mb-3 border-b pb-2">Ocorrências Relevantes</h4>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded border-l-4 border-purple-500 shadow-sm">
+                                    <p class="text-xs font-mono text-slate-500 mb-1">BO 00163966/2026-A01 | DEAM (01/03 14:34)</p>
+                                    <p class="text-sm text-slate-700">Vias de fato com resistência à prisão e flagrante por descumprimento de Medida Protetiva de Urgência.</p>
+                                </div>
+                                <div class="bg-white p-3 rounded border-l-4 border-purple-500 shadow-sm">
+                                    <p class="text-xs font-mono text-slate-500 mb-1">BO 00163281/2026 | DEAM (28/02 20:51)</p>
+                                    <p class="text-sm text-slate-700">Perseguição (Stalking - Art. 147-A). Vítima monitorada pelo autor de forma sistemática.</p>
+                                </div>
+                                <div class="bg-white p-3 rounded border-l-4 border-purple-900 shadow-sm">
+                                    <p class="text-xs font-mono text-slate-500 mb-1">BO 00159449/2026-A01 | DAI (27/02 12:09)</p>
+                                    <p class="text-sm text-slate-700 font-semibold text-red-600">Estupro de Vulnerável em contexto de Violência Doméstica.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-cvli" class="tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900 mb-4 border-l-4 border-slate-800 pl-3">Crimes Contra a Vida (CVLI e Tentativas)</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold text-slate-800 flex items-center"><span class="mr-2 text-slate-700">&#x2699;&#xFE0F;</span> Dinâmica (Modus Operandi)</h4>
+                                    <p class="text-sm text-slate-600 mt-1">Execuções rápidas e diretas predominantemente com emprego de arma de fogo. A maioria dos registros iniciais aponta para autores "Desconhecidos". Observou-se ocorrência gravíssima de roubo seguido de morte (latrocínio), o que denota sobreposição de criminosos patrimoniais violentos no território.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                            <h4 class="font-bold text-slate-800 mb-3 border-b pb-2">Ocorrências Relevantes</h4>
+                            <div class="space-y-3">
+                                <div class="bg-black p-3 rounded border-l-4 border-red-600 shadow-sm text-white">
+                                    <p class="text-xs font-mono text-slate-400 mb-1">BO 00149050/2026 | DRFR (23/02 19:43)</p>
+                                    <p class="text-sm font-bold uppercase tracking-wide">Latrocínio (Roubo seguido de Morte - Hediondo).</p>
+                                </div>
+                                <div class="bg-white p-3 rounded border-l-4 border-slate-800 shadow-sm">
+                                    <p class="text-xs font-mono text-slate-500 mb-1">BO 00163005/2026-A02 | DH (28/02 20:17)</p>
+                                    <p class="text-sm text-slate-700">Homicídio Simples. Vítima: Joab Brito Azevedo.</p>
+                                </div>
+                                <div class="bg-white p-3 rounded border-l-4 border-slate-800 shadow-sm">
+                                    <p class="text-xs font-mono text-slate-500 mb-1">BO 00160420/2026 | DH (27/02 14:19)</p>
+                                    <p class="text-sm text-slate-700">Homicídio e Tentativa de Homicídio com múltiplas vítimas (Daniel e Marlene), com indício de ação em grupo.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="matriz-risco" class="space-y-6">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900 flex items-center">
+                        <span class="mr-2 text-2xl">&#x1F3AF;</span> Matriz de Risco e Recomendações
+                    </h2>
+                    <p class="text-sm text-slate-600 mt-2">
+                        Esta tabela organiza taticamente os ambientes críticos da região, associando o nível de risco aos fatores geradores. O objetivo é fornecer à ASCOM (Assessoria de Comunicação) diretrizes claras para ações de marketing policial direcionado.
+                    </p>
+                </div>
+
+                <div class="overflow-x-auto rounded-lg border border-slate-200">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-slate-100 text-slate-700 font-semibold uppercase text-xs">
+                            <tr>
+                                <th class="px-4 py-3 border-b">Cidade / Região</th>
+                                <th class="px-4 py-3 border-b">Risco</th>
+                                <th class="px-4 py-3 border-b">Fator Crítico</th>
+                                <th class="px-4 py-3 border-b">Recomendação ASCOM</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-4 py-4 font-medium text-slate-900">Feira de Santana (Macro)</td>
+                                <td class="px-4 py-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                        &#x1F534; CRÍTICO
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 text-slate-600">Explosão de golpes (156 Estelionatos).</td>
+                                <td class="px-4 py-4 text-slate-700 font-medium italic">Disparar campanha "Alerta Cyber PCBA" nas mídias regionais.</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-4 py-4 font-medium text-slate-900">Feira de Santana (Periferia)</td>
+                                <td class="px-4 py-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
+                                        &#x1F7E0; ALTO
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 text-slate-600">Violência de Gênero reprimida no final de semana.</td>
+                                <td class="px-4 py-4 text-slate-700 font-medium italic">Fomentar vídeos institucionais humanizando o fluxo da DEAM.</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-4 py-4 font-medium text-slate-900">Feira de Santana (Vias Estruturais)</td>
+                                <td class="px-4 py-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                        &#x1F7E1; MÉDIO
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 text-slate-600">Roubos com concurso de 2 ou mais pessoas.</td>
+                                <td class="px-4 py-4 text-slate-700 font-medium italic">Divulgação de apreensões da DRFR para desestimular práticas.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-8 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-5 shadow-inner">
+                    <h3 class="text-amber-800 font-bold flex items-center mb-2">
+                        <span class="mr-2 text-xl">&#x1F3C6;</span> Oportunidade de Ouro
+                    </h3>
+                    <p class="text-slate-800 text-sm leading-relaxed">
+                        Promover uma coletiva ou release de marketing policial positivo, demonstrando como a PCBA na DIRPIN Leste possui "Inteligência Orientada a Dados", mapeando em tempo real não apenas os crimes de sangue, mas também combatendo ativamente a impunidade digital (Estelionato).
+                    </p>
+                </div>
+            </div>
+            
+            <div class="bg-slate-900 text-slate-300 rounded-xl p-6 md:p-8 shadow-md">
+                <h3 class="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">&#x1F4CB; Conclusão</h3>
+                <p class="mb-4 text-sm leading-relaxed text-slate-300">
+                    A radiografia semanal da 1ª COORPIN - Feira de Santana revela um ecossistema criminal em transição. O dado mais alarmante não reside apenas na letalidade (estabilizada), mas no dreno de capacidade investigativa causado pelas 156 tipificações de Estelionato e Fraudes. Recomenda-se em caráter gerencial o estudo para a implementação de um Núcleo de Repressão a Crimes Cibernéticos a nível de DIRPIN.
+                </p>
+                <p class="mb-6 text-sm leading-relaxed text-slate-300">
+                    Adicionalmente, o número de vítimas buscando a DEAM (60 registros críticos) reitera a necessidade de manutenção integral do efetivo daquela especializada. A atividade de polícia judiciária e a confecção rápida de flagrantes foram determinantes para conter o recrudescimento dos delitos patrimoniais violentos no período.
+                </p>
+                
+                <div class="text-right border-t border-slate-700 pt-6 mt-6">
+                    <p class="text-white font-bold text-lg tracking-wide uppercase">Félix Rilton</p>
+                    <p class="text-sm text-blue-300 font-medium">Investigador PCBA | Análise Criminal - DIRPIN LESTE</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- NOVO: Relatório Completo em Texto -->
+        <section id="relatorio-completo" class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 md:p-12 mt-10 print:shadow-none print:border-none print:m-0 print:p-0">
+            
+            <!-- Cabeçalho do Relatório -->
+            <div class="border-b-2 border-slate-900 pb-4 mb-8">
+                <h2 class="text-2xl font-black text-center uppercase mb-6 tracking-wide">Relatório de Análise Estratégica e Dinâmica Criminal 2026 - DIRPIN LESTE</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-800">
+                    <p><strong>PARA:</strong> Gabinete do Diretor da DIRPIN - LESTE / Coordenador da 1ª COORPIN Feira de Santana / ASCOM</p>
+                    <p><strong>DE:</strong> Ponto Focal de Inteligência e Análise Criminal - DIRPIN LESTE</p>
+                    <p><strong>DATA:</strong> 02 de Março de 2026</p>
+                    <p><strong>PERÍODO:</strong> 23/02/2026 a 01/03/2026</p>
+                </div>
+                <div class="mt-6 text-sm text-slate-800">
+                    <p><strong>ASSUNTO:</strong> ALERTA DE RISCO: EXPLOSÃO DE ESTELIONATOS E INCIDÊNCIA CRÍTICA DE VIOLÊNCIA DOMÉSTICA</p>
+                    <p class="mt-3"><span class="bg-red-600 text-white px-3 py-1 font-bold text-xs uppercase tracking-wider rounded-sm">CLASSIFICAÇÃO: RESERVADO</span></p>
+                </div>
+            </div>
+
+            <!-- Corpo do Relatório -->
+            <div class="space-y-8 text-slate-800 text-sm leading-relaxed">
+                
+                <!-- I. MINERAÇÃO DE DADOS -->
+                <div>
+                    <h3 class="text-lg font-bold border-b border-slate-300 pb-1 mb-3 text-slate-900">I. MINERAÇÃO DE DADOS (OSINT & HUMINT)</h3>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>Fonte PCBA/Cicom (23/02):</strong> Latrocínio registrado mobiliza equipes da Delegacia de Repressão a Furtos e Roubos (DRFR).</li>
+                        <li><strong>Fonte SSP/BA (26/02):</strong> Tentativa de homicídio/feminicídio com atuação imediata da DEAM de Feira de Santana.</li>
+                        <li><strong>Fonte OSINT/Redes Sociais (28/02):</strong> Alerta de cidadãos sobre aumento expressivo de golpes digitais e falsas centrais de investimento na região de Feira de Santana.</li>
+                    </ul>
+                </div>
+
+                <!-- 1. SUMÁRIO EXECUTIVO -->
+                <div>
+                    <h3 class="text-lg font-bold border-b border-slate-300 pb-1 mb-3 text-slate-900">1. SUMÁRIO EXECUTIVO (BRIEFING)</h3>
+                    <p class="text-justify">O presente relatório mapeia a ambiência criminal da 1ª COORPIN - Feira de Santana (recorte de 23/02 a 01/03). A semana evidenciou um contraste brutal: explosão nos registros de Estelionato/Fraude (156 casos), demonstrando clara migração de quadrilhas para o cibercrime. Por outro lado, a PCBA performou de maneira positiva na contenção imediata, via flagrantes, dos Crimes Contra o Patrimônio com Violência (63 casos). A Violência Doméstica (60 casos) permanece como fator de atenção máxima, exigindo alta resiliência da DEAM. A Delegacia de Homicídios (DH) contabilizou 4 CVLI, apontando estabilidade em relação à letalidade urbana de facções, mas requerendo atenção investigativa na identificação das autorias iniciais ("Desconhecidos").</p>
+                </div>
+
+                <!-- 2. INDICADORES QUANTITATIVOS -->
+                <div>
+                    <h3 class="text-lg font-bold border-b border-slate-300 pb-1 mb-3 text-slate-900">2. INDICADORES QUANTITATIVOS SELECIONADOS</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse border border-slate-300">
+                            <thead class="bg-slate-100">
+                                <tr>
+                                    <th class="border border-slate-300 p-2 text-slate-900">Grupo Delitivo</th>
+                                    <th class="border border-slate-300 p-2 text-slate-900">Quantidade</th>
+                                    <th class="border border-slate-300 p-2 text-slate-900">Principais Naturezas</th>
+                                    <th class="border border-slate-300 p-2 text-slate-900">Unidades Envolvidas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="border border-slate-300 p-2 font-medium">Estelionato e Fraudes</td><td class="border border-slate-300 p-2 text-center">156</td><td class="border border-slate-300 p-2">Art. 171 (Estelionato), Fraude Eletrônica</td><td class="border border-slate-300 p-2">1ª DT, 2ª DT, DRFR</td></tr>
+                                <tr><td class="border border-slate-300 p-2 font-medium">Crimes Contra o Patrimônio</td><td class="border border-slate-300 p-2 text-center">63</td><td class="border border-slate-300 p-2">Roubo Majorado, Roubo com Arma de Fogo</td><td class="border border-slate-300 p-2">1ª DT, 2ª DT, DRFR, CF</td></tr>
+                                <tr><td class="border border-slate-300 p-2 font-medium">Violência Doméstica</td><td class="border border-slate-300 p-2 text-center">60</td><td class="border border-slate-300 p-2">Lesão Corporal (Art. 129), Ameaça, Stalking</td><td class="border border-slate-300 p-2">DEAM, 2ª DT, DAI</td></tr>
+                                <tr><td class="border border-slate-300 p-2 font-medium">CVLI (Homicídio/Latrocínio)</td><td class="border border-slate-300 p-2 text-center">6</td><td class="border border-slate-300 p-2">Homicídio Simples, Latrocínio</td><td class="border border-slate-300 p-2">DH, DRFR, 1ª Coorpin</td></tr>
+                                <tr><td class="border border-slate-300 p-2 font-medium">Tentativa de CVLI</td><td class="border border-slate-300 p-2 text-center">6</td><td class="border border-slate-300 p-2">Tentativa de Homicídio / Feminicídio</td><td class="border border-slate-300 p-2">1ª DT, DH, DEAM, CF</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. ANÁLISE DETALHADA DA MANCHA CRIMINAL -->
+                <div>
+                    <h3 class="text-lg font-bold border-b border-slate-300 pb-1 mb-4 text-slate-900">3. ANÁLISE DETALHADA DA MANCHA CRIMINAL</h3>
+                    <div class="space-y-6 text-justify">
+                        
+                        <!-- CVLI -->
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-base mb-1">📍 Crimes Contra a Vida (CVLI e Tentativas)</h4>
+                            <p class="mb-2"><strong>Dinâmica (Modus Operandi):</strong> Execuções rápidas e diretas predominantemente com emprego de arma de fogo. A maioria dos registros iniciais aponta para autores "Desconhecidos". Observou-se ocorrência gravíssima de roubo seguido de morte (latrocínio), o que denota sobreposição de criminosos patrimoniais violentos no território.</p>
+                            <p><strong>Ocorrências Relevantes:</strong></p>
+                            <ul class="list-disc pl-5 mt-1 space-y-1">
+                                <li><strong>BO 00163005/2026-A02 (DH - 28/02 20:17):</strong> Homicídio Simples. Vítima: Joab Brito Azevedo.</li>
+                                <li><strong>BO 00149050/2026 (DRFR - 23/02 19:43):</strong> Latrocínio (Roubo seguido de Morte - Hediondo).</li>
+                                <li><strong>BO 00160420/2026 (DH - 27/02 14:19):</strong> Homicídio e Tentativa de Homicídio com múltiplas vítimas (Daniel e Marlene), com indício de ação em grupo.</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Violência Doméstica -->
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-base mb-1">📍 Violência Doméstica (Lei Maria da Penha)</h4>
+                            <p class="mb-2"><strong>Dinâmica (Modus Operandi):</strong> Pico altíssimo durante o final de semana. Concentração em crimes de Ameaça, Injúria e Vias de Fato. Destaque para o crescimento do crime de Perseguição (Stalking).</p>
+                            <p class="mb-2"><strong>Fator Social:</strong> Repercussão crítica na base comunitária, refletindo dependência emocional e financeira das vítimas.</p>
+                            <p><strong>Ocorrências Relevantes:</strong></p>
+                            <ul class="list-disc pl-5 mt-1 space-y-1">
+                                <li><strong>BO 00163966/2026-A01 (DEAM - 01/03 14:34):</strong> Vias de fato com resistência à prisão e flagrante por descumprimento de Medida Protetiva de Urgência.</li>
+                                <li><strong>BO 00163281/2026 (DEAM - 28/02 20:51):</strong> Perseguição (Stalking - Art. 147-A). Vítima monitorada pelo autor de forma sistemática.</li>
+                                <li><strong>BO 00159449/2026-A01 (DAI - 27/02 12:09):</strong> Estupro de Vulnerável em contexto de Violência Doméstica.</li>
+                            </ul>
+                        </div>
+
+                        <!-- CVP -->
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-base mb-1">📍 Crimes Contra o Patrimônio (CVP - Com Violência)</h4>
+                            <p class="mb-2"><strong>Dinâmica (Modus Operandi):</strong> Prática reiterada de roubos em vias públicas com o concurso de duas ou mais pessoas ("arrastões" por duplas em motocicletas). Predominância do uso de arma de fogo.</p>
+                            <p><strong>Ocorrências Relevantes:</strong></p>
+                            <ul class="list-disc pl-5 mt-1 space-y-1">
+                                <li><strong>BO 00164303/2026 (Central de Flagrantes - 01/03):</strong> Roubo majorado pelo emprego de arma de fogo.</li>
+                                <li><strong>BO 00152470/2026-A01 (Central de Flagrantes - 25/02):</strong> Roubo com aumento de pena pelo concurso de 3 autores "Desconhecidos" contra múltiplas vítimas simultâneas.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Estelionato -->
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-base mb-1">📍 Estelionatos e Fraudes (Cibernético e Engenharia Social)</h4>
+                            <p class="mb-2"><strong>Dinâmica (Modus Operandi):</strong> Contas laranjas, falsas plataformas de investimento e clonagem de dados. Trata-se do crime de maior incidência absoluta do período.</p>
+                            <p><strong>Ocorrências Relevantes:</strong></p>
+                            <ul class="list-disc pl-5 mt-1 space-y-1">
+                                <li><strong>BO 00145651/2026 (DRFR - 23/02):</strong> Fraude massiva envolvendo mais de 15 suspeitos listados, incluindo "Empresas de Limpeza" e pessoas físicas atuando como estrutura de lavagem/recebimento de recursos.</li>
+                                <li><strong>BO 00162024/2026 (Central de Flagrantes - 28/02):</strong> Fraudes complexas documentais, incluindo cédulas de produto rural.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. DESTAQUES OPERACIONAIS -->
+                <div>
+                    <h3 class="text-lg font-bold border-b border-slate-300 pb-1 mb-3 text-slate-900">4. DESTAQUES OPERACIONAIS</h3>
+                    <ul class="list-disc pl-5 space-y-2 text-justify">
+                        <li><strong>Pronto Emprego:</strong> Rápida resposta da Central de Flagrantes, consolidando prisões integradas com a PMBA (67ª CIPM, ocorrência BO 00163315/2026).</li>
+                        <li><strong>Atendimento Especializado Ativo:</strong> O volume assustador de 56 ocorrências processadas pela DEAM de Feira de Santana em uma única semana evidencia o esforço homérico do efetivo em não deixar vítimas de gênero sem assistência cautelar e registro policial.</li>
+                    </ul>
+                </div>
+
+                <!-- 5. MATRIZ DE RISCO -->
+                <div>
+                    <h3 class="text-lg font-bold border-b border-slate-300 pb-1 mb-3 text-slate-900">5. MATRIZ DE RISCO E RECOMENDAÇÕES</h3>
+                    <div class="overflow-x-auto mb-4">
+                        <table class="w-full text-left border-collapse border border-slate-300">
+                            <thead class="bg-slate-100">
+                                <tr>
+                                    <th class="border border-slate-300 p-2 text-slate-900">Cidade / Região</th>
+                                    <th class="border border-slate-300 p-2 text-slate-900">Risco</th>
+                                    <th class="border border-slate-300 p-2 text-slate-900">Fator Crítico</th>
+                                    <th class="border border-slate-300 p-2 text-slate-900">Recomendação ASCOM</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="border border-slate-300 p-2">Feira de Santana (Macro)</td><td class="border border-slate-300 p-2 text-red-700 font-bold whitespace-nowrap">🔴 CRÍTICO</td><td class="border border-slate-300 p-2">Explosão de golpes (156 Estelionatos).</td><td class="border border-slate-300 p-2 italic">Disparar campanha "Alerta Cyber PCBA" nas mídias regionais.</td></tr>
+                                <tr><td class="border border-slate-300 p-2">Feira de Santana (Periferia)</td><td class="border border-slate-300 p-2 text-orange-600 font-bold whitespace-nowrap">🟠 ALTO</td><td class="border border-slate-300 p-2">Violência de Gênero reprimida no final de semana.</td><td class="border border-slate-300 p-2 italic">Fomentar vídeos institucionais humanizando o fluxo da DEAM.</td></tr>
+                                <tr><td class="border border-slate-300 p-2">Feira de Santana (Vias Estruturais)</td><td class="border border-slate-300 p-2 text-yellow-600 font-bold whitespace-nowrap">🟡 MÉDIO</td><td class="border border-slate-300 p-2">Roubos com concurso de 2 ou mais pessoas.</td><td class="border border-slate-300 p-2 italic">Divulgação de apreensões da DRFR para desestimular práticas.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded text-slate-800 text-justify">
+                        <strong class="text-yellow-700">OPORTUNIDADE DE OURO:</strong> Promover uma coletiva ou release de marketing policial positivo, demonstrando como a PCBA na DIRPIN Leste possui "Inteligência Orientada a Dados", mapeando em tempo real não apenas os crimes de sangue, mas também combatendo ativamente a impunidade digital (Estelionato).
+                    </div>
+                </div>
+
+                <!-- TABELAS TÉCNICAS -->
+                <div>
+                    <h3 class="text-lg font-bold border-b border-slate-300 pb-1 mb-4 text-slate-900">TABELAS TÉCNICAS</h3>
+                    
+                    <h4 class="font-bold text-slate-800 mb-2">Tabela 1: Indicadores de Violência e Tendências (1ª COORPIN)</h4>
+                    <div class="overflow-x-auto mb-6">
+                        <table class="w-full text-left border-collapse border border-slate-300">
+                            <thead class="bg-slate-100">
+                                <tr>
+                                    <th class="border border-slate-300 p-2 text-slate-900">COORPIN</th>
+                                    <th class="border border-slate-300 p-2 text-slate-900">Qtd CVLI</th>
+                                    <th class="border border-slate-300 p-2 text-slate-900">CVP</th>
+                                    <th class="border border-slate-300 p-2 text-center text-slate-900">Tendência</th>
+                                    <th class="border border-slate-300 p-2 text-slate-900">Obs</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="border border-slate-300 p-2 font-medium">1ª COORPIN - FSA</td>
+                                    <td class="border border-slate-300 p-2 text-center">6</td>
+                                    <td class="border border-slate-300 p-2 text-center">63</td>
+                                    <td class="border border-slate-300 p-2 text-center">⬇️</td>
+                                    <td class="border border-slate-300 p-2 text-sm">Letalidade focalizada; Controle operante do CVLI, mas atenção aos roubos.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h4 class="font-bold text-slate-800 mb-2">Tabela 2: Ranking de Atividade (Demandas por Unidade - TOP 5)</h4>
+                    <div class="overflow-x-auto mb-4">
+                        <table class="w-full text-left border-collapse border border-slate-300">
+                            <thead class="bg-slate-100">
+                                <tr>
+                                    <th class="border border-slate-300 p-2 text-center w-16 text-slate-900">Posição</th>
+                                    <th class="border border-slate-300 p-2 text-slate-900">Unidade de Registro / Apuração</th>
+                                    <th class="border border-slate-300 p-2 text-slate-900">Volume de Ocorrências Críticas Tratadas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="border border-slate-300 p-2 text-center font-bold">1º</td><td class="border border-slate-300 p-2 font-medium">1ª Delegacia Territorial - Feira de Santana</td><td class="border border-slate-300 p-2">133 procedimentos (Foco: Patrimônio e Estelionato)</td></tr>
+                                <tr><td class="border border-slate-300 p-2 text-center font-bold">2º</td><td class="border border-slate-300 p-2 font-medium">Delegacia Especial de Atend. à Mulher (DEAM)</td><td class="border border-slate-300 p-2">56 procedimentos (Foco: Violência de Gênero)</td></tr>
+                                <tr><td class="border border-slate-300 p-2 text-center font-bold">3º</td><td class="border border-slate-300 p-2 font-medium">2ª Delegacia Territorial - Feira de Santana</td><td class="border border-slate-300 p-2">71 procedimentos (Foco: Estelionato e Roubos)</td></tr>
+                                <tr><td class="border border-slate-300 p-2 text-center font-bold">4º</td><td class="border border-slate-300 p-2 font-medium">Delegacia de Rep. a Furtos e Roubos (DRFR)</td><td class="border border-slate-300 p-2">14 procedimentos (Casos qualificados/Latrocínio)</td></tr>
+                                <tr><td class="border border-slate-300 p-2 text-center font-bold">5º</td><td class="border border-slate-300 p-2 font-medium">Delegacia de Homicídios (DH)</td><td class="border border-slate-300 p-2">5 procedimentos (CVLI e Tentativas)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 6. CONCLUSÃO -->
+                <div>
+                    <h3 class="text-lg font-bold border-b border-slate-300 pb-1 mb-3 text-slate-900">6. CONCLUSÃO</h3>
+                    <p class="text-justify">A radiografia semanal da 1ª COORPIN - Feira de Santana revela um ecossistema criminal em transição. O dado mais alarmante não reside apenas na letalidade (estabilizada), mas no dreno de capacidade investigativa causado pelas 156 tipificações de Estelionato e Fraudes. Recomenda-se em caráter gerencial o estudo para a implementação de um Núcleo de Repressão a Crimes Cibernéticos a nível de DIRPIN. Adicionalmente, o número de vítimas buscando a DEAM (60 registros críticos) reitera a necessidade de manutenção integral do efetivo daquela especializada. A atividade de polícia judiciária e a confecção rápida de flagrantes foram determinantes para conter o recrudescimento dos delitos patrimoniais violentos no período.</p>
+                </div>
+
+                <!-- ASSINATURA -->
+                <div class="mt-10 pt-6 border-t border-slate-300 flex flex-col items-end text-right">
+                    <p class="font-black text-lg uppercase tracking-wider text-slate-900">Félix Rilton</p>
+                    <p class="text-slate-600 font-medium">Investigador PCBA | Análise Criminal - DIRPIN LESTE</p>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const crimeData = {
+            labels: ['Estelionato/Fraudes', 'Crimes Contra o Patrimônio', 'Violência Doméstica', 'CVLI e Tentativas'],
+            datasets: [{
+                data: [156, 63, 60, 12],
+                backgroundColor: [
+                    '#dc2626',
+                    '#ea580c',
+                    '#7e22ce',
+                    '#1e293b' 
+                ],
+                borderWidth: 0,
+                hoverOffset: 6
+            }]
+        };
+
+        const unitData = {
+            labels: ['1ª DT', 'DEAM', '2ª DT', 'DRFR', 'DH'],
+            datasets: [{
+                label: 'Volume de Ocorrências Críticas Tratadas',
+                data: [133, 56, 71, 14, 5],
+                backgroundColor: '#1e3a8a',
+                borderRadius: 4,
+            }]
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const ctxCrime = document.getElementById('crimeDistributionChart').getContext('2d');
+            new Chart(ctxCrime, {
+                type: 'doughnut',
+                data: crimeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: { family: "'Inter', sans-serif", size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const total = context.chart._metasets[context.datasetIndex].total;
+                                    const percentage = Math.round((value / total) * 100) + '%';
+                                    return ` ${context.label}: ${value} ocorrências (${percentage})`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+
+            const ctxUnit = document.getElementById('unitWorkloadChart').getContext('2d');
+            new Chart(ctxUnit, {
+                type: 'bar',
+                data: unitData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    let title = context[0].label;
+                                    return title.length > 25 ? title.substring(0, 25) + '...' : title;
+                                },
+                                label: function(context) {
+                                    return ` Procedimentos: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#f1f5f9'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { family: "'Inter', sans-serif", weight: 'bold' }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
+
+            const tabBtns = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < tabBtns.length; i++) {
+                tabBtns[i].classList.remove("active");
+            }
+
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+    </script>
+</body>
+</html>

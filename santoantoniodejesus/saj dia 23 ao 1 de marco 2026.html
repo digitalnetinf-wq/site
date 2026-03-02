@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Inteligência - DIRPIN LESTE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Chosen Palette: Warm Neutrals (Stone/Slate) for background/text, with strategic semantic accents (Emerald for success, Rose for alerts, Amber for warnings, Indigo for tech). -->
+    
+    <!-- Application Structure Plan: A tabbed dashboard interface. This structure was chosen because an intelligence report contains distinct types of information (executive summaries, quantitative data, tactical risks, and detailed case files). A linear document is hard to scan; a tabbed dashboard allows the commanding officer or analyst to immediately jump to the specific insight they need (e.g., viewing raw metrics vs. reading case details) without losing context. -->
+    
+    <!-- Visualization & Content Choices: 
+         1. Metric Cards: Goal -> Quick overview of KPI. Viz -> Large numbers with trend indicators (CSS/Unicode). Justification -> Immediate executive briefing.
+         2. Doughnut Chart (Grupos Delitivos): Goal -> Show proportion. Viz -> Chart.js Doughnut. Justification -> Quickly highlights the shift from violent crimes to cyber/domestic.
+         3. Bar Chart (Top Naturezas): Goal -> Compare volume. Viz -> Chart.js Horizontal Bar. Justification -> Best for ranking text-heavy categories.
+         4. Risk Matrix: Goal -> Organize tactical responses. Viz -> Interactive HTML Table. Justification -> Allows sorting/filtering mental models.
+         5. Detailed Cases: Goal -> Drill-down context. Viz -> Accordion (HTML/JS). Justification -> Keeps UI clean while offering deep dives.
+         All charts use NO SVG/Mermaid. 
+    -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #fafaf9; /* stone-50 */ }
+        
+        /* Chart Container Mandatory Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        
+        .tab-btn.active {
+            border-bottom: 2px solid #1e293b;
+            color: #1e293b;
+            font-weight: 600;
+        }
+        .tab-btn {
+            color: #64748b;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        /* Custom scrollbar for inner elements */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased h-screen flex flex-col overflow-hidden">
+
+    <!-- Top Navigation / Header -->
+    <header class="bg-slate-900 text-white shadow-md z-10 shrink-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">🛡️</span>
+                        <h1 class="text-xl font-bold tracking-tight">DIRPIN LESTE <span class="text-slate-400 font-normal text-sm ml-2">Painel de Análise Estratégica 2026</span></h1>
+                    </div>
+                    <p class="text-sm text-slate-300 mt-1">4ª COORPIN - Santo Antônio de Jesus | Período: 23/02/2026 a 01/03/2026</p>
+                </div>
+                <div class="flex flex-col items-end gap-2">
+                    <span class="bg-rose-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Classificação: Reservado</span>
+                    <span class="text-xs text-slate-400">Atualizado: 02 de Março de 2026</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Application Area -->
+    <main class="flex-1 overflow-y-auto max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+        
+        <!-- Interactive Header Alert -->
+        <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6 shadow-sm flex items-start gap-4">
+            <div class="text-indigo-600 text-2xl mt-1">📢</div>
+            <div>
+                <h3 class="text-sm font-bold text-indigo-900 uppercase">Assunto Principal</h3>
+                <p class="text-indigo-800 font-medium">Supressão total de CVLI, alta produtividade em prisões e ascensão da mancha de crimes cibernéticos e violência doméstica.</p>
+            </div>
+        </div>
+
+        <!-- Dashboard Tabs -->
+        <div class="border-b border-slate-200 mb-6 flex overflow-x-auto shrink-0">
+            <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn active px-4 py-3 text-sm whitespace-nowrap">Visão Geral & Sumário</button>
+            <button onclick="switchTab('analytics')" id="tab-analytics" class="tab-btn px-4 py-3 text-sm whitespace-nowrap">Mancha Criminal (Dados)</button>
+            <button onclick="switchTab('risks')" id="tab-risks" class="tab-btn px-4 py-3 text-sm whitespace-nowrap">Matriz de Risco & Prevenção</button>
+            <button onclick="switchTab('cases')" id="tab-cases" class="tab-btn px-4 py-3 text-sm whitespace-nowrap">Casos Detalhados (Drill-down)</button>
+        </div>
+
+        <!-- TAB CONTENT 1: OVERVIEW -->
+        <section id="content-overview" class="block animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Sumário Executivo (Briefing)</h2>
+                <p class="text-slate-600 leading-relaxed max-w-4xl">
+                    Esta seção apresenta o cenário macro criminal da jurisdição. Utilize estes dados para obter um panorama rápido da produtividade e das alterações táticas. O destaque absoluto é a completa supressão de crimes letais aliada à alta taxa de cumprimento de mandados.
+                </p>
+            </div>
+
+            <!-- Key Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <!-- Metric 1 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 border-t-4 border-t-emerald-500 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-slate-500">CVLI (Homicídios)</p>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1">0</h3>
+                        </div>
+                        <span class="text-2xl">📉</span>
+                    </div>
+                    <p class="text-xs text-emerald-600 font-medium mt-2">⬇️ Controle Total na Semana</p>
+                </div>
+                <!-- Metric 2 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 border-t-4 border-t-blue-500 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-slate-500">Repressão Qualificada</p>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1">10</h3>
+                        </div>
+                        <span class="text-2xl">🚔</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Cumprimento de Mandados</p>
+                </div>
+                <!-- Metric 3 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 border-t-4 border-t-amber-500 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-slate-500">Fraudes e Estelionatos</p>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1">16</h3>
+                        </div>
+                        <span class="text-2xl">💻</span>
+                    </div>
+                    <p class="text-xs text-amber-600 font-medium mt-2">⬆️ Alta Ascensão Cibernética</p>
+                </div>
+                <!-- Metric 4 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 border-t-4 border-t-rose-500 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-slate-500">Violência Doméstica</p>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1">10+</h3>
+                        </div>
+                        <span class="text-2xl">⚠️</span>
+                    </div>
+                    <p class="text-xs text-rose-600 font-medium mt-2">⬆️ Ameaça, Injúria, Vias de Fato</p>
+                </div>
+            </div>
+
+            <!-- Insights OSINT/HUMINT -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center cursor-pointer" onclick="toggleElement('osint-content')">
+                    <h3 class="font-bold text-slate-800">I. Mineração de Dados (OSINT & HUMINT)</h3>
+                    <span class="text-slate-400 text-sm">Clique para expandir 🔽</span>
+                </div>
+                <div id="osint-content" class="p-6">
+                    <ul class="space-y-4">
+                        <li class="flex gap-4 items-start">
+                            <span class="text-emerald-500 text-xl mt-1">🎯</span>
+                            <div>
+                                <strong class="text-slate-900">4ª COORPIN (28/02/2026):</strong>
+                                <p class="text-slate-600 text-sm mt-1">Forças Policiais deflagram ações contínuas resultando no cumprimento massivo de Mandados de Prisão na base de Santo Antônio de Jesus.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-4 items-start">
+                            <span class="text-amber-500 text-xl mt-1">📱</span>
+                            <div>
+                                <strong class="text-slate-900">4ª COORPIN (23 a 28/02/2026):</strong>
+                                <p class="text-slate-600 text-sm mt-1">Alerta no comércio e redes locais: Crescimento agudo de estelionatos e fraudes eletrônicas aplicadas via WhatsApp e redes sociais.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-4 items-start">
+                            <span class="text-rose-500 text-xl mt-1">🚨</span>
+                            <div>
+                                <strong class="text-slate-900">4ª COORPIN (24/02/2026):</strong>
+                                <p class="text-slate-600 text-sm mt-1">Rápida intervenção da NEAM em casos sensíveis, incluindo Importunação Sexual e escalada de violência física contra a mulher.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB CONTENT 2: ANALYTICS -->
+        <section id="content-analytics" class="hidden animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Indicadores Quantitativos e Mancha Criminal</h2>
+                <p class="text-slate-600 leading-relaxed max-w-4xl">
+                    Esta seção traduz os registros em visualizações interativas para facilitar a identificação de tendências e volumes. Explore os gráficos para entender a distribuição dos delitos e o ranking das naturezas criminais mais frequentes.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Chart 1: Proporção -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
+                    <h3 class="font-bold text-slate-800 mb-4 text-center">Distribuição por Grupos Delitivos</h3>
+                    <div class="chart-container flex-grow max-w-md">
+                        <canvas id="grupoDelitivoChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-slate-500 mt-4">Nota-se o predomínio não-violento (Fraudes) sobre o violento letal.</p>
+                </div>
+
+                <!-- Chart 2: Ranking -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
+                    <h3 class="font-bold text-slate-800 mb-4 text-center">Ranking de Atividade (Top 5 Naturezas)</h3>
+                    <div class="chart-container flex-grow max-w-xl">
+                        <canvas id="rankingChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-slate-500 mt-4">Ameaça (Geral e Doméstica) lidera os registros na semana.</p>
+                </div>
+            </div>
+
+            <!-- Modus Operandi Card -->
+            <div class="bg-slate-800 text-white rounded-xl shadow-md p-6">
+                <h3 class="font-bold text-lg mb-4 flex items-center gap-2">🔍 Dinâmica da Mancha Criminal (Modus Operandi)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                    <div>
+                        <p class="text-emerald-400 font-bold mb-1">Substituição Criminal</p>
+                        <p class="text-slate-300">Observa-se a substituição do crime patrimonial violento (Roubo) pelo cibernético. Os estelionatários atuam invadindo perfis ou simulando vendas.</p>
+                    </div>
+                    <div>
+                        <p class="text-rose-400 font-bold mb-1">Ciclo da Violência (NEAM)</p>
+                        <p class="text-slate-300">Na violência de gênero, o ciclo clássico de injúria e ameaça prevalece, com autores (geralmente ex-parceiros) apresentando escalada para o dano patrimonial e vias de fato.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB CONTENT 3: RISKS & PREVENTION -->
+        <section id="content-risks" class="hidden animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Matriz de Risco e Estratégia</h2>
+                <p class="text-slate-600 leading-relaxed max-w-4xl">
+                    Identificação de riscos operacionais e direcionamentos estratégicos de prevenção e marketing institucional. Interaja com a tabela abaixo para focar nas ações recomendadas para cada nível de risco.
+                </p>
+            </div>
+
+            <!-- Golden Opportunity Banner -->
+            <div class="bg-gradient-to-r from-amber-200 to-yellow-400 rounded-xl p-6 shadow-md mb-8 flex flex-col md:flex-row items-center gap-6 border border-yellow-500">
+                <div class="text-5xl drop-shadow-md">💡</div>
+                <div>
+                    <h3 class="text-xl font-extrabold text-yellow-900 uppercase tracking-wide mb-1">Oportunidade de Ouro (Marketing Institucional)</h3>
+                    <p class="text-yellow-900 font-medium">A ASCOM deve capitalizar o contraste do período publicando a <strong>"Operação Semana Segura"</strong> em Santo Antônio de Jesus, cruzando os dados de <strong>ZERO homicídios</strong> com as <strong>mais de 08 prisões por mandado</strong> realizadas pela 1ª DT. Isso transmite força, controle territorial e inteligência investigativa.</p>
+                </div>
+            </div>
+
+            <!-- Risk Matrix Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Cidade / Unidade</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Risco</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Fator Crítico</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Recomendação / Prevenção</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-slate-200" id="riskTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TAB CONTENT 4: CASES -->
+        <section id="content-cases" class="hidden animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Análise Detalhada da Mancha Criminal</h2>
+                <p class="text-slate-600 leading-relaxed max-w-4xl">
+                    Recortes de inteligência sobre os fatos de maior relevância no período. Navegue pelas categorias abaixo para acessar os resumos dos Boletins de Ocorrência (BOs) e as análises táticas específicas de cada modalidade.
+                </p>
+            </div>
+
+            <div class="space-y-4">
+                
+                <!-- Accordion 1: Violência Doméstica -->
+                <div class="bg-white border border-rose-200 rounded-lg overflow-hidden">
+                    <button onclick="toggleAccordion('acc-violencia')" class="w-full px-6 py-4 flex justify-between items-center bg-rose-50 hover:bg-rose-100 transition-colors text-left">
+                        <span class="font-bold text-rose-900">A. Violência Doméstica e Familiar (Lei Maria da Penha)</span>
+                        <span id="icon-acc-violencia" class="text-rose-700 font-bold transition-transform">➕</span>
+                    </button>
+                    <div id="acc-violencia" class="hidden px-6 py-4 text-sm text-slate-700 border-t border-rose-200 space-y-4">
+                        <div class="p-3 bg-slate-50 rounded border border-slate-100">
+                            <span class="inline-block bg-slate-800 text-white text-xs px-2 py-1 rounded mb-2 font-mono">BO 00145820/2026-A01</span> <span class="text-xs text-slate-500 ml-2">NEAM SAJ | 23/02/2026 09:36</span>
+                            <p class="mt-1 font-medium">Múltiplos crimes: Injúria, Dano, Lesão Corporal Dolosa e Ameaça.</p>
+                            <p class="mt-1 text-slate-600">Ocorrência de alto risco devido à escalada da violência (agressão física e dano ao patrimônio da vítima). Autor identificado: Lucas Barbosa.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-100">
+                            <span class="inline-block bg-slate-800 text-white text-xs px-2 py-1 rounded mb-2 font-mono">BO 00151860/2026-A01</span> <span class="text-xs text-slate-500 ml-2">NEAM SAJ | 24/02/2026 16:45</span>
+                            <p class="mt-1 font-medium">Importunação Sexual (Art. 215-A).</p>
+                            <p class="mt-1 text-slate-600">Vítima Luana F., Autor identificado. Resposta necessária para coibir crimes contra a dignidade sexual.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-100">
+                            <span class="inline-block bg-slate-800 text-white text-xs px-2 py-1 rounded mb-2 font-mono">BO 00159005/2026</span> <span class="text-xs text-slate-500 ml-2">NEAM SAJ | 27/02/2026 08:50</span>
+                            <p class="mt-1 font-medium">Injúria por razões da condição do sexo feminino.</p>
+                            <p class="mt-1 text-slate-600">Reflete o volume constante de violência psicológica e moral sendo protocolada na especializada.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion 2: Repressão Qualificada -->
+                <div class="bg-white border border-slate-300 rounded-lg overflow-hidden">
+                    <button onclick="toggleAccordion('acc-repressao')" class="w-full px-6 py-4 flex justify-between items-center bg-slate-100 hover:bg-slate-200 transition-colors text-left">
+                        <span class="font-bold text-slate-900">B. Repressão Qualificada e Armas/Drogas</span>
+                        <span id="icon-acc-repressao" class="text-slate-700 font-bold transition-transform">➕</span>
+                    </button>
+                    <div id="acc-repressao" class="hidden px-6 py-4 text-sm text-slate-700 border-t border-slate-300 space-y-4">
+                        <div class="p-3 bg-slate-50 rounded border border-slate-100">
+                            <span class="inline-block bg-slate-800 text-white text-xs px-2 py-1 rounded mb-2 font-mono">BO 00160138/2026-A01</span> <span class="text-xs text-slate-500 ml-2">1ª DT SAJ | 27/02/2026 16:17</span>
+                            <p class="mt-1 font-medium">Cumprimento simultâneo de Mandado de Prisão e Mandado de Busca e Apreensão Domiciliar.</p>
+                            <p class="mt-1 text-slate-600">Ação de inteligência e intervenção cirúrgica.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-100">
+                            <span class="inline-block bg-slate-800 text-white text-xs px-2 py-1 rounded mb-2 font-mono">BO 00163681/2026-A01</span> <span class="text-xs text-slate-500 ml-2">1ª DT SAJ | 01/03/2026 10:22</span>
+                            <p class="mt-1 font-medium">Cumprimento de Mandado de Prisão.</p>
+                            <p class="mt-1 text-slate-600">Mais um registro, fechando o ciclo semanal com alta produtividade do SI da unidade.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-100">
+                            <span class="inline-block bg-slate-800 text-white text-xs px-2 py-1 rounded mb-2 font-mono">BO 00164050/2026-A02</span> <span class="text-xs text-slate-500 ml-2">1ª DT SAJ | 01/03/2026 17:31</span>
+                            <p class="mt-1 font-medium">Adulteração de Sinal Identificador de Veículo Automotor.</p>
+                            <p class="mt-1 text-slate-600">Prisão/condução realizada em apoio com guarnições da PMBA, sufocando a logística de roubo/furto de veículos.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion 3: Crimes Cibernéticos -->
+                <div class="bg-white border border-amber-200 rounded-lg overflow-hidden">
+                    <button onclick="toggleAccordion('acc-cyber')" class="w-full px-6 py-4 flex justify-between items-center bg-amber-50 hover:bg-amber-100 transition-colors text-left">
+                        <span class="font-bold text-amber-900">C. Crimes Cibernéticos e Fraudes</span>
+                        <span id="icon-acc-cyber" class="text-amber-700 font-bold transition-transform">➕</span>
+                    </button>
+                    <div id="acc-cyber" class="hidden px-6 py-4 text-sm text-slate-700 border-t border-amber-200">
+                        <div class="p-3 bg-slate-50 rounded border border-slate-100">
+                            <span class="inline-block bg-slate-800 text-white text-xs px-2 py-1 rounded mb-2 font-mono">Múltiplos BOs (ex: 00162463/2026)</span> <span class="text-xs text-slate-500 ml-2">1ª DT SAJ | 27 e 28/02/2026</span>
+                            <p class="mt-1 font-medium text-rose-600">ALERTA EPIDÊMICO</p>
+                            <p class="mt-2 text-slate-600">Explosão de registros (mais de 15 procedimentos em poucos dias) tipificados como Estelionato e Fraude Eletrônica. O modus operandi concentra-se no ambiente cibernético (redes sociais e mensageiros). O perfil das vítimas é difuso, indicando a atuação de associações criminosas especializadas (cybercrime), possivelmente atuando de fora da base territorial da COORPIN.</p>
+                            <div class="mt-4 p-3 bg-amber-100 rounded text-amber-900 text-xs font-bold border border-amber-300">
+                                Sugestão Estratégica: Mapeamento bancário/PIX das contas favorecidas nestes registros.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- FULL ORIGINAL REPORT (APPENDED AS REQUESTED) -->
+        <section class="mt-12 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden shrink-0">
+            <div class="bg-slate-100 px-6 py-4 border-b border-slate-200 flex justify-between items-center cursor-pointer hover:bg-slate-200 transition-colors" onclick="toggleElement('raw-report-content')">
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">📄 Documento Original na Íntegra (Relatório de Análise em Texto)</h2>
+                <span class="text-slate-500 text-sm font-medium">Clique para expandir/recolher 🔽</span>
+            </div>
+            <div id="raw-report-content" class="p-6 md:p-10 hidden border-t border-slate-200">
+                <div class="text-slate-800 text-sm leading-relaxed space-y-6 max-w-4xl mx-auto font-sans">
+                    
+                    <h3 class="text-center text-xl font-bold uppercase mb-6">Relatório de Análise Estratégica e Dinâmica Criminal 2026 - DIRPIN Leste</h3>
+                    
+                    <div class="bg-slate-50 p-5 border border-slate-200 rounded-lg text-xs md:text-sm shadow-inner space-y-2">
+                        <p><strong>PARA:</strong> Gabinete do Diretor da DIRPIN - LESTE, Coordenador da 4ª COORPIN-SANTO ANTONIO DE JESUS</p>
+                        <p><strong>DE:</strong> Ponto Focal de Inteligência e Análise Criminal</p>
+                        <p><strong>DATA:</strong> 02 de Março de 2026</p>
+                        <p><strong>PERÍODO:</strong> 23/02/2026 a 01/03/2026</p>
+                        <p><strong>ASSUNTO:</strong> SUPRESSÃO TOTAL DE CVLI, ALTA PRODUTIVIDADE EM PRISÕES E ASCENSÃO DA MANCHA DE CRIMES CIBERNÉTICOS E VIOLÊNCIA DOMÉSTICA</p>
+                        <p><strong>CLASSIFICAÇÃO:</strong> <span class="text-rose-600 font-bold">RESERVADO</span></p>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-lg text-slate-900 border-b pb-2 mb-3">📍 I. MINERAÇÃO DE DADOS (OSINT & HUMINT)</h4>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>4ª COORPIN (28/02/2026):</strong> Forças Policiais deflagram ações contínuas resultando no cumprimento massivo de Mandados de Prisão na base de Santo Antônio de Jesus.</li>
+                            <li><strong>4ª COORPIN (23 a 28/02/2026):</strong> Alerta no comércio e redes locais: Crescimento agudo de estelionatos e fraudes eletrônicas aplicadas via WhatsApp e redes sociais.</li>
+                            <li><strong>4ª COORPIN (24/02/2026):</strong> Rápida intervenção da NEAM em casos sensíveis, incluindo Importunação Sexual e escalada de violência física contra a mulher.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-lg text-slate-900 border-b pb-2 mb-3">📍 1. SUMÁRIO EXECUTIVO (BRIEFING)</h4>
+                        <p>No período em tela, o cenário macro criminal na jurisdição da 4ª COORPIN (Santo Antônio de Jesus) apresentou um indicativo de excelência operacional: a completa supressão de Crimes Violentos Letais Intencionais (CVLI). A atividade de Polícia Judiciária demonstrou altíssima assertividade na ponta repressiva, materializada no cumprimento de múltiplos mandados judiciais (prisões e buscas). Em contrapartida analítica, a mancha criminal migrou acentuadamente para o ambiente virtual e intramuros. Destaca-se o desempenho negativo no aumento de Crimes Contra o Patrimônio na modalidade Fraude/Estelionato (CVP não-violento) e o alto volume de ocorrências de Violência Doméstica (Lei Maria da Penha), exigindo atenção para o esgotamento da capacidade investigativa das delegacias especializadas.</p>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-lg text-slate-900 border-b pb-2 mb-3">📍 2. ANÁLISE DE MANCHA CRIMINAL POR COORPIN</h4>
+                        <p class="font-bold text-slate-800 mb-2">Santo Antônio de Jesus (4ª COORPIN)</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>Dinâmica (Modus Operandi):</strong> Observa-se a substituição do crime patrimonial violento (Roubo) pelo cibernético. Os estelionatários atuam invadindo perfis ou simulando vendas. Na violência de gênero, o ciclo clássico de injúria e ameaça prevalece, com autores (geralmente ex-parceiros) apresentando escalada para o dano patrimonial e vias de fato.</li>
+                            <li><strong>Fator Social (Repercussão):</strong> A ausência de homicídios aumenta a sensação de segurança viária. Contudo, a alta incidência de fraudes afeta diretamente a microeconomia local e a confiança digital do cidadão. O aumento de BOs na NEAM reflete maior encorajamento das vítimas em buscar o Estado.</li>
+                            <li><strong>Prevenção:</strong> Imposição célere de Medidas Protetivas de Urgência (MPUs); Ações de conscientização digital (campanhas de profilaxia contra golpes) em parceria com a CDL (Câmara de Dirigentes Lojistas) de SAJ.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-lg text-slate-900 border-b pb-2 mb-3">📍 3. DESTAQUES OPERACIONAIS</h4>
+                        <p class="mb-2">A Polícia Civil obteve êxito contundente na desarticulação de alvos prioritários, destacando-se:</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Cumprimento de 08 (oito) Mandados de Prisão pela 1ª DT, retirando de circulação indivíduos contumazes.</li>
+                            <li>Cumprimento de Busca e Apreensão Domiciliar (BO 00160138), asfixiando a logística criminal.</li>
+                            <li>Prisões em flagrante delito por Tráfico de Drogas (Art. 33) durante ações ostensivas.</li>
+                            <li>Identificação e condução por Adulteração de Sinal Identificador de Veículo Automotor (Art. 311).</li>
+                            <li>Atuação imediata da NEAM em dezenas de expedientes, garantindo a integridade física de mulheres em risco iminente.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-lg text-slate-900 border-b pb-2 mb-3">📍 4. MATRIZ DE RISCO E RECOMENDAÇÕES</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-left text-sm border-collapse border border-slate-300">
+                                <thead class="bg-slate-100 font-bold">
+                                    <tr>
+                                        <th class="border border-slate-300 px-4 py-2">Cidade / COORPIN</th>
+                                        <th class="border border-slate-300 px-4 py-2">Risco</th>
+                                        <th class="border border-slate-300 px-4 py-2">Fator Crítico</th>
+                                        <th class="border border-slate-300 px-4 py-2">Recomendação ASCOM</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="border border-slate-300 px-4 py-2">Santo Antônio de Jesus</td>
+                                        <td class="border border-slate-300 px-4 py-2 text-amber-600 font-bold">Médio</td>
+                                        <td class="border border-slate-300 px-4 py-2">Estelionato / Fraude Eletrônica (Art. 171)</td>
+                                        <td class="border border-slate-300 px-4 py-2">Disparar material educativo "Como blindar seu WhatsApp" nas mídias regionais.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-slate-300 px-4 py-2">Santo Antônio de Jesus</td>
+                                        <td class="border border-slate-300 px-4 py-2 text-rose-600 font-bold">Alto</td>
+                                        <td class="border border-slate-300 px-4 py-2">Violência Doméstica (Ameaça/Injúria/Lesão)</td>
+                                        <td class="border border-slate-300 px-4 py-2">Destacar a Operacionalidade da NEAM no acolhimento e rigor contra agressores.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-slate-300 px-4 py-2">Santo Antônio de Jesus</td>
+                                        <td class="border border-slate-300 px-4 py-2 text-emerald-600 font-bold">Baixo</td>
+                                        <td class="border border-slate-300 px-4 py-2">CVLI (Homicídios/Feminicídios)</td>
+                                        <td class="border border-slate-300 px-4 py-2">Divulgar balanço positivo de "Semana Zero Homicídios".</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-slate-300 px-4 py-2">Santo Antônio de Jesus</td>
+                                        <td class="border border-slate-300 px-4 py-2 text-emerald-600 font-bold">Baixo</td>
+                                        <td class="border border-slate-300 px-4 py-2">CVP Violento (Roubos/Arrastões)</td>
+                                        <td class="border border-slate-300 px-4 py-2">Evidenciar a relação entre os mandados de prisão cumpridos e a queda de assaltos.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400">
+                            <strong>💡 OPORTUNIDADE DE OURO:</strong> A ASCOM deve capitalizar o contraste do período publicando a "Operação Semana Segura" em Santo Antônio de Jesus, cruzando os dados de ZERO homicídios com as mais de 08 prisões por mandado realizadas pela 1ª DT. Isso transmite força, controle territorial e inteligência investigativa.
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-lg text-slate-900 border-b pb-2 mb-3">📍 TABELAS TÉCNICAS</h4>
+                        <p class="font-bold mb-2">Tabela 1: Indicadores Quantitativos Selecionados</p>
+                        <div class="overflow-x-auto mb-6">
+                            <table class="min-w-full text-left text-sm border-collapse border border-slate-300">
+                                <thead class="bg-slate-100 font-bold">
+                                    <tr>
+                                        <th class="border border-slate-300 px-4 py-2">Grupo Delitivo</th>
+                                        <th class="border border-slate-300 px-4 py-2 text-center">Quantidade</th>
+                                        <th class="border border-slate-300 px-4 py-2">Principais Naturezas</th>
+                                        <th class="border border-slate-300 px-4 py-2">Unidades Envolvidas</th>
+                                        <th class="border border-slate-300 px-4 py-2 text-center">Tendência</th>
+                                        <th class="border border-slate-300 px-4 py-2">Obs</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="border border-slate-300 px-4 py-2">CVLI (Crimes Contra a Vida)</td>
+                                        <td class="border border-slate-300 px-4 py-2 text-center">0</td>
+                                        <td class="border border-slate-300 px-4 py-2">Homicídio, Feminicídio, Latrocínio</td>
+                                        <td class="border border-slate-300 px-4 py-2">1ª DT SAJ</td>
+                                        <td class="border border-slate-300 px-4 py-2 text-center text-emerald-600">⬇️</td>
+                                        <td class="border border-slate-300 px-4 py-2">Excelente controle</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-slate-300 px-4 py-2">Violência Doméstica / Gênero</td>
+                                        <td class="border border-slate-300 px-4 py-2 text-center">10+</td>
+                                        <td class="border border-slate-300 px-4 py-2">Ameaça, Injúria, Vias de Fato, Dano</td>
+                                        <td class="border border-slate-300 px-4 py-2">NEAM SAJ / 1ª DT</td>
+                                        <td class="border border-slate-300 px-4 py-2 text-center text-rose-600">⬆️</td>
+                                        <td class="border border-slate-300 px-4 py-2">Demanda contínua</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-slate-300 px-4 py-2">Fraudes e Estelionatos</td>
+                                        <td class="border border-slate-300 px-4 py-2 text-center">16</td>
+                                        <td class="border border-slate-300 px-4 py-2">Estelionato (131), Fraude Eletrônica</td>
+                                        <td class="border border-slate-300 px-4 py-2">1ª DT / Del. Virtual</td>
+                                        <td class="border border-slate-300 px-4 py-2 text-center text-amber-600">⬆️</td>
+                                        <td class="border border-slate-300 px-4 py-2">Ponto focal de risco</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-slate-300 px-4 py-2">Crimes Contra o Patrimônio</td>
+                                        <td class="border border-slate-300 px-4 py-2 text-center">08</td>
+                                        <td class="border border-slate-300 px-4 py-2">Furto (7), Roubo (1)</td>
+                                        <td class="border border-slate-300 px-4 py-2">1ª DT SAJ</td>
+                                        <td class="border border-slate-300 px-4 py-2 text-center text-emerald-600">⬇️</td>
+                                        <td class="border border-slate-300 px-4 py-2">Baixa incidência violenta</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="border border-slate-300 px-4 py-2">Repressão Qualificada (Prisões)</td>
+                                        <td class="border border-slate-300 px-4 py-2 text-center">10</td>
+                                        <td class="border border-slate-300 px-4 py-2">Cumprimento de Mandados</td>
+                                        <td class="border border-slate-300 px-4 py-2">1ª DT SAJ</td>
+                                        <td class="border border-slate-300 px-4 py-2 text-center text-rose-600">⬆️</td>
+                                        <td class="border border-slate-300 px-4 py-2">Produtividade Alta</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <p class="font-bold mb-2">Tabela 2: Ranking de Atividade (Top Naturezas da Semana)</p>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-left text-sm border-collapse border border-slate-300 max-w-lg">
+                                <thead class="bg-slate-100 font-bold">
+                                    <tr>
+                                        <th class="border border-slate-300 px-4 py-2 text-center">Ranking</th>
+                                        <th class="border border-slate-300 px-4 py-2">Natureza Criminal (Tipificação Principal)</th>
+                                        <th class="border border-slate-300 px-4 py-2 text-center">Ocorrências (Aprox.)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="border border-slate-300 px-4 py-2 text-center">1º</td><td class="border border-slate-300 px-4 py-2">Ameaça (Art. 147 do CPB) - Geral e Doméstica</td><td class="border border-slate-300 px-4 py-2 text-center font-bold">14</td></tr>
+                                    <tr><td class="border border-slate-300 px-4 py-2 text-center">2º</td><td class="border border-slate-300 px-4 py-2">Estelionato (Art. 171 do CPB)</td><td class="border border-slate-300 px-4 py-2 text-center font-bold">11</td></tr>
+                                    <tr><td class="border border-slate-300 px-4 py-2 text-center">3º</td><td class="border border-slate-300 px-4 py-2">Cumprimento de Mandado de Prisão</td><td class="border border-slate-300 px-4 py-2 text-center font-bold">08</td></tr>
+                                    <tr><td class="border border-slate-300 px-4 py-2 text-center">4º</td><td class="border border-slate-300 px-4 py-2">Furto (Art. 155 Caput do CPB)</td><td class="border border-slate-300 px-4 py-2 text-center font-bold">07</td></tr>
+                                    <tr><td class="border border-slate-300 px-4 py-2 text-center">5º</td><td class="border border-slate-300 px-4 py-2">Fraude Eletrônica (Art. 171, § 2°-A do CPB)</td><td class="border border-slate-300 px-4 py-2 text-center font-bold">04</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-lg text-slate-900 border-b pb-2 mb-3">📍 5. ANÁLISE DETALHADA DA MANCHA CRIMINAL</h4>
+                        <p class="mb-4">Abaixo, os recortes de inteligência sobre os fatos de maior relevância no período:</p>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <p class="font-bold text-rose-800">A. VIOLÊNCIA DOMÉSTICA E FAMILIAR (LEI MARIA DA PENHA)</p>
+                                <ul class="list-disc pl-5 mt-2 space-y-2">
+                                    <li><strong>BO 00145820/2026-A01 | NEAM SAJ | 23/02/2026 09:36</strong> - Múltiplos crimes: Injúria, Dano, Lesão Corporal Dolosa e Ameaça. Ocorrência de alto risco devido à escalada da violência (agressão física e dano ao patrimônio da vítima). Autor identificado: Lucas Barbosa.</li>
+                                    <li><strong>BO 00151860/2026-A01 | NEAM SAJ | 24/02/2026 16:45</strong> - Importunação Sexual (Art. 215-A). Vítima Luana F., Autor identificado. Resposta necessária para coibir crimes contra a dignidade sexual.</li>
+                                    <li><strong>BO 00159005/2026 | NEAM SAJ | 27/02/2026 08:50</strong> - Injúria por razões da condição do sexo feminino. Reflete o volume constante de violência psicológica e moral sendo protocolada na especializada.</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <p class="font-bold text-slate-800">B. REPRESSÃO QUALIFICADA E ARMAS/DROGAS</p>
+                                <ul class="list-disc pl-5 mt-2 space-y-2">
+                                    <li><strong>BO 00160138/2026-A01 | 1ª DT SAJ | 27/02/2026 16:17</strong> - Cumprimento simultâneo de Mandado de Prisão e Mandado de Busca e Apreensão Domiciliar. Ação de inteligência e intervenção cirúrgica.</li>
+                                    <li><strong>BO 00163681/2026-A01 | 1ª DT SAJ | 01/03/2026 10:22</strong> - Mais um registro de Cumprimento de Mandado de Prisão, fechando o ciclo semanal com alta produtividade do SI da unidade.</li>
+                                    <li><strong>BO 00164050/2026-A02 | 1ª DT SAJ | 01/03/2026 17:31</strong> - Adulteração de Sinal Identificador de Veículo Automotor. Prisão/condução realizada em apoio com guarnições da PMBA, sufocando a logística de roubo/furto de veículos.</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <p class="font-bold text-amber-800">C. CRIMES CIBERNÉTICOS E FRAUDES</p>
+                                <ul class="list-disc pl-5 mt-2 space-y-2">
+                                    <li><strong>BOs 00162463/2026, 00161966/2026, 00161076/2026 | 1ª DT SAJ | 27 e 28/02/2026</strong> - Explosão de registros (mais de 15 procedimentos em poucos dias) tipificados como Estelionato e Fraude Eletrônica. O modus operandi concentra-se no ambiente cibernético (redes sociais e mensageiros). O perfil das vítimas é difuso, indicando a atuação de associações criminosas especializadas (cybercrime), possivelmente atuando de fora da base territorial da COORPIN.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200 mt-8">
+                        <h4 class="font-bold text-lg text-slate-900 border-b pb-2 mb-3">📍 CONCLUSÃO</h4>
+                        <p class="mb-4">A análise da mancha criminal da 4ª COORPIN na presente semana revela um cenário de absoluto controle tático e investigativo sobre o terreno no que tange à criminalidade violenta. O esforço concentrado do Setor de Investigação resultou no cumprimento de mandados que geram impacto direto na pacificação social, mantendo o indicador de CVLI zerado.</p>
+                        <p class="mb-6">Como contramedida estratégica para os próximos dias, o Comando da DIRPIN e a Coordenação local devem atentar para a sobrecarga da NEAM (em virtude do alto encorajamento social para denúncias) e, principalmente, articular doutrina ou núcleo de apoio para processar a "epidemia" de estelionatos digitais que afetam a região, sugerindo-se o mapeamento bancário/PIX das contas favorecidas nestes registros.</p>
+                        
+                        <div class="text-right border-t border-slate-300 pt-4">
+                            <p class="font-bold text-slate-800">Félix Rilton</p>
+                            <p class="text-slate-500">Investigador PCBA | Ponto Focal de Análise Criminal - DIRPIN LESTE</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer / Conclusion -->
+    <footer class="bg-slate-100 border-t border-slate-200 py-4 shrink-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center text-xs text-slate-500">
+            <div>
+                <strong>Conclusão Tática:</strong> Cenário de controle sobre crimes violentos. Atenção requerida para sobrecarga da NEAM e ações contra "epidemia" de estelionatos digitais.
+            </div>
+            <div class="text-right">
+                Ponto Focal de Análise Criminal<br><strong>Investigador PCBA - DIRPIN LESTE</strong>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- DATA STATE ---
+        const reportData = {
+            gruposDelitivos: {
+                labels: ['Fraudes/Estelionatos', 'Violência Doméstica', 'Repressão (Mandados)', 'Crimes Patrimoniais', 'CVLI (Homicídios)'],
+                data: [16, 10, 10, 8, 0],
+                colors: ['#f59e0b', '#ef4444', '#3b82f6', '#64748b', '#10b981'] // amber, red, blue, slate, emerald
+            },
+            ranking: {
+                labels: ['Ameaça (Geral/Doméstica)', 'Estelionato (Art. 171)', 'Cumprimento de Mandado', 'Furto (Art. 155)', 'Fraude Eletrônica'],
+                data: [14, 11, 8, 7, 4]
+            },
+            riskMatrix: [
+                { cidade: 'Santo Antônio de Jesus', risco: 'Alto', corRisco: 'bg-rose-100 text-rose-800', fator: 'Violência Doméstica (Ameaça/Injúria/Lesão)', rec: 'Destacar a Operacionalidade da NEAM no acolhimento e rigor contra agressores.' },
+                { cidade: 'Santo Antônio de Jesus', risco: 'Médio', corRisco: 'bg-amber-100 text-amber-800', fator: 'Estelionato / Fraude Eletrônica (Art. 171)', rec: 'Disparar material educativo "Como blindar seu WhatsApp" nas mídias regionais. Imposição de conscientização via CDL.' },
+                { cidade: 'Santo Antônio de Jesus', risco: 'Baixo', corRisco: 'bg-emerald-100 text-emerald-800', fator: 'CVLI (Homicídios/Feminicídios)', rec: 'Divulgar balanço positivo de "Semana Zero Homicídios".' },
+                { cidade: 'Santo Antônio de Jesus', risco: 'Baixo', corRisco: 'bg-emerald-100 text-emerald-800', fator: 'CVP Violento (Roubos/Arrastões)', rec: 'Evidenciar a relação entre os mandados de prisão cumpridos e a queda de assaltos.' }
+            ]
+        };
+
+        // --- NAVIGATION LOGIC ---
+        function switchTab(tabId) {
+            // Hide all content
+            const contents = ['content-overview', 'content-analytics', 'content-risks', 'content-cases'];
+            contents.forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected content and activate button
+            document.getElementById('content-' + tabId).classList.remove('hidden');
+            document.getElementById('tab-' + tabId).classList.add('active');
+
+            // Render charts if analytics tab is opened (and charts aren't rendered yet)
+            if(tabId === 'analytics') {
+                renderCharts();
+            }
+        }
+
+        // --- INTERACTIVE ELEMENTS LOGIC ---
+        function toggleElement(id) {
+            const el = document.getElementById(id);
+            if(el.classList.contains('hidden')) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        }
+
+        function toggleAccordion(id) {
+            const el = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                icon.textContent = '➖';
+                icon.classList.add('rotate-180');
+            } else {
+                el.classList.add('hidden');
+                icon.textContent = '➕';
+                icon.classList.remove('rotate-180');
+            }
+        }
+
+        function populateRiskTable() {
+            const tbody = document.getElementById('riskTableBody');
+            let html = '';
+            reportData.riskMatrix.forEach((item, index) => {
+                html += `
+                <tr class="hover:bg-slate-50 transition-colors cursor-pointer group" onclick="alert('Estratégia Detalhada:\\n\\nFator: ${item.fator}\\nRecomendação: ${item.rec}')" title="Clique para ver detalhes">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">${item.cidade}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.corRisco}">
+                            ${item.risco}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${item.fator}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500 group-hover:text-slate-900 transition-colors">${item.rec}</td>
+                </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // --- CHART IMPLEMENTATION (CHART.JS) ---
+        let chartsRendered = false;
+        function renderCharts() {
+            if (chartsRendered) return;
+
+            // Chart Configuration Standards
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.color = '#64748b';
+            
+            // 1. Doughnut Chart (Grupos Delitivos)
+            const ctxDoughnut = document.getElementById('grupoDelitivoChart').getContext('2d');
+            new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: {
+                    labels: reportData.gruposDelitivos.labels,
+                    datasets: [{
+                        data: reportData.gruposDelitivos.data,
+                        backgroundColor: reportData.gruposDelitivos.colors,
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // CRITICAL for Tailwind container constraint
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label + ': ' + context.raw + ' ocorrências';
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+
+            // 2. Horizontal Bar Chart (Ranking)
+            const ctxBar = document.getElementById('rankingChart').getContext('2d');
+            new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: reportData.ranking.labels.map(label => {
+                        // Label Wrapping Logic (approx 16-20 chars)
+                        if (label.length > 20) {
+                            return label.match(/.{1,20}(\s|$)/g);
+                        }
+                        return label;
+                    }),
+                    datasets: [{
+                        label: 'Volume de Ocorrências (Aprox.)',
+                        data: reportData.ranking.data,
+                        backgroundColor: '#475569', // slate-600
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // Makes it horizontal
+                    responsive: true,
+                    maintainAspectRatio: false, // CRITICAL for Tailwind container constraint
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) { return context[0].label.replace(/,/g, ' '); }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+
+            chartsRendered = true;
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            populateRiskTable();
+        };
+    </script>
+</body>
+</html>
