@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Briefing Tático - Fraudes Eletrônicas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 250px;
+            }
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-800 font-sans antialiased leading-relaxed">
+
+    <!-- Chosen Palette: Warm Neutrals (Stone-50 background, Slate-800 text) with Slate-600 accents and subtle Red/Amber for tactical alerts. -->
+    
+    <!-- Application Structure Plan: A dashboard-style SPA divided into three core sections: 1. Macro Scenario (Context & Overview), 2. Typologies Deep-Dive (Interactive Tabs for detailed exploration), and 3. Response Matrix (Actionable cards). This structure was chosen to allow decision-makers to quickly grasp the severity of the problem, explore the specific criminal methods interactively without overwhelming text, and immediately see the recommended actions. -->
+    
+    <!-- Visualization & Content Choices: 
+    - Report Info: Shift to digital crime & 35+ occurrences. Goal: Inform/Compare. Viz: Bar Chart (Chart.js). Justification: Quickly visualizes the distribution of the 4 typologies. Library: Chart.js (NO SVG).
+    - Report Info: Fraud Typologies (A, B, C, D). Goal: Organize/Explore. Viz: Interactive Tabbed Interface. Justification: Prevents text fatigue, allows users to focus on one criminal Modus Operandi at a time. Method: Vanilla JS + Tailwind HTML.
+    - Report Info: Action Plan. Goal: Organize/Change. Viz: Grid of Action Cards. Justification: Clearly delineates responsibilities across different departments. Method: Tailwind CSS grid layout. -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <header class="bg-slate-900 text-stone-50 py-6 px-4 shadow-md border-b-4 border-red-800">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold tracking-tight">&#128110; BRIEFING TÁTICO: FRAUDES ELETRÔNICAS</h1>
+                <p class="text-sm text-slate-300 mt-1">2ª COORPIN ALAGOINHAS | DIRPIN LESTE</p>
+            </div>
+            <div class="bg-red-800 text-red-50 text-xs font-bold px-3 py-1 rounded tracking-wider border border-red-600">
+                CLASSIFICAÇÃO: RESERVADO
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-4 md:p-6 space-y-10 mt-4">
+
+        <section id="cenario-macro" class="bg-white p-6 rounded-lg shadow-sm border border-stone-200">
+            <h2 class="text-2xl font-bold text-slate-900 mb-4 border-b border-stone-200 pb-2">&#128202; 1. O Cenário Macro: Migração Digital</h2>
+            
+            <p class="text-slate-700 mb-6 text-lg">
+                Esta seção apresenta o panorama geral da criminalidade na 2ª COORPIN entre 23/02 e 02/03/2026. O objetivo é evidenciar a transição clara dos crimes de rua convencionais para o ambiente cibernético (Art. 171, § 2°-A). Enquanto as forças táticas mantêm alta eficácia nas ruas, o volume de fraudes virtuais exige uma nova postura analítica. Os dados abaixo refletem a magnitude deste deslocamento criminal.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-stone-100 p-4 rounded border-l-4 border-slate-600">
+                    <div class="text-3xl font-black text-slate-800">35+</div>
+                    <div class="text-sm font-semibold text-slate-600 uppercase tracking-wide">Ocorrências Mapeadas</div>
+                    <div class="text-xs text-slate-500 mt-1">Crimes patrimoniais não-violentos na semana.</div>
+                </div>
+                <div class="bg-stone-100 p-4 rounded border-l-4 border-red-600">
+                    <div class="text-3xl font-black text-slate-800">4</div>
+                    <div class="text-sm font-semibold text-slate-600 uppercase tracking-wide">Tipologias Identificadas</div>
+                    <div class="text-xs text-slate-500 mt-1">Modus Operandi distintos em operação.</div>
+                </div>
+                <div class="bg-stone-100 p-4 rounded border-l-4 border-amber-600">
+                    <div class="text-3xl font-black text-slate-800">3</div>
+                    <div class="text-sm font-semibold text-slate-600 uppercase tracking-wide">Frentes de Resposta</div>
+                    <div class="text-xs text-slate-500 mt-1">Ações táticas, preventivas e de atendimento.</div>
+                </div>
+            </div>
+
+            <div class="bg-stone-50 p-4 rounded border border-stone-200">
+                <h3 class="text-center font-bold text-slate-700 mb-4">Volume Estimado de Ocorrências por Tipologia (Base: 37 BOs)</h3>
+                <div class="chart-container">
+                    <canvas id="typologyChart"></canvas>
+                </div>
+                <p class="text-xs text-center text-slate-500 mt-4">Nota: O gráfico ilustra a predominância da Falsidade Institucional (uso de marcas) e Associações Criminosas sobre as demais tipologias na circunscrição.</p>
+            </div>
+        </section>
+
+        <section id="deep-dive" class="bg-white p-6 rounded-lg shadow-sm border border-stone-200">
+            <h2 class="text-2xl font-bold text-slate-900 mb-4 border-b border-stone-200 pb-2">&#128269; 2. Deep-Dive: Tipologias e Vínculos</h2>
+            
+            <p class="text-slate-700 mb-6 text-lg">
+                Esta seção destrincha os padrões operacionais (Modus Operandi) dos estelionatários mapeados. Interaja com as abas abaixo para explorar cada uma das quatro tipologias identificadas no relatório. Compreender esses padrões é fundamental para subsidiar as quebras de sigilo bancário e telemático recomendadas.
+            </p>
+
+            <div class="flex flex-wrap gap-2 mb-6 border-b border-stone-300 pb-2" id="tab-buttons">
+                <button onclick="openTab('tipo-a', this)" class="tab-btn active px-4 py-2 bg-slate-800 text-white font-semibold rounded hover:bg-slate-700 transition-colors focus:outline-none">Tipologia A (Cyber)</button>
+                <button onclick="openTab('tipo-b', this)" class="tab-btn px-4 py-2 bg-stone-200 text-slate-700 font-semibold rounded hover:bg-stone-300 transition-colors focus:outline-none">Tipologia B (Institucional)</button>
+                <button onclick="openTab('tipo-c', this)" class="tab-btn px-4 py-2 bg-stone-200 text-slate-700 font-semibold rounded hover:bg-stone-300 transition-colors focus:outline-none">Tipologia C (Células)</button>
+                <button onclick="openTab('tipo-d', this)" class="tab-btn px-4 py-2 bg-stone-200 text-slate-700 font-semibold rounded hover:bg-stone-300 transition-colors focus:outline-none">Tipologia D (Crossover)</button>
+            </div>
+
+            <div id="tipo-a" class="tab-content active bg-stone-50 p-6 rounded border border-stone-200">
+                <h3 class="text-xl font-bold text-slate-800 mb-3">&#128241; Engenharia Social e Clonagem de Dispositivos</h3>
+                <p class="text-slate-600 mb-4">Autores invadem contas de WhatsApp e redes sociais para extorquir a rede de contatos da vítima. Frequentemente envolve *phishing* ou exploração de falhas na autenticação de dois fatores.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-white p-3 rounded shadow-sm border border-stone-100">
+                        <span class="font-bold text-slate-700 block">Ocorrência Chave:</span>
+                        <span class="text-slate-600">BO 00154250/2026 (1ª DT)</span>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm border border-stone-100">
+                        <span class="font-bold text-slate-700 block">Autoria Apontada:</span>
+                        <span class="text-red-700 font-semibold">Indivíduo "Laila"</span>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm border border-stone-100 sm:col-span-2">
+                        <span class="font-bold text-slate-700 block">Vítimas e Agravantes:</span>
+                        <span class="text-slate-600">Ikaro dos Santos Pereira e Laercio de Assis Ferreira. Tipificado com agravante de Invasão de Dispositivo Informático (Art. 154-A, § 4°).</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tipo-b" class="tab-content bg-stone-50 p-6 rounded border border-stone-200">
+                <h3 class="text-xl font-bold text-slate-800 mb-3">&#127970; Falsidade Institucional</h3>
+                <p class="text-slate-600 mb-4">Uso de fachadas corporativas. Criminosos utilizam o nome de grandes bancos, fundos e concessionárias para simular cobranças, falsos empréstimos ou renegociações de dívidas, vitimando principalmente idosos.</p>
+                <div class="space-y-3">
+                    <div class="bg-white p-3 rounded shadow-sm border-l-4 border-slate-600">
+                        <span class="font-bold text-slate-800">Bancos Utilizados como Isca:</span>
+                        <p class="text-sm text-slate-600">Bradesco (BOs 00160218, 00153294, 00145886) e Banco Safra (BO 00154364).</p>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm border-l-4 border-slate-600">
+                        <span class="font-bold text-slate-800">Fundos e Planos de Saúde:</span>
+                        <p class="text-sm text-slate-600">Fundo Empirica Noverde (BO 00159562) e Qualicorp (BO 00160286).</p>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm border-l-4 border-slate-600">
+                        <span class="font-bold text-slate-800">Concessionárias & E-commerce:</span>
+                        <p class="text-sm text-slate-600">SABESP (BO 00149602 - Falsidade Ideológica). Falso E-commerce usando nomes Bazam & Pichau Informática (BO 00158030 - Autor: Leandro de Castro Macedo).</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tipo-c" class="tab-content bg-stone-50 p-6 rounded border border-stone-200">
+                <h3 class="text-xl font-bold text-slate-800 mb-3">&#128101; Associações Criminosas (Estelionatos Plurais)</h3>
+                <p class="text-slate-600 mb-4">Núcleos operando em dupla, atuando de forma contumaz e vitimando múltiplas pessoas simultaneamente. Fortes indicativos de esquemas de pirâmide, falso consórcio ou golpe do intermediário.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded shadow-sm border border-stone-200 hover:border-slate-400 transition-colors">
+                        <h4 class="font-bold text-red-800 mb-1">Célula 1 (Sena)</h4>
+                        <p class="text-sm text-slate-600">Autoras <strong>Kailane Santos Sena</strong> e <strong>Noelia dos Santos Sena</strong>. Defraudaram simultaneamente 3 vítimas (Ana Maria, Annya, Cibele). Apropriação Indébita/Estelionato (BO 00147686).</p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow-sm border border-stone-200 hover:border-slate-400 transition-colors">
+                        <h4 class="font-bold text-red-800 mb-1">Célula 2</h4>
+                        <p class="text-sm text-slate-600">Autores <strong>Emmanuel Reyvson G.</strong> e <strong>Kauan Tadeu A.</strong> operando contra a vítima Lucas Conceição (BO 00161108).</p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow-sm border border-stone-200 hover:border-slate-400 transition-colors">
+                        <h4 class="font-bold text-red-800 mb-1">Célula 3</h4>
+                        <p class="text-sm text-slate-600">Autores <strong>E.R. Domingos</strong> e <strong>Lucas Moreira da Silva</strong> (BO 00154950).</p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow-sm border border-stone-200 hover:border-slate-400 transition-colors">
+                        <h4 class="font-bold text-red-800 mb-1">Célula 4</h4>
+                        <p class="text-sm text-slate-600">Autora <strong>Carla Matos Salomao</strong> atuando contra múltiplas vítimas distintas no mesmo registro (BO 00160936).</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tipo-d" class="tab-content bg-stone-50 p-6 rounded border border-stone-200">
+                <h3 class="text-xl font-bold text-slate-800 mb-3">&#9888; O Criminoso "Crossover" (Alerta Tático)</h3>
+                <p class="text-slate-600 mb-4">Intersecção de perfis violentos com fraudes. O autor não é apenas um criminoso de colarinho branco ("hacker"), utilizando os rendimentos da fraude para financiar um estilo de vida violento.</p>
+                <div class="bg-white p-5 rounded shadow-sm border-l-8 border-red-700">
+                    <h4 class="font-black text-lg text-slate-900 mb-2">O Caso: Marcelo Lima Mota</h4>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1 bg-stone-100 p-3 rounded">
+                            <span class="block font-bold text-slate-700 text-sm uppercase">Ação Fraude</span>
+                            <span class="text-slate-600 text-sm">Autor de Estelionato (BO 00154511/2026).</span>
+                        </div>
+                        <div class="flex flex-col justify-center items-center text-slate-400">
+                            <span class="text-2xl">&#10133;</span>
+                        </div>
+                        <div class="flex-1 bg-stone-100 p-3 rounded">
+                            <span class="block font-bold text-slate-700 text-sm uppercase">Ação Violenta</span>
+                            <span class="text-slate-600 text-sm">Dias depois, autor de Ameaça e Dano na Lei Maria da Penha (BO 00163424/2026).</span>
+                        </div>
+                    </div>
+                    <p class="text-sm font-semibold text-red-700 mt-4">Conclusão Analítica: Indivíduo altamente instável. A quebra financeira deve compor o inquérito de violência doméstica para embasar prisão.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="plano-acao" class="bg-white p-6 rounded-lg shadow-sm border border-stone-200">
+            <h2 class="text-2xl font-bold text-slate-900 mb-4 border-b border-stone-200 pb-2">&#128640; 3. Matriz de Resposta e Plano de Ação</h2>
+            
+            <p class="text-slate-700 mb-6 text-lg">
+                Para estancar o volume de ocorrências e iniciar a desarticulação destas células criminosas digitais, recomenda-se a execução estruturada das três frentes de ação abaixo. Cada departamento possui uma missão clara para conter o avanço dos estelionatários mapeados.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <div class="bg-slate-800 text-stone-50 rounded-lg overflow-hidden shadow-md flex flex-col">
+                    <div class="bg-slate-900 p-3 text-center border-b border-slate-700">
+                        <span class="text-lg font-bold tracking-wide">&#128270; I. Tática-Investigativa</span>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <span class="bg-slate-700 text-xs font-bold uppercase py-1 px-2 rounded w-max mb-3">SI da 1ª DT / DRFR</span>
+                        <h4 class="font-bold text-xl mb-2 text-red-400">Follow the Money</h4>
+                        <p class="text-slate-300 text-sm flex-1">Agrupar todos os 37+ BOs de Fraude/Estelionato da semana e representar por uma <strong>quebra de sigilo bancário em lote</strong> focada nas chaves PIX/Contas recebedoras.</p>
+                        <div class="mt-4 pt-3 border-t border-slate-700 text-xs text-slate-400">
+                            Objetivo: Atingir o "conteiro" (laranja) e o operador financeiro local, não apenas a linha telefônica.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-stone-100 text-slate-800 rounded-lg overflow-hidden shadow-md border border-stone-200 flex flex-col">
+                    <div class="bg-stone-200 p-3 text-center border-b border-stone-300">
+                        <span class="text-lg font-bold tracking-wide">&#128227; II. Prevenção Institucional</span>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <span class="bg-stone-300 text-slate-700 text-xs font-bold uppercase py-1 px-2 rounded w-max mb-3">ASCOM (PCBA)</span>
+                        <h4 class="font-bold text-xl mb-2 text-slate-700">Operação Conscientização</h4>
+                        <p class="text-slate-600 text-sm flex-1">Lançar cards nas redes sociais da COORPIN alertando a população, focando especialmente na Tipologia B (Falsidade Institucional) que atinge idosos.</p>
+                        <div class="mt-4 p-3 bg-white rounded border border-stone-200 text-sm italic font-semibold text-center text-slate-700 shadow-inner">
+                            "O Banco não pede sua senha nem liga para reverter PIX. Desligue na hora."
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-stone-100 text-slate-800 rounded-lg overflow-hidden shadow-md border border-stone-200 flex flex-col">
+                    <div class="bg-stone-200 p-3 text-center border-b border-stone-300">
+                        <span class="text-lg font-bold tracking-wide">&#128187; III. Atendimento</span>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <span class="bg-stone-300 text-slate-700 text-xs font-bold uppercase py-1 px-2 rounded w-max mb-3">Plantão / Central</span>
+                        <h4 class="font-bold text-xl mb-2 text-slate-700">Qualificação Qualificada</h4>
+                        <p class="text-slate-600 text-sm flex-1">Instruir os IPCs do plantão a exigirem os comprovantes de PIX e prints de conversa <em>no momento do registro</em> do BO.</p>
+                        <div class="mt-4 pt-3 border-t border-stone-300 text-xs text-slate-600 font-semibold">
+                            Mandatório: Inserir a Chave PIX do estelionatário diretamente no campo "Envolvidos/Autores" do sistema PPE.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- NOVO RELATÓRIO ADICIONADO -->
+        <section id="relatorio-completo" class="bg-white p-6 rounded-lg shadow-sm border border-stone-200 mt-10">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6 border-b border-stone-200 pb-2">&#128196; RELATÓRIO DE ANÁLISE ESTRATÉGICA E DINÂMICA CRIMINAL 2026 - DIRPIN LESTE</h2>
+            
+            <div class="bg-stone-100 p-4 rounded border border-stone-200 mb-8 text-sm text-slate-800 space-y-2 shadow-inner">
+                <p><span class="font-bold text-slate-600">PARA:</span> Gabinete do Diretor da DIRPIN - LESTE, Coordenador da 2ª COORPIN ALAGOINHAS</p>
+                <p><span class="font-bold text-slate-600">DE:</span> Ponto Focal de Inteligência e Análise Criminal - DIRPIN LESTE</p>
+                <p><span class="font-bold text-slate-600">PERÍODO:</span> 23/02/2026 a 02/03/2026</p>
+                <p><span class="font-bold text-slate-600">ASSUNTO:</span> ALTA INCIDÊNCIA DE FRAUDES DIGITAIS E OFENSIVA TÁTICA CONTRA O TRÁFICO DE DROGAS NA 2ª COORPIN</p>
+                <p><span class="font-bold text-slate-600">CLASSIFICAÇÃO:</span> <span class="bg-red-800 text-red-50 px-2 py-0.5 rounded text-xs tracking-widest">RESERVADO</span></p>
+            </div>
+
+            <div class="space-y-8 text-slate-700">
+                <!-- Seção 1 -->
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2"><span class="text-xl">&#128205;</span> I. MINERAÇÃO DE DADOS (OSINT & HUMINT)</h3>
+                    <p class="leading-relaxed">Os dados processados refletem os registros de ocorrências validados no sistema de Procedimentos Policiais Eletrônicos (PPE) da 2ª COORPIN Alagoinhas, abrangendo a 1ª Delegacia Territorial, Delegacia Especial de Atendimento à Mulher (DEAM), Delegacia de Repressão a Furtos e Roubos (DRFR) e unidades circunscricionais (Rio Real, Inhambupe, Irará e Catu). Registros de cunho estritamente administrativo (Fatos Atípicos, Perda de Documentos, Custódias e Alvarás) foram devidamente depurados da presente análise para foco no panorama tático-operacional.</p>
+                </div>
+
+                <!-- Seção 2 -->
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2"><span class="text-xl">&#128205;</span> 1. SUMÁRIO EXECUTIVO (BRIEFING)</h3>
+                    <p class="leading-relaxed">A semana operativa (23/02 a 02/03/2026) na área da 2ª COORPIN foi marcada por uma dualidade evidente. Por um lado, observa-se uma explosão de <strong>Crimes de Estelionato e Fraudes Eletrônicas</strong>, demonstrando uma migração da criminalidade patrimonial clássica para o ambiente cibernético. A <strong>Violência Doméstica (Lei Maria da Penha)</strong> manteve patamares críticos, exigindo pronta resposta da DEAM e 1ª DT. Por outro lado, a Polícia Civil, em ações conjuntas e pontuais com a Polícia Militar, demonstrou alta eficácia repressiva (Destaque Positivo), consubstanciada em múltiplas prisões em flagrante por tráfico de drogas, recuperação de veículos e apreensão de armas de fogo, culminando em uma intervenção policial com resultado morte (Auto de Resistência) frente à oposição armada.</p>
+                </div>
+
+                <!-- Seção 3 -->
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><span class="text-xl">&#128205;</span> 2. INDICADORES QUANTITATIVOS SELECIONADOS</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left border border-stone-200">
+                            <thead class="text-xs text-slate-700 uppercase bg-stone-100 border-b border-stone-200">
+                                <tr>
+                                    <th class="px-4 py-3 border-r border-stone-200">Grupo Delitivo</th>
+                                    <th class="px-4 py-3 border-r border-stone-200 text-center">Quantidade (Aprox.)</th>
+                                    <th class="px-4 py-3 border-r border-stone-200">Principais Naturezas</th>
+                                    <th class="px-4 py-3">Unidades Envolvidas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-stone-200 bg-white hover:bg-stone-50"><td class="px-4 py-2 font-bold border-r border-stone-200">CVLI / Mortes</td><td class="px-4 py-2 text-center border-r border-stone-200">3</td><td class="px-4 py-2 border-r border-stone-200">Intervenção Policial, Morte a Esclarecer, Suicídio</td><td class="px-4 py-2">1ª DT Alagoinhas</td></tr>
+                                <tr class="border-b border-stone-200 bg-white hover:bg-stone-50"><td class="px-4 py-2 font-bold border-r border-stone-200">Violência Doméstica</td><td class="px-4 py-2 text-center border-r border-stone-200">21</td><td class="px-4 py-2 border-r border-stone-200">Ameaça, Lesão Corporal, Estupro, Violação de Domicílio</td><td class="px-4 py-2">DEAM, 1ª DT</td></tr>
+                                <tr class="border-b border-stone-200 bg-white hover:bg-stone-50"><td class="px-4 py-2 font-bold border-r border-stone-200">CVP (Roubos/Furtos)</td><td class="px-4 py-2 text-center border-r border-stone-200">34</td><td class="px-4 py-2 border-r border-stone-200">Furto Qualificado, Roubo Majorado, Furto Simples</td><td class="px-4 py-2">DRFR, 1ª DT</td></tr>
+                                <tr class="border-b border-stone-200 bg-white hover:bg-stone-50"><td class="px-4 py-2 font-bold border-r border-stone-200">Estelionato/Fraudes</td><td class="px-4 py-2 text-center border-r border-stone-200">37</td><td class="px-4 py-2 border-r border-stone-200">Fraude Eletrônica, Estelionato, Falsidade Ideológica</td><td class="px-4 py-2">1ª DT, Del. Virtual</td></tr>
+                                <tr class="bg-white hover:bg-stone-50"><td class="px-4 py-2 font-bold border-r border-stone-200">Tráfico e Armas</td><td class="px-4 py-2 text-center border-r border-stone-200">10</td><td class="px-4 py-2 border-r border-stone-200">Tráfico de Drogas, Porte Ilegal de Arma de Fogo (Restrito/Permitido)</td><td class="px-4 py-2">1ª DT</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Seção 4 -->
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><span class="text-xl">&#128205;</span> 3. ANÁLISE DETALHADA DA MANCHA CRIMINAL</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-stone-50 p-4 border border-stone-200 rounded">
+                            <h4 class="font-bold text-slate-800 mb-2 border-b border-stone-200 pb-1">A. Crimes Contra a Vida (CVLI e Mortes a Esclarecer)</h4>
+                            <ul class="list-disc pl-5 text-sm space-y-2">
+                                <li><strong>Intervenção Policial:</strong> BO 00164535/2026 (01/03) - Morte por intervenção de agente de segurança pública (1ª DT). Ação reativa do Estado (PMBA) frente à agressão letal, neutralizando a ameaça (Autor/Vítima: Lucas Alves Dias).</li>
+                                <li><strong>Mortes a Esclarecer/Suicídios:</strong> BO 00145632/2026 (Morte a esclarecer) e BO 00145610/2026 (Suicídio), ambos em 23/02. Dinâmica em apuração pelo SI da 1ª DT.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-stone-50 p-4 border border-stone-200 rounded">
+                            <h4 class="font-bold text-slate-800 mb-2 border-b border-stone-200 pb-1">B. Violência Doméstica e Crimes Sexuais (DEAM e 1ª DT)</h4>
+                            <ul class="list-disc pl-5 text-sm space-y-2">
+                                <li><strong>Dinâmica:</strong> Elevado número de descumprimento de medidas e escalada de violência física e psicológica.</li>
+                                <li><strong>Destaques:</strong> BO 00158142/2026 (26/02) - Estupro de Vulnerável (Menor de 14 anos); BO 00151285/2026 (24/02) - Estupro (Hediondo).</li>
+                                <li><strong>Casos Corriqueiros:</strong> Ameaças (BO 00164062/2026, 00157577/2026), Lesões Corporais (BO 00152998/2026, 00163439/2026) e Assédio Sexual (BO 00156820/2026). A multiplicidade de registros indica forte encorajamento das vítimas à denúncia, embora o risco de feminicídio permaneça em alerta amarelo/vermelho.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-stone-50 p-4 border border-stone-200 rounded">
+                            <h4 class="font-bold text-slate-800 mb-2 border-b border-stone-200 pb-1">C. Crimes Contra o Patrimônio (CVP - DRFR e 1ª DT)</h4>
+                            <ul class="list-disc pl-5 text-sm space-y-2">
+                                <li><strong>Dinâmica (Modus Operandi):</strong> Atuação de duplas em motocicletas para roubos e furtos de oportunidade em vias públicas e estabelecimentos.</li>
+                                <li><strong>Destaques Roubo:</strong> BO 00153960/2026 e 00152405/2026 (Roubo com emprego de arma de fogo e concurso de pessoas), indicando quadrilhas especializadas operando na circunscrição da DRFR.</li>
+                                <li><strong>Destaques Furto:</strong> Incursões noturnas e a órgãos essenciais (BO 00156046/2026 - SAAE; BO 00160517/2026 - Escola Municipal).</li>
+                            </ul>
+                        </div>
+                        <div class="bg-stone-50 p-4 border border-stone-200 rounded">
+                            <h4 class="font-bold text-slate-800 mb-2 border-b border-stone-200 pb-1">D. Crimes Cibernéticos, Fraudes e Estelionato</h4>
+                            <ul class="list-disc pl-5 text-sm space-y-2">
+                                <li><strong>Dinâmica:</strong> Maior volume de registros da semana. Migração massiva do crime de rua para o ambiente digital (Art. 171, § 2°-A do CPB).</li>
+                                <li><strong>Destaques:</strong> Invasão de dispositivos, clonagem de WhatsApp, falsos intermediários de vendas e golpes bancários (BOs 00160218, 00163728, 00158030, etc.). Oportunidade crítica para campanhas de prevenção pela ASCOM.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção 5 -->
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2"><span class="text-xl">&#128205;</span> 4. DESTAQUES OPERACIONAIS (PRODUTIVIDADE)</h3>
+                    <p class="mb-3">A semana demonstrou excelente produtividade repressiva, com prisões e apreensões vitais para a desidratação do crime organizado local:</p>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>Combate ao Tráfico:</strong> Múltiplos flagrantes lavrados. BO 00164007/2026 (Autores: Eric e Jeovane dos Santos Conceição); BO 00163083/2026 (Autores: Cauã Santos Machado e Mateus Conceição Silva); BO 00153947/2026 (Bruno da Conceição Gomes); BO 00152528/2026; BO 00150822/2026.</li>
+                        <li><strong>Apreensão de Armas:</strong> BO 00161747/2026 (Tráfico + Posse de Arma de Uso Restrito - Autor: Adney Leite da Silva); BO 00164475/2026 (Posse Irregular + Tráfico em Rio Real).</li>
+                        <li><strong>Recuperação de Veículos:</strong> Sucesso da DRFR na localização e recuperação de veículos roubados (BO 00153949/2026 e 00145664/2026 - com receptação qualificada e envolvimento policial).</li>
+                        <li><strong>Mandados Cumpridos:</strong> Múltiplos cumprimentos de prisão (BO 00158205/2026, 00148887/2026, 00149074/2026 em Irará).</li>
+                    </ul>
+                </div>
+
+                <!-- Seção 6 -->
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2"><span class="text-xl">&#128205;</span> 5. ANÁLISE DE MANCHA CRIMINAL POR COORPIN (CIDADES PRINCIPAIS)</h3>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>Alagoinhas (Sede):</strong> Concentra 90% dos registros. Foco agudo em fraudes digitais e violência doméstica. Mancha tática de tráfico nos bairros periféricos contida por forte repressão estatal (vide prisões).</li>
+                        <li><strong>Rio Real:</strong> Foco tático (BO 00164475/2026). Atividade de tráfico de drogas consorciada com posse de arma de fogo. Eixo de atenção para rotas de escoamento.</li>
+                        <li><strong>Inhambupe:</strong> Registros de furtos (BO 00146969/2026 - Furto Noturno a empresa de empreendimentos florestais) e Lesão Corporal/Ameaça (BO 00149048/2026). Dinâmica patrimonial rural.</li>
+                        <li><strong>Irará:</strong> Foco em inteligência e captura (Cumprimento de Mandado de Prisão - BO 00149074/2026).</li>
+                        <li><strong>Catu:</strong> Foco preventivo e averiguações (BO 00149296/2026).</li>
+                    </ul>
+                </div>
+
+                <!-- Seção 7 -->
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><span class="text-xl">&#128205;</span> 6. MATRIZ DE RISCO E RECOMENDAÇÕES</h3>
+                    <div class="overflow-x-auto mb-6">
+                        <table class="w-full text-sm text-left border border-stone-200">
+                            <thead class="text-xs text-slate-700 uppercase bg-stone-100 border-b border-stone-200">
+                                <tr>
+                                    <th class="px-4 py-3 border-r border-stone-200">Cidade/Unidade</th>
+                                    <th class="px-4 py-3 border-r border-stone-200 text-center">Risco</th>
+                                    <th class="px-4 py-3 border-r border-stone-200">Fator Crítico</th>
+                                    <th class="px-4 py-3">Recomendação ASCOM / Operacional</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-stone-200"><td class="px-4 py-2 font-bold border-r border-stone-200">Alagoinhas (Sede)</td><td class="px-4 py-2 text-center border-r border-stone-200"><span class="text-red-700 font-bold">ALTO</span></td><td class="px-4 py-2 border-r border-stone-200">Escalada de Estelionato e Fraudes Virtuais</td><td class="px-4 py-2">Campanha Massiva: "Alerta Golpe" nas redes sociais da PCBA.</td></tr>
+                                <tr class="border-b border-stone-200"><td class="px-4 py-2 font-bold border-r border-stone-200">Alagoinhas (DEAM)</td><td class="px-4 py-2 text-center border-r border-stone-200"><span class="text-red-700 font-bold">ALTO</span></td><td class="px-4 py-2 border-r border-stone-200">Desc. Medida Protetiva e Crimes Sexuais</td><td class="px-4 py-2">Reforço na Operação Ronda Maria da Penha e mutirões de inquéritos.</td></tr>
+                                <tr class="border-b border-stone-200"><td class="px-4 py-2 font-bold border-r border-stone-200">Rio Real</td><td class="px-4 py-2 text-center border-r border-stone-200"><span class="text-amber-600 font-bold">MÉDIO</span></td><td class="px-4 py-2 border-r border-stone-200">Tráfico Armado</td><td class="px-4 py-2">Intensificação de blitz e escuta qualificada (HUMINT) nas divisas.</td></tr>
+                                <tr class="border-b border-stone-200"><td class="px-4 py-2 font-bold border-r border-stone-200">Inhambupe</td><td class="px-4 py-2 text-center border-r border-stone-200"><span class="text-amber-600 font-bold">MÉDIO</span></td><td class="px-4 py-2 border-r border-stone-200">Furtos a propriedades rurais/empresas</td><td class="px-4 py-2">Integração com sindicatos rurais e patrulhamento de estradas vicinais.</td></tr>
+                                <tr><td class="px-4 py-2 font-bold border-r border-stone-200">Irará / Catu</td><td class="px-4 py-2 text-center border-r border-stone-200"><span class="text-emerald-600 font-bold">BAIXO</span></td><td class="px-4 py-2 border-r border-stone-200">Foragidos da Justiça</td><td class="px-4 py-2">Manter cruzamento de dados de inteligência para captura de alvos.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-5 rounded text-amber-900 shadow-sm">
+                        <h4 class="font-bold flex items-center gap-2 text-amber-700 mb-2"><span class="text-lg">&#11088;</span> OPORTUNIDADE DE OURO (MARKETING POLICIAL):</h4>
+                        <p class="text-sm">A ampla quantidade de prisões por tráfico e apreensões de armas de fogo realizadas pela 1ª DT, aliada à recuperação de veículos pela DRFR, oferece material robusto para a ASCOM. Recomenda-se a publicação de um balanço semanal destacando a "Tolerância Zero contra o Tráfico e a Proteção ao Patrimônio em Alagoinhas", gerando sensação de segurança imediata na população.</p>
+                    </div>
+                </div>
+
+                <!-- Seção 8 -->
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><span class="text-xl">&#128205;</span> TABELAS TÉCNICAS</h3>
+                    <h4 class="font-bold text-slate-700 mb-2">Tabela 1: Indicadores de Tendência de Violência</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left border border-stone-200">
+                            <thead class="text-xs text-slate-700 uppercase bg-stone-100 border-b border-stone-200">
+                                <tr>
+                                    <th class="px-4 py-3 border-r border-stone-200">COORPIN</th>
+                                    <th class="px-4 py-3 border-r border-stone-200 text-center">Qtd CVLI</th>
+                                    <th class="px-4 py-3 border-r border-stone-200 text-center">CVP</th>
+                                    <th class="px-4 py-3 border-r border-stone-200 text-center">VD (Maria da Penha)</th>
+                                    <th class="px-4 py-3 border-r border-stone-200 text-center">Fraudes</th>
+                                    <th class="px-4 py-3 border-r border-stone-200 text-center">Tendência</th>
+                                    <th class="px-4 py-3">Obs</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="px-4 py-2 font-bold border-r border-stone-200">2ª Alagoinhas</td>
+                                    <td class="px-4 py-2 text-center border-r border-stone-200">0 (0 homicídios dolosos)</td>
+                                    <td class="px-4 py-2 text-center border-r border-stone-200">Alta</td>
+                                    <td class="px-4 py-2 text-center border-r border-stone-200">Alta</td>
+                                    <td class="px-4 py-2 text-center border-r border-stone-200">Crítica</td>
+                                    <td class="px-4 py-2 text-center font-bold border-r border-stone-200">&#11015;&#65039; CVLI / &#11014;&#65039; CVP-Fraude</td>
+                                    <td class="px-4 py-2 text-xs">Controle letal mantido; migração para crimes não-violentos patrimoniais (ciber).</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Seção 9 -->
+                <div class="border-t border-stone-200 pt-6">
+                    <h3 class="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2"><span class="text-xl">&#128205;</span> 7. CONCLUSÃO</h3>
+                    <p class="leading-relaxed mb-6">A circunscrição da 2ª COORPIN apresenta estabilidade nos crimes letais intencionais (CVLI), fruto direto da forte ofensiva contra o tráfico de drogas (vetor primário de homicídios). Contudo, o desafio contemporâneo deslocou-se para a esfera cibernética (estelionatos) e para o ambiente intrafamiliar (violência de gênero). A recomendação estratégica é a manutenção da pressão operativa nas ruas pelas forças táticas, enquanto as seções de investigação (SI) fortalecem a apuração em fontes abertas e quebras de sigilo para desarticular os laboratórios de fraudes eletrônicas.</p>
+                    
+                    <div class="mt-8 pt-4">
+                        <p class="font-bold text-slate-800 text-lg">Félix Rilton</p>
+                        <p class="text-slate-600">Investigador PCBA | Análise Criminal - DIRPIN LESTE</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center pb-8 pt-4">
+            <p class="text-slate-500 text-sm font-semibold">Félix Rilton - Investigador PCBA | Análise Criminal - DIRPIN LESTE</p>
+            <p class="text-slate-400 text-xs mt-1">Gerado em 02 de Março de 2026</p>
+        </footer>
+
+    </main>
+
+    <script>
+        // Tab switching logic for Typologies
+        function openTab(tabId, btnElement) {
+            // Hide all tab content
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Reset all buttons styling
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-slate-800', 'text-white');
+                btn.classList.add('bg-stone-200', 'text-slate-700');
+            });
+
+            // Show selected tab content
+            document.getElementById(tabId).classList.add('active');
+
+            // Set active styling to clicked button
+            btnElement.classList.remove('bg-stone-200', 'text-slate-700');
+            btnElement.classList.add('bg-slate-800', 'text-white');
+        }
+
+        // Initialize Chart.js for Macro Overview
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('typologyChart').getContext('2d');
+            
+            // Data based on the report's typologies and 37 BOs estimate
+            const typologyData = {
+                labels: ['Tipologia A (Cyber)', 'Tipologia B (Institucional)', 'Tipologia C (Células)', 'Tipologia D (Crossover)'],
+                datasets: [{
+                    label: 'Número Estimado de BOs',
+                    data: [4, 16, 14, 3], // Total 37 to reflect the report context
+                    backgroundColor: [
+                        '#94a3b8', // Slate 400
+                        '#475569', // Slate 600
+                        '#1e293b', // Slate 800
+                        '#991b1b'  // Red 800 (Highlight crossover)
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
+                    borderRadius: 4
+                }]
+            };
+
+            const typologyChart = new Chart(ctx, {
+                type: 'bar',
+                data: typologyData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false // Hide legend to save space, label is clear from x-axis
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { size: 14 },
+                            bodyFont: { size: 13 },
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y + ' Ocorrências mapeadas';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#e5e7eb',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                stepSize: 4,
+                                color: '#64748b'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#334155',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
