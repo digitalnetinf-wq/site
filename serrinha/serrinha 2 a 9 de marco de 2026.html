@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIRPIN LESTE - Inteligência Policial</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Chosen Palette: Warm Neutrals with Authority Accents (Slate/Navy/Crimson) -->
+<!-- Application Structure Plan: The SPA uses a "Command Center Dashboard" structure to prioritize actionable intelligence. It replaces the linear report with four functional zones: 1. "Visão Estratégica" (Macro KPIs and Briefing for immediate situational awareness), 2. "Inteligência Operacional" (Interactive OSINT/HUMINT feed), 3. "Termômetro Criminal" (Interactive charts contrasting the spike in Domestic Violence against contained CVLI), 4. "Matriz de Risco Territorial" (Filterable city matrix to direct operational resources), and 5. "Anexos" (Raw report data). -->
+<!-- Visualization & Content Choices: 1. KPIs (Stats) -> Inform: Quick status of CVLI and operations. 2. Chart.js Bar Chart -> Compare: Visually highlights the severe contrast between Domestic Violence (High) and CVLI (Zero), proving the core thesis of the report. 3. Filterable Table -> Organize: Allows users to sort 20 cities by risk level (Critical, High, Medium, Low) for tactical deployment. 4. Interactive Accordion -> Relationships: Groups relevant BOs by crime type, keeping the interface clean while preserving deep details. 5. Data Table -> Detail raw inputs. Library: Vanilla JS + Chart.js. NO SVG/Mermaid used. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<style>
+body { background-color: #f5f3f0; color: #1e293b; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+.chart-container { position: relative; width: 100%; max-width: 700px; margin-left: auto; margin-right: auto; height: 320px; max-height: 400px; }
+@media (min-width: 768px) { .chart-container { height: 380px; } }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); }
+</style>
+</head>
+<body class="min-h-screen pb-12">
+
+<nav class="bg-slate-900 text-slate-100 shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center gap-3 font-bold text-lg tracking-wider">
+                <span class="text-2xl">🛡️</span> DIRPIN LESTE
+            </div>
+            <div class="hidden md:block">
+                <div class="flex items-baseline space-x-4 text-sm font-medium">
+                    <a href="#sumario" class="hover:bg-slate-700 px-3 py-2 rounded-md transition-colors">Sumário Executivo</a>
+                    <a href="#mancha" class="hover:bg-slate-700 px-3 py-2 rounded-md transition-colors">Mancha Criminal</a>
+                    <a href="#risco" class="hover:bg-slate-700 px-3 py-2 rounded-md transition-colors">Matriz de Risco</a>
+                    <a href="#operacional" class="hover:bg-slate-700 px-3 py-2 rounded-md transition-colors">Resultados Operacionais</a>
+                    <a href="#anexos" class="hover:bg-slate-700 px-3 py-2 rounded-md transition-colors text-yellow-400">Dados do Relatório</a>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded shadow animate-pulse">RESERVADO</span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<header class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+    <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight">Relatório de Análise Estratégica e Dinâmica Criminal</h1>
+    <p class="mt-2 text-lg text-slate-600 font-medium">Escalada da Violência Doméstica VS. Pronta Resposta Operacional</p>
+    <div class="mt-4 flex flex-wrap gap-4 text-sm text-slate-500 font-semibold uppercase tracking-wide">
+        <span class="bg-white px-3 py-1 rounded-full shadow-sm">📍 15.ª COORPIN - SERRINHA</span>
+        <span class="bg-white px-3 py-1 rounded-full shadow-sm">📅 02/03 a 09/03/2026</span>
+        <span class="bg-white px-3 py-1 rounded-full shadow-sm">👤 Ponto Focal DIRPIN LESTE</span>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+
+    <section id="sumario" class="scroll-mt-20">
+        <div class="mb-4">
+            <h2 class="text-2xl font-bold border-b-2 border-slate-300 pb-2 flex items-center gap-2">
+                <span class="text-xl">📊</span> Visão Estratégica
+            </h2>
+            <p class="mt-2 text-slate-700 leading-relaxed text-sm md:text-base">
+                Esta seção apresenta o macrocenário criminal da 15.ª COORPIN, consolidando o diagnóstico executivo e os principais indicadores da semana. O objetivo é fornecer ao comando uma compreensão imediata do contraste operacional: o sucesso na supressão de crimes letais contra o alerta crítico nos registros de violência de gênero. Interaja com os cards operacionais para verificar a efetividade das ações policiais.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-2 glass-panel rounded-xl p-6 shadow-sm">
+                <h3 class="text-lg font-bold text-slate-800 mb-3 uppercase text-sm tracking-wider">Briefing Executivo</h3>
+                <p class="text-slate-700 leading-relaxed mb-4 text-justify">
+                    O cenário criminal da <strong class="text-slate-900">15.ª COORPIN - Serrinha</strong> demonstra um <strong class="text-red-700">contraste operacional agudo</strong> no período. Os crimes violentos letais intencionais (CVLI) e crimes contra o patrimônio (CVP) mantiveram-se contidos devido à atuação repressiva da 1.ª DT na desarticulação da logística do crime (adulteração de veículos e tráfico periférico).
+                </p>
+                <p class="text-slate-700 leading-relaxed text-justify">
+                    Em contrapartida, observa-se uma <strong class="text-red-700">elevação crítica nos registros de Violência Doméstica</strong>. A atuação do NEAM foi o ponto de excelência, demonstrando alta capacidade de absorção e tipificação de crimes complexos (violência psicológica, stalking e ameaças). Alerta-se para subnotificação de furtos e pulverização de estelionatos eletrônicos.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div class="bg-green-50 border-l-4 border-green-600 p-4 rounded shadow-sm">
+                    <p class="text-xs text-green-800 font-bold uppercase">CVLI / Tentativas</p>
+                    <p class="text-3xl font-black text-green-700">0</p>
+                    <p class="text-xs text-green-700 mt-1">Totalmente sob controle</p>
+                </div>
+                <div class="bg-red-50 border-l-4 border-red-600 p-4 rounded shadow-sm">
+                    <p class="text-xs text-red-800 font-bold uppercase">Violência Doméstica</p>
+                    <p class="text-3xl font-black text-red-700">25+</p>
+                    <p class="text-xs text-red-700 mt-1">Explosão de registros (NEAM) ⬆️</p>
+                </div>
+                <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded shadow-sm">
+                    <p class="text-xs text-blue-800 font-bold uppercase">Crimes Patrimoniais (CVP)</p>
+                    <p class="text-3xl font-black text-blue-700">05</p>
+                    <p class="text-xs text-blue-700 mt-1">Contido (Foco 1.ª DT)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 glass-panel rounded-xl p-6 shadow-sm border border-slate-200">
+            <h3 class="text-lg font-bold text-slate-800 mb-4 uppercase text-sm tracking-wider flex items-center gap-2">
+                📡 Mineração de Dados (OSINT & HUMINT)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white p-4 rounded border border-slate-100 shadow-sm relative overflow-hidden group hover:border-blue-300 transition-colors">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-slate-800"></div>
+                    <span class="text-xs font-bold text-slate-500">HUMINT (04/03)</span>
+                    <p class="text-sm text-slate-800 mt-1 font-medium">Reestruturação de pequenos pontos de tráfico no bairro Cidade Nova (Serrinha) utilizando veículos adulterados.</p>
+                    <p class="text-xs text-blue-600 mt-2 font-bold">↳ Confirmado pelo BO 00183602/2026</p>
+                </div>
+                <div class="bg-white p-4 rounded border border-slate-100 shadow-sm relative overflow-hidden group hover:border-blue-300 transition-colors">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                    <span class="text-xs font-bold text-slate-500">OSINT - Redes Sociais (05/03)</span>
+                    <p class="text-sm text-slate-800 mt-1 font-medium">Áudios em grupos de WhatsApp relatando golpes via PIX na região comercial de Serrinha e Conceição do Coité.</p>
+                </div>
+                <div class="bg-white p-4 rounded border border-slate-100 shadow-sm relative overflow-hidden group hover:border-blue-300 transition-colors">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-slate-800"></div>
+                    <span class="text-xs font-bold text-slate-500">HUMINT (07/03)</span>
+                    <p class="text-sm text-slate-800 mt-1 font-medium">Relatos de moradores sobre aumento do consumo ostensivo de entorpecentes em praças públicas.</p>
+                </div>
+                <div class="bg-white p-4 rounded border border-slate-100 shadow-sm relative overflow-hidden group hover:border-blue-300 transition-colors">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
+                    <span class="text-xs font-bold text-slate-500">OSINT - Imprensa (08/03)</span>
+                    <p class="text-sm text-slate-800 mt-1 font-medium">Portais de notícias regionais destacam o alto volume de denúncias de mulheres vítimas de violência doméstica.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="mancha" class="scroll-mt-20">
+        <div class="mb-4">
+            <h2 class="text-2xl font-bold border-b-2 border-slate-300 pb-2 flex items-center gap-2">
+                <span class="text-xl">📈</span> Dinâmica e Mancha Criminal
+            </h2>
+            <p class="mt-2 text-slate-700 leading-relaxed text-sm md:text-base">
+                Esta seção detalha a composição qualitativa e quantitativa da criminalidade mapeada. Através do gráfico interativo, o usuário pode comparar o volume de ocorrências entre os principais grupos delitivos, evidenciando a concentração no escopo da Lei Maria da Penha. Os painéis expansíveis abaixo do gráfico contêm o detalhamento de inteligência (modus operandi e boletins relevantes) para cada eixo investigativo.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div class="lg:col-span-3 glass-panel rounded-xl p-6 shadow-sm">
+                <h3 class="text-center font-bold text-slate-800 mb-4 text-sm uppercase tracking-wider">Volume de Ocorrências por Grupo Delitivo</h3>
+                <div class="chart-container">
+                    <canvas id="crimeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 space-y-4 flex flex-col justify-center">
+                <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                    <button class="w-full px-5 py-4 text-left font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 flex justify-between items-center focus:outline-none" onclick="toggleAccordion('acc-vd')">
+                        <span class="flex items-center gap-2"><span class="text-red-600">⚠️</span> Violência Doméstica (NEAM)</span>
+                        <span id="icon-acc-vd" class="text-xl transition-transform duration-200">+</span>
+                    </button>
+                    <div id="acc-vd" class="hidden px-5 py-4 text-sm text-slate-700 border-t border-slate-100">
+                        <p class="mb-2"><strong class="text-slate-900">Dinâmica:</strong> Agressões baseadas no gênero, escalada de violência (injúria até ameaças graves). Multiplicidade de tipificações no mesmo BO.</p>
+                        <ul class="space-y-3 mt-4">
+                            <li class="bg-slate-50 p-2 rounded border-l-2 border-red-400">
+                                <strong>BO 00172502/2026</strong> (04/03)<br>
+                                Fato: Injúria, Difamação e Violência Psicológica.<br>
+                                <em>Análise: Autor utiliza terror psicológico contínuo.</em>
+                            </li>
+                            <li class="bg-slate-50 p-2 rounded border-l-2 border-red-400">
+                                <strong>BO 00166563/2026</strong> (02/03)<br>
+                                Fato: Perseguição/Stalking.<br>
+                                <em>Análise: Perfil obsessivo, exige intervenção rápida para evitar feminicídio.</em>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                    <button class="w-full px-5 py-4 text-left font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 flex justify-between items-center focus:outline-none" onclick="toggleAccordion('acc-cvp')">
+                        <span class="flex items-center gap-2"><span class="text-blue-600">📱</span> Patrimônio e Fraude (1.ª DT)</span>
+                        <span id="icon-acc-cvp" class="text-xl transition-transform duration-200">+</span>
+                    </button>
+                    <div id="acc-cvp" class="hidden px-5 py-4 text-sm text-slate-700 border-t border-slate-100">
+                        <p class="mb-2"><strong class="text-slate-900">Dinâmica:</strong> Migração do crime de rua para o ambiente digital. Estelionatos via engenharia social.</p>
+                        <ul class="space-y-3 mt-4">
+                            <li class="bg-slate-50 p-2 rounded border-l-2 border-blue-400">
+                                <strong>BO Ref. Estelionato</strong> (02/03)<br>
+                                Fato: Fraude/Estelionato (Art. 171).<br>
+                                <em>Análise: Vítimas vulneráveis cedendo dados a terceiros.</em>
+                            </li>
+                            <li class="bg-slate-50 p-2 rounded border-l-2 border-blue-400">
+                                <strong>BO 00164780/2026</strong> (02/03)<br>
+                                Fato: Dano (Art. 163).
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                    <button class="w-full px-5 py-4 text-left font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 flex justify-between items-center focus:outline-none" onclick="toggleAccordion('acc-log')">
+                        <span class="flex items-center gap-2"><span class="text-slate-600">🚗</span> Logística e Entorpecentes</span>
+                        <span id="icon-acc-log" class="text-xl transition-transform duration-200">+</span>
+                    </button>
+                    <div id="acc-log" class="hidden px-5 py-4 text-sm text-slate-700 border-t border-slate-100">
+                        <p class="mb-2"><strong class="text-slate-900">Dinâmica:</strong> Uso de veículos clonados/adulterados para crimes na região do sisal, financiados por microtráfico.</p>
+                        <ul class="space-y-3 mt-4">
+                            <li class="bg-slate-50 p-2 rounded border-l-2 border-slate-400">
+                                <strong>BO 00183602/2026</strong> (08/03)<br>
+                                Fato: Adulteração de Sinal Veicular.<br>
+                                <em>Análise: Interrupção de cadeia logística de roubo/furto.</em>
+                            </li>
+                            <li class="bg-slate-50 p-2 rounded border-l-2 border-slate-400">
+                                <strong>BO 00183634/2026</strong> (08/03)<br>
+                                Fato: Consumo/Posse de Drogas.<br>
+                                <em>Análise: Mapeamento aponta novas bocas de fumo no entorno.</em>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="risco" class="scroll-mt-20">
+        <div class="mb-4">
+            <h2 class="text-2xl font-bold border-b-2 border-slate-300 pb-2 flex items-center gap-2">
+                <span class="text-xl">📍</span> Matriz de Risco Territorial
+            </h2>
+            <p class="mt-2 text-slate-700 leading-relaxed text-sm md:text-base">
+                Esta interface gerencia a distribuição geográfica das ameaças nas 20 cidades da circunscrição. Utilize os botões de filtro para isolar rapidamente as zonas de classificação "Crítica" ou "Alta", facilitando o planejamento de policiamento preventivo e as recomendações de comunicação social (ASCOM). A tabela dinâmica permite a organização instantânea das prioridades de atuação.
+            </p>
+        </div>
+
+        <div class="glass-panel rounded-xl p-6 shadow-sm overflow-hidden">
+            
+            <div class="flex flex-wrap gap-2 mb-6" id="filter-buttons">
+                <button onclick="filterTable('Todos', this)" class="px-4 py-2 rounded-full text-sm font-bold bg-slate-800 text-white transition-all filter-btn">Todos</button>
+                <button onclick="filterTable('CRÍTICO', this)" class="px-4 py-2 rounded-full text-sm font-bold bg-white text-red-700 border border-red-200 hover:bg-red-50 transition-all filter-btn">Crítico</button>
+                <button onclick="filterTable('ALTO', this)" class="px-4 py-2 rounded-full text-sm font-bold bg-white text-orange-600 border border-orange-200 hover:bg-orange-50 transition-all filter-btn">Alto</button>
+                <button onclick="filterTable('Médio', this)" class="px-4 py-2 rounded-full text-sm font-bold bg-white text-blue-600 border border-blue-200 hover:bg-blue-50 transition-all filter-btn">Médio</button>
+                <button onclick="filterTable('Baixo', this)" class="px-4 py-2 rounded-full text-sm font-bold bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 transition-all filter-btn">Baixo</button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse" id="riskTable">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 text-xs uppercase tracking-wider">
+                            <th class="p-4 font-bold rounded-tl-lg">Cidade / Distrito</th>
+                            <th class="p-4 font-bold">Risco</th>
+                            <th class="p-4 font-bold">Fator Crítico</th>
+                            <th class="p-4 font-bold rounded-tr-lg">Recomendação ASCOM</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm divide-y divide-slate-100" id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="operacional" class="scroll-mt-20">
+        <div class="mb-4">
+            <h2 class="text-2xl font-bold border-b-2 border-slate-300 pb-2 flex items-center gap-2">
+                <span class="text-xl">🛡️</span> Destaques Operacionais & Oportunidades
+            </h2>
+            <p class="mt-2 text-slate-700 leading-relaxed text-sm md:text-base">
+                O último painel quantifica a resposta institucional às vulnerabilidades detectadas, listando a produtividade das unidades (15.ª COORPIN, NEAM e DTs). Destaca-se também o quadro "Oportunidade de Ouro", um espaço dedicado a converter o volume estatístico em campanhas institucionais positivas, aproximando a Polícia Civil da comunidade através do marketing estratégico.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div class="glass-panel rounded-xl p-6 shadow-sm border-t-4 border-blue-800">
+                <h3 class="text-lg font-bold text-slate-900 mb-4 uppercase tracking-wider">Produtividade Semanal (50+ Ações)</h3>
+                
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-500 uppercase flex items-center gap-2 mb-2">⛓️ Prisões e Mandados</h4>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="bg-white p-3 rounded text-center border border-slate-100 shadow-sm">
+                                <span class="block text-2xl font-black text-slate-800">03</span>
+                                <span class="text-[10px] text-slate-500 uppercase leading-tight">Prisões Flagrante</span>
+                            </div>
+                            <div class="bg-white p-3 rounded text-center border border-slate-100 shadow-sm">
+                                <span class="block text-2xl font-black text-slate-800">08</span>
+                                <span class="text-[10px] text-slate-500 uppercase leading-tight">Mandados Prev.</span>
+                            </div>
+                            <div class="bg-white p-3 rounded text-center border border-slate-100 shadow-sm">
+                                <span class="block text-2xl font-black text-slate-800">05</span>
+                                <span class="text-[10px] text-slate-500 uppercase leading-tight">Inquéritos Autoria</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-500 uppercase flex items-center gap-2 mb-2">📱 Apreensões & Prevenção</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <div class="bg-white p-2 rounded text-center border border-slate-100 shadow-sm">
+                                <span class="block text-xl font-bold text-blue-700">02</span>
+                                <span class="text-[10px] text-slate-500 uppercase">Veículos</span>
+                            </div>
+                            <div class="bg-white p-2 rounded text-center border border-slate-100 shadow-sm">
+                                <span class="block text-xl font-bold text-blue-700">15</span>
+                                <span class="text-[10px] text-slate-500 uppercase">Celulares</span>
+                            </div>
+                            <div class="bg-white p-2 rounded text-center border border-slate-100 shadow-sm">
+                                <span class="block text-xl font-bold text-blue-700">04</span>
+                                <span class="text-[10px] text-slate-500 uppercase">Drogas (pts)</span>
+                            </div>
+                            <div class="bg-white p-2 rounded text-center border border-slate-100 shadow-sm">
+                                <span class="block text-xl font-bold text-red-600 animate-pulse">18</span>
+                                <span class="text-[10px] text-slate-500 uppercase">MPU Deferidas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 rounded-xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-500 opacity-10 rounded-full blur-2xl transform translate-x-10 -translate-y-10"></div>
+                <div>
+                    <h3 class="text-yellow-400 font-bold uppercase tracking-widest text-sm flex items-center gap-2 mb-3">
+                        🌟 Oportunidade de Ouro (Marketing Institucional)
+                    </h3>
+                    <h4 class="text-2xl font-black text-white mb-4">"Operação Respeito"</h4>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                        Recomenda-se divulgação massiva nas redes da PCBA consolidando os números de prisões e MPU do <strong class="text-white">NEAM Serrinha</strong> no mês da Mulher (Março).
+                    </p>
+                    <div class="bg-slate-800/50 border border-slate-700 rounded p-4">
+                        <p class="text-slate-200 text-sm italic">
+                            "Mostrar que a PCBA na 15.ª COORPIN não apenas acolhe, mas identifica precocemente e neutraliza o autor nos crimes de Stalking e Violência Psicológica antes que virem Feminicídio."
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-6 pt-4 border-t border-slate-700">
+                    <p class="text-center font-bold text-white text-sm uppercase tracking-wider">
+                        Mensagem Chave: <span class="text-yellow-400">A Polícia Civil baiana tem a inteligência e a força para proteger a mulher do sisal.</span>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    
+    <!-- NOVA SEÇÃO: DADOS DO RELATÓRIO / ANEXOS -->
+    <section id="anexos" class="scroll-mt-20 mt-8">
+        <div class="mb-4">
+            <h2 class="text-2xl font-bold border-b-2 border-slate-300 pb-2 flex items-center gap-2">
+                <span class="text-xl">📋</span> Dados do Relatório (Anexo)
+            </h2>
+            <p class="mt-2 text-slate-700 leading-relaxed text-sm md:text-base">
+                Relação dos principais registos de Boletins de Ocorrência (BO) extraídos da base de dados (PPE) que fundamentaram a análise descrita neste relatório executivo.
+            </p>
+        </div>
+
+        <div class="glass-panel rounded-xl p-0 shadow-sm overflow-hidden border border-slate-200">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800 text-slate-100 text-xs uppercase tracking-wider">
+                            <th class="p-4 font-bold">Nº Registo (BO)</th>
+                            <th class="p-4 font-bold">Data/Hora</th>
+                            <th class="p-4 font-bold">Natureza da Ocorrência</th>
+                            <th class="p-4 font-bold">Unidade de Registo</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm divide-y divide-slate-200 bg-white">
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="p-4 font-medium text-slate-800">00172502/2026</td>
+                            <td class="p-4 text-slate-600">04/03/2026 11:08</td>
+                            <td class="p-4 text-slate-700">
+                                <span class="inline-block px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-bold mb-1">Violência Doméstica</span><br>
+                                Injúria, Difamação e Violência Psicológica contra a Mulher (Art. 147-B)
+                            </td>
+                            <td class="p-4 text-slate-600">NEAM - Serrinha</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="p-4 font-medium text-slate-800">00167294/2026</td>
+                            <td class="p-4 text-slate-600">02/03/2026 15:56</td>
+                            <td class="p-4 text-slate-700">
+                                <span class="inline-block px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-bold mb-1">Violência Doméstica</span><br>
+                                Ameaça por razões da condição do sexo feminino
+                            </td>
+                            <td class="p-4 text-slate-600">NEAM - Serrinha</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="p-4 font-medium text-slate-800">00166563/2026</td>
+                            <td class="p-4 text-slate-600">02/03/2026 13:57</td>
+                            <td class="p-4 text-slate-700">
+                                <span class="inline-block px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-bold mb-1">Violência Doméstica</span><br>
+                                Perseguição cometida contra a Mulher (Stalking - Art. 147-A)
+                            </td>
+                            <td class="p-4 text-slate-600">NEAM - Serrinha</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="p-4 font-medium text-slate-800">00183602/2026</td>
+                            <td class="p-4 text-slate-600">08/03/2026 22:47</td>
+                            <td class="p-4 text-slate-700">
+                                <span class="inline-block px-2 py-1 bg-slate-200 text-slate-800 rounded text-xs font-bold mb-1">Logística do Crime</span><br>
+                                Adulteração de Sinal Identificador de Veículo Automotor (Art. 311)
+                            </td>
+                            <td class="p-4 text-slate-600">1.ª DT - Serrinha</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="p-4 font-medium text-slate-800">00183634/2026</td>
+                            <td class="p-4 text-slate-600">08/03/2026 23:29</td>
+                            <td class="p-4 text-slate-700">
+                                <span class="inline-block px-2 py-1 bg-slate-200 text-slate-800 rounded text-xs font-bold mb-1">Entorpecentes</span><br>
+                                Consumo Pessoal de Drogas (Art. 28)
+                            </td>
+                            <td class="p-4 text-slate-600">1.ª DT - Serrinha</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="p-4 font-medium text-slate-800">00164780/2026</td>
+                            <td class="p-4 text-slate-600">02/03/2026 08:27</td>
+                            <td class="p-4 text-slate-700">
+                                <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-bold mb-1">Património</span><br>
+                                Dano (Art. 163 Caput do CPB)
+                            </td>
+                            <td class="p-4 text-slate-600">1.ª DT - Serrinha</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="p-4 font-medium text-slate-800">00165178/2026</td>
+                            <td class="p-4 text-slate-600">02/03/2026 09:32</td>
+                            <td class="p-4 text-slate-700">
+                                <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-bold mb-1">Estelionato / Fraude</span><br>
+                                Obtenção de Vantagem Ilícita (Fraude Eletrónica relacionada)
+                            </td>
+                            <td class="p-4 text-slate-600">1.ª DT - Serrinha</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <footer class="mt-12 pt-6 border-t border-slate-300 text-center text-slate-500 text-sm">
+        <p class="font-bold text-slate-700">Félix Rilton</p>
+        <p>Investigador PCBA | Análise Criminal - DIRPIN LESTE</p>
+        <p class="mt-2 text-xs">Relatório classificado como RESERVADO. Conteúdo gerado para briefing executivo.</p>
+    </footer>
+
+</main>
+
+<script>
+const riskData = [
+    { city: "Serrinha (Sede)", risk: "CRÍTICO", riskClass: "bg-red-100 text-red-800 font-bold", factor: "Violência Doméstica (Escalada)", rec: "Divulgar amplamente ações e prisões do NEAM." },
+    { city: "Conceição do Coité", risk: "ALTO", riskClass: "bg-orange-100 text-orange-800 font-bold", factor: "Estelionato / Crimes Cibernéticos", rec: "Campanha alerta: 'Não caia no Golpe do PIX'." },
+    { city: "Serrinha (Cidade Nova)", risk: "ALTO", riskClass: "bg-orange-100 text-orange-800 font-bold", factor: "Logística do Tráfico", rec: "Divulgar prisões em flagrante na região." },
+    { city: "Riachão do Jacuípe", risk: "Médio", riskClass: "bg-blue-100 text-blue-800", factor: "Adulteração de Veículos (BR-324)", rec: "Divulgar apreensões de veículos clonados." },
+    { city: "Araci", risk: "Médio", riskClass: "bg-blue-100 text-blue-800", factor: "Tráfico Intermunicipal", rec: "Focar na inteligência e disque-denúncia." },
+    { city: "Teofilândia", risk: "Médio", riskClass: "bg-blue-100 text-blue-800", factor: "Consumo de Entorpecentes", rec: "Foco em operações integradas com PM." },
+    { city: "Serrinha (Rodagem)", risk: "Médio", riskClass: "bg-blue-100 text-blue-800", factor: "Vulnerabilidade Social", rec: "N/A" },
+    { city: "Serrinha (Centro)", risk: "Médio", riskClass: "bg-blue-100 text-blue-800", factor: "Furtos em Comércio", rec: "Dicas de segurança para lojistas." },
+    { city: "Araci (Tapuio)", risk: "Médio", riskClass: "bg-blue-100 text-blue-800", factor: "Ocultação de Veículos", rec: "N/A" },
+    { city: "Santaluz (Sede)", risk: "Médio", riskClass: "bg-blue-100 text-blue-800", factor: "Violência Doméstica", rec: "Apoio ao fluxo do NEAM Regional." },
+    { city: "Santaluz", risk: "Baixo", riskClass: "bg-slate-100 text-slate-600", factor: "Conflitos Interpessoais", rec: "Ações preventivas de resolução de conflitos." },
+    { city: "Valente", risk: "Baixo", riskClass: "bg-slate-100 text-slate-600", factor: "Furtos Menores", rec: "Reforçar canal de denúncias 181." },
+    { city: "Barrocas", risk: "Baixo", riskClass: "bg-slate-100 text-slate-600", factor: "Rotas de Fuga", rec: "Monitoramento rural." },
+    { city: "Retirolândia", risk: "Baixo", riskClass: "bg-slate-100 text-slate-600", factor: "Ocorrências Administrativas", rec: "N/A" },
+    { city: "São Domingos", risk: "Baixo", riskClass: "bg-slate-100 text-slate-600", factor: "Estabilidade Relativa", rec: "N/A" },
+    { city: "Biritinga", risk: "Baixo", riskClass: "bg-slate-100 text-slate-600", factor: "Estabilidade Relativa", rec: "N/A" },
+    { city: "Lamarão", risk: "Baixo", riskClass: "bg-slate-100 text-slate-600", factor: "Estabilidade Relativa", rec: "N/A" },
+    { city: "Coité (Salgadália)", risk: "Baixo", riskClass: "bg-slate-100 text-slate-600", factor: "Estabilidade", rec: "N/A" },
+    { city: "Jacuípe (Barreiros)", risk: "Baixo", riskClass: "bg-slate-100 text-slate-600", factor: "Estabilidade", rec: "N/A" },
+    { city: "Candeal", risk: "Baixo", riskClass: "bg-slate-100 text-slate-600", factor: "Estabilidade", rec: "N/A" }
+];
+
+function initChart() {
+    const ctx = document.getElementById('crimeChart').getContext('2d');
+    
+    Chart.defaults.color = '#475569';
+    Chart.defaults.font.family = 'ui-sans-serif, system-ui, sans-serif';
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Violência Doméstica', 'Crimes Patrimoniais', 'Tráfico/Logística', 'CVLI (Letais)'],
+            datasets: [{
+                label: 'Volume Estimado de Ocorrências Relevantes',
+                data: [26, 5, 10, 0], 
+                backgroundColor: [
+                    'rgba(220, 38, 38, 0.8)',   
+                    'rgba(37, 99, 235, 0.8)',   
+                    'rgba(71, 85, 105, 0.8)',   
+                    'rgba(22, 163, 74, 0.8)'    
+                ],
+                borderColor: [
+                    'rgb(185, 28, 28)',
+                    'rgb(29, 78, 216)',
+                    'rgb(51, 65, 85)',
+                    'rgb(21, 128, 61)'
+                ],
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleFont: { size: 14 },
+                    bodyFont: { size: 13 },
+                    padding: 12,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) { label += ': '; }
+                            if (context.parsed.y !== null) { label += context.parsed.y; }
+                            if(context.dataIndex === 0) label += " (Alerta Crítico)";
+                            if(context.dataIndex === 3) label += " (Conteúdo)";
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(203, 213, 225, 0.4)' },
+                    ticks: { precision: 0 }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        callback: function(val, index) {
+                            let label = this.getLabelForValue(val);
+                            if (label.length > 16) {
+                                return label.match(/.{1,16}(\s|$)/g);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function toggleAccordion(id) {
+    const el = document.getElementById(id);
+    const icon = document.getElementById('icon-' + id);
+    if (el.classList.contains('hidden')) {
+        el.classList.remove('hidden');
+        icon.style.transform = 'rotate(45deg)';
+    } else {
+        el.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
+function renderTable(filterStr) {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+    
+    let filtered = riskData;
+    if(filterStr !== 'Todos') {
+        filtered = riskData.filter(item => item.risk === filterStr);
+    }
+
+    filtered.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition-colors";
+        tr.innerHTML = `
+            <td class="p-4 border-b border-slate-100 text-slate-800 font-medium">${row.city}</td>
+            <td class="p-4 border-b border-slate-100">
+                <span class="px-2 py-1 rounded text-xs tracking-wider uppercase ${row.riskClass}">${row.risk}</span>
+            </td>
+            <td class="p-4 border-b border-slate-100 text-slate-700">${row.factor}</td>
+            <td class="p-4 border-b border-slate-100 text-slate-600 text-xs italic">${row.rec}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function filterTable(filterStr, btnElement) {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-slate-800', 'text-white');
+        if(!btn.classList.contains('bg-white')){
+            btn.classList.add('bg-white');
+        }
+    });
+    
+    btnElement.classList.remove('bg-white', 'text-red-700', 'text-orange-600', 'text-blue-600', 'text-slate-500');
+    btnElement.classList.add('bg-slate-800', 'text-white');
+
+    renderTable(filterStr);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initChart();
+    renderTable('Todos');
+});
+</script>
+</body>
+</html>

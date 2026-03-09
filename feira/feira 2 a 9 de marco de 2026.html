@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIRPIN LESTE - Painel de Inteligência Criminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f5f5f4; 
+            color: #1c1917; 
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 50vh;
+            max-height: 450px;
+            min-height: 300px;
+        }
+        .tab-active {
+            border-bottom: 4px solid #1e293b;
+            font-weight: bold;
+            color: #1e293b;
+        }
+        .tab-inactive {
+            border-bottom: 4px solid transparent;
+            color: #78716c;
+        }
+        .tab-inactive:hover {
+            color: #44403c;
+            border-bottom: 4px solid #d6d3d1;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased leading-relaxed">
+
+    <!-- Chosen Palette: Warm Neutrals (Stone/Slate) with Semantic Accents (Red/Amber for risk, Green for stability) -->
+    
+    <!-- Application Structure Plan: The SPA uses a "Dashboard & Drill-down" architecture. It opens with an Executive Briefing to set context, follows immediately with high-level KPI cards and a comparative bar chart (The "Mancha Criminal") for macro-level understanding. Below this, a tabbed interface allows users to drill down into specific case files (BOs) without cluttering the screen, categorized by crime type. Finally, a Risk Matrix provides actionable, geographic intelligence. This flow moves the user logically from 'What is happening broadly?' to 'What are the specific critical incidents?' and concludes with 'What should we do about it?'. -->
+    
+    <!-- Visualization & Content Choices: 
+         1. Executive Briefing (Text): Goal = Contextualize. Method = Clean typography block. Justification = Sets the analytical tone immediately.
+         2. KPIs (Number Cards): Goal = Inform. Method = HTML/CSS Cards with Unicode indicators. Justification = Quick glance metrics for leadership.
+         3. Crime Comparison (Bar Chart): Goal = Compare. Method = Chart.js Bar Chart. Justification = Visually stark contrast between low CVLI and high CVP/VD volumes. NO SVG used.
+         4. Detailed Cases (Tabbed Cards): Goal = Organize/Explore. Method = JS-driven Tabs and toggleable detail cards. Justification = Prevents information overload while allowing deep dives into specific Police Reports.
+         5. Risk Matrix (Table): Goal = Organize/Inform. Method = HTML Table with conditional styling. Justification = Standard law enforcement matrix format, made easily scannable. -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <header class="bg-slate-900 text-stone-100 py-8 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-sm uppercase tracking-widest text-slate-400 mb-2">Polícia Civil da Bahia • 1ª COORPIN</p>
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">Painel Estratégico e Dinâmica Criminal</h1>
+            <h2 class="text-xl text-slate-300 font-light mb-4">DIRPIN LESTE • Período: 02/03/2026 a 09/03/2026</h2>
+            <div class="inline-block bg-red-800 text-red-100 px-3 py-1 rounded text-sm font-semibold tracking-wide border border-red-700">
+                CLASSIFICAÇÃO: RESERVADO
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section id="briefing" class="bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
+            <div class="mb-6 border-b border-stone-100 pb-4">
+                <h3 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <span>📋</span> Sumário Executivo
+                </h3>
+                <p class="text-stone-500 mt-2 text-sm">Este painel apresenta o diagnóstico macro do cenário criminal da semana, destacando as discrepâncias entre os crimes contra a vida e a explosão de ocorrências patrimoniais e digitais, baseando a tomada de decisão da liderança.</p>
+            </div>
+            
+            <p class="text-lg text-stone-700 mb-4 leading-relaxed">
+                A análise da mancha criminal da <strong class="text-slate-900">1ª COORPIN (Feira de Santana e região)</strong> revela um cenário de alto contraste. Observa-se uma relativa estabilidade e contenção no indicador de mortes (5 CVLIs consumados), o que demonstra assertividade das forças de segurança na repressão aos crimes contra a vida. Em contrapartida, há uma escalada crítica de <strong class="text-slate-900">Crimes Violentos contra o Patrimônio (CVP)</strong> e <strong class="text-slate-900">Violência Doméstica (LMP)</strong>, ambos liderando massivamente as estatísticas com 134 ocorrências cada.
+            </p>
+            <p class="text-lg text-stone-700 leading-relaxed">
+                A dinâmica criminal evidencia que as facções continuam atuando em confrontos por território, enquanto a criminalidade difusa migra vorazmente para o ambiente digital, registrando <strong class="text-slate-900">79 casos de Fraude/Estelionato</strong>. A Polícia Civil obteve sucesso na identificação contumaz de estelionatários, mas enfrenta o desafio de conter a pulverização dos roubos urbanos e a escalada da violência intramuros.
+            </p>
+        </section>
+
+        <section id="dashboard">
+            <div class="mb-6">
+                <h3 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <span>📊</span> Indicadores Quantitativos
+                </h3>
+                <p class="text-stone-500 mt-2 text-sm">Esta seção consolida o volume bruto de ocorrências por grupo delitivo. Os cartões numéricos fornecem um resumo imediato, enquanto o gráfico permite a comparação visual das proporções da mancha criminal na jurisdição.</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8" id="kpi-container">
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                <h4 class="text-lg font-bold text-slate-700 mb-4 text-center">Distribuição do Volume Criminal</h4>
+                <div class="chart-container">
+                    <canvas id="crimeChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="detalhamento">
+            <div class="mb-6 border-b border-stone-200 pb-4">
+                <h3 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <span>🔎</span> Detalhamento da Mancha Criminal (Casos Críticos)
+                </h3>
+                <p class="text-stone-500 mt-2 text-sm">Aqui são detalhados os Boletins de Ocorrência (BOs) de maior repercussão e interesse estratégico. Navegue pelas abas (categorias delitivas) e clique nos cartões para ler a análise de inteligência e o modus operandi identificado pela equipe.</p>
+            </div>
+
+            <div class="mb-6 flex space-x-2 md:space-x-4 overflow-x-auto pb-2" id="tabs-container">
+            </div>
+
+            <div id="cases-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+        </section>
+
+        <section id="matriz-risco" class="bg-white rounded-xl shadow-sm border border-stone-200 p-6 md:p-8">
+            <div class="mb-6">
+                <h3 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <span>🛡️</span> Matriz de Risco e Recomendações
+                </h3>
+                <p class="text-stone-500 mt-2 text-sm">Estruturação geográfica dos níveis de alerta baseada nas análises semanais, direcionando o emprego de efetivo operacional e pautas de comunicação social (ASCOM).</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-stone-100 text-stone-600 text-sm uppercase tracking-wider border-b border-stone-300">
+                            <th class="p-4 font-semibold">Município / Área</th>
+                            <th class="p-4 font-semibold">Nível de Risco</th>
+                            <th class="p-4 font-semibold">Fator Crítico</th>
+                            <th class="p-4 font-semibold">Recomendação ASCOM / Operacional</th>
+                        </tr>
+                    </thead>
+                    <tbody id="risk-table-body" class="text-stone-800">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-8 bg-amber-50 border-l-4 border-amber-500 p-6 rounded-r-lg">
+                <h4 class="text-lg font-bold text-amber-800 flex items-center gap-2 mb-2">
+                    <span>🌟</span> Oportunidade de Ouro (Marketing Policial)
+                </h4>
+                <p class="text-amber-900 leading-relaxed">
+                    Divulgação massiva pela ASCOM da rápida identificação de golpistas em série (Ex: Caso Dayane Cerqueira na 2ª DT). Demonstrar que a Polícia Civil possui ferramentas de Inteligência Cibernética ativas, desconstruindo a sensação de impunidade nos crimes de estelionato digital ("A internet não é terra sem lei").
+                </p>
+            </div>
+        </section>
+
+        <!-- NOVO: Seção do Relatório Completo em Texto -->
+        <section id="relatorio-completo" class="bg-white rounded-xl shadow-sm border border-stone-200 p-8 md:p-12 mt-12 print:shadow-none print:border-none print:p-0">
+            <div class="mb-8 pb-6 border-b-2 border-slate-800 text-center">
+                <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-2 uppercase tracking-wide">Relatório de Análise Estratégica e Dinâmica Criminal</h2>
+                <h3 class="text-xl text-slate-700 font-semibold uppercase tracking-widest">DIRPIN LESTE - 2026</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 text-sm md:text-base text-stone-800 mb-10 p-6 bg-stone-50 rounded-lg border border-stone-200">
+                <div class="md:col-span-2"><span class="font-bold text-slate-500 mr-2">PARA:</span> Gabinete do Diretor da DIRPIN - LESTE / Coordenador da 1ª COORPIN / ASCOM</div>
+                <div><span class="font-bold text-slate-500 mr-2">DE:</span> Ponto Focal de Inteligência - DIRPIN LESTE</div>
+                <div><span class="font-bold text-slate-500 mr-2">DATA:</span> 09/03/2026</div>
+                <div><span class="font-bold text-slate-500 mr-2">PERÍODO:</span> 02/03/2026 a 09/03/2026</div>
+                <div class="md:col-span-2"><span class="font-bold text-slate-500 mr-2">ASSUNTO:</span> <span class="font-bold uppercase">Estabilidade em CVLI contrastada pela escalada crítica em Crimes Patrimoniais e Violência Doméstica</span></div>
+                <div class="md:col-span-2 mt-2 inline-block"><span class="bg-red-800 text-white px-3 py-1 text-xs font-bold uppercase rounded tracking-widest">Classificação: Reservado</span></div>
+            </div>
+
+            <div class="space-y-10 text-stone-800 leading-relaxed">
+                
+                <div>
+                    <h4 class="text-xl font-bold text-slate-900 border-b border-stone-200 pb-2 mb-4 flex items-center gap-2"><span>1.</span> SUMÁRIO EXECUTIVO (BRIEFING)</h4>
+                    <p class="mb-4">A análise da mancha criminal da <strong>1ª COORPIN (Feira de Santana e região)</strong> no período de 02 a 09 de março de 2026 revela um cenário de alto contraste. Observa-se uma relativa estabilidade e contenção no indicador de mortes (5 CVLIs consumados), o que demonstra assertividade das forças de segurança na repressão aos crimes contra a vida.</p>
+                    <p>Em contrapartida, há uma explosão de <strong>Crimes Violentos contra o Patrimônio (CVP)</strong> e <strong>Violência Doméstica (LMP)</strong>, ambos liderando massivamente as estatísticas com <strong>134 ocorrências cada</strong>. A dinâmica criminal evidencia que as facções continuam atuando em confrontos por território (refletido no alto número de vítimas em tentativas de CVLI na mesma ocorrência), enquanto a criminalidade difusa migra vorazmente para o ambiente digital, registrando <strong>79 casos de Fraude/Estelionato</strong>.</p>
+                </div>
+
+                <div>
+                    <h4 class="text-xl font-bold text-slate-900 border-b border-stone-200 pb-2 mb-4 flex items-center gap-2"><span>2.</span> INDICADORES QUANTITATIVOS SELECIONADOS</h4>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Patrimônio (CVP/Furtos):</strong> 134 ocorrências ⬆️ (Roubo, Roubo Majorado c/ Arma, Furto Qualificado)</li>
+                        <li><strong>Violência Doméstica:</strong> 134 ocorrências ⬆️ (Ameaça, Lesão Corporal, Estupro de Vulnerável)</li>
+                        <li><strong>Fraude/Estelionato:</strong> 79 ocorrências ⬆️ (Estelionato, Estelionato contra Idoso)</li>
+                        <li><strong>Tentativa de CVLI:</strong> 10 ocorrências ⬇️ (Tentativa de Homicídio Simples/Qualificado)</li>
+                        <li><strong>CVLI Consumado:</strong> 5 ocorrências ⬇️ (Homicídio Simples/Qualificado, Feminicídio, Tentativa Latrocínio)</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-xl font-bold text-slate-900 border-b border-stone-200 pb-2 mb-4 flex items-center gap-2"><span>3.</span> ANÁLISE DETALHADA DA MANCHA CRIMINAL</h4>
+                    
+                    <div class="space-y-6">
+                        <div class="bg-stone-50 p-5 rounded border border-stone-200 border-l-4 border-l-emerald-600">
+                            <h5 class="font-bold text-lg text-slate-800 mb-2">A. CRIMES VIOLENTOS LETAIS INTENCIONAIS (CVLI)</h5>
+                            <p class="text-sm text-stone-600 italic mb-3">Análise de Inteligência: Prevalência de execuções com características de pistolagem (emboscada) e violência de gênero extrema.</p>
+                            <ul class="space-y-3 text-sm">
+                                <li><strong>BO 00173952/2026-A05 (DEAM):</strong> Feminicídio. Crime letal em ambiente doméstico vitimando Iasmim Celeste Ferreira Rosa. Autor: Alysson Silva Santos.</li>
+                                <li><strong>BO 00180666/2026 (DH):</strong> Homicídio Qualificado. Vítima Israel de Jesus Pinto Nunes. Modus operandi indica execução sumária.</li>
+                                <li><strong>BO 00172261/2026-A01 (DRFR):</strong> Tentativa de Latrocínio. Ação patrimonial com violência extrema contra Antonio Jose da Rocha Souza.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-stone-50 p-5 rounded border border-stone-200 border-l-4 border-l-yellow-500">
+                            <h5 class="font-bold text-lg text-slate-800 mb-2">B. TENTATIVAS DE CVLI (DINÂMICA DE FACÇÕES)</h5>
+                            <p class="text-sm text-stone-600 italic mb-3">Análise de Inteligência: Concentração de múltiplas vítimas no mesmo evento, sugerindo ataques em bloco ("bondes").</p>
+                            <ul class="space-y-3 text-sm">
+                                <li><strong>BO 00180532/2026-A01 (DH):</strong> Ocorrência com 5 vítimas diretas. Ataque coordenado mediante dissimulação/emboscada.</li>
+                                <li><strong>BO 00181946/2026-A02 (DH):</strong> Evento com múltiplas vítimas (Felix, Thiago, Welington). Corrobora tendência de crimes contra aglomerações.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-stone-50 p-5 rounded border border-stone-200 border-l-4 border-l-rose-500">
+                            <h5 class="font-bold text-lg text-slate-800 mb-2">C. VIOLÊNCIA DOMÉSTICA E CONTRA VULNERÁVEIS</h5>
+                            <p class="text-sm text-stone-600 italic mb-3">Análise de Inteligência: Pulverização crônica (134 casos). As ameaças são a porta de entrada para o CVLI passional.</p>
+                            <ul class="space-y-3 text-sm">
+                                <li><strong>BO 00180668/2026 (DAI):</strong> Estupro de Vulnerável (Menor de 14 anos). Exige rigorosa investigação e rede de apoio.</li>
+                                <li><strong>BO 00182799/2026 (Central):</strong> Ameaça (Art. 147). Autor Jackson de Jesus da Cruz. Fator de risco alto para evolução criminal.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-stone-50 p-5 rounded border border-stone-200 border-l-4 border-l-orange-500">
+                            <h5 class="font-bold text-lg text-slate-800 mb-2">D. CRIMES CONTRA O PATRIMÔNIO (ROUBO/FURTO)</h5>
+                            <p class="text-sm text-stone-600 italic mb-3">Análise de Inteligência: Maior volume de subnotificações estimadas. Prevalência de concurso de pessoas em vias públicas.</p>
+                            <ul class="space-y-3 text-sm">
+                                <li><strong>BO 00183271/2026-A01 (2ª DT):</strong> Roubo com emprego de Arma de Fogo contra Verbenia Borges no horário de pico.</li>
+                                <li><strong>BO 00181116/2026 (1ª DT):</strong> Roubo Majorado (Arrastão). Quadrilha estruturada (4 autores) focada em transeuntes.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-stone-50 p-5 rounded border border-stone-200 border-l-4 border-l-blue-500">
+                            <h5 class="font-bold text-lg text-slate-800 mb-2">E. FRAUDES E ESTELIONATO (CYBERCRIME)</h5>
+                            <p class="text-sm text-stone-600 italic mb-3">Análise de Inteligência: O crime de "menor risco e maior lucro" gerou 79 boletins. Destaque para crimes contra idosos.</p>
+                            <ul class="space-y-3 text-sm">
+                                <li><strong>BO 00171349/2026 (Central):</strong> Estelionato contra Idoso. Engenharia social focada em vulnerabilidade tecnológica.</li>
+                                <li><strong>BO 00179462/2026 (2ª DT):</strong> Estelionato. Autoria reincidente identificada fazendo múltiplas vítimas no mesmo dia.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xl font-bold text-slate-900 border-b border-stone-200 pb-2 mb-4 flex items-center gap-2"><span>5.</span> CONCLUSÃO E RECOMENDAÇÕES</h4>
+                    <p class="mb-4">O recorte temporal da 1ª COORPIN evidencia uma transição na tipologia criminal. Embora a contenção dos homicídios consumados seja um trunfo estratégico, a altíssima incidência de <strong>Tentativas de CVLI com múltiplas vítimas</strong> alerta para uma efervescência silenciosa da guerra de facções, que demanda ações de inteligência focadas na descapitalização destes grupos.</p>
+                    <p>Paralelamente, a explosão de ocorrências de patrimônio e de violência doméstica dita a necessidade urgente de policiamento preventivo nas manchas criminais comerciais e de uma força-tarefa multidisciplinar para dar vazão aos inquéritos da DEAM, evitando que as atuais ameaças se convertam nos feminicídios da próxima semana.</p>
+                </div>
+            </div>
+            
+            <div class="mt-12 pt-8 border-t border-stone-300 text-center">
+                <p class="font-bold text-xl text-slate-800 mb-1">Félix Rilton</p>
+                <p class="text-stone-600 font-medium uppercase text-sm tracking-wide">Investigador PCBA | Análise Criminal - DIRPIN LESTE</p>
+            </div>
+        </section>
+
+        <footer class="mt-12 text-center text-stone-500 text-sm pb-8 border-t border-stone-200 pt-8">
+            <p class="font-bold text-slate-700">Félix Rilton</p>
+            <p>Investigador PCBA | Análise Criminal - DIRPIN LESTE</p>
+            <p class="mt-2">Salvador/Feira de Santana, 09 de março de 2026.</p>
+        </footer>
+
+    </main>
+
+    <script>
+        const appData = {
+            kpis: [
+                { id: 'cvp', title: 'Patrimônio', value: 134, trend: '⬆️', desc: 'Roubos/Furtos', color: 'bg-orange-100 text-orange-800 border-orange-200' },
+                { id: 'vd', title: 'Violência Dom.', value: 134, trend: '⬆️', desc: 'Ameaças/Lesões', color: 'bg-rose-100 text-rose-800 border-rose-200' },
+                { id: 'fraude', title: 'Estelionato', value: 79, trend: '⬆️', desc: 'Fraudes Digitais', color: 'bg-blue-100 text-blue-800 border-blue-200' },
+                { id: 'tcvli', title: 'Tentativa CVLI', value: 10, trend: '⬇️', desc: 'Confrontos/Facções', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+                { id: 'cvli', title: 'CVLI Consumado', value: 5, trend: '⬇️', desc: 'Homicídio/Latrocínio', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' }
+            ],
+            categories: [
+                { id: 'cvli', label: 'CVLI', icon: '☠️' },
+                { id: 'tcvli', label: 'Tentativas CVLI', icon: '⚔️' },
+                { id: 'vd', label: 'Violência Doméstica', icon: '🩸' },
+                { id: 'cvp', label: 'Crimes Patrimônio', icon: '🏍️' },
+                { id: 'fraude', label: 'Fraudes/Cyber', icon: '💻' }
+            ],
+            cases: [
+                { id: '00173952/2026-A05', cat: 'cvli', unit: 'DEAM - Feira de Santana', date: '06/03/2026', type: 'Feminicídio (Art. 121-A)', dynamics: 'Crime letal em ambiente doméstico vitimando Iasmim Celeste Ferreira Rosa (Autor identificado: Alysson Silva Santos). Fato demonstra a escalada letal do ciclo de violência.' },
+                { id: '00180666/2026', cat: 'cvli', unit: 'DH - Feira de Santana', date: '06/03/2026', type: 'Homicídio Qualificado (Emboscada)', dynamics: 'Vítima Israel de Jesus Pinto Nunes. O modus operandi indica execução sumária, típica de "acerto de contas" do narcotráfico.' },
+                { id: '00172261/2026-A01', cat: 'cvli', unit: 'DRFR - Feira de Santana', date: '05/03/2026', type: 'Tentativa de Latrocínio', dynamics: 'Ação patrimonial com emprego de violência extrema contra a vítima Antonio Jose da Rocha Souza. Alta periculosidade do autor no CVP.' },
+                
+                { id: '00180532/2026-A01', cat: 'tcvli', unit: 'DH - Feira de Santana', date: '07/03/2026', type: 'Homicídio Qualificado e Tentativas', dynamics: 'Ocorrência com 5 vítimas diretas. Ataque coordenado mediante dissimulação/emboscada. Necessita de cruzamento de dados com setor de Inteligência Prisional (Bondes de facção).' },
+                { id: '00181946/2026-A02', cat: 'tcvli', unit: 'DH - Feira de Santana', date: '08/03/2026', type: 'Homicídio Simples e Tentativa', dynamics: 'Evento com múltiplas vítimas (Felix, Thiago, Welington). Corrobora a tendência de crimes praticados contra aglomerações.' },
+                
+                { id: '00180668/2026', cat: 'vd', unit: 'DAI - Feira de Santana', date: '06/03/2026', type: 'Estupro de Vulnerável', dynamics: 'Crime contra a menor Rayza Melissa. Exige rigorosa investigação e encaminhamento ao conselho tutelar e rede de apoio.' },
+                { id: '00182799/2026', cat: 'vd', unit: 'Central de Flagrantes', date: '08/03/2026', type: 'Ameaça (Art. 147)', dynamics: 'Autor Jackson de Jesus da Cruz contra Kelley Lobo. Fator de risco alto para evolução criminal se não houver Medida Protetiva de Urgência (MPU).' },
+                
+                { id: '00183271/2026-A01', cat: 'cvp', unit: '2ª DT - Feira de Santana', date: '08/03/2026', type: 'Roubo com Arma de Fogo', dynamics: 'Abordagem direta contra Verbenia Borges. Horário de pico (início da noite), demonstrando audácia dos criminosos na mancha comercial.' },
+                { id: '00181116/2026', cat: 'cvp', unit: '1ª DT - Feira de Santana', date: '07/03/2026', type: 'Roubo Majorado (Arrastão)', dynamics: 'Ação diurna contra Raelson Nunes. Aponta para quadrilha estruturada focada em transeuntes no centro comercial (concurso de 4 pessoas).' },
+                
+                { id: '00171349/2026', cat: 'fraude', unit: 'Central de Flagrantes', date: '03/03/2026', type: 'Estelionato contra Idoso', dynamics: 'Vítima Gislaine Marcelino. Engenharia social focada na vulnerabilidade tecnológica da terceira idade.' },
+                { id: '00179462 & 580', cat: 'fraude', unit: '2ª DT - Feira de Santana', date: '06/03/2026', type: 'Estelionato (Art. 171)', dynamics: 'Identificação de autoria reincidente (Dayane Cerqueira de Jesus) fazendo múltiplas vítimas (Wanderson e Dilma) no mesmo dia. Alvo prioritário.' }
+            ],
+            risks: [
+                { city: 'Feira de Santana (Sede)', level: 'CRÍTICO', factor: 'CVP (Roubos em série) e CVLI de Facções', action: 'Divulgar prisões da DRFR e ações da DHPP. Operação saturação da PM.', color: 'bg-red-100 text-red-800' },
+                { city: 'Feira (Bairros Residenciais)', level: 'ALTO', factor: 'Violência Doméstica (134 registros)', action: 'Campanha preventiva DEAM. "Denuncie antes que vire estatística letal".', color: 'bg-orange-100 text-orange-800' },
+                { city: 'Santo Estêvão', level: 'MÉDIO', factor: 'Furto e Violência Doméstica', action: 'Divulgar ações do NEAM local para fortalecimento da rede de proteção.', color: 'bg-yellow-100 text-yellow-800' },
+                { city: 'Tanquinho / Ipecaetá', level: 'MÉDIO', factor: 'Homicídios Pontuais', action: 'Reportar rápida instauração de inquéritos pelas DTs locais.', color: 'bg-yellow-100 text-yellow-800' }
+            ],
+            activeTab: 'cvli'
+        };
+
+        function renderKPIs() {
+            const container = document.getElementById('kpi-container');
+            container.innerHTML = appData.kpis.map(kpi => `
+                <div class="${kpi.color} rounded-xl p-4 border flex flex-col items-center justify-center text-center shadow-sm transition-transform hover:scale-105 cursor-default">
+                    <div class="text-sm font-semibold uppercase tracking-wider mb-1 opacity-80">${kpi.title}</div>
+                    <div class="text-4xl font-bold mb-1">${kpi.value}</div>
+                    <div class="text-xs font-medium flex items-center gap-1">
+                        <span>${kpi.trend}</span>
+                        <span>${kpi.desc}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderTabs() {
+            const container = document.getElementById('tabs-container');
+            container.innerHTML = appData.categories.map(cat => `
+                <button onclick="setTab('${cat.id}')" class="px-5 py-3 text-sm md:text-base whitespace-nowrap transition-colors duration-200 ${appData.activeTab === cat.id ? 'tab-active' : 'tab-inactive'} focus:outline-none">
+                    <span class="mr-2">${cat.icon}</span>${cat.label}
+                </button>
+            `).join('');
+        }
+
+        function renderCases() {
+            const container = document.getElementById('cases-grid');
+            const filteredCases = appData.cases.filter(c => c.cat === appData.activeTab);
+            
+            if(filteredCases.length === 0) {
+                container.innerHTML = `<div class="col-span-full p-8 text-center text-stone-500 bg-stone-100 rounded-xl">Nenhum registro crítico destacado para esta categoria.</div>`;
+                return;
+            }
+
+            container.innerHTML = filteredCases.map((c, index) => `
+                <div class="bg-white rounded-xl shadow border border-stone-200 overflow-hidden flex flex-col">
+                    <div class="bg-slate-800 text-white p-4">
+                        <div class="text-xs uppercase tracking-wider text-slate-400 mb-1">BO: ${c.id}</div>
+                        <h4 class="font-bold text-lg leading-tight">${c.type}</h4>
+                    </div>
+                    <div class="p-4 flex-grow flex flex-col">
+                        <div class="flex items-center gap-2 text-sm text-stone-600 mb-2">
+                            <span>📍</span> <span class="truncate" title="${c.unit}">${c.unit}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-stone-600 mb-4 border-b border-stone-100 pb-4">
+                            <span>📅</span> <span>${c.date}</span>
+                        </div>
+                        <div class="mt-auto">
+                            <button onclick="toggleDetails(${index})" class="w-full text-left bg-stone-100 hover:bg-stone-200 text-slate-800 font-semibold py-2 px-4 rounded transition-colors flex justify-between items-center focus:outline-none">
+                                Análise de Inteligência <span>➕</span>
+                            </button>
+                            <div id="details-${index}" class="hidden mt-3 text-sm text-stone-700 bg-stone-50 p-3 rounded border border-stone-200 leading-relaxed">
+                                ${c.dynamics}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderRiskMatrix() {
+            const tbody = document.getElementById('risk-table-body');
+            tbody.innerHTML = appData.risks.map(risk => `
+                <tr class="border-b border-stone-200 hover:bg-stone-50 transition-colors">
+                    <td class="p-4 font-medium text-slate-800">${risk.city}</td>
+                    <td class="p-4">
+                        <span class="${risk.color} px-3 py-1 rounded-full text-xs font-bold tracking-wider">${risk.level}</span>
+                    </td>
+                    <td class="p-4 text-stone-600 text-sm">${risk.factor}</td>
+                    <td class="p-4 text-stone-600 text-sm italic">${risk.action}</td>
+                </tr>
+            `).join('');
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('crimeChart').getContext('2d');
+            
+            const labels = appData.kpis.map(k => k.title);
+            const dataValues = appData.kpis.map(k => k.value);
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Volume de Ocorrências',
+                        data: dataValues,
+                        backgroundColor: [
+                            'rgba(249, 115, 22, 0.7)', 
+                            'rgba(244, 63, 94, 0.7)',  
+                            'rgba(59, 130, 246, 0.7)', 
+                            'rgba(234, 179, 8, 0.7)',  
+                            'rgba(16, 185, 129, 0.7)'  
+                        ],
+                        borderColor: [
+                            'rgb(194, 65, 12)',
+                            'rgb(225, 29, 72)',
+                            'rgb(37, 99, 235)',
+                            'rgb(202, 138, 4)',
+                            'rgb(5, 150, 105)'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                            titleFont: { size: 14, family: 'sans-serif' },
+                            bodyFont: { size: 13, family: 'sans-serif' },
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                callback: function(value) {
+                                    const label = this.getLabelForValue(value);
+                                    if (label.length > 16) {
+                                        return label.substr(0, 16) + '...';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        window.setTab = function(tabId) {
+            appData.activeTab = tabId;
+            renderTabs();
+            renderCases();
+        };
+
+        window.toggleDetails = function(index) {
+            const el = document.getElementById(`details-${index}`);
+            const btn = el.previousElementSibling;
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                btn.innerHTML = 'Ocultar Análise <span>➖</span>';
+            } else {
+                el.classList.add('hidden');
+                btn.innerHTML = 'Análise de Inteligência <span>➕</span>';
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderKPIs();
+            renderTabs();
+            renderCases();
+            renderRiskMatrix();
+            initChart();
+        });
+    </script>
+</body>
+</html>
