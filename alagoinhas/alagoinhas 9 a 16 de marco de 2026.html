@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Análise Estratégica - DIRPIN LESTE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Chosen Palette: Warm Neutrals (Stone-50 background, Slate-800 text, Sky-800 for primary elements, Rose-700 for critical alerts, Amber-600 for warnings) -->
+    <!-- Application Structure Plan: The SPA uses a dashboard structure divided into four main thematic tabs: "Visão Geral & KPIs", "Dinâmica Criminal", "Matriz de Risco & Operações", and "Relatório Formal". This architecture was chosen to break down the dense, formal legal document into digestible, task-oriented views, while still providing the full, formal academic text in a dedicated "document-like" view. -->
+    <!-- Visualization & Content Choices: 1. KPI Cards: Quick consumption. 2. Bar Chart (Chart.js): Volume of crime types. 3. Interactive City Grid: Exploratory risk factors. 4. Formal Report Tab: Formatted HTML document style (tables, lists, justified text) for the formal legal text. NO SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fafaf9; /* stone-50 */
+            color: #1c1917; /* stone-900 */
+        }
+        
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            border-bottom: 4px solid #075985; /* sky-800 */
+            color: #075985;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+
+        .risk-card {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .risk-card:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Custom Scrollbar for inner content */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f5f5f4; }
+        ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
+        
+        /* Formal Document Styles */
+        .doc-content p { margin-bottom: 1rem; text-align: justify; line-height: 1.7; }
+        .doc-content h3 { font-size: 1.25rem; font-weight: bold; color: #075985; margin-top: 2rem; margin-bottom: 1rem; }
+        .doc-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1.5rem; }
+        .doc-content li { margin-bottom: 0.5rem; }
+        .doc-table th, .doc-table td { padding: 0.75rem; border: 1px solid #e7e5e4; }
+        .doc-table th { background-color: #f5f5f4; font-weight: 600; text-align: left; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-stone-100 border-b border-stone-200 sticky top-0 z-10 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-sky-900 tracking-tight">&#128110;&#8205;&#9794;&#65039; DIRPIN LESTE - Inteligência Estratégica</h1>
+                <p class="text-sm text-stone-500 mt-1">Análise da Fenomenologia Criminal • 2ª COORPIN</p>
+            </div>
+            <div class="mt-4 md:mt-0 text-right">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-rose-100 text-rose-800 border border-rose-200">
+                    &#128274; ACESSO RESERVADO
+                </span>
+                <p class="text-xs text-stone-500 mt-2">Período: 09 a 16 de Março de 2026</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex flex-col gap-6">
+        
+        <!-- Intro Paragraph -->
+        <section class="bg-white p-6 rounded-lg shadow-sm border border-stone-200">
+            <h2 class="text-lg font-semibold text-stone-800 mb-2">&#128203; Sumário Executivo (Briefing)</h2>
+            <p class="text-stone-600 leading-relaxed text-justify">
+                Este painel interativo traduz o <strong>Relatório de Exame Estratégico e Dinâmica da Fenomenologia Criminal</strong>. O objetivo desta interface é proporcionar à Coordenação e ao Gabinete do Diretor uma navegação intuitiva sobre a transição delitiva observada na 2ª COORPIN. Enquanto os crimes letais (CVLI) encontram-se estabilizados, observamos uma severa migração para o ambiente digital (Estelionatos) e o aumento da Violência Doméstica. O fato de maior gravidade no período foi o atentado contra a integridade física de uma Agente de Segurança Pública, exigindo respostas imediatas. Utilize as abas abaixo para explorar os indicadores, a dinâmica por unidade, a matriz de risco regional, ou acesse a íntegra do documento formal.
+            </p>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex border-b border-stone-300 mb-4 overflow-x-auto">
+            <button onclick="switchTab('tab-visao-geral')" id="btn-visao-geral" class="tab-btn active py-3 px-6 text-stone-600 font-medium text-sm whitespace-nowrap focus:outline-none hover:text-sky-800">
+                &#128202; Visão Geral & KPIs
+            </button>
+            <button onclick="switchTab('tab-dinamica')" id="btn-dinamica" class="tab-btn py-3 px-6 text-stone-600 font-medium text-sm whitespace-nowrap focus:outline-none hover:text-sky-800">
+                &#128269; Dinâmica Criminal
+            </button>
+            <button onclick="switchTab('tab-risco')" id="btn-risco" class="tab-btn py-3 px-6 text-stone-600 font-medium text-sm whitespace-nowrap focus:outline-none hover:text-sky-800">
+                &#9888;&#65039; Matriz de Risco & Operações
+            </button>
+            <button onclick="switchTab('tab-relatorio')" id="btn-relatorio" class="tab-btn py-3 px-6 text-stone-600 font-medium text-sm whitespace-nowrap focus:outline-none hover:text-sky-800">
+                &#128196; Relatório Formal
+            </button>
+        </nav>
+
+        <!-- TAB 1: Visão Geral -->
+        <div id="tab-visao-geral" class="tab-content flex flex-col gap-6 block">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- KPI 1 -->
+                <div class="bg-white p-5 rounded-lg shadow-sm border border-stone-200 border-l-4 border-l-rose-600">
+                    <p class="text-sm font-medium text-stone-500">Atentado a Agente Público</p>
+                    <div class="flex items-baseline mt-2">
+                        <span class="text-3xl font-bold text-stone-900">01</span>
+                        <span class="ml-2 text-xs font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">CRÍTICO</span>
+                    </div>
+                    <p class="text-xs text-stone-500 mt-2">1ª DT - Autoria identificada</p>
+                </div>
+                <!-- KPI 2 -->
+                <div class="bg-white p-5 rounded-lg shadow-sm border border-stone-200 border-l-4 border-l-sky-600">
+                    <p class="text-sm font-medium text-stone-500">Mandados Cumpridos</p>
+                    <div class="flex items-baseline mt-2">
+                        <span class="text-3xl font-bold text-stone-900">04</span>
+                        <span class="ml-2 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">SUCESSO</span>
+                    </div>
+                    <p class="text-xs text-stone-500 mt-2">Prisões por Roubo/Tráfico</p>
+                </div>
+                <!-- KPI 3 -->
+                <div class="bg-white p-5 rounded-lg shadow-sm border border-stone-200 border-l-4 border-l-sky-600">
+                    <p class="text-sm font-medium text-stone-500">Veículos Recuperados</p>
+                    <div class="flex items-baseline mt-2">
+                        <span class="text-3xl font-bold text-stone-900">03</span>
+                    </div>
+                    <p class="text-xs text-stone-500 mt-2">DRFR - Alto valor comercial</p>
+                </div>
+                <!-- KPI 4 -->
+                <div class="bg-white p-5 rounded-lg shadow-sm border border-stone-200 border-l-4 border-l-amber-500">
+                    <p class="text-sm font-medium text-stone-500">Contas Fraudulentas (Pix)</p>
+                    <div class="flex items-baseline mt-2">
+                        <span class="text-3xl font-bold text-stone-900">28</span>
+                        <span class="ml-2 text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded">ALERTA</span>
+                    </div>
+                    <p class="text-xs text-stone-500 mt-2">Mapeamento de "Laranjas"</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-stone-200 mt-2">
+                <h3 class="text-lg font-semibold text-stone-800 mb-4">Hierarquia de Demandas (Incidências na Semana)</h3>
+                <p class="text-sm text-stone-600 mb-6">Este gráfico ilustra a concentração das ocorrências. Nota-se claramente a prevalência de infrações ligadas a conflitos interpessoais (Violência Doméstica) e crimes transregionais (Estelionato), superando os crimes patrimoniais clássicos (Furtos).</p>
+                <div class="chart-container">
+                    <canvas id="demandChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Dinâmica Criminal -->
+        <div id="tab-dinamica" class="tab-content flex flex-col gap-6 hidden">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-stone-200">
+                <h2 class="text-lg font-semibold text-stone-800 mb-2">&#128269; Análise por Unidade de Apuração</h2>
+                <p class="text-stone-600 mb-6 text-sm">Nesta seção, dissecamos a dinâmica operacional e os principais vetores de risco enfrentados por cada delegacia especializada e territorial na área da 2ª COORPIN. Selecione uma unidade abaixo para compreender o modus operandi local e as estratégias de intervenção recomendadas pela Inteligência.</p>
+                
+                <div class="flex flex-col md:flex-row gap-6">
+                    <!-- Selector -->
+                    <div class="w-full md:w-1/3">
+                        <label class="block text-sm font-medium text-stone-700 mb-2">Selecione a Unidade:</label>
+                        <select id="unitSelect" class="w-full bg-stone-50 border border-stone-300 text-stone-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block p-2.5" onchange="updateUnitDetails()">
+                            <option value="1dt">1ª DT Alagoinhas</option>
+                            <option value="deam">DEAM Alagoinhas</option>
+                            <option value="drfr">DRFR (Especializada)</option>
+                            <option value="regional">Região Regional</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Details Display -->
+                    <div class="w-full md:w-2/3 bg-stone-50 p-5 rounded-lg border border-stone-200">
+                        <h4 id="unitTitle" class="text-xl font-bold text-sky-900 mb-2">1ª DT Alagoinhas</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <span class="text-xs font-semibold uppercase text-stone-500 tracking-wider">Dinâmica e Modus Operandi</span>
+                                <p id="unitDynamic" class="text-stone-800 mt-1">Atentado por projétil de arma de fogo contra guarnição em exercício. Emprego de emboscada ou evasão beligerante.</p>
+                            </div>
+                            <div>
+                                <span class="text-xs font-semibold uppercase text-stone-500 tracking-wider">Implicações Sociais e Ordem Pública</span>
+                                <p id="unitImplications" class="text-rose-700 font-medium mt-1">Risco de erosão da confiança pública e desmotivação do aparato ostensivo.</p>
+                            </div>
+                            <div class="bg-white p-3 rounded border border-stone-200">
+                                <span class="text-xs font-semibold uppercase text-sky-800 tracking-wider">&#9874;&#65039; Estratégias de Intervenção</span>
+                                <p id="unitStrategy" class="text-stone-700 mt-1 italic">Saturação de perímetros críticos e inteligência voltada à desarticulação bélica.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diretrizes Estratégicas -->
+            <div class="bg-stone-800 text-stone-50 p-6 rounded-lg shadow-sm">
+                <h3 class="text-lg font-bold text-sky-400 mb-4">&#128640; Diretrizes Finais da DIRPIN LESTE</h3>
+                <ul class="space-y-3">
+                    <li class="flex items-start">
+                        <span class="mr-2 text-rose-400">&#10148;</span>
+                        <span><strong>Prioridade I:</strong> Conclusão célere do Inquérito Policial atinente à tentativa de homicídio contra a Sd PM Thaina Aragão. A higidez institucional depende de uma resposta enérgica.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="mr-2 text-sky-400">&#10148;</span>
+                        <span><strong>Prioridade II:</strong> Articulação entre DRFR e Setor de Inteligência para a identificação dos receptadores de carga proveniente de e-commerce (Last Mile).</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="mr-2 text-amber-400">&#10148;</span>
+                        <span><strong>Prioridade III:</strong> Fortalecimento imediato da rede de proteção à integridade feminina (DEAM), visando obstar a evolução de ameaças recorrentes para agressões letais.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- TAB 3: Matriz de Risco -->
+        <div id="tab-risco" class="tab-content flex flex-col gap-6 hidden">
+            
+            <section class="bg-white p-6 rounded-lg shadow-sm border border-stone-200">
+                <h2 class="text-lg font-semibold text-stone-800 mb-2">&#9888;&#65039; Matriz de Risco Geográfica</h2>
+                <p class="text-stone-600 mb-6 text-sm">Mapeamento tático dos vetores de risco nas jurisdições da COORPIN. O painel interativo abaixo categoriza os municípios pelo grau de vulnerabilidade detectado no período. <strong>Clique nos cartões das cidades</strong> para revelar os fatores críticos identificados e as recomendações de comunicação institucional (ASCOM).</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="riskGrid">
+                    <!-- Cards injected via JS -->
+                </div>
+            </section>
+
+            <!-- Detalhes do Risco (Painel Inferior) -->
+            <div id="riskDetailPanel" class="bg-stone-50 p-6 rounded-lg shadow-inner border border-stone-200 hidden">
+                <div class="flex justify-between items-center mb-4 border-b border-stone-200 pb-2">
+                    <h3 id="detailCityName" class="text-xl font-bold text-stone-800">Selecione uma cidade</h3>
+                    <span id="detailRiskBadge" class="px-3 py-1 rounded-full text-xs font-bold"></span>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="text-sm font-semibold text-stone-500 uppercase">Fator Crítico Identificado</h4>
+                        <p id="detailFactor" class="mt-2 text-stone-800 bg-white p-3 rounded border border-stone-200 min-h-[4rem]"></p>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-stone-500 uppercase">Recomendação Institucional (ASCOM)</h4>
+                        <p id="detailRecommendation" class="mt-2 text-sky-800 font-medium bg-sky-50 p-3 rounded border border-sky-100 min-h-[4rem]"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Prognóstico -->
+            <div class="bg-gradient-to-r from-stone-100 to-white p-6 rounded-lg border border-stone-200 shadow-sm flex items-start gap-4">
+                <div class="text-3xl">&#127919;</div>
+                <div>
+                    <h4 class="font-bold text-stone-800">Prognóstico de Imagem Institucional</h4>
+                    <p class="text-sm text-stone-600 mt-1">A célere identificação do agressor da força pública propicia uma narrativa de <strong>"Eficiência e Justiça"</strong>. Recomenda-se que a ASCOM estruture manifestação pública tão logo a custódia seja efetuada, sedimentando a imagem da PCBA como baluarte da legalidade.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 4: Relatório Formal -->
+        <div id="tab-relatorio" class="tab-content hidden">
+            <div class="bg-white p-8 md:p-12 rounded-lg shadow-md border border-stone-200 max-w-5xl mx-auto doc-content text-stone-800">
+                
+                <h2 class="text-2xl font-bold text-center text-stone-900 mb-8 border-b-2 border-stone-800 pb-4">&#128205; RELATÓRIO DE EXAME ESTRATÉGICO E DINÂMICA DA FENOMENOLOGIA CRIMINAL 2026 - DIRPIN LESTE</h2>
+                
+                <div class="bg-stone-50 p-6 rounded border border-stone-200 mb-8 text-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="md:col-span-1 font-bold text-stone-600 uppercase">Destinatário:</div>
+                        <div class="md:col-span-3">Gabinete do Diretor da DIRPIN LESTE / Assessoria de Comunicação / Coordenação da 2ª COORPIN</div>
+                        
+                        <div class="md:col-span-1 font-bold text-stone-600 uppercase">Emissor:</div>
+                        <div class="md:col-span-3">Ponto Focal de Inteligência e Análise Criminal - DIRPIN LESTE</div>
+                        
+                        <div class="md:col-span-1 font-bold text-stone-600 uppercase">Interstício Temporal:</div>
+                        <div class="md:col-span-3">09 de março de 2026 a 16 de março de 2026</div>
+                        
+                        <div class="md:col-span-1 font-bold text-stone-600 uppercase">Objeto:</div>
+                        <div class="md:col-span-3">Análise de Conjuntura sobre a Violência Perpetrada contra Agentes Públicos e Monitoramento da Transição Delitiva para Esferas Tecnológicas e Domésticas</div>
+                        
+                        <div class="md:col-span-1 font-bold text-rose-700 uppercase">Nível de Acesso:</div>
+                        <div class="md:col-span-3 font-bold text-rose-700">RESERVADO</div>
+                    </div>
+                </div>
+
+                <h3>I. FUNDAMENTAÇÃO E METODOLOGIA DE MINERAÇÃO (OSINT & HUMINT)</h3>
+                <p>A elaboração do vertente instrumento analítico fundamentou-se na concatenação de dados primários custodiados pelo Sistema de Procedimentos Policiais Eletrônicos (PPE), devidamente correlacionados com informes de inteligência de campo (HUMINT) e o escrutínio de fontes abertas (OSINT).</p>
+                
+                <ul class="space-y-3 mt-4">
+                    <li><strong>&#128205; DRFR Alagoinhas (13/03):</strong> Identificou-se uma célula especializada na adulteração de sinais identificadores de automotores. A intervenção resultou na recuperação de ativos e na interrupção do fluxo logístico de receptação de componentes.</li>
+                    <li><strong>&#128205; 1ª DT Alagoinhas (12/03):</strong> Registrou-se evento crítico atinente ao atentado contra a integridade física de Agente de Segurança Pública (Sd PM). Tal ocorrência demanda investigação acerca de possíveis retaliações ou demonstrações de hegemonia por grupos criminosos locais.</li>
+                    <li><strong>&#128205; DEAM Alagoinhas (Fluxo Contínuo):</strong> Observou-se acentuada saturação nos procedimentos afetos à Lei nº 11.340/06, com particular incidência de agressores que reiteram na inobservância de ordens judiciais de afastamento.</li>
+                    <li><strong>&#128205; Inteligência DIRPIN (16/03):</strong> Logrou-se o mapeamento de inovador <em>modus operandi</em> em subtrações de carga, com enfoque em micro-distribuidores de e-commerce (Last Mile), cujos protocolos de segurança apresentam vulnerabilidades comparativamente aos grandes centros logísticos.</li>
+                </ul>
+
+                <h3>1. EXPOSIÇÃO SUMÁRIA (EXECUTIVE BRIEFING)</h3>
+                <p>No interstício compreendido entre 09 e 16 de março de 2026, a circunscrição da 2ª COORPIN - Alagoinhas evidenciou uma dinâmica criminal caracterizada por marcantes antíteses. Sob a ótica quantitativa, os Crimes Letais Intencionais (CVLI) mantiveram-se em patamares reduzidos, não se registrando homicídios dolosos consumados, fato que corrobora a consecução das metas estabelecidas pela Secretaria de Segurança Pública. Inobstante tal estabilidade métrica, imperioso se faz ressaltar que a ausência de óbitos não oblitera a gravidade da Tentativa de Homicídio perpetrada contra a Agente Sd PM Thaina Aragão. O referido evento configura afronta direta às instituições estatais, a exigir uma resposta institucional de natureza inarredável, voltada à desestimulação de condutas de audácia delitiva.</p>
+                <p>Observa-se, outrossim, uma nítida transição da mancha criminal. Enquanto o policiamento ostensivo e as intervenções da DRFR lograram êxito na redução de subtrações veiculares convencionais, as práticas delitivas têm migrado para o Estelionato Eletrônico e a Violência Doméstica. Tais infrações, por ocorrerem predominantemente em ambiente privado ou virtual, impõem óbices ao patrulhamento preventivo tradicional. A produtividade operacional do período revelou-se conspícua, notadamente no que tange ao cumprimento de mandados segregatórios, consolidando a atuação proativa da Polícia Civil na retaguarda do sistema de justiça criminal.</p>
+
+                <h3>2. EXAME DETALHADO DA FENOMENOLOGIA CRIMINAL (2ª COORPIN)</h3>
+                <div class="overflow-x-auto mt-4 mb-6">
+                    <table class="w-full doc-table text-sm">
+                        <thead>
+                            <tr>
+                                <th class="w-1/4">Unidade/Foco</th>
+                                <th class="w-1/4">Dinâmica e Modus Operandi</th>
+                                <th class="w-1/4">Implicações Sociais e à Ordem Pública</th>
+                                <th class="w-1/4">Estratégias de Intervenção</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-bold">1ª DT Alagoinhas</td>
+                                <td>Atentado por projétil de arma de fogo contra guarnição em exercício. Emprego de emboscada ou evasão beligerante.</td>
+                                <td>Risco de erosão da confiança pública e desmotivação do aparato ostensivo.</td>
+                                <td>Saturação de perímetros críticos e inteligência voltada à desarticulação bélica.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">DEAM Alagoinhas</td>
+                                <td>Escalada de violência psíquica para agressão somática. Descumprimento sistêmico de Medidas Protetivas.</td>
+                                <td>Saturação do aparato jurisdicional e perigo iminente de Feminicídio ante a ausência de custódia.</td>
+                                <td>Intensificação das diligências da Ronda Maria da Penha e representações por prisões preventivas.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">DRFR (Especializada)</td>
+                                <td>Subtração veicular no período noturno. Adulteração técnica de chassis e placas em exíguo intervalo temporal.</td>
+                                <td>Fomento de mercados ilícitos e vultosos prejuízos a concessionários logísticos.</td>
+                                <td>Monitoramento de entrepostos suspeitos e fiscalização de estabelecimentos de desmanche.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">Região Regional</td>
+                                <td>Estelionatos via engenharia social (Transações Pix fraudulentas e supressão de contas digitais).</td>
+                                <td>Severo prejuízo financeiro a estratos vulneráveis, gerando instabilidade socioeconômica.</td>
+                                <td>Implementação de núcleos especializados em crimes cibernéticos e pedagogia comunitária.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>3. RELEVÂNCIA DAS INTERVENÇÕES E ÊXITOS INVESTIGATIVOS</h3>
+                <p>A atuação da 2ª COORPIN no período sob exame demonstrou proficiência administrativa e capacidade de resposta imediata. Detalham-se os marcos operacionais:</p>
+                <p class="font-bold mt-2 text-sky-800">&#128205; REPRESSÃO QUALIFICADA E EXEQUIBILIDADE DE ORDENS JUDICIAIS:</p>
+                <ul class="space-y-2 mt-2">
+                    <li><strong>Segregação de Alvos Estratégicos:</strong> Deu-se cumprimento a 04 Mandados de Prisão relativos a indivíduos vinculados a crimes de roubo e narcotráfico, promovendo o enfraquecimento de células operacionais locais.</li>
+                    <li><strong>Elucidação de Atentado:</strong> Mediante exame de vestígios e inteligência técnica, logrou-se a identificação do autor dos disparos contra a Sd PM Thaina Aragão (BO 00197637/2026). O inquérito policial progride com elementos probatórios robustos visando o indiciamento por homicídio qualificado tentado.</li>
+                    <li><strong>Restituição de Bens Patrimoniais:</strong> Procedeu-se à recuperação de 03 veículos de elevado valor comercial, os quais se encontravam em estágio de adulteração, assegurando a devolução do patrimônio e a descapitalização de organizações delitivas.</li>
+                    <li><strong>Preservação da Autoridade Estatal:</strong> Foram realizadas prisões em flagrante delito por dano qualificado e resistência, reiterando o princípio de que atos contra o patrimônio público e a autoridade policial não gozarão de impunidade.</li>
+                    <li><strong>Inteligência Financeira e Cibernética:</strong> Identificaram-se 28 contas bancárias destinatárias de vultos provenientes de estelionato, ensejando o bloqueio judicial de ativos e a qualificação de intermediários ("laranjas").</li>
+                    <li><strong>Garantia da Integridade Individual:</strong> A DEAM viabilizou 17 procedimentos de urgência, assegurando às vítimas em situação de vulnerabilidade extrema o amparo legal e o imediato afastamento dos agentes agressores.</li>
+                </ul>
+
+                <h3>4. VETORES DE RISCO E RECOMENDAÇÕES ESTRATÉGICAS</h3>
+                <p>A matriz infraorientada estabelece as prioridades para o próximo ciclo epidemiológico criminal:</p>
+                <div class="overflow-x-auto mt-4 mb-6">
+                    <table class="w-full doc-table text-sm">
+                        <thead>
+                            <tr>
+                                <th class="w-1/5">Localidade</th>
+                                <th class="w-1/6">Grau de Risco</th>
+                                <th class="w-1/3">Fator Crítico Identificado</th>
+                                <th>Recomendação Institucional / ASCOM</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-bold">Alagoinhas</td>
+                                <td class="text-rose-600 font-bold">Crítico</td>
+                                <td>Atentado contra Agente e Subtração de Cargas.</td>
+                                <td>Divulgação da coesão institucional entre as forças de segurança na captura de infratores.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">Entre Rios</td>
+                                <td class="text-orange-600 font-bold">Alto</td>
+                                <td>Pirataria Rodoviária e Furtos em Perímetros Rurais.</td>
+                                <td>Orientação aos transportadores quanto ao uso de telemetria e pontos de parada monitorados.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">Rio Real</td>
+                                <td class="text-amber-600 font-bold">Médio</td>
+                                <td>Estelionato em detrimento de Pessoas Idosas.</td>
+                                <td>Campanha informativa acerca de fraudes em benefícios previdenciários.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">Inhambupe</td>
+                                <td class="text-amber-600 font-bold">Médio</td>
+                                <td>Subtração de Condutores Metálicos e Danos ao Erário.</td>
+                                <td>Fiscalização rigorosa em estabelecimentos de comercialização de sucatas.</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">Esplanada</td>
+                                <td class="text-amber-600 font-bold">Médio</td>
+                                <td>Recidiva em Violência Doméstica.</td>
+                                <td>Difusão dos canais de denúncia digital e telefônica (180).</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">Adjacências</td>
+                                <td class="text-emerald-600 font-bold">Baixo</td>
+                                <td>Fatos Atípicos e Perturbação da Tranquilidade.</td>
+                                <td>Manutenção da presença policial em períodos de aglomeração social.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="bg-stone-100 p-4 border border-stone-300 rounded mt-4 mb-8">
+                    <p class="mb-0"><strong class="text-stone-900">&#128640; PROGNÓSTICO DE IMAGEM INSTITUCIONAL:</strong> A célere identificação do agressor da força pública propicia uma narrativa de "Eficiência e Justiça". Recomenda-se que a ASCOM estruture manifestação pública tão logo a custódia seja efetuada, sedimentando a imagem da PCBA como baluarte da legalidade.</p>
+                </div>
+
+                <h3>TABELAS TÉCNICAS DE INDICADORES</h3>
+                
+                <h4 class="font-bold mt-4 mb-2">Tabela 1: Indicadores de Violência e Patrimônio</h4>
+                <div class="overflow-x-auto mb-6">
+                    <table class="w-full doc-table text-sm">
+                        <thead>
+                            <tr>
+                                <th>Unidade de Apuração</th>
+                                <th>CVLI</th>
+                                <th>CVP Tendência</th>
+                                <th>Produtividade Operacional</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-bold">2ª COORPIN (Sede)</td>
+                                <td>01*</td>
+                                <td>&#11015;&#65039;</td>
+                                <td>Elevada (Mandados e Flagrantes)</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">DEAM Alagoinhas</td>
+                                <td>00</td>
+                                <td>&#11014;&#65039;</td>
+                                <td>Moderada (Medidas Protetivas)</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">DRFR Alagoinhas</td>
+                                <td>00</td>
+                                <td>&#11015;&#65039;</td>
+                                <td>Elevada (Recuperação de Ativos)</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold">DTs do Interior</td>
+                                <td>00</td>
+                                <td>&#10145;&#65039;</td>
+                                <td>Moderada (Atendimento Territorial)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="text-xs text-stone-500 mt-1 italic">*Nota: O registro de CVLI circunscreve-se a Homicídio Culposo em acidente de trânsito.</p>
+                </div>
+
+                <h4 class="font-bold mt-4 mb-2">Tabela 2: Hierarquia de Demandas por Natureza Jurídica</h4>
+                <ul class="space-y-2 mb-6">
+                    <li><strong>Violência Doméstica (26 incidências):</strong> Exuberância de demanda cartorial e diligenciamento de campo.</li>
+                    <li><strong>Estelionato e Fraudes (23 incidências):</strong> Desafio investigativo em razão da transregionalidade.</li>
+                    <li><strong>Furtos de Veículos e Objetos (21 incidências):</strong> Necessidade de atenção a perímetros de baixa vigilância.</li>
+                    <li><strong>Ameaças e Injúrias (14 incidências):</strong> Indicadores de conflitos interpessoais com potencial de progressão violenta.</li>
+                </ul>
+
+                <h3>CONCLUSÃO E DIRETRIZES FINAIS</h3>
+                <p>O escrutínio técnico da 11ª semana do corrente ano revela uma DIRPIN LESTE operosa frente a novos paradigmas delitivos. A redução dos crimes de via pública (CVP) configura êxito estratégico, contudo, a migração para infrações de menor visibilidade externa (digitais e domésticas) impõe a readequação do aporte investigativo.</p>
+                
+                <p class="font-bold text-stone-800 mt-4">DIRETRIZES:</p>
+                <ul class="space-y-2">
+                    <li><strong>Prioridade I:</strong> Conclusão do Inquérito Policial atinente à tentativa de homicídio contra a Sd PM Thaina Aragão.</li>
+                    <li><strong>Prioridade II:</strong> Articulação entre DRFR e Inteligência para a identificação dos receptadores de carga proveniente de e-commerce.</li>
+                    <li><strong>Prioridade III:</strong> Fortalecimento da rede de proteção à integridade feminina, visando obstar a evolução de ameaças para agressões letais.</li>
+                </ul>
+                
+                <p>A higidez das instituições estatais mantém-se inabalável frente à fluidez das dinâmicas delitivas. A resposta da Polícia Civil da Bahia guardar-se-á sempre proporcional à gravidade das infrações, sob a égide do rigor legal.</p>
+
+                <div class="mt-12 pt-6 border-t border-stone-300">
+                    <p class="font-bold text-sm uppercase text-stone-500 mb-1">ASSINATURA:</p>
+                    <p class="text-lg font-medium text-stone-900">Félix Rilton</p>
+                    <p class="text-sm text-stone-600">Investigador PCBA | Especialista em Análise Criminal - DIRPIN LESTE</p>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-stone-800 text-stone-400 py-6 text-center text-xs mt-auto">
+        <p>Documento de Inteligência Gerado a partir de OSINT/HUMINT e Sistema PPE.</p>
+        <p class="mt-1">Ponto Focal de Inteligência e Análise Criminal - DIRPIN LESTE | PCBA</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- State Management & Data Storage ---
+        
+        // Data for Chart (Demand Hierarchy)
+        const demandData = {
+            labels: ['Violência Doméstica', 'Estelionato/Fraudes', 'Furtos/Roubos', 'Ameaças/Injúrias'],
+            values: [26, 23, 21, 14]
+        };
+
+        // Data for Unit Analysis
+        const unitsData = {
+            '1dt': {
+                title: '1ª DT Alagoinhas',
+                dynamic: 'Atentado por projétil de arma de fogo contra guarnição em exercício. Emprego de emboscada ou evasão beligerante.',
+                implication: 'Risco de erosão da confiança pública e desmotivação do aparato ostensivo.',
+                strategy: 'Saturação de perímetros críticos e inteligência voltada à desarticulação bélica.'
+            },
+            'deam': {
+                title: 'DEAM Alagoinhas',
+                dynamic: 'Escalada de violência psíquica para agressão somática. Descumprimento sistêmico de Medidas Protetivas.',
+                implication: 'Saturação do aparato jurisdicional e perigo iminente de Feminicídio ante a ausência de custódia.',
+                strategy: 'Intensificação das diligências da Ronda Maria da Penha e representações por prisões preventivas.'
+            },
+            'drfr': {
+                title: 'DRFR (Especializada)',
+                dynamic: 'Subtração veicular no período noturno. Adulteração técnica de chassis e placas em exíguo intervalo temporal.',
+                implication: 'Fomento de mercados ilícitos e vultosos prejuízos a concessionários logísticos.',
+                strategy: 'Monitoramento de entrepostos suspeitos e fiscalização de estabelecimentos de desmanche.'
+            },
+            'regional': {
+                title: 'Região Regional',
+                dynamic: 'Estelionatos via engenharia social (Transações Pix fraudulentas e supressão de contas digitais).',
+                implication: 'Severo prejuízo financeiro a estratos vulneráveis, gerando instabilidade socioeconômica.',
+                strategy: 'Implementação de núcleos especializados em crimes cibernéticos e pedagogia comunitária.'
+            }
+        };
+
+        // Data for Risk Matrix
+        const riskData = [
+            { id: 'alagoinhas', city: 'Alagoinhas', level: 'Crítico', factor: 'Atentado contra Agente Público e Subtração de Cargas (e-commerce).', rec: 'Divulgação intensiva da coesão institucional entre forças de segurança na captura de infratores.' },
+            { id: 'entre-rios', city: 'Entre Rios', level: 'Alto', factor: 'Pirataria Rodoviária e Furtos sistemáticos em perímetros rurais.', rec: 'Orientação direta aos transportadores quanto ao uso de telemetria e restrição a pontos de parada homologados.' },
+            { id: 'rio-real', city: 'Rio Real', level: 'Médio', factor: 'Epidemia de Estelionato, precipuamente em detrimento de pessoas idosas.', rec: 'Estruturação de campanha informativa em rádios locais acerca de fraudes em benefícios previdenciários.' },
+            { id: 'inhambupe', city: 'Inhambupe', level: 'Médio', factor: 'Subtração de condutores metálicos gerando danos severos ao erário público.', rec: 'Fiscalização ostensiva e rigorosa em estabelecimentos de comercialização de sucatas (ferros-velhos).' },
+            { id: 'esplanada', city: 'Esplanada', level: 'Médio', factor: 'Elevada taxa de recidiva criminal no âmbito da Violência Doméstica.', rec: 'Difusão orgânica dos canais de denúncia digital e linha telefônica de emergência (180).' },
+            { id: 'adjacencias', city: 'Adjacências', level: 'Baixo', factor: 'Fatos atípicos e perturbação pontual da tranquilidade pública.', rec: 'Manutenção da presença ostensiva policial em períodos e locais de aglomeração social.' }
+        ];
+
+        let chartInstance = null;
+
+        // --- Core Interaction Handling ---
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            renderRiskGrid();
+        });
+
+        // Tab Navigation Logic
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+            // Deactivate all buttons
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active', 'border-sky-800', 'text-sky-800');
+            });
+
+            // Show selected tab
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById(tabId).classList.add('block');
+            
+            // Activate clicked button
+            const btnId = 'btn-' + tabId.replace('tab-', '');
+            const btn = document.getElementById(btnId);
+            if(btn) btn.classList.add('active');
+        }
+
+        // Initialize Chart.js
+        function initChart() {
+            const ctx = document.getElementById('demandChart').getContext('2d');
+            
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: demandData.labels,
+                    datasets: [{
+                        label: 'Volume de Incidências',
+                        data: demandData.values,
+                        backgroundColor: [
+                            'rgba(15, 23, 42, 0.8)',   // Slate-900
+                            'rgba(3, 105, 161, 0.8)',  // Sky-700
+                            'rgba(185, 28, 28, 0.8)',  // Red-700
+                            'rgba(168, 162, 158, 0.8)' // Stone-400
+                        ],
+                        borderColor: [
+                            'rgb(15, 23, 42)',
+                            'rgb(3, 105, 161)',
+                            'rgb(185, 28, 28)',
+                            'rgb(120, 113, 108)'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(28, 25, 23, 0.9)',
+                            titleFont: { size: 14, family: "'Segoe UI', sans-serif" },
+                            bodyFont: { size: 13, family: "'Segoe UI', sans-serif" },
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y + ' Ocorrências registradas';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#e7e5e4' }, // stone-200
+                            ticks: {
+                                stepSize: 5,
+                                color: '#57534e'
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#57534e',
+                                maxRotation: 0,
+                                minRotation: 0,
+                                callback: function(value) {
+                                    // Label wrapping logic (approx 16 chars)
+                                    let label = this.getLabelForValue(value);
+                                    if (label.length > 15) {
+                                        return label.substr(0, 15) + '...';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update Unit Details panel based on dropdown selection
+        function updateUnitDetails() {
+            const selectedKey = document.getElementById('unitSelect').value;
+            const data = unitsData[selectedKey];
+            
+            if(data) {
+                document.getElementById('unitTitle').innerText = data.title;
+                document.getElementById('unitDynamic').innerText = data.dynamic;
+                document.getElementById('unitImplications').innerText = data.implication;
+                document.getElementById('unitStrategy').innerText = data.strategy;
+                
+                // Add a brief highlight animation
+                const container = document.getElementById('unitTitle').parentElement;
+                container.classList.remove('bg-stone-50');
+                container.classList.add('bg-sky-50');
+                setTimeout(() => {
+                    container.classList.remove('bg-sky-50');
+                    container.classList.add('bg-stone-50');
+                }, 300);
+            }
+        }
+
+        // Render Risk Matrix Grid
+        function renderRiskGrid() {
+            const grid = document.getElementById('riskGrid');
+            grid.innerHTML = ''; // clear
+
+            riskData.forEach(item => {
+                // Determine styling based on risk level
+                let colorClasses = '';
+                if (item.level === 'Crítico') colorClasses = 'border-rose-300 bg-rose-50 text-rose-800 hover:bg-rose-100';
+                else if (item.level === 'Alto') colorClasses = 'border-orange-300 bg-orange-50 text-orange-800 hover:bg-orange-100';
+                else if (item.level === 'Médio') colorClasses = 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100';
+                else colorClasses = 'border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100';
+
+                const cardHTML = `
+                    <div onclick="selectRiskCity('${item.id}')" class="risk-card p-4 rounded-lg border-2 ${colorClasses} flex justify-between items-center shadow-sm">
+                        <span class="font-bold text-lg text-stone-900">${item.city}</span>
+                        <span class="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded bg-white bg-opacity-60">${item.level}</span>
+                    </div>
+                `;
+                grid.innerHTML += cardHTML;
+            });
+        }
+
+        // Handle Risk Card Click
+        function selectRiskCity(cityId) {
+            const data = riskData.find(c => c.id === cityId);
+            if (!data) return;
+
+            const panel = document.getElementById('riskDetailPanel');
+            panel.classList.remove('hidden');
+
+            document.getElementById('detailCityName').innerText = data.city;
+            document.getElementById('detailFactor').innerText = data.factor;
+            document.getElementById('detailRecommendation').innerText = data.rec;
+
+            const badge = document.getElementById('detailRiskBadge');
+            badge.innerText = 'Risco: ' + data.level.toUpperCase();
+            
+            // Reset badge classes
+            badge.className = 'px-3 py-1 rounded-full text-xs font-bold text-white';
+            
+            if (data.level === 'Crítico') badge.classList.add('bg-rose-600');
+            else if (data.level === 'Alto') badge.classList.add('bg-orange-500');
+            else if (data.level === 'Médio') badge.classList.add('bg-amber-500');
+            else badge.classList.add('bg-emerald-600');
+            
+            // Scroll to details on mobile
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+</body>
+</html>

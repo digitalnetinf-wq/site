@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analítico Estratégico - DIRPIN LESTE (2026)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Chosen Palette: Warm Neutrals with Sophisticated Slate and Subtle Alert Accents (Stone-50 background, Slate-800 text, Blue-700/Red-700 for data focus, strictly adhering to the light background requirement). -->
+    <!-- Application Structure Plan: A single-page application (SPA) upgraded with a Top-Level Tab navigation system. Tab 1 houses the Interactive Dashboard (charts, dynamic tables, accordions). Tab 2 houses the Formal Document View, presenting the raw text report in a highly readable, formally styled typographic layout. This separates the quick-glance interactive analysis from deep reading. -->
+    <!-- Visualization & Content Choices: 
+         - Main Navigation -> Tab system via Vanilla JS toggling CSS 'hidden' classes to simulate pages.
+         - Formal Report -> HTML styled with Tailwind utility classes for typography (margins, leading, text-justify, custom tables) to mirror a legal/academic document.
+         - Dashboard components -> Preserved intact.
+         - CONFIRMING NO SVG/Mermaid. Used Unicode icons and Chart.js. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #fafaf9; /* Tailwind stone-50 */
+            color: #1e293b; /* Tailwind slate-800 */
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom scrollbar for table */
+        .table-scroll::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .table-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .table-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        .accordion-content {
+            transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+            max-height: 0;
+            overflow: hidden;
+        }
+        
+        .accordion-content.open {
+            max-height: 500px;
+        }
+
+        /* Formal Document Styling */
+        .doc-section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            color: #1e293b;
+            text-transform: uppercase;
+        }
+        .doc-paragraph {
+            margin-bottom: 1rem;
+            line-height: 1.75;
+            text-align: justify;
+            color: #334155;
+        }
+        .doc-list {
+            list-style-type: disc;
+            margin-left: 2rem;
+            margin-bottom: 1.5rem;
+            color: #334155;
+        }
+        .doc-list li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-200 selection:text-blue-900 flex flex-col min-h-screen">
+
+    <!-- Sticky Header & App Title -->
+    <nav class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl">🛡️</span>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight uppercase tracking-wider">DIRPIN LESTE - 4ª COORPIN</h1>
+                        <p class="text-xs text-slate-400">Sistema de Análise Estratégica</p>
+                    </div>
+                </div>
+                <div class="hidden md:block text-right">
+                    <p class="text-sm font-medium">Período: 09/03 a 15/03/2026</p>
+                    <p class="text-xs text-slate-400">Grau de Sigilo: RESERVADO</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Top-Level Tabs -->
+        <div class="bg-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <nav class="flex space-x-4 overflow-x-auto" aria-label="Tabs">
+                    <button class="main-tab-btn active bg-blue-600 text-white px-4 py-3 text-sm font-medium border-b-4 border-blue-400 whitespace-nowrap transition-colors" data-target="dashboard-view">
+                        📊 Dashboard Interativo
+                    </button>
+                    <button class="main-tab-btn text-slate-300 hover:text-white hover:bg-slate-700 px-4 py-3 text-sm font-medium border-b-4 border-transparent whitespace-nowrap transition-colors" data-target="report-view">
+                        📄 Documento Oficial (Relatório Extenso)
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: DASHBOARD INTERATIVO (ORIGINAL)    -->
+        <!-- ========================================== -->
+        <div id="dashboard-view" class="space-y-12 block">
+            <header class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4 border-b pb-4">Síntese Executiva e Análise Macroestratégica</h2>
+                <p class="text-slate-600 mb-4 leading-relaxed text-justify">
+                    <strong>Objetivo da Seção:</strong> Este bloco apresenta a conjuntura criminal consolidada da 4ª COORPIN. O interregno temporal evidencia um panorama de profundas dicotomias: proatividade eficaz no combate à violência doméstica e desarmamento, em contraposição a um cenário reativo frente ao exponencial aumento de infrações cibernéticas e estelionatos tradicionais.
+                </p>
+                <div class="bg-blue-50 border-l-4 border-blue-700 p-4 text-sm text-blue-900 mb-6">
+                    <p><strong>EMENTA:</strong> Constatada ascensão nos índices referentes a delitos de natureza cibernética em contraposição à eficácia das medidas repressivas aplicadas ao combate da violência doméstica e ao desarmamento civil.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200 text-center hover:shadow-md transition-shadow">
+                        <div class="text-4xl mb-2">🩸</div>
+                        <div class="text-3xl font-bold text-slate-800">00</div>
+                        <div class="text-sm font-semibold text-slate-600 uppercase tracking-wide mt-1">CVLI (Sede)</div>
+                        <div class="text-xs text-slate-500 mt-2">Nulidade de letalidade violenta mantida.</div>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200 text-center hover:shadow-md transition-shadow">
+                        <div class="text-4xl mb-2">⚖️</div>
+                        <div class="text-3xl font-bold text-slate-800">04</div>
+                        <div class="text-sm font-semibold text-slate-600 uppercase tracking-wide mt-1">Violência Doméstica</div>
+                        <div class="text-xs text-slate-500 mt-2">Resposta rápida e efetiva da DEAM.</div>
+                    </div>
+                    <div class="bg-red-50 p-6 rounded-lg border border-red-200 text-center hover:shadow-md transition-shadow">
+                        <div class="text-4xl mb-2">💻</div>
+                        <div class="text-3xl font-bold text-red-700">Ascensão</div>
+                        <div class="text-sm font-semibold text-red-900 uppercase tracking-wide mt-1">Estelionato Digital</div>
+                        <div class="text-xs text-red-700 mt-2">Migração para o ambiente telemático.</div>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200 text-center hover:shadow-md transition-shadow">
+                        <div class="text-4xl mb-2">🔫</div>
+                        <div class="text-3xl font-bold text-slate-800">12+</div>
+                        <div class="text-sm font-semibold text-slate-600 uppercase tracking-wide mt-1">Prisões/Apreensões</div>
+                        <div class="text-xs text-slate-500 mt-2">Expedição célere de autos de flagrante.</div>
+                    </div>
+                </div>
+            </header>
+
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Consolidação de Indicadores (SAJ)</h3>
+                    <p class="text-sm text-slate-600 mb-6">
+                        <strong>Objetivo:</strong> Visualizar a proporção das tipificações criminais predominantes na Sede Administrativa. Interaja com o gráfico (hover) para visualizar os quantitativos específicos de cada modalidade delitiva registrada no período.
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="indicatorsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Ordenação Hierárquica de Demandas</h3>
+                    <p class="text-sm text-slate-600 mb-6">
+                        <strong>Objetivo:</strong> Dimensionar o grau de esforço institucional aplicado pelas unidades (DEAM e 1ª DT). O gráfico mensura o nível de precedência processual, evidenciando o foco na ofensa à integridade intrafamiliar.
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="operationalChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6 md:p-8 bg-slate-50 border-b border-slate-200">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2">Exegese da Mancha Criminal por Delimitação Territorial</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed text-justify">
+                        <strong>Contexto e Interação:</strong> Selecione os municípios abaixo para explorar a dinâmica delitiva, o impacto socioeconômico e as diretrizes preventivas recomendadas pela inteligência. Esta arquitetura permite o foco regionalizado e o planejamento tático focal.
+                    </p>
+                </div>
+                
+                <div class="flex flex-col md:flex-row">
+                    <div class="w-full md:w-1/3 bg-white border-r border-slate-200 flex flex-col" id="city-tabs">
+                        <button class="city-btn active p-4 text-left font-semibold text-slate-700 bg-slate-100 border-l-4 border-blue-600 hover:bg-slate-50 transition-colors" data-city="saj">
+                            📍 Santo Antônio de Jesus (Sede)
+                        </button>
+                        <button class="city-btn p-4 text-left font-semibold text-slate-600 border-l-4 border-transparent hover:bg-slate-50 transition-colors" data-city="cruz">
+                            📍 Cruz das Almas
+                        </button>
+                        <button class="city-btn p-4 text-left font-semibold text-slate-600 border-l-4 border-transparent hover:bg-slate-50 transition-colors" data-city="amargosa">
+                            📍 Amargosa
+                        </button>
+                        <button class="city-btn p-4 text-left font-semibold text-slate-600 border-l-4 border-transparent hover:bg-slate-50 transition-colors" data-city="nazare">
+                            📍 Nazaré
+                        </button>
+                    </div>
+                    
+                    <div class="w-full md:w-2/3 p-6 md:p-8 min-h-[300px]" id="city-content">
+                        <!-- Dynamic Content Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-800 mb-2">Matriz Prospectiva de Riscos Institucionais</h3>
+                        <p class="text-sm text-slate-600">
+                            <strong>Ferramenta:</strong> Utilize o filtro abaixo para segregar os municípios por Grau de Risco. Uma visão sistêmica essencial para alocação de recursos da ASCOM e tropas de choque.
+                        </p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <label for="riskFilter" class="sr-only">Filtrar por Risco</label>
+                        <select id="riskFilter" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none cursor-pointer">
+                            <option value="Todos">⚠️ Filtrar por Grau de Risco (Todos)</option>
+                            <option value="Crítico">🔴 Risco Crítico</option>
+                            <option value="Elevado">🟠 Risco Elevado</option>
+                            <option value="Intermediário">🟡 Risco Intermediário</option>
+                            <option value="Reduzido">🟢 Risco Reduzido</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto table-scroll rounded-lg border border-slate-200">
+                    <table class="w-full text-sm text-left text-slate-600">
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 font-bold">Município</th>
+                                <th scope="col" class="px-6 py-3 font-bold">Grau de Risco</th>
+                                <th scope="col" class="px-6 py-3 font-bold">Fator Criminógeno Crítico</th>
+                                <th scope="col" class="px-6 py-3 font-bold">Recomendações Estratégicas (ASCOM)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrixTableBody" class="divide-y divide-slate-200">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200 shadow-sm flex items-start space-x-4">
+                    <div class="text-2xl mt-1">💡</div>
+                    <div>
+                        <h4 class="font-bold text-yellow-800 text-sm uppercase tracking-wide">Proposição de Estratégia de Comunicação Institucional</h4>
+                        <p class="text-sm text-yellow-900 mt-1 leading-relaxed text-justify">
+                            Recomenda-se, de forma peremptória, que a ASCOM promova a capitalização midiática da presteza técnico-operacional da Delegacia Especializada (DEAM). Postula-se a elaboração de material audiovisual alicerçado no preceito normativo de <strong>"Irrestrita Repressão às Infrações Penais Fundamentadas no Gênero"</strong>. Esta demonstração insofismável mitiga a "Cifra Oculta" e consolida a credibilidade institucional.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-slate-800 mb-2">Apreciação Pormenorizada de Ocorrências e Êxitos</h3>
+                <p class="text-sm text-slate-600 mb-6 text-justify">
+                    <strong>Análise Qualitativa:</strong> Expanda as seções abaixo para acessar a exegese de inteligência atinente aos registros factuais mais relevantes do período e às intervenções operacionais exitosas consolidadas.
+                </p>
+
+                <div class="space-y-3" id="occurrencesList">
+                    <!-- Accordions Populated by JS -->
+                </div>
+            </section>
+            
+            <footer class="text-center py-8 text-sm text-slate-500 border-t border-slate-200 mt-8">
+                <p><strong>Conclusão Central:</strong> A 4ª COORPIN exerce domínio ostensivo sobre CVLI. Demandas projetam-se, hodiernamente, na proteção intrafamiliar (DEAM) e repressão profunda ao estelionato cibernético.</p>
+                <p class="mt-4">Documento subscrito digitalmente.<br>Unidade Focal de Inteligência e Análise Criminal - DIRPIN LESTE / PCBA</p>
+            </footer>
+        </div>
+
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: DOCUMENTO OFICIAL (RELATÓRIO EXTENSO) -->
+        <!-- ========================================== -->
+        <div id="report-view" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 p-8 md:p-12 lg:px-20 lg:py-16">
+            
+            <!-- Report Header -->
+            <div class="text-center border-b-2 border-slate-800 pb-8 mb-8">
+                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-wide uppercase leading-snug">
+                    Relatório Analítico Estratégico Acerca da Dinâmica Criminal - Exercício de 2026
+                </h1>
+                <h2 class="text-lg md:text-xl font-bold text-slate-700 mt-2 uppercase">
+                    Diretoria Regional de Polícia do Interior Leste
+                </h2>
+            </div>
+
+            <!-- Meta Data Block -->
+            <div class="bg-slate-50 border border-slate-200 p-6 rounded-lg mb-8 text-sm md:text-base text-slate-800 shadow-inner">
+                <p class="mb-2"><strong>DESTINATÁRIO:</strong> Ao Gabinete da Diretoria Regional de Polícia do Interior Leste / Coordenadoria da 4ª COORPIN - Santo Antônio de Jesus / Assessoria de Comunicação (ASCOM)</p>
+                <p class="mb-2"><strong>EMITENTE:</strong> Unidade Focal de Inteligência e Análise Criminal - Diretoria Regional de Polícia do Interior Leste</p>
+                <p class="mb-2"><strong>DATA DE EMISSÃO:</strong> 16 de março de 2026</p>
+                <p class="mb-2"><strong>PERÍODO DE ABRANGÊNCIA:</strong> 09 de março de 2026 a 15 de março de 2026</p>
+                <p class="mb-2"><strong>GRAU DE SIGILO:</strong> <span class="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded border border-red-300">RESERVADO</span></p>
+                <div class="mt-4 pt-4 border-t border-slate-300">
+                    <p class="text-justify leading-relaxed"><strong>EMENTA:</strong> CONSTATADA ASCENSÃO NOS ÍNDICES REFERENTES A DELITOS DE NATUREZA CIBERNÉTICA EM CONTRAPOSIÇÃO À EFICÁCIA DAS MEDIDAS REPRESSIVAS APLICADAS AO COMBATE DA VIOLÊNCIA DOMÉSTICA E AO DESARMAMENTO CIVIL.</p>
+                </div>
+            </div>
+
+            <!-- Section I -->
+            <h3 class="doc-section-title">I. MINERAÇÃO E CONSOLIDAÇÃO DE DADOS DE INTELIGÊNCIA</h3>
+            <p class="doc-paragraph">O presente exórdio destina-se à consolidação dos dados coligidos por intermédio de metodologias de inteligência em fontes abertas, inteligência humana e extrações diretas advindas do sistema de Procedimentos Policiais Eletrônicos (PPE), devidamente processados pela Célula de Inteligência vinculada à 4ª Coordenadoria Regional de Polícia do Interior. O monitoramento ininterrupto logrou identificar vetores de risco latentes e ações de natureza repressiva dotadas de substancial impacto:</p>
+            <p class="doc-paragraph font-bold">Consolidação de Registros Factuais - 4ª COORPIN (Município de Santo Antônio de Jesus):</p>
+            <ul class="doc-list">
+                <li><strong>Dados Institucionais Oriundos de Plantão Policial (09/03):</strong> Constata-se a lavratura de auto de prisão em flagrante delito, cumulada com a apreensão de artefato bélico, sob a presidência da Autoridade Policial, o Excelentíssimo Delegado Victor Eduardo Menezes de Freitas (Boletim de Ocorrência nº 00183656/2026-A02). A intervenção tática, perpetrada nas horas inaugurais da madrugada, afigura-se de suma importância para a desarticulação de potenciais infrações penais de natureza violenta (tais como constrições patrimoniais qualificadas ou crimes contra a vida), culminando na supressão da circulação de indivíduo implicado em condutas de receptação e porte ilegal de arma de fogo.</li>
+                <li><strong>Dados Institucionais Oriundos da Delegacia Especializada de Atendimento à Mulher (09/03 a 12/03):</strong> Sob a coordenação da Excelentíssima Delegada Aline Cristina Nogueira de Freitas, apurou-se uma recrudescência nos registros formais de violência perpetrada em desfavor de mulheres. Merecem destaque as ocorrências de ofensa à integridade corporal de natureza severa (Boletim de Ocorrência nº 00185342/2026), ameaças de grave dano no espectro intrafamiliar (Boletim de Ocorrência nº 00197078/2026-A01) e uma elevação atípica nos procedimentos atinentes a crimes contra a dignidade sexual, notadamente a importunação sexual em vias públicas (Boletim de Ocorrência nº 00196107/2026-A01).</li>
+                <li><strong>Dados Provenientes de Fontes Abertas e Inteligência Telemática (15/03):</strong> O acompanhamento sistemático de agrupamentos virtuais comunitários sinalizou a propagação de narrativas oriundas de vítimas de ilícitos cibernéticos na circunscrição de Santo Antônio de Jesus. Tal conjectura restou corroborada por intermédio do registro oficial tipificado como Estelionato (Boletim de Ocorrência nº 00204192/2026), conduzido pela Excelentíssima Delegada Maria de Jesus Sandy de Oliveira de Sousa, o que sugere a probabilidade de uma transmutação da delinquência do ambiente físico para o domínio digital.</li>
+            </ul>
+
+            <!-- Section 1 -->
+            <h3 class="doc-section-title">1. SÍNTESE EXECUTIVA E ANÁLISE MACROESTRATÉGICA</h3>
+            <p class="doc-paragraph">O interregno temporal ora analisado, circunscrito à área de atuação da 4ª Coordenadoria Regional de Polícia do Interior, evidencia um panorama caracterizado por profundas dicotomias operacionais e comportamentais atinentes à criminalidade regional. Por um lado, as forças de segurança pública demonstraram notória celeridade e proatividade no que tange à repressão dos delitos de violência doméstica. A Delegacia Especializada de Atendimento à Mulher atuou de maneira incisiva e contínua na formalização de flagrantes delitos e na postulação de Medidas Protetivas de Urgência, estabelecendo acentuada sinergia com o policiamento ostensivo, circunstância que obstou a progressão de lesões corporais para eventuais crimes de feminicídio. Adita-se a este cenário o êxito alcançado na política de desarmamento preventivo e na recuperação de bens patrimoniais espoliados.</p>
+            <p class="doc-paragraph">Em contraposição analítica, atesta-se uma postura eminentemente reativa em relação às infrações penais de natureza cibernética e estelionatos tradicionais. Associações criminosas, possivelmente operando a partir de jurisdições alienígenas, apresentaram uma curva de atuação em ascensão no território em análise. Tais entidades exploram a vulnerabilidade socioeconômica, a assimetria informacional e a incipiente literacia digital dos cidadãos locais, com especial ênfase em comerciantes e indivíduos na terceira idade. Estes delitos, consubstanciados na utilização de técnicas de engenharia social (tais como o provimento de endereços eletrônicos falaciosos e a clonagem de aplicativos de mensageria), impõem um obstáculo investigativo de grande monta, o qual exige um aprofundamento técnico substantivo no que concerne às representações por quebras de sigilo telemático e bancário.</p>
+            <p class="doc-paragraph">Não obstante a verificada transmutação tecnológica atinente aos crimes de cunho patrimonial, o índice de contenção dos Crimes Violentos Letais Intencionais permanece caracterizado por estabilidade, encontrando-se alinhado às metas institucionais delimitadas pela Secretaria de Segurança Pública. Este indicador configura reflexo imediato da manutenção do policiamento ostensivo em zonas de vulnerabilidade aferida, da tramitação expedita no cumprimento de mandados judiciais e da aplicação de metodologias de inteligência voltadas ao mapeamento de manchas criminais críticas na região do recôncavo baiano.</p>
+
+            <!-- Section 2 -->
+            <h3 class="doc-section-title">2. EXEGESE DA MANCHA CRIMINAL POR DELIMITAÇÃO TERRITORIAL</h3>
+            <p class="doc-paragraph">Com o fito de propiciar a otimização na alocação do contingente policial e de fornecer substrato para a formulação de políticas públicas direcionadas à segurança, a dinâmica criminal dos principais centros urbanos abrangidos pela Coordenadoria foi estruturada segundo as diretrizes que se seguem:</p>
+            
+            <p class="font-bold text-slate-800 mt-6 mb-2">1. Município de Santo Antônio de Jesus (Sede Administrativa)</p>
+            <ul class="doc-list">
+                <li><strong>Modus Operandi e Dinâmica Delitiva:</strong> Em virtude de sua caracterização como polo mercantil e de prestação de serviços, a sede administrativa centraliza ocorrências bifurcadas em duas vertentes proeminentes: o espectro intrafamiliar (compreendendo ameaças, ofensa à integridade física e importunação sexual) e as infrações patrimoniais destituídas de violência física direta (estelionatos perpetrados via plataformas digitais). Identifica-se, outrossim, o trânsito de indivíduos portando armamentos de fogo, frequentemente vinculados à mercancia ilícita de entorpecentes, os quais são objeto de frequentes interceptações operacionais.</li>
+                <li><strong>Repercussão e Impacto Socioeconômico:</strong> Verifica-se que as infrações penais perpetradas em desfavor de mulheres detêm substancial repercussão na percepção coletiva de segurança pública, apresentando, de forma recorrente, nexo de causalidade com o consumo imoderado de substâncias psicoativas aos finais de semana ou com litígios originados pela dissolução de vínculos conjugais. De maneira paralela, o delito de estelionato atinge de forma severa a base econômica do município, vitimando entes comerciais, prestadores de serviços e aposentados, resultando em expressivas perdas pecuniárias subnotificadas.</li>
+                <li><strong>Diretrizes Preventivas Recomendadas:</strong> Propõe-se o recrudescimento das ações de cunho educativo promovidas pela Especializada e a pronta veiculação de alertas institucionais informativos pela Assessoria de Comunicação. É imperativa, igualmente, a capacitação continuada dos servidores lotados no atendimento primário para a escorreita orientação às vítimas de fraudes eletrônicas.</li>
+            </ul>
+
+            <p class="font-bold text-slate-800 mt-6 mb-2">2. Município de Cruz das Almas</p>
+            <ul class="doc-list">
+                <li><strong>Modus Operandi e Dinâmica Delitiva:</strong> Observa-se a predominância de Crimes Violentos contra o Patrimônio, mais especificamente subtrações patrimoniais com ou sem emprego de grave ameaça, incidentes sobre transeuntes. A referida incidência concentra-se nas adjacências do polo acadêmico universitário e nas vias de maior circulação comercial, caracterizando-se pela utilização de veículos automotores de duas rodas para facilitar a pronta evasão dos executores.</li>
+                <li><strong>Repercussão e Impacto Socioeconômico:</strong> Esta modalidade delitiva fomenta uma sensação imediata de insegurança entre o corpo discente, docente e o empresariado local, o que é reiteradamente potencializado por meio da disseminação de registros visuais captados por circuitos de segurança privada.</li>
+                <li><strong>Diretrizes Preventivas Recomendadas:</strong> Recomenda-se a intensificação do patrulhamento tático em horários de pico acadêmico e comercial, a ampliação do escopo de abordagens direcionadas a motocicletas tripuladas por dois ocupantes e a maximização da integração com os sistemas de videomonitoramento geridos pelo poder público municipal.</li>
+            </ul>
+
+            <p class="font-bold text-slate-800 mt-6 mb-2">3. Município de Amargosa</p>
+            <ul class="doc-list">
+                <li><strong>Modus Operandi e Dinâmica Delitiva:</strong> Detectou-se uma movimentação atípica de indivíduos associados ao tráfico de entorpecentes em pequena escala, os quais protagonizam litígios por domínios territoriais restritos. Esta dinâmica encontra reflexo direto no incremento de registros policiais versando sobre contravenções de vias de fato, lesões corporais de natureza leve e ameaças.</li>
+                <li><strong>Repercussão e Impacto Socioeconômico:</strong> Tais embates, se não reprimidos com o devido rigor e celeridade, apresentam viés histórico indicativo de progressão para crimes contra a vida na modalidade tentada ou consumada, impingindo temor às comunidades adjacentes.</li>
+                <li><strong>Diretrizes Preventivas Recomendadas:</strong> Sugere-se a execução de abordagens sistemáticas e incursões por unidades de patrulhamento tático em zonas de alta incidência, previamente delimitadas pelos relatórios de inteligência, acompanhadas da fiel execução de mandados judiciais de busca e apreensão.</li>
+            </ul>
+
+            <p class="font-bold text-slate-800 mt-6 mb-2">4. Município de Nazaré</p>
+            <ul class="doc-list">
+                <li><strong>Modus Operandi e Dinâmica Delitiva:</strong> Subsiste um estado de tensão contínua originado por conflitos territoriais entre organizações criminosas estruturadas, as quais almejam o monopólio das rotas de escoamento de substâncias ilícitas na região litorânea do recôncavo.</li>
+                <li><strong>Repercussão e Impacto Socioeconômico:</strong> Tal conjuntura enseja elevado risco de letalidade transversa (danos a terceiros não envolvidos) e a instalação de instabilidade nas comunidades periféricas, limitando o pleno exercício da liberdade de locomoção dos munícipes em virtude de determinações espúrias emanadas pelos referidos grupos.</li>
+                <li><strong>Diretrizes Preventivas Recomendadas:</strong> É recomendada a saturação operacional do perímetro, com a alocação de unidades de policiamento especializado, conjugada ao cumprimento tempestivo e simultâneo de mandados de prisão preventiva expedidos em desfavor das lideranças identificadas.</li>
+            </ul>
+            <p class="doc-paragraph italic text-sm text-slate-500">(Nota Metodológica: O padrão de estratificação analítica supra aplica-se, com as devidas adequações fáticas, às demais municipalidades que compõem a Coordenadoria. Cumpre salientar a prevalência de crimes de furto envolvendo maquinário agrícola nas zonas rurais de Mutuípe e Conceição do Almeida, requerendo interlocução formal com as entidades representativas dos produtores rurais. Por seu turno, municípios litorâneos como Salinas da Margarida demandam estratégias voltadas à mitigação de furtos em propriedades de ocupação sazonal).</p>
+
+            <!-- Section 3 -->
+            <h3 class="doc-section-title">3. APRECIAÇÃO PORMENORIZADA DE OCORRÊNCIAS DE MAIOR RELEVÂNCIA</h3>
+            <p class="doc-paragraph">Com o escopo de materializar a dinâmica supramencionada e prover substrato empírico a este documento, procedeu-se à extração de procedimentos de natureza exemplar que evidenciam o padrão da conduta criminosa e a correspondente tutela jurisdicional no lapso temporal delimitado:</p>
+            
+            <p class="font-bold text-slate-800 mt-4 mb-2">I. Apreensão de Armamentos, Receptação e Mitigação de Risco à Vida</p>
+            <ul class="doc-list">
+                <li><strong>Boletim de Ocorrência nº 00183656/2026-A02 (1ª Delegacia Territorial de SAJ - 09/03, às 01:31):</strong> Formalizou-se a lavratura de Auto de Prisão em Flagrante, sob a presidência do Excelentíssimo Delegado Victor Eduardo Menezes de Freitas. O procedimento tem por objeto a apuração das condutas tipificadas como Receptação e Porte Ilegal de Arma de Fogo.<br>
+                <strong>Exegese de Inteligência e Desdobramentos:</strong> A interceptação do aludido indivíduo em trânsito noturno constitui evidência da eficácia do patrulhamento preventivo. A segregação cautelar deste material bélico obstou a continuidade da cadeia logística da delinquência, mitigando constrições patrimoniais e execuções sumárias.</li>
+            </ul>
+
+            <p class="font-bold text-slate-800 mt-4 mb-2">II. Tutela Jurisdicional no Âmbito da Violência Doméstica e Baseada no Gênero</p>
+            <ul class="doc-list">
+                <li><strong>Boletim de Ocorrência nº 00185342/2026 (DEAM - 09/03, às 11:42):</strong> Procedeu-se ao registro de ofensa à integridade corporal qualificada. Materialidade aponta agressões a Jessica Bittencourt Barbosa dos Santos, imputadas a Marcos Fernandes de Jesus. Condução por guarnição da PM, procedimento por Del. Aline Cristina Nogueira de Freitas.<br>
+                <strong>Exegese:</strong> Evento de Risco Crítico. Resposta interinstitucional tempestiva interrompeu a fase aguda do "Ciclo da Violência", constituindo medida profilática indispensável para obstar o feminicídio.</li>
+                <li><strong>Boletim de Ocorrência nº 00197078/2026-A01 (DEAM - 12/03, às 17:46):</strong> Ameaça de natureza grave. Vítima: Raila Sousa Silva; Autor: Robson de Jesus Carvalho.<br>
+                <strong>Exegese:</strong> Inequívoco indicativo de escalada coercitiva. Exige vigilância premente e extrema urgência no deferimento judicial de Medidas Protetivas.</li>
+                <li><strong>Boletim de Ocorrência nº 00196107/2026-A01 e Conexos (DEAM/1ª DT - 12/03, às 18:24):</strong> Múltiplos registros de Importunação Sexual. Vítima listada: Marina dos Santos Lobo Lima. Autor desconhecido.<br>
+                <strong>Exegese:</strong> Recrudescimento quantitativo sinaliza atuação de agressores em série. Invoca a imperiosidade de abordagens repressivas veladas e uso de reconhecimento biométrico.</li>
+            </ul>
+
+            <p class="font-bold text-slate-800 mt-4 mb-2">III. Ilícitos de Natureza Falsária e o Paradigma Contemporâneo do Crime Patrimonial</p>
+            <ul class="doc-list">
+                <li><strong>Boletim de Ocorrência nº 00204192/2026 (1ª DT - 15/03, às 22:14):</strong> Consumação do crime de Estelionato, Del. Maria de Jesus Sandy de Oliveira de Sousa. Vítima: Agatha Keisy dos Santos Souza. Autora qualificada: Nailana Barbosa dos Santos.<br>
+                <strong>Exegese:</strong> Disseminação predatória desta modalidade delituosa substitui a subtração mediante violência física. Demanda representação acautelatória inadiável visando afastamento de sigilo de dados (apoio LAB-LD) para desestruturar engenharia financeira.</li>
+            </ul>
+
+            <p class="font-bold text-slate-800 mt-4 mb-2">IV. Mediação de Litígios de Menor Potencial Ofensivo e Racionalização Administrativa</p>
+            <ul class="doc-list">
+                <li><strong>Boletins nº 00184553/2026 e 00184045/2026 (1ª DT - 09/03):</strong> Perturbação do Sossego e Ameaça, partes: Edson Cerqueira dos Santos e Rivelino Souza Conceição.<br>
+                <strong>Exegese:</strong> A formalização compulsória de tais litígios compromete a capacidade cartorária. Filtros preliminares de inteligência são indispensáveis para coibir congestionamento, garantindo foco em apurações de elevada complexidade.</li>
+            </ul>
+
+            <!-- Section 4 -->
+            <h3 class="doc-section-title">4. CONSOLIDAÇÃO DAS INTERVENÇÕES DE NATUREZA OPERACIONAL EXITOSAS</h3>
+            <p class="doc-paragraph italic text-sm">(Compilação técnica das atuações proeminentes extraídas das bases de dados correcionais e do acompanhamento institucional correlato)</p>
+            <ul class="doc-list font-medium">
+                <li><strong>I. Eficiência Técnico-Operacional em Abordagens:</strong> A supressão da circulação de armamento de fogo na Sede Administrativa, mormente no período noturno, transcende a formalidade, configurando ato assecuratório de integridade física.</li>
+                <li><strong>II. Atuação Sistêmica Interinstitucional (Gênero):</strong> A condução de flagrantes de lesão corporal demonstrou plena conformidade aos protocolos. Desde acionamento PM até formalização na DEAM, evidenciou-se solidez na malha de proteção.</li>
+                <li><strong>III. Racionalização e Celeridade na Especializada:</strong> Instauração de inquéritos referentes a crimes contra a dignidade sexual em exíguo prazo (48h) ensejou remessa incontinenti ao Judiciário, revestindo de efetividade material as medidas cautelares.</li>
+                <li><strong>IV. Acurácia Investigativa Pretérita (Fraudes):</strong> A escorreita individualização da autoria em estelionatos denota capacidade de adaptação orgânica das instâncias ao paradigma cibernético.</li>
+                <li><strong>V. Gestão do Fluxo de Demandas e Triagem:</strong> O expressivo descongestionamento viabilizado por rápida observância de alvarás de soltura e arquivamento de fatos atípicos libera contingente para diligências de campo.</li>
+            </ul>
+            <p class="doc-paragraph text-sm bg-slate-100 p-4 rounded-lg text-slate-700"><strong>Cômputo consolidado regional:</strong> Expedição e formalização de mais de doze autos de prisão em flagrante delito, fiel cumprimento de quatro mandados judiciais de restrição de liberdade, apreensão de artefatos bélicos, deferimento de proteção jurisdicional a pelo menos cinco ofendidas vitimadas por violência baseada no gênero e tomada de mais de trinta termos de declarações dotados de complexidade investigatória.</p>
+
+            <!-- Section 5 -->
+            <h3 class="doc-section-title">5. MATRIZ PROSPECTIVA DE RISCOS E DIRETRIZES INSTITUCIONAIS</h3>
+            
+            <div class="overflow-x-auto table-scroll rounded border border-slate-300 mb-8 mt-4">
+                <table class="w-full text-sm text-left text-slate-800">
+                    <thead class="bg-slate-200 font-bold uppercase text-xs text-slate-700">
+                        <tr>
+                            <th class="px-4 py-3 border-b border-slate-300">Município</th>
+                            <th class="px-4 py-3 border-b border-slate-300">Grau de Risco</th>
+                            <th class="px-4 py-3 border-b border-slate-300">Fator Criminógeno Crítico</th>
+                            <th class="px-4 py-3 border-b border-slate-300">Recomendações Estratégicas (ASCOM)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <tr><td class="px-4 py-3 font-semibold">Santo Antônio de Jesus</td><td class="px-4 py-3"><span class="bg-orange-100 text-orange-800 px-2 py-1 rounded">Elevado</span></td><td class="px-4 py-3">Violência Intrafamiliar / Estelionatos Digitais</td><td class="px-4 py-3">Fomento ininterrupto de diretrizes orientativas e difusão de contatos.</td></tr>
+                        <tr class="bg-slate-50"><td class="px-4 py-3 font-semibold">Nazaré</td><td class="px-4 py-3"><span class="bg-red-100 text-red-800 px-2 py-1 rounded font-bold">Crítico</span></td><td class="px-4 py-3">Conflito entre Entidades Criminosas</td><td class="px-4 py-3">Ampla divulgação da presença estatal e canais de denúncia.</td></tr>
+                        <tr><td class="px-4 py-3 font-semibold">Cruz das Almas</td><td class="px-4 py-3"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Intermediário</span></td><td class="px-4 py-3">Subtração Patrimonial (Transeuntes/Discentes)</td><td class="px-4 py-3">Protocolos documentais visando profilaxia acadêmica.</td></tr>
+                        <tr class="bg-slate-50"><td class="px-4 py-3 font-semibold">Amargosa</td><td class="px-4 py-3"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Intermediário</span></td><td class="px-4 py-3">Tráfico de Entorpecentes Pulverizado</td><td class="px-4 py-3">Exposição formal das confiscações patrimoniais.</td></tr>
+                        <tr><td class="px-4 py-3 font-semibold">Laje</td><td class="px-4 py-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded">Reduzido</span></td><td class="px-4 py-3">Condutas Perturbadoras do Sossego</td><td class="px-4 py-3">Mediação pacífica para dissídios comunitários.</td></tr>
+                        <tr class="bg-slate-50"><td class="px-4 py-3 font-semibold">Mutuípe</td><td class="px-4 py-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded">Reduzido</span></td><td class="px-4 py-3">Subtração de Insumos em Áreas Rurais</td><td class="px-4 py-3">Canais de interlocução com sindicatos rurais.</td></tr>
+                        <tr><td class="px-4 py-3 font-semibold">Ubaíra</td><td class="px-4 py-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded">Reduzido</span></td><td class="px-4 py-3">Ausência de Instabilidade</td><td class="px-4 py-3">Fomento ao policiamento de proximidade.</td></tr>
+                        <tr class="bg-slate-50"><td class="px-4 py-3 font-semibold">Jiquiriçá</td><td class="px-4 py-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded">Reduzido</span></td><td class="px-4 py-3">Ausência de Instabilidade</td><td class="px-4 py-3">Publicidade a ações sociais da segurança.</td></tr>
+                        <tr><td class="px-4 py-3 font-semibold">São Felipe</td><td class="px-4 py-3"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Intermediário</span></td><td class="px-4 py-3">Infrações Patrimoniais Menores</td><td class="px-4 py-3">Emissão de alertas de segurança privada.</td></tr>
+                        <tr class="bg-slate-50"><td class="px-4 py-3 font-semibold">Conceição do Almeida</td><td class="px-4 py-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded">Reduzido</span></td><td class="px-4 py-3">Violência Intrafamiliar Ocasional</td><td class="px-4 py-3">Veiculação de mecanismos sigilosos de denúncia.</td></tr>
+                        <tr><td class="px-4 py-3 font-semibold">Sapeaçu</td><td class="px-4 py-3"><span class="bg-green-100 text-green-800 px-2 py-1 rounded">Reduzido</span></td><td class="px-4 py-3">Furtos a Cargas em Trânsito</td><td class="px-4 py-3">Diretrizes direcionadas ao setor logístico.</td></tr>
+                        <tr class="bg-slate-50"><td class="px-4 py-3 font-semibold">Castro Alves</td><td class="px-4 py-3"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Intermediário</span></td><td class="px-4 py-3">Circulação de Entorpecentes (Rota)</td><td class="px-4 py-3">Operações de bloqueio em rodovias secundárias.</td></tr>
+                        <tr><td class="px-4 py-3 font-semibold">Aratuípe</td><td class="px-4 py-3"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Intermediário</span></td><td class="px-4 py-3">Possibilidade de Crimes Letais</td><td class="px-4 py-3">Mapeamento de rotas de evasão.</td></tr>
+                        <tr class="bg-slate-50"><td class="px-4 py-3 font-semibold">Salinas da Margarida</td><td class="px-4 py-3"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Intermediário</span></td><td class="px-4 py-3">Constrição Patrimonial / Invasão</td><td class="px-4 py-3">Orientações normativas de segurança flutuante.</td></tr>
+                        <tr><td class="px-4 py-3 font-semibold" colspan="4">Demais Municípios (Santa Teresinha, Elísio Medrado, Varzedo, Muniz Ferreira, Jaguaripe, Dom Macedo Costa): <span class="bg-green-100 text-green-800 px-2 py-1 rounded ml-2 text-xs">Reduzido</span> Ausência de Instabilidade. Manutenção do patrulhamento.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="bg-yellow-50 border-l-4 border-yellow-600 p-5 mb-8 text-yellow-900 shadow-sm">
+                <h4 class="font-bold uppercase mb-2">Proposição de Estratégia de Comunicação Institucional</h4>
+                <p class="text-justify leading-relaxed text-sm">Recomenda-se, de forma peremptória, que a Assessoria de Comunicação Institucional promova a capitalização midiática da presteza técnico-operacional evidenciada pela Delegacia Especializada no transcurso das diligências atinentes a lesões corporais e ofensas à dignidade sexual recentes. Postula-se a elaboração de material institucional audiovisual, protagonizado por agente de autoridade do gênero feminino, alicerçado no preceito normativo de "Irrestrita Repressão às Infrações Penais Fundamentadas no Gênero". A demonstração insofismável da celeridade persecutória em face de ofensores e do acolhimento prestado às ofendidas fomenta o engajamento cívico, mitiga o fenômeno criminológico da "Cifra Oculta" e consolida a credibilidade institucional perante o corpo social.</p>
+            </div>
+
+            <h3 class="doc-section-title">TABULAÇÕES DE NATUREZA ESTATÍSTICA E TÉCNICA</h3>
+            
+            <p class="font-bold text-slate-700 mt-6 mb-2">Tabela 1: Consolidação de Indicadores de Incidência Criminal e Produtividade (Sede Administrativa)</p>
+            <div class="overflow-x-auto table-scroll rounded border border-slate-300 mb-6">
+                <table class="w-full text-sm text-left text-slate-800">
+                    <thead class="bg-slate-100 text-xs text-slate-700">
+                        <tr>
+                            <th class="px-4 py-3 border-b border-slate-300">Órgão Jurisdicionado</th>
+                            <th class="px-4 py-3 border-b border-slate-300">Qtd. CVLI</th>
+                            <th class="px-4 py-3 border-b border-slate-300">Qtd. CVP</th>
+                            <th class="px-4 py-3 border-b border-slate-300">Violência Doméstica</th>
+                            <th class="px-4 py-3 border-b border-slate-300">Estelionato</th>
+                            <th class="px-4 py-3 border-b border-slate-300">Tendência</th>
+                            <th class="px-4 py-3 border-b border-slate-300">Observações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="px-4 py-3 font-semibold border-b border-slate-200">4ª COORPIN</td>
+                            <td class="px-4 py-3 border-b border-slate-200">00</td>
+                            <td class="px-4 py-3 border-b border-slate-200">01</td>
+                            <td class="px-4 py-3 border-b border-slate-200">04</td>
+                            <td class="px-4 py-3 border-b border-slate-200">02</td>
+                            <td class="px-4 py-3 border-b border-slate-200 font-bold text-red-600">Ascensão</td>
+                            <td class="px-4 py-3 border-b border-slate-200 text-xs">Constatada a nulidade da letalidade violenta. Incremento consolida-se pela migração ao meio telemático e alta nas denúncias da Lei 11.340.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="font-bold text-slate-700 mt-6 mb-2">Tabela 2: Ordenação Hierárquica de Demandas Operacionais (Por Grau de Esforço Institucional)</p>
+            <div class="overflow-x-auto table-scroll rounded border border-slate-300 mb-8">
+                <table class="w-full text-sm text-left text-slate-800">
+                    <thead class="bg-slate-100 text-xs text-slate-700">
+                        <tr>
+                            <th class="px-4 py-3 border-b border-slate-300">Nível</th>
+                            <th class="px-4 py-3 border-b border-slate-300">Tipificação Penal Submetida à Apuração</th>
+                            <th class="px-4 py-3 border-b border-slate-300">Unidade Responsável</th>
+                            <th class="px-4 py-3 border-b border-slate-300">Situação Processual Predominante</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <tr><td class="px-4 py-3 font-bold">1º</td><td class="px-4 py-3">Ofensa Física Intrafamiliar / Ameaça Severa</td><td class="px-4 py-3">DEAM</td><td class="px-4 py-3 text-red-700 font-medium">Lavratura de Flagrante Delito (Elevada Urgência)</td></tr>
+                        <tr class="bg-slate-50"><td class="px-4 py-3 font-bold">2º</td><td class="px-4 py-3">Ofensa à Dignidade Sexual (Tendência Alta)</td><td class="px-4 py-3">DEAM</td><td class="px-4 py-3">Diligências Investigativas Pendentes</td></tr>
+                        <tr><td class="px-4 py-3 font-bold">3º</td><td class="px-4 py-3">Obtenção de Vantagem Ilícita e Fraudes</td><td class="px-4 py-3">1ª DT</td><td class="px-4 py-3">Instauração de Persecução Tecnológica</td></tr>
+                        <tr class="bg-slate-50"><td class="px-4 py-3 font-bold">4º</td><td class="px-4 py-3">Posse de Artefato Bélico e Proveito Criminoso</td><td class="px-4 py-3">1ª DT</td><td class="px-4 py-3 text-blue-700 font-medium">Segregação Cautelar (Profilaxia Letais)</td></tr>
+                        <tr><td class="px-4 py-3 font-bold">5º</td><td class="px-4 py-3">Atos de Coerção e Perturbação da Ordem</td><td class="px-4 py-3">1ª DT</td><td class="px-4 py-3">Remessa dos Autos ao JECRIM</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Conclusion -->
+            <h3 class="doc-section-title">CONCLUSÃO E ESTABELECIMENTO DE DIRETRIZES FUTURAS</h3>
+            <p class="doc-paragraph">A exegese pormenorizada e estruturada concernente à mancha criminal do interregno em comento evidencia que a estrutura organizacional da 4ª Coordenadoria Regional de Polícia do Interior exerce um domínio ostensivo e resoluto no que tange à delinquência provida de extrema gravidade (Crimes Violentos Letais Intencionais). Tal constatação materializa-se na absoluta nulidade dos correspondentes índices na Sede Administrativa durante o período avaliado, bem como na supressão preventiva de armamentos do convívio civil. Esta estabilidade reitera o rigor técnico das operações integradas e o acertamento das conjecturas territoriais elaboradas.</p>
+            <p class="doc-paragraph">Nada obstante o êxito consolidado na repressão à criminalidade letal, o presente compêndio atesta, de forma inequívoca, que o cerne das demandas de segurança pública projeta-se, hodiernamente, sobre dois eixos diametralmente distintos. O primeiro deles refere-se às infrações fundamentadas no gênero e à intolerância verificada no ambiente intrafamiliar, seara na qual a presteza e a robustez das peças inquisitoriais produzidas pela Delegacia Especializada consubstanciam o principal entrave à ocorrência de homicídios qualificados pelo feminicídio. A disposição cívica em formalizar a denúncia evidencia a fiabilidade outorgada às instituições públicas; todavia, tal avanço requer inarredável aporte logístico contínuo em favor desta Especializada.</p>
+            <p class="doc-paragraph">O segundo paradigma de transformação consubstancia-se no desenvolvimento sistemático dos crimes consubstanciados em fraudes eletrônicas e congêneres. Tendo em vista a multiplicação quantitativa de ilícitos perpetrados mediante ardil informático, depreende-se que o agente infrator contemporão preteriu o emprego de constrição física em favor da anonimidade propiciada por interfaces telemáticas. Esta profunda reconfiguração impõe a obrigatoriedade de se revisar a doutrina de inteligência da 4ª COORPIN, tornando inescusável o investimento na instrução técnica do quadro de servidores para a operacionalização de metodologias avançadas de mineração de dados, o rastreamento da liquidação de ativos virtuais e o estreitamento dos vínculos institucionais perante as instituições financeiras.</p>
+            <p class="doc-paragraph">Em sede de conclusão, depreende-se que a integração sistêmica, consubstanciada na contenção ostensiva exercida pela Polícia Militar e na persecução técnica qualificada executada pela Polícia Civil, ratifica-se como o postulado basilar necessário à salvaguarda e à perenidade da ordem pública na extensão territorial do Recôncavo Baiano.</p>
+
+            <div class="mt-12 pt-8 border-t border-slate-300 text-center text-slate-500 font-medium">
+                <p>Documento subscrito digitalmente.</p>
+                <p class="mt-2 text-slate-800">Unidade Focal de Inteligência e Análise Criminal</p>
+                <p>Diretoria Regional de Polícia do Interior Leste<br>Polícia Civil do Estado da Bahia</p>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        // --- TOP-LEVEL TABS LOGIC ---
+        const mainTabs = document.querySelectorAll('.main-tab-btn');
+        const views = {
+            'dashboard-view': document.getElementById('dashboard-view'),
+            'report-view': document.getElementById('report-view')
+        };
+
+        mainTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Reset all tabs
+                mainTabs.forEach(t => {
+                    t.classList.remove('bg-blue-600', 'text-white', 'border-blue-400');
+                    t.classList.add('text-slate-300', 'hover:text-white', 'hover:bg-slate-700', 'border-transparent');
+                });
+                
+                // Set active tab styling
+                tab.classList.remove('text-slate-300', 'hover:text-white', 'hover:bg-slate-700', 'border-transparent');
+                tab.classList.add('bg-blue-600', 'text-white', 'border-blue-400');
+
+                // Hide all views, show targeted view
+                Object.values(views).forEach(view => view.classList.add('hidden'));
+                views[tab.dataset.target].classList.remove('hidden');
+            });
+        });
+
+        // --- DATA STORAGE (For Dashboard Tab) ---
+        const regionData = {
+            'saj': {
+                title: 'Santo Antônio de Jesus (Sede Administrativa)',
+                modus: 'Centraliza ocorrências bifurcadas em duas vertentes: o espectro intrafamiliar (ameaças, ofensa física, importunação sexual) e infrações patrimoniais (estelionatos via plataformas digitais). Trânsito de indivíduos portando armamentos vinculados ao tráfico identificados e interceptados.',
+                impact: 'Infrações contra a mulher têm substancial repercussão na percepção coletiva, frequentemente associadas a consumo de psicoativos ou dissolução de vínculos. O estelionato atinge de forma severa a base econômica (comerciantes e aposentados).',
+                recs: 'Recrudescimento das ações de cunho educativo promovidas pela Especializada; pronta veiculação de alertas institucionais informativos; capacitação de servidores para orientação às vítimas de fraudes.'
+            },
+            'cruz': {
+                title: 'Cruz das Almas',
+                modus: 'Predominância de Crimes Violentos contra o Patrimônio, especificamente subtrações patrimoniais incidentes sobre transeuntes, concentradas nas adjacências do polo acadêmico universitário e vias comerciais, utilizando veículos de duas rodas para evasão.',
+                impact: 'Fomenta sensação imediata de insegurança entre o corpo discente, docente e o empresariado local, potencializada pela disseminação de registros visuais (câmeras).',
+                recs: 'Intensificação do patrulhamento tático em horários de pico acadêmico/comercial, ampliação de abordagens direcionadas a motocicletas e integração com videomonitoramento municipal.'
+            },
+            'amargosa': {
+                title: 'Amargosa',
+                modus: 'Movimentação atípica de indivíduos associados ao tráfico em pequena escala protagonizando litígios territoriais restritos, refletido em contravenções de vias de fato, lesões corporais e ameaças.',
+                impact: 'Tais embates, se não reprimidos, apresentam viés histórico indicativo de progressão para crimes contra a vida (tentada ou consumada), impingindo temor às comunidades.',
+                recs: 'Execução de abordagens sistemáticas e incursões por patrulhamento tático em zonas de alta incidência, delimitadas pela inteligência, com cumprimento de mandados.'
+            },
+            'nazare': {
+                title: 'Nazaré',
+                modus: 'Tensão contínua originada por conflitos territoriais entre organizações criminosas estruturadas almejando monopólio de rotas ilícitas na região litorânea do recôncavo.',
+                impact: 'Elevado risco de letalidade transversa (danos a terceiros) e instalação de instabilidade nas comunidades periféricas, limitando a locomoção dos munícipes.',
+                recs: 'Saturação operacional do perímetro, alocação de policiamento especializado e cumprimento tempestivo e simultâneo de mandados de prisão preventiva contra lideranças.'
+            }
+        };
+
+        const riskMatrix = [
+            { city: 'Santo Antônio de Jesus', risk: 'Elevado', factor: 'Violência Intrafamiliar / Estelionatos Digitais', recs: 'Fomento ininterrupto de diretrizes orientativas.' },
+            { city: 'Nazaré', risk: 'Crítico', factor: 'Conflito entre Entidades Criminosas', recs: 'Ampla divulgação atinente à presença policial e denúncia anônima.' },
+            { city: 'Cruz das Almas', risk: 'Intermediário', factor: 'Subtração Patrimonial (Transeuntes/Discentes)', recs: 'Formulações de protocolos visando profilaxia acadêmica.' },
+            { city: 'Amargosa', risk: 'Intermediário', factor: 'Tráfico de Entorpecentes Pulverizado', recs: 'Exposição formal das recentes confiscações patrimoniais.' },
+            { city: 'Laje', risk: 'Reduzido', factor: 'Perturbações do Sossego / Litígios', recs: 'Fomento institucional de mecanismos de mediação pacífica.' },
+            { city: 'Mutuípe', risk: 'Reduzido', factor: 'Subtração de Insumos Rurais', recs: 'Inteligência colaborativa com sindicatos rurais.' },
+            { city: 'Ubaíra', risk: 'Reduzido', factor: 'Ausência de Instabilidade', recs: 'Fomento ao policiamento de proximidade.' },
+            { city: 'Jiquiriçá', risk: 'Reduzido', factor: 'Ausência de Instabilidade', recs: 'Publicidade a ações sociais de segurança pública.' },
+            { city: 'São Felipe', risk: 'Intermediário', factor: 'Infrações Patrimoniais Menores', recs: 'Alertas de medidas acautelatórias privadas.' },
+            { city: 'Conceição do Almeida', risk: 'Reduzido', factor: 'Violência Intrafamiliar Ocasional', recs: 'Veiculação de mecanismos de denúncias sigilosas.' },
+            { city: 'Sapeaçu', risk: 'Reduzido', factor: 'Furtos Cargas em Trânsito', recs: 'Diretrizes logísticas e de transporte.' },
+            { city: 'Castro Alves', risk: 'Intermediário', factor: 'Circulação Intermunicipal de Entorpecentes', recs: 'Operações integradas em rodovias secundárias.' },
+            { city: 'Aratuípe', risk: 'Intermediário', factor: 'Possibilidade de Crimes Letais (Deslocamento)', recs: 'Intensificação de táticas e rotas de evasão.' },
+            { city: 'Salinas da Margarida', risk: 'Intermediário', factor: 'Invasão Domicílio (População Flutuante)', recs: 'Orientações normativas de segurança litorânea.' },
+            { city: 'Santa Teresinha', risk: 'Reduzido', factor: 'Ausência de Instabilidade', recs: 'Manutenção da regularidade do policiamento.' },
+            { city: 'Elísio Medrado', risk: 'Reduzido', factor: 'Ausência de Instabilidade', recs: 'Manutenção da regularidade do policiamento.' },
+            { city: 'Varzedo', risk: 'Reduzido', factor: 'Ausência de Instabilidade', recs: 'Manutenção da regularidade do policiamento.' },
+            { city: 'Muniz Ferreira', risk: 'Reduzido', factor: 'Ausência de Instabilidade', recs: 'Manutenção da regularidade do policiamento.' },
+            { city: 'Jaguaripe', risk: 'Reduzido', factor: 'Ausência de Instabilidade', recs: 'Patrulhamento sistemático na orla costeira.' },
+            { city: 'Dom Macedo Costa', risk: 'Reduzido', factor: 'Ausência de Instabilidade', recs: 'Manutenção da regularidade do policiamento.' }
+        ];
+
+        const occurrences = [
+            {
+                title: 'I. Apreensão de Armamentos e Mitigação de Risco à Vida (BO 00183656/2026-A02)',
+                content: 'Lavratura de Prisão em Flagrante (Receptação e Porte Ilegal de Arma) na 1ª DT. <strong>Exegese:</strong> Interceptação em trânsito noturno evidencia eficácia do patrulhamento preventivo. Segregação deste material bélico obste a cadeia logística da delinquência, mitigando constrições patrimoniais e potenciais execuções sumárias nas primeiras horas da manhã.'
+            },
+            {
+                title: 'II. Tutela Jurisdicional no Âmbito da Violência Doméstica (BO 00185342 e BO 00197078)',
+                content: 'Registros de ofensa à integridade corporal e ameaça severa processados pela DEAM. <strong>Exegese:</strong> Resposta interinstitucional PM/PC tempestiva propiciou remoção do ofensor (Risco Crítico), interrompendo a fase aguda do "Ciclo da Violência" e obstando a progressão rumo ao feminicídio. Ameaças exigem vigilância premente para concessão de Medidas Protetivas.'
+            },
+            {
+                title: 'III. Importunação Sexual e Ações em Série (BO 00196107)',
+                content: 'Múltiplos registros de Importunação Sexual em via pública. <strong>Exegese:</strong> Recrudescimento quantitativo sinaliza agressores valendo-se do anonimato. Invoca a imperiosidade de abordagens repressivas veladas em logradouros de uso comum e adoção de reconhecimento biométrico.'
+            },
+            {
+                title: 'IV. Paradigma Contemporâneo do Crime Patrimonial / Estelionato (BO 00204192)',
+                content: 'Estelionato consumado registrado na 1ª DT. <strong>Exegese:</strong> Disseminação predatória que substitui infrações físicas, visando mitigar risco de embate e otimizar lucro. Demanda representação acautelatória inadiável para quebra de sigilos telemáticos e bancários (apoio LAB-LD) contra a engenharia financeira criminosa.'
+            },
+            {
+                title: 'V. Racionalização Administrativa e Fluxo Cartorário',
+                content: 'Expedição de Alvarás de Soltura (BOs 00204242, 00204219) e filtro de fatos atípicos (BO 00184045). <strong>Exegese:</strong> O filtro preliminar coíbe o congestionamento estrutural da unidade territorial primária, resguardando a legalidade e liberando o contingente operacional para diligências de elevada complexidade.'
+            }
+        ];
+
+        // --- CORE INTERACTION LOGIC (Dashboard) ---
+
+        // Regional Tabs Interaction
+        const cityBtns = document.querySelectorAll('.city-btn');
+        const cityContent = document.getElementById('city-content');
+
+        function updateCityContent(cityKey) {
+            const data = regionData[cityKey];
+            cityContent.innerHTML = `
+                <h4 class="text-xl font-bold text-slate-800 mb-4">${data.title}</h4>
+                <div class="space-y-4 text-sm text-slate-700">
+                    <p><strong><span class="text-blue-700">Modus Operandi e Dinâmica Delitiva:</span></strong><br>${data.modus}</p>
+                    <p><strong><span class="text-red-700">Repercussão e Impacto Socioeconômico:</span></strong><br>${data.impact}</p>
+                    <p><strong><span class="text-emerald-700">Diretrizes Preventivas Recomendadas:</span></strong><br>${data.recs}</p>
+                </div>
+            `;
+            
+            cityBtns.forEach(btn => {
+                if(btn.dataset.city === cityKey) {
+                    btn.classList.add('bg-slate-100', 'border-blue-600', 'text-slate-800');
+                    btn.classList.remove('border-transparent', 'text-slate-600');
+                } else {
+                    btn.classList.remove('bg-slate-100', 'border-blue-600', 'text-slate-800');
+                    btn.classList.add('border-transparent', 'text-slate-600');
+                }
+            });
+        }
+
+        cityBtns.forEach(btn => {
+            btn.addEventListener('click', () => updateCityContent(btn.dataset.city));
+        });
+        updateCityContent('saj'); // Initial load
+
+        // Risk Matrix Table & Filtering
+        const tbody = document.getElementById('matrixTableBody');
+        const filterSelect = document.getElementById('riskFilter');
+
+        function getRiskBadge(risk) {
+            const baseClasses = "px-2.5 py-0.5 rounded-full text-xs font-medium border";
+            switch(risk) {
+                case 'Crítico': return `<span class="${baseClasses} bg-red-100 text-red-800 border-red-200">🔴 Crítico</span>`;
+                case 'Elevado': return `<span class="${baseClasses} bg-orange-100 text-orange-800 border-orange-200">🟠 Elevado</span>`;
+                case 'Intermediário': return `<span class="${baseClasses} bg-yellow-100 text-yellow-800 border-yellow-200">🟡 Intermediário</span>`;
+                case 'Reduzido': return `<span class="${baseClasses} bg-green-100 text-green-800 border-green-200">🟢 Reduzido</span>`;
+                default: return risk;
+            }
+        }
+
+        function renderTable(data) {
+            tbody.innerHTML = '';
+            data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.className = index % 2 === 0 ? 'bg-white' : 'bg-slate-50';
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">${row.city}</td>
+                    <td class="px-6 py-4">${getRiskBadge(row.risk)}</td>
+                    <td class="px-6 py-4">${row.factor}</td>
+                    <td class="px-6 py-4">${row.recs}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        filterSelect.addEventListener('change', (e) => {
+            const selected = e.target.value;
+            if(selected === 'Todos') {
+                renderTable(riskMatrix);
+            } else {
+                const filtered = riskMatrix.filter(row => row.risk === selected);
+                renderTable(filtered);
+            }
+        });
+        renderTable(riskMatrix); // Initial Load
+
+        // Accordions for Occurrences
+        const occurrencesList = document.getElementById('occurrencesList');
+        occurrences.forEach((occ, idx) => {
+            const item = document.createElement('div');
+            item.className = 'border border-slate-200 rounded-lg overflow-hidden bg-white';
+            
+            const headerBtn = document.createElement('button');
+            headerBtn.className = 'w-full px-6 py-4 text-left font-semibold text-slate-800 hover:bg-slate-50 flex justify-between items-center outline-none transition-colors';
+            headerBtn.innerHTML = `<span>${occ.title}</span><span class="text-xl font-light toggle-icon">+</span>`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'accordion-content bg-slate-50 text-slate-600 text-sm px-6';
+            
+            const p = document.createElement('p');
+            p.className = 'pb-4';
+            p.innerHTML = occ.content;
+            contentDiv.appendChild(p);
+            
+            headerBtn.addEventListener('click', () => {
+                const isOpen = contentDiv.classList.contains('open');
+                // Close all
+                document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('open', 'py-4'));
+                document.querySelectorAll('.toggle-icon').forEach(i => i.textContent = '+');
+                
+                // Open clicked if it wasn't open
+                if (!isOpen) {
+                    contentDiv.classList.add('open', 'py-4');
+                    headerBtn.querySelector('.toggle-icon').textContent = '−';
+                }
+            });
+
+            item.appendChild(headerBtn);
+            item.appendChild(contentDiv);
+            occurrencesList.appendChild(item);
+        });
+
+        // --- CHARTS (CHART.JS) ---
+        
+        Chart.defaults.font.family = "'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+        Chart.defaults.color = '#475569'; // text-slate-600
+
+        // Doughnut Chart: Indicadores (SAJ)
+        const ctxIndicators = document.getElementById('indicatorsChart').getContext('2d');
+        new Chart(ctxIndicators, {
+            type: 'doughnut',
+            data: {
+                labels: ['Violência Doméstica', 'Estelionato', 'CVP (Patrimônio)', 'CVLI (Letais)'],
+                datasets: [{
+                    data: [4, 2, 1, 0],
+                    backgroundColor: [
+                        '#1e3a8a', // blue-900
+                        '#b91c1c', // red-700
+                        '#f59e0b', // amber-500
+                        '#64748b'  // slate-500
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { boxWidth: 12, padding: 15 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.label}: ${context.raw} Ocorrências`;
+                            }
+                        }
+                    }
+                },
+                cutout: '65%'
+            }
+        });
+
+        // Bar Chart: Ordenação Hierárquica de Demandas
+        const ctxOp = document.getElementById('operationalChart').getContext('2d');
+        new Chart(ctxOp, {
+            type: 'bar',
+            data: {
+                labels: [
+                    '1º. Integridade Intrafamiliar', 
+                    '2º. Dignidade Sexual', 
+                    '3º. Vantagem Ilícita/Fraudes', 
+                    '4º. Posse Artefato Bélico', 
+                    '5º. Coerção/Vias de Fato'
+                ].map(l => l.match(/.{1,16}(\s|$)/g) || []), // Wrap long labels (approx 16 char chunks)
+                datasets: [{
+                    label: 'Grau de Precedência / Esforço Institucional',
+                    data: [5, 4, 3, 2, 1], // Inverse visual ranking where 1st is highest bar
+                    backgroundColor: [
+                        '#1e40af', // blue-800
+                        '#3b82f6', // blue-500
+                        '#94a3b8', // slate-400
+                        '#cbd5e1', // slate-300
+                        '#f1f5f9'  // slate-100
+                    ],
+                    borderWidth: 1,
+                    borderColor: '#cbd5e1',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y', // Horizontal bar chart
+                scales: {
+                    x: {
+                        display: false, // Hide numeric scale as it represents abstract "Precedence"
+                        beginAtZero: true
+                    },
+                    y: {
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function(items) { return items[0].label.replaceAll(',', ''); }, // Fix wrapped label commas
+                            label: function(context) {
+                                const texts = [
+                                    'Demanda de Elevado Grau de Urgência (Flagrante)',
+                                    'Diligências Investigativas Pendentes (Tendência Alta)',
+                                    'Persecução de Natureza Tecnológica',
+                                    'Segregação Cautelar (Profilaxia Letais)',
+                                    'Remessa aos Juizados Especiais'
+                                ];
+                                return texts[context.dataIndex];
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dossiê Interativo - DIRPIN LESTE</title>
+    
+    <!-- CSS Framework -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Chosen Palette: Institutional Slate & Blue with Alert Accents (Red/Amber/Emerald) for Risk Levels -->
+    <!-- Application Structure Plan: Transformed into a multi-tab SPA ("pages"). Top navigation allows users to switch between 4 distinct views: 1. Overview/KPIs, 2. Interactive Crime Analysis (Chart + Details), 3. Risk Matrix, and 4. The Full Formal Report. This reduces vertical scrolling and organizes content cognitively like a professional web portal. -->
+    <!-- Visualization & Content Choices: 
+         1. Goal: Navigation -> Method: Top Tab Bar (Tailwind HTML/JS) -> Justification: Creates a "page-like" feel, separating distinct types of information.
+         2. Goal: Inform -> Method: KPI Cards (Tailwind HTML) -> Justification: Quick operational status (0 Homicides, 50+ Actions). 
+         3. Goal: Proportions -> Method: Doughnut Chart (Chart.js Canvas) -> Justification: Clearly shows the dominance of Domestic Violence and Fraud. 
+         4. Goal: Organize/Explore -> Method: Dynamic Content Panel (Vanilla JS + HTML) -> Justification: Allows reading complex text sequentially.
+         5. Goal: Full Context -> Method: Dedicated Document Tab -> Justification: Displays the dense formal report in a clean, distraction-free environment. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. Unicode used for icons. -->
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Tailwind slate-50 */
+            color: #0f172a; /* Tailwind slate-900 */
+        }
+
+        /* Mandatory Chart Container Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom Scrollbar for details panel */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #e2e8f0; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+        /* Sub-Tab active state (for the Analysis Section) */
+        .tab-active {
+            background-color: #1e293b; 
+            color: white;
+            border-left: 4px solid #3b82f6; 
+        }
+        .tab-inactive {
+            background-color: #f1f5f9; 
+            color: #475569; 
+            border-left: 4px solid transparent;
+        }
+        .tab-inactive:hover {
+            background-color: #e2e8f0;
+        }
+
+        /* Page transition animation */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Header Section -->
+    <header class="bg-slate-900 text-white shadow-md relative z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="text-3xl">🛡️</div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">DOSSIÊ TÉCNICO-ANALÍTICO</h1>
+                    <p class="text-xs text-slate-400 uppercase tracking-wider">Dinâmica Criminal e Estratégia Institucional - DIRPIN LESTE</p>
+                </div>
+            </div>
+            <div class="text-right flex flex-col items-end">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900 text-red-200 border border-red-700">
+                    GRAU DE SIGILO: RESERVADO
+                </span>
+                <p class="text-xs text-slate-400 mt-1">Interregno: 09/03 a 16/03/2026 | 3ª COORPIN</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Page Navigation Tabs -->
+    <nav class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-row overflow-x-auto custom-scrollbar gap-8" aria-label="Tabs">
+                <button id="nav-visao" onclick="openPage('page-visao', this)" class="main-nav-btn whitespace-nowrap py-4 px-1 border-b-2 font-semibold text-sm transition-colors border-blue-600 text-blue-600">
+                    📊 Visão Executiva
+                </button>
+                <button id="nav-analise" onclick="openPage('page-analise', this)" class="main-nav-btn whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-colors">
+                    🔍 Análise de Mancha
+                </button>
+                <button id="nav-matriz" onclick="openPage('page-matriz', this)" class="main-nav-btn whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-colors">
+                    🎯 Matriz de Risco
+                </button>
+                <button id="nav-dossie" onclick="openPage('page-dossie', this)" class="main-nav-btn whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-colors">
+                    📄 Dossiê Completo
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+        <!-- PAGE 1: Visão Executiva & KPIs -->
+        <div id="page-visao" class="app-page block fade-in">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 border-b pb-2">Conspecto Executivo</h2>
+                <p class="text-slate-600 mt-3 leading-relaxed">
+                    <strong class="text-slate-900">Contexto Operacional:</strong> Este painel sumariza a contraposição fenomênica no município de Santo Amaro: a ausência absoluta de Crimes Violentos Letais Intencionais (CVLI) vis-à-vis a proliferação insidiosa de injustos patrimoniais mediante fraude (estelionato virtual) e a reiteração da conflitualidade intrafamiliar (violência doméstica). Os dados refletem as bases operacionais do sistema PPE e inteligência humana.
+                </p>
+            </div>
+            
+            <!-- KPI Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="text-4xl">📉</div>
+                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Ótimo</span>
+                    </div>
+                    <p class="text-5xl font-black text-emerald-600 mb-1">0</p>
+                    <p class="text-slate-800 font-bold text-sm uppercase tracking-wide">Registros CVLI</p>
+                    <p class="text-slate-500 text-xs mt-2 leading-tight">Ausência absoluta de homicídios no interregno avaliado.</p>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="text-4xl">⚠️</div>
+                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-amber-100 text-amber-800">Alerta</span>
+                    </div>
+                    <p class="text-5xl font-black text-amber-600 mb-1">14</p>
+                    <p class="text-slate-800 font-bold text-sm uppercase tracking-wide">Violência Doméstica</p>
+                    <p class="text-slate-500 text-xs mt-2 leading-tight">Alta demanda por medidas protetivas de urgência (MPU).</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="text-4xl">📱</div>
+                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-red-100 text-red-800">Crítico</span>
+                    </div>
+                    <p class="text-5xl font-black text-red-600 mb-1">10</p>
+                    <p class="text-slate-800 font-bold text-sm uppercase tracking-wide">Fraude Digital</p>
+                    <p class="text-slate-500 text-xs mt-2 leading-tight">Crescimento de estelionatos e falsas centrais de atendimento.</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="text-4xl">⚖️</div>
+                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-blue-100 text-blue-800">Atuação</span>
+                    </div>
+                    <p class="text-5xl font-black text-blue-600 mb-1">50+</p>
+                    <p class="text-slate-800 font-bold text-sm uppercase tracking-wide">Intervenções Estatais</p>
+                    <p class="text-slate-500 text-xs mt-2 leading-tight">Inquéritos, prisões, oitivas e diligências operacionais.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 2: Interactive Analysis Section -->
+        <div id="page-analise" class="app-page hidden fade-in">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 border-b pb-2">Exame Minucioso da Espacialidade Criminal</h2>
+                <p class="text-slate-500 text-sm mt-2">A visualização conjuga a distribuição quantitativa com o aprofundamento técnico (mecânica delitiva e repercussão sociológica), permitindo uma compreensão granular da transmutação delitiva.</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Left Column: Chart & Navigation -->
+                    <div class="lg:col-span-1 flex flex-col gap-6">
+                        <!-- Chart Container -->
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <h3 class="text-sm font-semibold text-center mb-4 text-slate-700 uppercase tracking-wide">Distribuição de Ocorrências</h3>
+                            <div class="chart-container">
+                                <canvas id="crimeChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Sub-Navigation Tabs -->
+                        <div class="flex flex-col gap-2" id="subTabContainer">
+                            <!-- Buttons injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Dynamic Content Panel -->
+                    <div class="lg:col-span-2 bg-slate-50 rounded-lg border border-slate-200 p-6 flex flex-col h-[500px]">
+                        <div class="border-b border-slate-300 pb-4 mb-4 flex justify-between items-start">
+                            <div>
+                                <h3 id="panelTitle" class="text-xl font-bold text-slate-800">Selecione uma categoria</h3>
+                                <p id="panelSubtitle" class="text-sm font-medium text-slate-500 mt-1 uppercase tracking-wider"></p>
+                            </div>
+                            <div id="panelIcon" class="text-4xl"></div>
+                        </div>
+                        
+                        <div class="overflow-y-auto custom-scrollbar flex-grow pr-4 space-y-6" id="panelContent">
+                            <p class="text-slate-500 italic">O conteúdo detalhado será exibido aqui após a seleção.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 3: Risk Matrix & PR Strategy -->
+        <div id="page-matriz" class="app-page hidden fade-in">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900 border-b pb-2">Matriz de Risco e Diretrizes Propositivas</h2>
+                    <p class="text-slate-500 text-sm mt-2">Síntese cruzada entre o grau de periculosidade imposto à ordem pública e as orientações cogentes para a administração superior e ASCOM.</p>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 border border-slate-200 rounded-lg overflow-hidden">
+                        <thead class="bg-slate-800 text-white">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Espaço Territorial</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Nível de Risco</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Fator Criminógeno</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Diretriz Propositiva (ASCOM / Comando)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200">
+                            <!-- Critical -->
+                            <tr class="hover:bg-slate-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">Santo Amaro</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">CRÍTICO</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-slate-700 font-medium">Estelionatos Virtuais contra Idosos</td>
+                                <td class="px-6 py-4 text-sm text-slate-600">Confecção e disseminação de compêndio informativo digital e físico sobre fraudes, mediante cooperação bancária.</td>
+                            </tr>
+                            <!-- High -->
+                            <tr class="hover:bg-slate-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">Santo Amaro</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">ALTO</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-slate-700 font-medium">Reiteração de Violência Doméstica</td>
+                                <td class="px-6 py-4 text-sm text-slate-600">Promoção publicitária das vias de acesso ao NEAM, com elucidação dos rigores punitivos previstos em lei.</td>
+                            </tr>
+                            <!-- Medium -->
+                            <tr class="hover:bg-slate-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">Santo Amaro</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">MÉDIO</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-slate-700 font-medium">Roubos Circunstanciados (Comércio)</td>
+                                <td class="px-6 py-4 text-sm text-slate-600">Orientação técnico-consultiva a associações mercantis sobre segurança ambiental e posicionamento de CFTV.</td>
+                            </tr>
+                            <!-- Low / Success -->
+                            <tr class="hover:bg-emerald-50 bg-emerald-50/30">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">Santo Amaro</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800">BAIXO / ÊXITO</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-slate-700 font-medium">Crimes Violentos Letais Intencionais</td>
+                                <td class="px-6 py-4 text-sm text-slate-600 font-medium text-emerald-900">Promoção ostensiva da ausência de homicídios; atribuir o feito à eficácia das forças interligadas de segurança.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PR Strategy Callout -->
+                <div class="mt-8 bg-slate-800 rounded-xl p-8 border-l-4 border-blue-500 text-white shadow-lg">
+                    <h3 class="text-xl font-bold flex items-center gap-3 mb-4">
+                        <span class="text-3xl">📢</span> Plano de Comunicação Estratégica Institucional
+                    </h3>
+                    <p class="text-slate-300 text-base leading-relaxed mb-6">
+                        A inexistência de eventos finalizados com resultado morte no espaço amostral consubstancia um triunfo operacional que reclama divulgação apropriada. Sugere-se a confecção e distribuição imediata de press release formal direcionado aos veículos de imprensa de amplo alcance.
+                    </p>
+                    <div class="bg-slate-900 p-5 rounded-lg text-sm text-slate-200 border border-slate-700 flex flex-col md:flex-row gap-4 items-start">
+                        <div class="text-blue-400 text-2xl">💡</div>
+                        <div>
+                            <strong class="text-blue-300 text-base block mb-1">Ação Complementar:</strong> 
+                            Agendamento de manifestações públicas (conferências ou sabatinas em mídias regionais) conduzidas por representantes gabaritados do NEAM para explanação técnica da rede de apoio à mulher vítima de violência, atestando o ininterrupto comprometimento preventivo e repressor adotado pelos entes estatais.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 4: Full Document Section -->
+        <div id="page-dossie" class="app-page hidden fade-in">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-8 md:p-12 bg-[#fdfdfd] text-slate-800 text-sm md:text-base leading-relaxed font-serif">
+                    
+                    <div class="text-center border-b-2 border-slate-800 pb-6 mb-8">
+                        <h3 class="font-bold text-xl md:text-2xl uppercase tracking-widest text-slate-900">DOSSIÊ TÉCNICO-ANALÍTICO DE DINÂMICA CRIMINAL E ESTRATÉGIA INSTITUCIONAL 2026</h3>
+                        <h4 class="font-bold text-lg md:text-xl mt-2 text-slate-700">DIRPIN LESTE</h4>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3 bg-slate-100 p-6 rounded-md border border-slate-300 mb-10 font-sans text-sm shadow-inner">
+                        <div><span class="font-bold text-slate-900">DESTINATÁRIOS:</span> Gabinete da Diretoria da DIRPIN LESTE / Coordenação da 3ª COORPIN - SANTO AMARO / Assessoria de Comunicação (ASCOM)</div>
+                        <div><span class="font-bold text-slate-900">REMETENTE:</span> Célula de Inteligência Analítica - DIRPIN LESTE</div>
+                        <div><span class="font-bold text-slate-900">INTERREGNO AVALIADO:</span> 09/03/2026 a 16/03/2026</div>
+                        <div><span class="font-bold text-slate-900">TEMA CENTRAL:</span> CONTRAPOSIÇÃO ENTRE A NEUTRALIZAÇÃO EXTREMA DE CRIMES LETAIS INTENCIONAIS E A PROLIFERAÇÃO DE INJUSTOS PATRIMONIAIS MEDIANTE FRAUDE E CONFLITOS INTRAFAMILIARES NO MUNICÍPIO DE SANTO AMARO</div>
+                        <div class="text-red-700 font-bold mt-2"><span class="text-slate-900">GRAU DE SIGILO:</span> RESERVADO</div>
+                    </div>
+
+                    <div class="space-y-10">
+                        <!-- Section I -->
+                        <section>
+                            <h4 class="font-bold text-lg text-slate-900 border-b-2 border-slate-200 pb-2 mb-4">I. METODOLOGIA DE EXTRATIFICAÇÃO DE DADOS E INTELIGÊNCIA DE FONTES MÚLTIPLAS</h4>
+                            <p class="text-justify indent-8 mb-4">A confecção deste dossiê técnico esteve alicerçada na extração sistemática e rigorosa de dados oriundos do sistema de Procedimentos Policiais Eletrônicos (PPE), consorciada à aplicação de técnicas de Inteligência de Fontes Abertas (OSINT) e à coleta de dados provenientes de inteligência humana (HUMINT). A intersecção destas bases informacionais viabilizou o delineamento de padrões comportamentais e tendências delitivas circunscritas à região em epígrafe. O levantamento de dados e a difusão de informes, calcados na consolidação de registros da 3ª Coordenadoria Regional de Polícia do Interior (COORPIN) - Santo Amaro, indicam as seguintes premissas operacionais:</p>
+                            
+                            <ul class="list-disc pl-6 space-y-4 text-justify marker:text-slate-500">
+                                <li><strong>Base de Dados PPE (15/03):</strong> A migração de procedimentos e a multiplicidade de denúncias sinalizam a exacerbação de conflitos interpessoais e de ocorrências atinentes à violência doméstica no ínterim do repouso semanal. Constata-se a existência de uma provável correlação entre o consumo imoderado de substâncias psicoativas lícitas (álcool) e a intensificação de agressões no âmbito familiar, o que demanda a atuação peremptória da Polícia Judiciária visando à mitigação de desfechos fatais.</li>
+                                <li><strong>Base de Dados PPE (14/03):</strong> O registro atinente a disparos de arma de fogo em logradouro público enseja a deflagração de protocolos de alerta no âmbito da inteligência, por consubstanciar potencial prelúdio de retaliações recíprocas ou demonstrações de hegemonia bélica por agrupamentos locais. Sob a ótica da análise criminal contemporânea, episódios de disparos a esmo reiteradamente antecedem disputas territoriais inerentes à mercancia ilícita de entorpecentes ou configuram imposição de restrições de mobilidade por facções, exigindo, destarte, monitoramento profilático contínuo.</li>
+                                <li><strong>Base de Dados PPE (10/03 - 14/03):</strong> A sucessão contínua de fraudes perpetradas por meios eletrônicos, direcionadas sobremaneira a vítimas senis mediante o emprego de engenharia social em redes de comunicação, denota a operabilidade de células criminosas especializadas em ilícitos cibernéticos na circunscrição. A sistemática de ataque sugere a exploração de bases de dados sigilosos previamente vazados para a customização das abordagens ardilosas, caracterizando a translação da delinquência ostensiva para o espectro virtual, ambiente no qual a percepção de inalcançabilidade penal fomenta a adesão de novos transgressores.</li>
+                                <li><strong>Base de Dados PPE (10/03 - 13/03):</strong> Ocorrências tipificadas como roubo circunstanciado (emprego de arma de fogo e concurso de agentes) evidenciam a circulação de infratores habituais atuantes contra o patrimônio na malha urbana durante os períodos de atividade comercial. O emprego de motocicletas, as quais frequentemente figuram como objeto de adulteração de sinais de identificação veicular, outorga acentuada mobilidade aos perpetradores, constituindo severo óbice à interceptação flagrancial primária pelas forças de segurança de natureza ostensiva.</li>
+                            </ul>
+                        </section>
+
+                        <!-- Section 1 -->
+                        <section>
+                            <h4 class="font-bold text-lg text-slate-900 border-b-2 border-slate-200 pb-2 mb-4">1. CONSPECTO EXECUTIVO</h4>
+                            <p class="text-justify indent-8 mb-4">No interregno submetido a escrutínio (09 a 16 de março de 2026), o espaço territorial circunscrito à 3ª COORPIN (Santo Amaro) ostentou um panorama macroscópico de neutralização letal expressiva, culminando na ausência absoluta de registros atinentes a Crimes Violentos Letais Intencionais (CVLI). Tal indicador não deriva de mero acaso estatístico, mas consubstancia o reflexo direto da eficiência adstrita ao policiamento preventivo, conjugada às investigações consubstanciadas e às recentes prisões cautelares deferidas, as quais ensejaram a desarticulação de núcleos armados responsáveis por delitos contra a vida na referida região. A tutela do bem jurídico primordial, qual seja a vida humana, atingiu seu estadiamento ótimo no período em comento.</p>
+                            <p class="text-justify indent-8 mb-4">Em contraposição a este panorama de estabilidade da segurança pública física, verifica-se a ocorrência de um fenômeno criminológico caracterizado pela transmutação delitiva: a migração da pulsão criminal para as esferas intrafamiliar e cibernética. Configura-se uma modalidade de escalada insidiosa que, conquanto não produza vestígios aparentes em logradouros públicos, promove a corrosão progressiva dos tecidos social e econômico da municipalidade.</p>
+                            <p class="text-justify indent-8">A circunscrição policial em apreço foi rigorosamente demandada no processamento de injustos atinentes à Violência Doméstica (14 ocorrências de alta relevância processual) e ao Estelionato, bem como a Fraudes Cibernéticas (10 ocorrências consolidadas). A atuação das equipes lotadas na 1ª Delegacia Territorial e no Núcleo Especial de Atendimento à Mulher (NEAM) demonstrou proeminente assertividade na celeridade dos trâmites atinentes às tutelas de urgência. Não obstante, o volume conspícuo de ilícitos pautados em fraude impõe a necessidade premente de reestruturação preventiva e a adoção de metodologias investigativas voltadas estritamente ao rastreamento cibernético e financeiro.</p>
+                        </section>
+
+                        <!-- Section 2 -->
+                        <section>
+                            <h4 class="font-bold text-lg text-slate-900 border-b-2 border-slate-200 pb-2 mb-6">📍 2. EXAME MINUCIOSO DA ESPACIALIDADE CRIMINAL (3ª COORPIN)</h4>
+                            
+                            <div class="mb-8 pl-4 border-l-4 border-amber-500">
+                                <h5 class="font-bold text-slate-800 mb-2">VIOLÊNCIA DOMÉSTICA E FAMILIAR (14 Ocorrências Críticas)</h5>
+                                <p class="text-justify mb-2"><strong>Mecânica Delitiva:</strong> Vias de fato e agressões físicas diretas (CP, Art. 129, §9º), cumuladas com graves ameaças (CP, Art. 147), frequentemente fundamentadas na subjugação motivada pela condição intrínseca do sexo feminino (CP, Art. 121-A). Observa-se que o ciclo da violência perpetrada tende a sofrer recrudescimento no recesso dos domicílios, com especial incidência aos finais de semana, horários noturnos e feriados. Constata-se, outrossim, a contumácia de condutas voltadas ao controle patrimonial e constrangimento psicológico do autor em face da ofendida, condutas estas que invariavelmente precedem a consumação da agressão física.</p>
+                                <p class="text-justify mb-2"><strong>Repercussão Sociológica:</strong> Elevado impacto nas infraestruturas de saúde pública e sobrecarga sistêmica das autarquias de assistência social do município, redundando na perpetuação de danos psicológicos de caráter transgeracional. A cifra negra, correspondente aos delitos obstados de persecução em virtude do temor reverencial ou coação da vítima, permanece como um entrave estatístico imponderável, circunstância que permite inferir que os quatorze registros formalizados configuram tão somente uma fração exígua da magnitude da conflitualidade de gênero instalada na referida localidade.</p>
+                                <p class="text-justify mb-2"><strong>Diretrizes de Prevenção e Atuação:</strong> Imprime-se celeridade sistemática na confecção e encaminhamento de representações pugnando por Medidas Protetivas de Urgência (MPU), objetivando a segregação cautelar do agressor do domicílio comum e a fiscalização estrita de eventual descumprimento, executada por intermédio das forças patrulheiras da rede de proteção governamental.</p>
+                                <p class="text-justify mb-1 mt-3"><strong>Destaques de Análise Processual:</strong></p>
+                                <ul class="list-disc pl-8 mb-3 font-sans text-sm text-slate-600">
+                                    <li>BO 00203425/2026 | 1ª DT Santo Amaro | 15/03/2026 13:52 | 22822: PROCEDIMENTO MIGRADO (VIOLÊNCIA DOMÉSTICA)</li>
+                                    <li>BO 00195776/2026 | NEAM Santo Amaro | 12/03/2026 12:00 | 33: LESÃO CORPORAL DOLOSA - VIOLÊNCIA DOMÉSTICA</li>
+                                    <li>BO 00186988/2026 | NEAM Santo Amaro | 12/03/2026 11:30 | 21703: VIOLÊNCIA PSICOLÓGICA CONTRA A MULHER (ART. 147-B)</li>
+                                </ul>
+                                <p class="text-justify bg-slate-100 p-3 rounded text-sm font-sans"><strong>Aferição Prática:</strong> A tipificação de fatos atinentes à violência de gênero e subjugação psicológica com fulcro no Art. 147-B do Código Penal denota evolução técnico-jurídica na fase de apuração preliminar. A atuação consorciada do núcleo especializado (NEAM) tem assegurado a tutela estatal imediata, obstando o avanço da espiral delitiva que, sob a perspectiva histórico-criminológica, constitui o elemento propulsor do crime de feminicídio.</p>
+                            </div>
+
+                            <div class="mb-8 pl-4 border-l-4 border-red-500">
+                                <h5 class="font-bold text-slate-800 mb-2">ESTELIONATO E FRAUDE CIBERNÉTICA (10 Ocorrências Críticas)</h5>
+                                <p class="text-justify mb-2"><strong>Mecânica Delitiva:</strong> Os perpetradores valem-se de contatos telefônicos ardilosos que simulam falsas centrais de atendimento institucional, bem como procedem à clonagem de aplicativos de mensageria instantânea. Aplica-se engenharia social de alta complexidade nas plataformas digitais, com o escopo iniludível de auferir transferências patrimoniais imediatas por meios de pagamento instantâneo. Os ativos financeiros extorquidos são pulverizados com extrema celeridade em uma multiplicidade de contas bancárias de titularidade de interpostas pessoas, impondo óbices severos à eficácia tempestiva de bloqueios cautelares oriundos do Banco Central.</p>
+                                <p class="text-justify mb-2"><strong>Repercussão Sociológica:</strong> Extinção severa e amiúde irreversível do capital pecuniário de vítimas classificadas juridicamente como hipervulneráveis, notadamente idosos, aposentados e pensionistas, a teor das agravantes contidas no Art. 171, §4º, do Codex Penal. Tal conjuntura instiga uma profunda percepção de ineficácia da tutela jurisdicional, gerando constrangimento e debilitação psíquica nos ofendidos, além de fragilizar a confiabilidade imanente às instituições fiduciárias e aos órgãos de persecução estatal.</p>
+                                <p class="text-justify mb-2"><strong>Diretrizes de Prevenção e Atuação:</strong> Faz-se imperativa a deflagração de campanhas informativas maciças por intermédio de veículos de radiodifusão locais, congregações religiosas e centros de referência de assistência social. Postula-se a formulação de protocolos de atendimento preterido e especializado à população senil nas dependências da autoridade policial.</p>
+                                <p class="text-justify mb-1 mt-3"><strong>Destaques de Análise Processual:</strong></p>
+                                <ul class="list-disc pl-8 mb-3 font-sans text-sm text-slate-600">
+                                    <li>BO 00201173/2026 | 1ª DT Santo Amaro | 14/03/2026 10:16 | 21103: FRAUDE ELETRÔNICA (REDES SOCIAIS)</li>
+                                    <li>BO 00189033/2026 | 1ª DT Santo Amaro | 10/03/2026 14:14 | 1239: ESTELIONATO CONTRA IDOSO OU VULNERÁVEL</li>
+                                </ul>
+                                <p class="text-justify bg-slate-100 p-3 rounded text-sm font-sans"><strong>Aferição Prática:</strong> A manipulação comportamental vocacionada à obtenção de vantagem patrimonial ilícita erigiu-se à condição de principal vetor de lucratividade da criminalidade astuciosa contemporânea. Recomenda-se a imediata formalização de representações judiciais pugnando pelo afastamento dos sigilos bancário, fiscal e telemático dos dados vinculados aos destinatários das transações eletrônicas, com o fito de cartografar o fluxo dos capitais pecuniários e individualizar, de maneira inequívoca, os beneficiários derradeiros.</p>
+                            </div>
+
+                            <div class="mb-8 pl-4 border-l-4 border-blue-500">
+                                <h5 class="font-bold text-slate-800 mb-2">CRIMES CONTRA O PATRIMÔNIO - CVP (4 Ocorrências Críticas)</h5>
+                                <p class="text-justify mb-2"><strong>Mecânica Delitiva:</strong> Interceptação abrupta da vítima, perpetrada via de regra em concurso de agentes, operando sobremaneira em vias públicas de intenso escoamento e de aglutinação comercial. Emprega-se a ostentação de arma de fogo como instrumento de subjugação volitiva e inibição imediata de eventuais tentativas de resistência. O escopo patrimonial primordial recai sobre a subtração de dispositivos de telefonia móvel de elevado valor agregado, tendo como alvos transeuntes em estado de desatenção situacional.</p>
+                                <p class="text-justify mb-2"><strong>Repercussão Sociológica:</strong> Incremento instantâneo do grau de instabilidade e temor no seio da classe mercantil local, circunstância que ostenta potencial lesivo para induzir o encerramento prematuro das atividades do setor terciário e a retração severa da mobilidade civil no período noturno.</p>
+                                <p class="text-justify mb-2"><strong>Diretrizes de Prevenção e Atuação:</strong> Arrecadação exaustiva de registros audiovisuais (câmeras de vigilância de entes privados e da administração pública) situados nos eixos viários identificados como rotas de evasão. Faz-se necessário o compartilhamento ágil dos caracteres fenotípicos dos suspeitos e dos identificadores veiculares com a força policial militar, visando à consecução de cercos e bloqueios perimetrais.</p>
+                                <p class="text-justify mb-1 mt-3"><strong>Destaques de Análise Processual:</strong></p>
+                                <ul class="list-disc pl-8 mb-3 font-sans text-sm text-slate-600">
+                                    <li>BO 00200371/2026 | 1ª DT Santo Amaro | 13/03/2026 17:33 | 20126: ROUBO COM EMPREGO DE ARMA DE FOGO (HEDIONDO)</li>
+                                    <li>BO 00188737/2026 | 1ª DT Santo Amaro | 10/03/2026 12:15 | 89: ROUBO COM AUMENTO DE PENA (CONCURSO DE PESSOAS)</li>
+                                </ul>
+                                <p class="text-justify bg-slate-100 p-3 rounded text-sm font-sans"><strong>Aferição Prática:</strong> Consumação de expropriação mediante o concurso de grave ameaça dotada de alto potencial lesivo. O manuseio de artefato bélico pressupõe organização criminosa preliminar, consórcio de vontades deliberado e acesso logístico a armamento operante à margem da legalidade por agrupamentos ilícitos regionais.</p>
+                            </div>
+
+                            <div class="pl-4 border-l-4 border-slate-400">
+                                <h5 class="font-bold text-slate-800 mb-2">OUTROS RELEVANTES E TENTATIVAS DE IMPACTO</h5>
+                                <ul class="list-disc pl-8 mb-3 font-sans text-sm text-slate-600">
+                                    <li>BO 00200832/2026 | 1ª DT Santo Amaro | 14/03/2026 21:03 | 1040: DISPARO DE ARMA DE FOGO EM VIA PÚBLICA</li>
+                                    <li>BO 00192518/2026 | 1ª DT Santo Amaro | 11/03/2026 17:34 | 1079: TRÁFICO DE DROGAS (ART. 33)</li>
+                                </ul>
+                                <p class="text-justify bg-slate-100 p-3 rounded text-sm font-sans"><strong>Aferição Prática Exaustiva:</strong> A interrupção pontual da mercancia de entorpecentes por meio de flagrantes e apreensões materiais atua diretamente na descapitalização do arcabouço financeiro inerente ao crime organizado. No que tange aos incidentes tipificados como disparo de arma de fogo em logradouro de uso comum, ainda que desprovidos da contabilização de vítimas incólumes, operam como vetor criminológico de reiteração da desordem armada, transmitindo a falsa premissa de tolerância estatal. Exige-se máxima atenção dos setores de investigação para antever e neutralizar confrontos iminentes atrelados à hegemonia territorial, precedendo a elevação das estatísticas referentes aos homicídios dolosos.</p>
+                            </div>
+                        </section>
+
+                        <!-- Section 3 -->
+                        <section>
+                            <h4 class="font-bold text-lg text-slate-900 border-b-2 border-slate-200 pb-2 mb-4">📍 3. CONSECUÇÕES OPERACIONAIS E RESPOSTA DO APARATO ESTATAL</h4>
+                            <p class="text-justify indent-8 mb-4">As diligências empreendidas pelo aparato estatal transcenderam a mera formalização cartorária e processamento de dados burocráticos. No decurso do interregno avaliado, a 3ª COORPIN e as repartições que lhe são subordinadas efetivaram expressivo volume de procedimentos inerentes à Polícia Judiciária, consubstanciando registros preliminares em inquéritos de robusta densidade probatória e viabilidade penal. O balanço destas atividades culminou na execução de mais de meia centena de intervenções operacionais e atos investigatórios profícuos, erigindo, dessa forma, um anteparo de repressão qualificada consubstanciado nos seguintes atos:</p>
+                            
+                            <ul class="list-disc pl-8 space-y-3 text-justify marker:text-slate-500">
+                                <li><strong>Cumprimento de Mandados de Prisão e Alvarás (Ex: BO 00203693/2026):</strong> Execução escorreita dos mandamentos exarados pelo Juízo competente, procedendo-se às formalidades de praxe sem o cômputo de intercorrências de ordem tática.</li>
+                                <li><strong>Requerimentos Cautelares de Medidas Protetivas de Urgência (MPU):</strong> Representações formalizadas perante o Poder Judiciário em lapso temporal exíguo, atuando como o precípuo mecanismo jurídico de interdição acautelatória em face de perpetradores contumazes de ilícitos no ambiente doméstico.</li>
+                                <li><strong>Oitivas e Interrogatórios Qualificados:</strong> Inquirições formais encartadas em cadernos apuratórios atinentes a crimes de estelionato e ofensas patrimoniais, prestando-se ao aperfeiçoamento da materialidade delitiva e à estrita individualização das condutas antijurídicas.</li>
+                                <li><strong>Remessas de Inquéritos Policiais:</strong> Remessa de relatórios conclusivos exaustivos, dotados de autoria perfeitamente delineada e prova da materialidade irrefutável, encaminhados ao Ministério Público do Estado da Bahia para embasamento de eventual <em>opinio delicti</em>.</li>
+                                <li><strong>Diligências de Campo Setoriais:</strong> Operações táticas voltadas à preservação e análise técnica de locais de infração penal, levantamento de testemunhas ocluídas e arrecadação de registros de vigilância eletrônica, imprescindíveis para ulteriores autos de reconhecimento.</li>
+                                <li><strong>Repressão Constritiva contra o Tráfico de Entorpecentes (Art. 33 da Lei 11.343/06):</strong> Medidas de repressão direta ao narcotráfico, promovendo a asfixia econômica das organizações ilícitas locais e procedendo à constrição de substâncias estupefacientes que, reflexamente, figuram como força motriz para o cometimento de furtos e roubos em âmbito municipal.</li>
+                            </ul>
+                        </section>
+
+                        <!-- Section 4 -->
+                        <section>
+                            <h4 class="font-bold text-lg text-slate-900 border-b-2 border-slate-200 pb-2 mb-4">CONSIDERAÇÕES FINAIS E PROSPECTIVA ESTRATÉGICA</h4>
+                            <p class="text-justify indent-8 mb-4">A análise pormenorizada atinente à conjuntura criminal verificada na semana sub examine (09 a 16 de março) sinaliza a consolidação de um quadro de êxito operativo indubitável no que tange à tutela do bem jurídico primordial perante a ordem constitucional — a vida humana —, fato objetivamente mensurado pela manutenção do índice absoluto nulo de Crimes Violentos Letais Intencionais. Tal indicador estatístico ratifica a premissa de que os protocolos repressivos direcionados ao extermínio do crime organizado estrutural e armado encontram-se em irrefutável estágio de otimização no âmbito territorial de Santo Amaro.</p>
+                            <p class="text-justify indent-8 mb-4">Não obstante a mencionada conquista institucional, o escrutínio exaustivo das métricas coligidas evidencia a ocorrência inegável de uma mutação no modus operandi das atividades ilícitas sistêmicas. Resta cristalino que a delinquência local, coarctada pela ostensividade irreprimível das polícias em via pública, arregimentou metodologias furtivas, mitigando o embate direto contra as forças de segurança em prol de empreitadas dotadas de maior margem de rentabilidade e ínfimo risco de autuação em estado de flagrância. Tal circunstância materializa-se na premente e assustadora proliferação de fraudes cibernéticas intentadas em detrimento da higidez financeira de pessoas idosas e na perene, estrutural e deplorável violência de gênero perpetrada no âmbito doméstico.</p>
+                            <p class="text-justify indent-8 mb-4">Em face do delineamento deste arcabouço analítico, impõe-se a premente e inadiável necessidade de readequação do escopo inerente às futuras operações deflagradas pela força policial civil. A Diretoria Regional (DIRPIN LESTE), por intermédio da proficiência inata à 3ª COORPIN, deverá envidar esforços investigativos precípuos direcionados ao contínuo aprimoramento tecnológico e intelectivo de seu efetivo, habilitando os Setores de Investigação ao rastreamento ininterrupto dos fluxos de capitais virtuais evadidos criminosamente. A primazia orgânica deve recair sobre a agilidade irrestrita na postulação das quebras de sigilos telemáticos e bancários no bojo de inquéritos cibernéticos.</p>
+                            <p class="text-justify indent-8 mb-8">Concomitantemente a estas diretrizes corporativas, exige-se a manutenção de ordens operacionais pautadas na tolerância nula perante os transgressores abarcados sob a égide da Lei Maria da Penha. Faz-se necessário promover a aplicação rigorosa, estrita e exemplar da legislação penal adjetiva e substantiva correlata, a fim de assegurar que as coações de ordem moral e as ofensas infligidas à integridade física no tempo hodierno não degenerem, inexoravelmente, na consumação dos feminicídios no porvir.</p>
+
+                            <div class="text-center md:text-right mt-16 text-slate-700 font-bold border-t border-slate-300 pt-6">
+                                <p>Salvador, Estado da Bahia, 16 de março de 2026.</p>
+                                <p class="mt-4 text-slate-900 uppercase">Célula de Inteligência Analítica - DIRPIN LESTE</p>
+                                <p class="text-sm">Polícia Civil do Estado da Bahia</p>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p class="font-semibold text-slate-300">Célula de Inteligência Analítica - DIRPIN LESTE</p>
+            <p>Polícia Civil do Estado da Bahia | Relatório Gerado em 16 de março de 2026</p>
+            <p class="mt-2 text-xs text-slate-500 uppercase tracking-widest">Documento Restrito</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Data Storage for the Interactive Analysis Section
+        const reportData = {
+            vd: {
+                id: 'vd',
+                title: 'Violência Doméstica e Familiar',
+                count: 14,
+                icon: '⚖️',
+                color: '#f59e0b', // amber
+                subtitle: '14 Ocorrências Críticas (Tendência Progressiva)',
+                content: `
+                    <div>
+                        <h4 class="text-slate-900 font-bold uppercase text-xs tracking-wider mb-2">Mecânica Delitiva</h4>
+                        <p class="text-slate-700 text-sm leading-relaxed text-justify">Vias de fato e agressões físicas diretas (CP, Art. 129, §9º), cumuladas com graves ameaças (CP, Art. 147), frequentemente fundamentadas na subjugação motivada pela condição intrínseca do sexo feminino (CP, Art. 121-A). O ciclo da violência perpetrada tende a sofrer recrudescimento no recesso dos domicílios, com especial incidência aos finais de semana, horários noturnos e feriados. Constata-se contumácia de condutas voltadas ao controle patrimonial e constrangimento psicológico.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-slate-900 font-bold uppercase text-xs tracking-wider mb-2">Repercussão Sociológica</h4>
+                        <p class="text-slate-700 text-sm leading-relaxed text-justify">Elevado impacto nas infraestruturas de saúde pública e sobrecarga sistêmica das autarquias de assistência social. A cifra negra permanece como entrave estatístico imponderável, circunstância que permite inferir que os registros formalizados configuram tão somente uma fração exígua da magnitude da conflitualidade de gênero na localidade.</p>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded border border-amber-200">
+                        <h4 class="text-amber-900 font-bold uppercase text-xs tracking-wider mb-2">Diretrizes de Atuação</h4>
+                        <p class="text-amber-800 text-sm leading-relaxed text-justify">Imprime-se celeridade sistemática na confecção e encaminhamento de representações pugnando por Medidas Protetivas de Urgência (MPU), objetivando a segregação cautelar do agressor do domicílio comum e a fiscalização estrita executada por intermédio das forças patrulheiras da rede de proteção governamental (NEAM).</p>
+                    </div>
+                `
+            },
+            fraude: {
+                id: 'fraude',
+                title: 'Estelionato e Fraude Cibernética',
+                count: 10,
+                icon: '📱',
+                color: '#ef4444', // red
+                subtitle: '10 Ocorrências Críticas (Tendência Progressiva)',
+                content: `
+                    <div>
+                        <h4 class="text-slate-900 font-bold uppercase text-xs tracking-wider mb-2">Mecânica Delitiva</h4>
+                        <p class="text-slate-700 text-sm leading-relaxed text-justify">Os perpetradores valem-se de contatos telefônicos ardilosos que simulam falsas centrais de atendimento, bem como procedem à clonagem de aplicativos de mensageria. Aplica-se engenharia social de alta complexidade com o escopo iniludível de auferir transferências patrimoniais imediatas. Os ativos financeiros são pulverizados com extrema celeridade em contas de interpostas pessoas (laranjas).</p>
+                    </div>
+                    <div>
+                        <h4 class="text-slate-900 font-bold uppercase text-xs tracking-wider mb-2">Repercussão Sociológica</h4>
+                        <p class="text-slate-700 text-sm leading-relaxed text-justify">Extinção severa e amiúde irreversível do capital pecuniário de vítimas classificadas como hipervulneráveis (idosos, aposentados e pensionistas - Art. 171, §4º). Tal conjuntura instiga profunda percepção de ineficácia da tutela jurisdicional, gerando constrangimento e debilitação psíquica nos ofendidos.</p>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded border border-red-200">
+                        <h4 class="text-red-900 font-bold uppercase text-xs tracking-wider mb-2">Diretrizes de Atuação</h4>
+                        <p class="text-red-800 text-sm leading-relaxed text-justify">Deflagração de campanhas informativas maciças em rádios locais e centros de referência. Postula-se a imediata formalização de representações judiciais pugnando pelo afastamento dos sigilos bancário, fiscal e telemático dos dados vinculados aos destinatários das transações eletrônicas, com o fito de cartografar o fluxo dos capitais.</p>
+                    </div>
+                `
+            },
+            cvp: {
+                id: 'cvp',
+                title: 'Crimes Contra o Patrimônio (Roubo)',
+                count: 4,
+                icon: '🏍️',
+                color: '#3b82f6', // blue
+                subtitle: '4 Ocorrências Críticas (Circulação Habitual)',
+                content: `
+                    <div>
+                        <h4 class="text-slate-900 font-bold uppercase text-xs tracking-wider mb-2">Mecânica Delitiva</h4>
+                        <p class="text-slate-700 text-sm leading-relaxed text-justify">Interceptação abrupta da vítima, perpetrada via de regra em concurso de agentes, operando sobremaneira em vias públicas de intenso escoamento e de aglutinação comercial. Emprega-se a ostentação de arma de fogo como instrumento de subjugação volitiva. O escopo primordial recai sobre a subtração de dispositivos de telefonia móvel de elevado valor.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-slate-900 font-bold uppercase text-xs tracking-wider mb-2">Repercussão Sociológica</h4>
+                        <p class="text-slate-700 text-sm leading-relaxed text-justify">Incremento instantâneo do grau de instabilidade e temor no seio da classe mercantil local, ostentando potencial lesivo para induzir o encerramento prematuro das atividades do setor terciário e a retração severa da mobilidade civil no período noturno.</p>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded border border-blue-200">
+                        <h4 class="text-blue-900 font-bold uppercase text-xs tracking-wider mb-2">Diretrizes de Atuação</h4>
+                        <p class="text-blue-800 text-sm leading-relaxed text-justify">Arrecadação exaustiva de registros audiovisuais (câmeras de vigilância de entes privados e administração pública) em rotas de evasão. Compartilhamento ágil dos caracteres fenotípicos e identificadores veiculares com a força policial militar para consecução de cercos perimetrais.</p>
+                    </div>
+                `
+            }
+        };
+
+        let myChart = null;
+
+        // --- Main Page Navigation Logic ---
+        function openPage(pageId, clickedBtn) {
+            // Hide all pages
+            const pages = document.querySelectorAll('.app-page');
+            pages.forEach(page => {
+                page.classList.remove('block');
+                page.classList.add('hidden');
+            });
+
+            // Show selected page
+            const activePage = document.getElementById(pageId);
+            activePage.classList.remove('hidden');
+            activePage.classList.add('block');
+
+            // Update main nav buttons styling
+            const navBtns = document.querySelectorAll('.main-nav-btn');
+            navBtns.forEach(btn => {
+                btn.classList.remove('border-blue-600', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-slate-500');
+            });
+            clickedBtn.classList.remove('border-transparent', 'text-slate-500');
+            clickedBtn.classList.add('border-blue-600', 'text-blue-600');
+
+            // Handle specific chart rendering trigger if moving to Analysis tab
+            if (pageId === 'page-analise' && myChart) {
+                // Ensure the canvas is sized correctly now that it's visible
+                myChart.resize();
+            }
+        }
+
+        // --- Interactive Analysis Sub-Section Logic ---
+        function initApp() {
+            renderSubNavigation();
+            renderChart();
+            selectCategory('vd'); // Default sub-selection
+        }
+
+        function renderSubNavigation() {
+            const container = document.getElementById('subTabContainer');
+            
+            Object.values(reportData).forEach(cat => {
+                const btn = document.createElement('button');
+                btn.id = `subtab-${cat.id}`;
+                btn.className = 'w-full text-left px-4 py-3 rounded-md font-medium text-sm transition-colors duration-200 flex items-center justify-between tab-inactive';
+                btn.innerHTML = `
+                    <span class="flex items-center gap-2">
+                        <span>${cat.icon}</span> ${cat.title}
+                    </span>
+                    <span class="bg-white/50 px-2 py-0.5 rounded text-xs border border-slate-300 font-bold text-slate-800">${cat.count}</span>
+                `;
+                btn.onclick = () => selectCategory(cat.id);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectCategory(id) {
+            // Update Sub-Tab UI
+            Object.keys(reportData).forEach(key => {
+                const btn = document.getElementById(`subtab-${key}`);
+                if (key === id) {
+                    btn.classList.remove('tab-inactive');
+                    btn.classList.add('tab-active');
+                } else {
+                    btn.classList.remove('tab-active');
+                    btn.classList.add('tab-inactive');
+                }
+            });
+
+            // Update Panel Content
+            const data = reportData[id];
+            document.getElementById('panelTitle').textContent = data.title;
+            document.getElementById('panelSubtitle').textContent = data.subtitle;
+            document.getElementById('panelSubtitle').style.color = data.color;
+            document.getElementById('panelIcon').textContent = data.icon;
+            
+            const contentArea = document.getElementById('panelContent');
+            contentArea.style.opacity = '0';
+            setTimeout(() => {
+                contentArea.innerHTML = data.content;
+                contentArea.style.transition = 'opacity 0.3s ease';
+                contentArea.style.opacity = '1';
+            }, 100);
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('crimeChart').getContext('2d');
+            
+            const labels = ['Violência Doméstica', 'Estelionato/Fraude', 'Roubos (CVP)', 'Outros Crimes'];
+            const dataValues = [14, 10, 4, 19];
+            const colors = ['#f59e0b', '#ef4444', '#3b82f6', '#94a3b8']; // Amber, Red, Blue, Slate
+
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: colors,
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    family: "'Inter', sans-serif",
+                                    size: 11
+                                },
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { family: "'Inter', sans-serif", size: 13 },
+                            bodyFont: { family: "'Inter', sans-serif", size: 12 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return ` Registros: ${context.parsed}`;
+                                }
+                            }
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const idx = elements[0].index;
+                            // Map chart index to category ID
+                            const idMap = ['vd', 'fraude', 'cvp', 'vd']; 
+                            if(idx < 3) selectCategory(idMap[idx]);
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize App on DOM load
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

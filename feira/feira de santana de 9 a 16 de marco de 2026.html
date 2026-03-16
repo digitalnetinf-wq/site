@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Analítico de Inteligência - DIRPIN LESTE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Chosen Palette: Warm Neutrals & Tactical Blue -->
+    <!-- Application Structure Plan: The SPA is structured as a strategic dashboard divided into four functional quadrants: 1. Sumário Executivo (macro overview and critical KPIs), 2. Produtividade & Estatísticas (quantitative data visualizations of police unit performance), 3. Matriz de Risco (interactive geospatial assessment by municipality), and 4. Casos de Relevância (qualitative breakdown of critical incidents). This non-linear, task-oriented structure allows decision-makers to rapidly digest the shift from physical to cyber crime, assess unit efficiency, and explore specific high-risk zones without reading a linear report. -->
+    <!-- Visualization & Content Choices: 
+         - Top Units Data -> Goal: Compare -> Bar Chart -> Interaction: Hover for exact volumes -> Justification: Clearest way to show the massive volume handled by 1ª DT vs others -> Library: Chart.js.
+         - Risk Matrix -> Goal: Organize/Filter -> Interactive Grid/Cards -> Interaction: Click municipality to see dynamic details -> Justification: Allows user to drill down into specific regional intelligence without cluttering the screen -> Library: Vanilla JS + Tailwind.
+         - Case Highlights -> Goal: Inform/Organize -> Expanding Cards (Accordion style) -> Interaction: Toggle details -> Justification: Keeps the UI clean while providing deep dives into CVLI and CVP cases when needed.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        /* Base typography and warm neutral background */
+        body {
+            background-color: #fafaf9; /* Tailwind stone-50 */
+            color: #292524; /* Tailwind stone-800 */
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* Essential Chart Container Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 250px;
+            }
+        }
+
+        /* Navigation active state */
+        .nav-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-btn.active {
+            border-bottom: 3px solid #0369a1; /* Tactical blue accent */
+            color: #0369a1;
+            font-weight: 600;
+        }
+
+        /* Utility classes */
+        .hidden-section {
+            display: none !important;
+        }
+        
+        /* Custom scrollbar for interactive lists */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f5f5f4; 
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #d6d3d1; 
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="antialiased flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-stone-900 text-stone-100 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                <span class="text-3xl" aria-hidden="true">🛡️</span>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wider">DIRPIN LESTE</h1>
+                    <p class="text-xs text-stone-400 uppercase tracking-widest">Painel de Análise Estratégica e Dinâmica Criminal</p>
+                </div>
+            </div>
+            <div class="text-right text-sm">
+                <p><span class="font-semibold">Período:</span> 09/03 a 16/03/2026</p>
+                <p><span class="font-semibold text-red-400">Classificação:</span> RESERVADO</p>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="bg-stone-100 text-stone-600 shadow-inner">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex overflow-x-auto custom-scroll">
+                <button onclick="navigate('resumo')" id="btn-resumo" class="nav-btn active whitespace-nowrap px-4 py-3 text-sm focus:outline-none">📋 Sumário Executivo</button>
+                <button onclick="navigate('produtividade')" id="btn-produtividade" class="nav-btn whitespace-nowrap px-4 py-3 text-sm focus:outline-none">📊 Produtividade e Estatística</button>
+                <button onclick="navigate('matriz')" id="btn-matriz" class="nav-btn whitespace-nowrap px-4 py-3 text-sm focus:outline-none">📍 Matriz de Risco Regional</button>
+                <button onclick="navigate('casos')" id="btn-casos" class="nav-btn whitespace-nowrap px-4 py-3 text-sm focus:outline-none">📂 Casos de Relevância</button>
+                <button onclick="navigate('relatorio')" id="btn-relatorio" class="nav-btn whitespace-nowrap px-4 py-3 text-sm focus:outline-none">📄 Relatório Completo</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+        <!-- SECTION 1: SUMÁRIO EXECUTIVO -->
+        <section id="sec-resumo" class="animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-stone-800 border-l-4 border-sky-700 pl-3 mb-2">Sumário Executivo e Conjuntura Macro-Criminal</h2>
+                <p class="text-stone-600 text-sm leading-relaxed text-justify">
+                    <strong>Contextualização da Seção:</strong> Esta aba inaugural consolida a hermenêutica do cenário macro-criminal circunscrito à 1.ª COORPIN. O escopo primordial é prover à alta gestão um panorama célere acerca das metamorfoses delitivas no interstício analisado, com ênfase cristalina na transição dos crimes patrimoniais clássicos para as fraudes em ambiente cibernético. Interaja com os painéis indicadores para assimilar a magnitude dos dados coletados via OSINT e HUMINT.
+                </p>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white p-4 rounded-lg shadow border border-stone-200 flex flex-col justify-between hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-stone-500 text-sm font-semibold uppercase">Total de Registros (1ª e 2ª DT)</span>
+                        <span class="text-2xl">📝</span>
+                    </div>
+                    <span class="text-3xl font-bold text-stone-800">607</span>
+                    <span class="text-xs text-sky-700 mt-2 font-medium">Volumetria Crítica Concentrada</span>
+                </div>
+                
+                <div class="bg-white p-4 rounded-lg shadow border border-stone-200 flex flex-col justify-between hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-stone-500 text-sm font-semibold uppercase">Homicídios (CVLI)</span>
+                        <span class="text-2xl">⚠️</span>
+                    </div>
+                    <span class="text-3xl font-bold text-stone-800">01</span>
+                    <span class="text-xs text-red-600 mt-2 font-medium">1 Execução Confirmada / 1 A Esclarecer</span>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg shadow border border-stone-200 flex flex-col justify-between hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-stone-500 text-sm font-semibold uppercase">Vetor Delitivo em Alta</span>
+                        <span class="text-2xl">📱</span>
+                    </div>
+                    <span class="text-xl font-bold text-stone-800 uppercase tracking-wide">Estelionato Digital</span>
+                    <span class="text-xs text-amber-600 mt-2 font-medium">Fraudes via WhatsApp e PIX</span>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg shadow border border-stone-200 flex flex-col justify-between hover:shadow-md transition-shadow bg-sky-50">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sky-800 text-sm font-semibold uppercase">Recomendação Estratégica</span>
+                        <span class="text-2xl">💡</span>
+                    </div>
+                    <span class="text-sm font-medium text-stone-800 mt-1">Divulgação Institucional (ASCOM) focada em profilaxia cibernética e exaltação da elucidação de fraudes.</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow border border-stone-200 p-6 text-stone-700 text-sm leading-relaxed text-justify">
+                <h3 class="font-bold text-stone-900 text-lg mb-3">Síntese Analítica</h3>
+                <p class="mb-3">A conjuntura afeta ao lapso temporal em apreço evidencia a manutenção preocupante dos índices relativos aos Crimes Contra o Patrimônio (CVP). Contudo, constata-se uma metamorfose insofismável na fenomenologia delitiva: a violência física e o emprego de grave ameaça cedem progressivo espaço à engenharia social e aos ardis tecnológicos. O <strong>estelionato</strong> perfaz a maior volumetria de registros na região, processados com notável eficácia pela 1ª DT (Delegacia Virtual).</p>
+                <p>No tocante à criminalidade violenta, os Crimes Violentos Letais Intencionais (CVLI) demandam escrutínio ininterrupto da Delegacia de Homicídios (DH), face aos indícios robustos de execuções sumárias orquestradas por grupos criminosos (facções). Adicionalmente, ressalta-se o labor basilar da DEAM e DRFR na mitigação da impunidade atinente à violência de gênero e roubo de veículos.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: PRODUTIVIDADE E ESTATÍSTICA -->
+        <section id="sec-produtividade" class="hidden-section animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-stone-800 border-l-4 border-sky-700 pl-3 mb-2">Escalonamento de Produtividade (Unidades)</h2>
+                <p class="text-stone-600 text-sm leading-relaxed text-justify">
+                    <strong>Contextualização da Seção:</strong> Este segmento objetiva cristalizar as métricas de produtividade das agências policiais locais. Através da representação gráfica disposta a seguir, torna-se cognoscível a abissal disparidade quantitativa absorvida pela 1ª Delegacia Territorial, impulsionada exponencialmente pelo processamento de boletins oriundos da esfera virtual. Interaja com as colunas do gráfico para aferir a volumetria exata de cada unidade de apuração.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white rounded-lg shadow border border-stone-200 p-4">
+                    <h3 class="text-center font-semibold text-stone-700 mb-4">Top 5 Unidades: Volumetria de Ocorrências</h3>
+                    <!-- Chart Container as required -->
+                    <div class="chart-container">
+                        <canvas id="prodChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="flex flex-col space-y-4">
+                    <div class="bg-white rounded-lg shadow border border-stone-200 p-5">
+                        <h3 class="font-bold text-stone-800 mb-2 border-b pb-2">Tendências de Monitoramento</h3>
+                        <ul class="space-y-3 mt-3 text-sm">
+                            <li class="flex justify-between items-center">
+                                <span class="font-medium">1ª DT Feira</span>
+                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold">⬆️ CVP (Cibernético)</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span class="font-medium">2ª DT Feira</span>
+                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold">⬆️ CVP (Majorado)</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span class="font-medium">DH Feira</span>
+                                <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-bold">➡️ CVLI (5 casos em sigilo)</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span class="font-medium">Santo Estevão</span>
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">⬇️ CVP (Roubos)</span>
+                            </li>
+                            <li class="flex justify-between items-center">
+                                <span class="font-medium">São Gonçalo</span>
+                                <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-bold">➡️ Estabilidade</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-stone-800 text-stone-100 rounded-lg shadow p-5">
+                        <h3 class="font-bold text-lg mb-2 flex items-center gap-2"><span>🎯</span> Destaque Operacional</h3>
+                        <p class="text-sm text-stone-300 leading-relaxed text-justify">
+                            Ao longo da semana, contabilizaram-se mais de <strong>50 êxitos operacionais</strong> consolidados (procedimentos finalizados, identificações irrefutáveis de autoria e recuperações). A expressiva taxa de elucidação atesta a probidade do aparato policial civil frente ao adensamento das fraudes eletrônicas.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: MATRIZ DE RISCO -->
+        <section id="sec-matriz" class="hidden-section animate-fade-in">
+             <div class="mb-6">
+                <h2 class="text-2xl font-bold text-stone-800 border-l-4 border-sky-700 pl-3 mb-2">Matriz de Risco e Fatores Sociodemográficos</h2>
+                <p class="text-stone-600 text-sm leading-relaxed text-justify">
+                    <strong>Contextualização da Seção:</strong> A dissecação da mancha criminal exige uma hermenêutica que transcende a mera estatística. Abaixo, apresenta-se o escalonamento geográfico do grau de ameaça inerente a cada circunscrição. <strong>Selecione um município na coluna à esquerda</strong> para acessar pormenores cruciais atinentes ao modus operandi local, impacto sociodemográfico e diretrizes preventivas estratégicas.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Selectable List -->
+                <div class="col-span-1 bg-white rounded-lg shadow border border-stone-200 overflow-hidden flex flex-col h-[500px]">
+                    <div class="bg-stone-100 p-3 border-b font-semibold text-stone-700">Municípios Jurisdicionados</div>
+                    <div class="overflow-y-auto custom-scroll flex-grow p-2 space-y-2" id="risk-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Detail View -->
+                <div class="col-span-1 md:col-span-2 bg-white rounded-lg shadow border border-stone-200 p-6 flex flex-col min-h-[500px]" id="risk-detail-container">
+                    <div class="text-center text-stone-400 my-auto flex flex-col items-center">
+                        <span class="text-5xl mb-3">🗺️</span>
+                        <p>Selecione um município à esquerda para exibir o detalhamento de inteligência.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: CASOS DE RELEVÂNCIA -->
+        <section id="sec-casos" class="hidden-section animate-fade-in">
+             <div class="mb-6">
+                <h2 class="text-2xl font-bold text-stone-800 border-l-4 border-sky-700 pl-3 mb-2">Análise Pormenorizada de Ocorrências Focais</h2>
+                <p class="text-stone-600 text-sm leading-relaxed text-justify">
+                    <strong>Contextualização da Seção:</strong> O escrutínio qualitativo dos eventos delituosos de maior gravidade confere substância aos dados numéricos abstratos, franqueando a extração de perfis criminológicos essenciais para a persecução penal qualificada. Expanda as abas subsequentes para analisar a fenomenologia, materialidade e providências atinentes aos ilícitos contra a vida, patrimônio e de gênero de maior envergadura registrados na semana.
+                </p>
+            </div>
+
+            <div class="space-y-4" id="cases-accordion">
+                <!-- Cases generated by JS -->
+            </div>
+            
+            <!-- Conclusion Box -->
+            <div class="mt-8 bg-stone-100 border-l-4 border-stone-800 p-5 rounded-r">
+                <h3 class="font-bold text-lg text-stone-900 mb-2">Prognóstico Institucional</h3>
+                <p class="text-sm text-stone-700 text-justify leading-relaxed mb-3">
+                    Afigura-se inescusável a manutenção do direcionamento dos recursos investigativos operacionais no âmbito da Delegacia de Homicídios (DH). Tal providência é o único meio profícuo de mitigar a letalidade violenta oriunda de embates entre agremiações criminosas.
+                </p>
+                <p class="text-sm text-stone-700 text-justify leading-relaxed">
+                    De igual modo, faz-se mister o recrudescimento das diretrizes de cunho preventivo e repressivo em face dos estelionatos digitais, exigindo aparelhamento tecnológico correspondente das forças estatais. As unidades especializadas (DEAM e DRFR) remanescem no exercício de função indispensável e basilar.
+                </p>
+                <p class="text-xs text-stone-500 mt-4 font-semibold text-right border-t border-stone-300 pt-2">
+                    Félix Rilton - Investigador PCBA | Ponto Focal de Análise Criminal - DIRPIN LESTE
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: RELATÓRIO COMPLETO (NEW) -->
+        <section id="sec-relatorio" class="hidden-section animate-fade-in">
+            <div class="bg-white rounded shadow-sm border border-stone-200 p-8 md:p-12 max-w-5xl mx-auto text-stone-800 leading-relaxed text-justify">
+                
+                <!-- CABEÇALHO -->
+                <div class="mb-8 border-b-2 border-stone-800 pb-6">
+                    <h1 class="text-xl font-bold text-center mb-6 uppercase tracking-wide">Relatório de Análise Estratégica e Dinâmica Criminal 2026 - DIRPIN Leste</h1>
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 text-sm">
+                        <div class="md:col-span-2 font-bold uppercase">PARA:</div>
+                        <div class="md:col-span-10">Gabinete do DIRETOR DA DIRPIN LESTE / ASCOM / Coordenador da 1.ª COORPIN</div>
+                        
+                        <div class="md:col-span-2 font-bold uppercase">DE:</div>
+                        <div class="md:col-span-10">Ponto Focal de Inteligência e Análise Criminal - DIRPIN LESTE</div>
+                        
+                        <div class="md:col-span-2 font-bold uppercase">PERÍODO:</div>
+                        <div class="md:col-span-10">09/03/2026 a 16/03/2026</div>
+                        
+                        <div class="md:col-span-2 font-bold uppercase">ASSUNTO:</div>
+                        <div class="md:col-span-10 font-semibold uppercase">Enfrentamento ao Crime Patrimonial, Monitoramento de CVLI e Prognóstico de Mancha Criminal no Município de Feira de Santana e Adjacências</div>
+                        
+                        <div class="md:col-span-2 font-bold uppercase text-red-700 mt-2">CLASSIFICAÇÃO:</div>
+                        <div class="md:col-span-10 text-red-700 font-bold mt-2">RESERVADO</div>
+                    </div>
+                </div>
+
+                <!-- CORPO DO DOCUMENTO -->
+                <div class="space-y-6 text-sm md:text-base">
+                    
+                    <div>
+                        <h2 class="font-bold text-lg mb-2 uppercase border-l-4 border-stone-800 pl-2">📍 I. Mineração de Dados (OSINT & HUMINT) e Metodologia Aplicada</h2>
+                        <p class="mb-3">Apresenta-se, por conseguinte, o compêndio analítico atinente às principais ocorrências e à respectiva volumetria registradas na circunscrição da 1.ª COORPIN - FEIRA DE SANTANA, bem como em suas unidades vinculadas, durante o interstício supramencionado. Faz-se mister salientar que a consecução do presente arcabouço informacional decorreu da confluência de métodos de Inteligência de Fontes Abertas (OSINT), mediante o monitoramento de redes telemáticas e plataformas digitais, aliados à coleta de dados provenientes de Inteligência Humana (HUMINT), consubstanciada em informes velados e diligências de campo ordinárias.</p>
+                        <ul class="list-disc pl-6 space-y-2 mt-2">
+                            <li><strong>PPE (09/03 a 16/03):</strong> Constatou-se a formalização de 386 registros no âmbito da 1ª Delegacia Territorial e 221 registros perante a 2ª Delegacia Territorial de Feira de Santana. Referida disparidade quantitativa elucida a capilaridade de atendimento da 1ª DT no que tange aos crimes de menor potencial ofensivo e fraudes eletrônicas.</li>
+                            <li><strong>HOMICÍDIOS (CVLI):</strong> Notificou-se a consecução de Homicídio Qualificado, majorado pelo emprego de arma de fogo de uso restrito, na municipalidade de Feira de Santana (BO 00199007/2026). A escassez aparente de registros múltiplos não elide a gravidade do evento isolado, cuja tipologia denota alto grau de organização do sujeito ativo.</li>
+                            <li><strong>ROUBO (CVP):</strong> Identificou-se uma multiplicidade de ocorrências consubstanciadas em roubos com o emprego de arma de fogo (delitos de natureza hedionda), cujos registros foram lavrados precipuamente pela 2ª DT e pela Delegacia de Repressão a Furtos e Roubos (DRFR). Observa-se a reiteração da subtração de veículos de tração em duas rodas.</li>
+                            <li><strong>VIOLÊNCIA DOMÉSTICA:</strong> Observou-se uma incidência sobremaneira elevada de ameaças e lesões corporais perpetradas no escopo da Lei Maria da Penha (Lei nº 11.340/2006), conforme reportado ininterruptamente pela DEAM-Feira, evidenciando uma continuidade no ciclo de violência de gênero nesta municipalidade.</li>
+                            <li><strong>ESTELIONATO:</strong> Verificou-se um volume em patamares críticos de fraudes cibernéticas e ardis perpetrados por intermédio do aplicativo WhatsApp e congêneres. Tais ilícitos foram noticiados, em sua esmagadora maioria, por meio da Delegacia Virtual, sendo posteriormente declinados à 1ª DT para a devida persecução investigatória.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h2 class="font-bold text-lg mt-8 mb-2 uppercase border-l-4 border-stone-800 pl-2">📍 1. Sumário Executivo (Briefing) e Conjuntura Macro-Criminal</h2>
+                        <p class="mb-3">A conjuntura macro-criminal afeta ao lapso temporal em apreço evidencia a manutenção preocupante dos índices relativos aos Crimes Contra o Patrimônio (CVP). Contudo, constata-se uma metamorfose na fenomenologia delitiva: a violência física e o emprego de grave ameaça, outrora hegemônicos nas lides patrimoniais, cedem progressivo espaço à engenharia social e aos ardis tecnológicos. Por conseguinte, há proeminência insofismável para o delito de estelionato, o qual, hodiernamente, perfaz a maior volumetria de registros na região de Feira de Santana. Vislumbra-se, outrossim, uma eficácia notável por parte da 1ª DT de Feira de Santana no que tange ao processamento de boletins deflagrados virtualmente, revelando resiliência institucional face ao incremento da demanda cibernética. Em contrapartida, a 2ª DT aglutinou os registros revestidos de maior gravidade corpórea, notadamente os roubos majorados e extorsões.</p>
+                        <p>No tocante à criminalidade violenta, os Crimes Violentos Letais Intencionais (CVLI) mantiveram-se em patamares que demandam escrutínio ininterrupto e sistemático. Resta à Delegacia de Homicídios (DH) o ofício inescusável de atuar na elucidação de inquéritos que ostentam indícios robustos de execuções sumárias orquestradas por grupos criminosos organizados (facções), cuja natureza transnacional e interestadual fomenta disputas cruentas pela hegemonia territorial do narcotráfico. A performance operacional das unidades especializadas (DEAM e DRFR) afigura-se basilar para a mitigação da percepção de impunidade perante a sociedade civil, com ênfase particular nos ilícitos de violência de gênero — cuja subnotificação histórica vem sendo paulatinamente dirimida — e nas subtrações de veículos automotores, os quais fomentam um mercado clandestino de autopeças e adulteração de sinais identificadores.</p>
+                    </div>
+
+                    <div>
+                        <h2 class="font-bold text-lg mt-8 mb-2 uppercase border-l-4 border-stone-800 pl-2">📍 2. Análise de Mancha Criminal por COORPIN e Fatores Sociodemográficos</h2>
+                        <p class="mb-4">A dissecação da mancha criminal exige uma hermenêutica que transcenda a mera estatística, adentrando as nuances geográficas e socioeconômicas de cada urbe componente da 1ª COORPIN.</p>
+                        
+                        <h3 class="font-bold uppercase mb-1">Município: Feira de Santana (Sede)</h3>
+                        <ul class="list-none pl-4 space-y-1 mb-4 border-l-2 border-stone-300">
+                            <li><strong>Dinâmica (Modus Operandi):</strong> Constata-se a prevalência de subtrações patrimoniais mediante o emprego de arma de fogo, executadas predominantemente por concuso de agentes (duplas) utilizando motocicletas. O arranjo viário da municipalidade, caracterizado por rodovias arteriais (BR-324, BR-116), propicia rotas de evasão de celeridade ímpar. Observa-se, ademais, a progressão contínua de ilícitos perpetrados em meio digital, fulcrados na exploração da vulnerabilidade tecnológica da população senil e de transeuntes do comércio local.</li>
+                            <li><strong>Fator Social (Repercussão):</strong> Nota-se um impacto substancial e deleterioso na percepção de segurança pública, precipuamente no núcleo comercial e nas adjacências periféricas de maior adensamento demográfico. A sensação de inércia estatal tende a aflorar caso não haja pronta resposta.</li>
+                            <li><strong>Prevenção:</strong> Faz-se imperativa a intensificação do patrulhamento ostensivo de cunho tático em eixos de interceptação previamente mapeados, aliada à deflagração de campanhas institucionais continuadas, voltadas à alfabetização digital e à prevenção de fraudes em ambiente cibernético (ASCOM).</li>
+                        </ul>
+
+                        <h3 class="font-bold uppercase mb-1">Município: Santo Estevão</h3>
+                        <ul class="list-none pl-4 space-y-1 mb-4 border-l-2 border-stone-300">
+                            <li><strong>Dinâmica:</strong> Verifica-se a reincidência de dissabores interpessoais e episódios de violência no âmbito doméstico, materializados primordialmente por meio de ameaças verbais, injúrias e vias de fato. A etiologia de tais delitos remonta, frequentemente, ao consumo imoderado de substâncias psicoativas e álcool no seio familiar.</li>
+                            <li><strong>Fator Social:</strong> A repercussão afigura-se moderada no espectro macroeconômico, porém profundamente gravosa sob a ótica dos direitos humanos, circunscrita, em grande medida, à desestruturação do núcleo familiar e à perpetuação intergeracional da violência.</li>
+                            <li><strong>Prevenção:</strong> Recomenda-se a consolidação, o aparelhamento e a ampla difusão das prerrogativas do Núcleo Especializado de Atendimento à Mulher (NEAM) em âmbito local, bem como a articulação de redes de amparo psicológico e social consorciadas com o poder executivo municipal.</li>
+                        </ul>
+
+                        <h3 class="font-bold uppercase mb-1">Município: São Gonçalo dos Campos</h3>
+                        <ul class="list-none pl-4 space-y-1 border-l-2 border-stone-300">
+                            <li><strong>Dinâmica:</strong> Relatam-se ocorrências de furtos qualificados e invasões perpetradas em propriedades de natureza rural, com foco na subtração de defensivos agrícolas, maquinários e semoventes.</li>
+                            <li><strong>Fator Social:</strong> Emerge uma preocupação latente e justificada por parte dos produtores agropecuários e dos residentes em zonas de afastamento urbano, resultando em potenciais prejuízos que afetam a cadeia produtiva local e a subsistência econômica da região.</li>
+                            <li><strong>Prevenção:</strong> Sugere-se a consecução de operações de inteligência direcionadas ao monitoramento de rotas de evasão rurais de difícil provimento e ao combate frontal aos receptadores (comerciantes irregulares e atravessadores), visando à asfixia econômica da prática delitiva.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h2 class="font-bold text-lg mt-8 mb-2 uppercase border-l-4 border-stone-800 pl-2">📍 3. Destaques Operacionais e Materialidade Delitiva</h2>
+                        <p class="mb-3">O esforço persecutório despendido no interstício culminou na materialidade e na elucidação de vasta gama de tipologias penais. Elencam-se, doravante, os êxitos operacionais consubstanciados em procedimentos finalizados, identificações irrefutáveis de autoria ou encaminhamentos exitosos ocorridos na pretérita semana, os quais atestam a probidade e a eficiência do aparato policial civil:</p>
+                        <div class="bg-stone-50 p-4 border border-stone-200 rounded max-h-64 overflow-y-auto custom-scroll text-sm">
+                            <ul class="list-none space-y-1">
+                                <li><strong>BO 00204133/2026:</strong> Elucidação de crime de estelionato - 1ª DT Feira.</li>
+                                <li><strong>BO 00204078/2026:</strong> Conclusão de inquérito referente a crime contra a honra (difamação) - 1ª DT Feira.</li>
+                                <li><strong>BO 00204052/2026:</strong> Recuperação de bem móvel objeto de furto - 1ª DT Feira.</li>
+                                <li><strong>BO 00203874/2026:</strong> Lavratura de Termo Circunstanciado de Ocorrência em desfavor de autor de ameaça - 1ª DT Feira.</li>
+                                <li><strong>BO 00203847/2026:</strong> Formalização de registro e encetamento de diligências atinentes a crime de furto - 1ª DT Feira.</li>
+                                <li><strong>BO 00203842/2026:</strong> Identificação qualificada de autoria em delito de estelionato - 1ª DT Feira.</li>
+                                <li><strong>BO 00203770/2026:</strong> Instauração de procedimento apuratório referente à apropriação indébita - 1ª DT Feira.</li>
+                                <li><strong>BO 00203763/2026:</strong> Finalização de procedimento atinente a estelionato - 1ª DT Feira.</li>
+                                <li><strong>BO 00203723/2026:</strong> Consecução de diligência em sede de apuração de furto - 1ª DT Feira.</li>
+                                <li><strong>BO 00203708/2026:</strong> Êxito na identificação de autoria de fraude - 1ª DT Feira.</li>
+                                <li><strong>BO 00199007/2026:</strong> Instauração de procedimento deflagrado em virtude de homicídio qualificado - DH Feira.</li>
+                                <li><strong>BO 00183861/2026:</strong> Lavratura de auto de prisão em flagrante delito decorrente de roubo majorado - 2ª DT Feira.</li>
+                                <li><strong>BO 00183857/2026:</strong> Identificação pormenorizada de autor de crime de roubo - 2ª DT Feira.</li>
+                                <li><strong>BO 00183792/2026:</strong> Conclusão de procedimento investigatório de estelionato - 1ª DT Feira.</li>
+                                <li><strong>BO 00183733/2026:</strong> Finalização de inquérito policial versando sobre ameaça - 1ª DT Feira.</li>
+                                <li><strong>BO 00183709/2026:</strong> Apreensão e conseguinte recuperação de veículo automotor - 1ª DT Feira.</li>
+                                <li><strong>BO 00183181/2026:</strong> Instauração de procedimento atinente à lesão corporal (Lei Maria da Penha) - DEAM.</li>
+                                <li><strong>BO 00183158/2026:</strong> Conclusão de ocorrência subsumida ao crime de injúria - DEAM.</li>
+                                <li><strong>BO 00183042/2026:</strong> Término de diligência afeta a registro de ameaça - DEAM.</li>
+                                <li><strong>BO 00183017/2026:</strong> Deferimento exitoso de requerimento de medida protetiva de urgência - DEAM.</li>
+                                <li><strong>BO 00191834/2026:</strong> Formalização de procedimento de roubo majorado - Santo Estevão.</li>
+                                <li><strong>BO 00189821/2026:</strong> Finalização de procedimento relativo a ameaça e difamação - Tanquinho.</li>
+                                <li><strong>BO 00189383/2026:</strong> Conclusão de trâmites de natureza administrativa - Tanquinho.</li>
+                                <li><strong>BO 00189252/2026:</strong> Encerramento de registro afeto a sinistro de trânsito - Tanquinho.</li>
+                                <li><strong>BO 00183672/2026:</strong> Formalização de ocorrência com definição de autoria - Anguera.</li>
+                                <li><strong>BO 00186524/2026:</strong> Tramitação de procedimento de estelionato - 1ª DT Feira.</li>
+                                <li><strong>BO 00186419/2026:</strong> Desfecho de procedimento investigatório de furto - 1ª DT Feira.</li>
+                                <li><strong>BO 00186358/2026:</strong> Conclusão de apuração atinente a delito de ameaça - 1ª DT Feira.</li>
+                                <li><strong>BO 00186306/2026:</strong> Deflagração de procedimento relativo a furto qualificado em residência - 1ª DT Feira.</li>
+                                <li><strong>BO 00186256/2026:</strong> Conclusão de registro policial versando sobre estelionato - 1ª DT Feira.</li>
+                                <li><strong>BO 00186175/2026:</strong> Deslinde de apuração de fraude em ambiente bancário - 1ª DT Feira.</li>
+                                <li><strong>BO 00185981/2026:</strong> Identificação de sujeito ativo em crime de ameaça - 1ª DT Feira.</li>
+                                <li><strong>BO 00185918/2026:</strong> Obtenção de êxito em diligência vinculada a crime de estelionato - 1ª DT Feira.</li>
+                                <li><strong>BO 00185854/2026:</strong> Encerramento de registro apuratório de ameaça - 1ª DT Feira.</li>
+                                <li><strong>BO 00185794/2026:</strong> Tramitação de procedimento atinente a estelionato - 1ª DT Feira.</li>
+                                <li><strong>BO 00185566/2026:</strong> Finalização de inquérito relativo a crime de furto - 1ª DT Feira.</li>
+                                <li><strong>BO 00185341/2026:</strong> Notícia-crime de ameaça acompanhada do devido encaminhamento - 1ª DT Feira.</li>
+                                <li><strong>BO 00185244/2026:</strong> Êxito operacional alcançado em apuração de estelionato - 1ª DT Feira.</li>
+                                <li><strong>BO 00184496/2026:</strong> Desfecho de ocorrência subsumida a furto - 1ª DT Feira.</li>
+                                <li><strong>BO 00184478/2026:</strong> Conclusão de apuração de estelionato - 1ª DT Feira.</li>
+                                <li><strong>BO 00184282/2026:</strong> Estabelecimento de autoria delitiva inconteste - 1ª DT Feira.</li>
+                                <li><strong>BO 00184126/2026:</strong> Encerramento de Boletim de Ocorrência relativo a ameaça - 1ª DT Feira.</li>
+                                <li><strong>BO 00184081/2026:</strong> Conclusão de investigação atinente a ilícito de estelionato - 1ª DT Feira.</li>
+                                <li><strong>BO 00184067/2026:</strong> Formalização final de registro de furto - 1ª DT Feira.</li>
+                                <li><strong>BO 00184013/2026:</strong> Encerramento de trâmite apuratório de ameaça - 1ª DT Feira.</li>
+                                <li><strong>BO 00183995/2026:</strong> Êxito na individualização de autoria em delito de fraude bancária - 1ª DT Feira.</li>
+                                <li><strong>BO 00183963/2026:</strong> Finalização de procedimentos registrais correlatos - 1ª DT Feira.</li>
+                                <li><strong>BO 00183921/2026:</strong> Desfecho de diligência pertinente a crime de ameaça - 1ª DT Feira.</li>
+                                <li><strong>BO 00183791/2026:</strong> Conclusão de trâmites de ordem administrativa indispensáveis - 1ª DT Feira.</li>
+                                <li><strong>BO 00183672/2026:</strong> Encerramento de registro relativo a sinistro com danos apurados - Anguera.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2 class="font-bold text-lg mt-8 mb-2 uppercase border-l-4 border-stone-800 pl-2">📍 4. Matriz de Risco, Critérios de Avaliação e Recomendações</h2>
+                        <p class="mb-3">A confecção da matriz que se segue obedeceu a critérios rigorosos de valoração, sopesando-se a frequência delitiva, a gravidade da ofensa ao bem jurídico tutelado e o impacto perceptível na sensação subjetiva de segurança da comunidade local.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left border-collapse border border-stone-300">
+                                <thead class="bg-stone-100 font-bold uppercase">
+                                    <tr>
+                                        <th class="border border-stone-300 px-4 py-2">Circunscrição / Unidade</th>
+                                        <th class="border border-stone-300 px-4 py-2 text-center">Grau de Risco</th>
+                                        <th class="border border-stone-300 px-4 py-2">Fator de Criticidade Determinante</th>
+                                        <th class="border border-stone-300 px-4 py-2">Recomendação (ASCOM e Op.)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="border border-stone-300 px-4 py-2 font-semibold">Feira de Santana</td><td class="border border-stone-300 px-4 py-2 text-center text-red-700 font-bold">Crítico</td><td class="border border-stone-300 px-4 py-2">Elevada incidência de CVP com emprego de arma e delitos de estelionato cibernético</td><td class="border border-stone-300 px-4 py-2">Difusão massiva de diretrizes de segurança no âmbito cibernético e reforço ostensivo</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 font-semibold">Santo Estevão</td><td class="border border-stone-300 px-4 py-2 text-center text-orange-600 font-bold">Alto</td><td class="border border-stone-300 px-4 py-2">Ocorrências reiteradas de violência doméstica e roubos a transeuntes</td><td class="border border-stone-300 px-4 py-2">Enaltecimento das atribuições do NEAM e ações repressivas focadas</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 font-semibold">São Gonçalo Dos Campos</td><td class="border border-stone-300 px-4 py-2 text-center text-yellow-600 font-bold">Médio</td><td class="border border-stone-300 px-4 py-2">Furtos qualificados em propriedades rurais de vasto escopo</td><td class="border border-stone-300 px-4 py-2">Fomento e suporte irrestrito aos Conselhos Comunitários de Segurança Rural</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 font-semibold">Tanquinho</td><td class="border border-stone-300 px-4 py-2 text-center text-yellow-600 font-bold">Médio</td><td class="border border-stone-300 px-4 py-2">Delitos contra a honra objetiva e subjetiva em meios telemáticos</td><td class="border border-stone-300 px-4 py-2">Promoção de campanhas de mitigação de crimes de intolerância e letramento digital</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 font-semibold">Rafael Jambeiro</td><td class="border border-stone-300 px-4 py-2 text-center text-yellow-600 font-bold">Médio</td><td class="border border-stone-300 px-4 py-2">Litígios de natureza agrária e conflagrações de ordem interpessoal</td><td class="border border-stone-300 px-4 py-2">Estabelecimento de interlocução mediadora com lideranças locais e judiciário</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 font-semibold">Humildes</td><td class="border border-stone-300 px-4 py-2 text-center text-yellow-600 font-bold">Médio</td><td class="border border-stone-300 px-4 py-2">Subtrações patrimoniais em vias de acesso intermunicipais</td><td class="border border-stone-300 px-4 py-2">Recrudescimento imperativo da atenção e barreiras nas rodovias adjacentes</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 font-semibold">Antônio Cardoso</td><td class="border border-stone-300 px-4 py-2 text-center text-green-700 font-bold">Baixo</td><td class="border border-stone-300 px-4 py-2">Registros predominantemente de natureza atípica ou culposa</td><td class="border border-stone-300 px-4 py-2">Manutenção estrita do monitoramento preventivo e ações sociais</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 font-semibold">Anguera</td><td class="border border-stone-300 px-4 py-2 text-center text-green-700 font-bold">Baixo</td><td class="border border-stone-300 px-4 py-2">Sinistros no tráfego viário com lesão corporal culposa</td><td class="border border-stone-300 px-4 py-2">Fomento a programas interinstitucionais de educação para o trânsito</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 font-semibold">Serra Preta</td><td class="border border-stone-300 px-4 py-2 text-center text-green-700 font-bold">Baixo</td><td class="border border-stone-300 px-4 py-2">Ocorrências esporádicas de furto simples</td><td class="border border-stone-300 px-4 py-2">Intensificação cíclica do patrulhamento em zonas rurais nevrálgicas</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 font-semibold">Ipecaetá</td><td class="border border-stone-300 px-4 py-2 text-center text-green-700 font-bold">Baixo</td><td class="border border-stone-300 px-4 py-2">Reduzida incidência histórica de criminalidade violenta</td><td class="border border-stone-300 px-4 py-2">Preservação intocável do policiamento ostensivo ordinário já estabelecido</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 bg-sky-50 border border-sky-200 p-4 rounded text-sky-900">
+                            <strong>OPORTUNIDADE DE DIVULGAÇÃO INSTITUCIONAL E PLANEJAMENTO ESTRATÉGICO:</strong> Afigura-se como conjuntura sobremaneira propícia a utilização da expressiva taxa de elucidação de delitos de estelionato, por parte da 1ª DT de Feira de Santana, como pauta jornalística de viés ostensivamente positivo. Referida difusão, a ser orquestrada pela Assessoria de Comunicação, possui o condão inestimável de atestar, perante o escrutínio público, a eficácia da novel Delegacia Virtual. Tal labor investigativo e de inteligência ulterior, consubstanciado no rastreamento meticuloso de contas bancárias e na qualificação inequívoca dos respectivos autores, serve como elemento dissuasório de primeira grandeza contra potenciais infratores que ainda creem na hipotética impunidade do ambiente virtual.
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2 class="font-bold text-lg mt-8 mb-2 uppercase border-l-4 border-stone-800 pl-2">📍 Tabelas Técnicas e Interpretação Estatística</h2>
+                        <p class="mb-3">As tabelas subsequentes cristalizam a produtividade das unidades e o delineamento das tendências criminais. A observação detida dos dados corrobora a tese de deslocamento modal do crime físico para o estelionato, impondo adaptações na práxis investigatória.</p>
+                        
+                        <h3 class="font-bold mt-4 mb-2">Tabela 1: Indicadores Analíticos de Violência e Monitoramento</h3>
+                        <div class="overflow-x-auto mb-4">
+                            <table class="w-full text-sm text-left border-collapse border border-stone-300">
+                                <thead class="bg-stone-100 font-bold">
+                                    <tr>
+                                        <th class="border border-stone-300 px-4 py-2">COORPIN / Unidade</th>
+                                        <th class="border border-stone-300 px-4 py-2 text-center">CVLI</th>
+                                        <th class="border border-stone-300 px-4 py-2 text-center">Tendência CVP</th>
+                                        <th class="border border-stone-300 px-4 py-2">Observações Complementares e Prognóstico</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="border border-stone-300 px-4 py-2 font-medium">1ª DT Feira</td><td class="border border-stone-300 px-4 py-2 text-center">0</td><td class="border border-stone-300 px-4 py-2 text-center text-red-600">⬆️</td><td class="border border-stone-300 px-4 py-2">Concentração premente de esforços investigativos em estelionatos cibernéticos; requer aportes tecnológicos.</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 font-medium">2ª DT Feira</td><td class="border border-stone-300 px-4 py-2 text-center">0</td><td class="border border-stone-300 px-4 py-2 text-center text-red-600">⬆️</td><td class="border border-stone-300 px-4 py-2">Foco inarredável na repressão a roubos majorados (subtração de veículos e transeuntes); demanda policiamento saturação.</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 font-medium">DH Feira</td><td class="border border-stone-300 px-4 py-2 text-center">5</td><td class="border border-stone-300 px-4 py-2 text-center text-yellow-600">➡️</td><td class="border border-stone-300 px-4 py-2">Inquéritos sob sigilo investigatório absoluto; mapeamento contínuo de associações criminosas para futuras incursões cautelares.</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 font-medium">Santo Estevão</td><td class="border border-stone-300 px-4 py-2 text-center">0</td><td class="border border-stone-300 px-4 py-2 text-center text-green-600">⬇️</td><td class="border border-stone-300 px-4 py-2">Decréscimo constatado nos índices de crimes de roubo, reflexo salutar de operações pretéritas na localidade.</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 font-medium">São Gonçalo</td><td class="border border-stone-300 px-4 py-2 text-center">0</td><td class="border border-stone-300 px-4 py-2 text-center text-yellow-600">➡️</td><td class="border border-stone-300 px-4 py-2">Constatação de estabilidade momentânea na volumetria dos registros policiais; a vigilância não deve ser arrefecida.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h3 class="font-bold mt-4 mb-2">Tabela 2: Escalonamento de Produtividade</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full md:w-2/3 text-sm text-left border-collapse border border-stone-300">
+                                <thead class="bg-stone-100 font-bold">
+                                    <tr>
+                                        <th class="border border-stone-300 px-4 py-2 text-center">Posição</th>
+                                        <th class="border border-stone-300 px-4 py-2">Unidade de Apuração Competente</th>
+                                        <th class="border border-stone-300 px-4 py-2 text-center">Volumetria de Ocorrências</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="border border-stone-300 px-4 py-2 text-center">1º</td><td class="border border-stone-300 px-4 py-2 font-medium">1ª DT - Feira de Santana</td><td class="border border-stone-300 px-4 py-2 text-center font-bold">386</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 text-center">2º</td><td class="border border-stone-300 px-4 py-2 font-medium">2ª DT - Feira de Santana</td><td class="border border-stone-300 px-4 py-2 text-center font-bold">221</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 text-center">3º</td><td class="border border-stone-300 px-4 py-2 font-medium">DEAM - Feira de Santana</td><td class="border border-stone-300 px-4 py-2 text-center font-bold">66</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 text-center">4º</td><td class="border border-stone-300 px-4 py-2 font-medium">Central de Flagrantes - Feira</td><td class="border border-stone-300 px-4 py-2 text-center font-bold">59</td></tr>
+                                    <tr><td class="border border-stone-300 px-4 py-2 text-center">5º</td><td class="border border-stone-300 px-4 py-2 font-medium">DT - Santo Estevão</td><td class="border border-stone-300 px-4 py-2 text-center font-bold">42</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2 class="font-bold text-lg mt-8 mb-2 uppercase border-l-4 border-stone-800 pl-2">📍 5. Análise Detalhada da Mancha Criminal (Casos de Relevância Pormenorizada)</h2>
+                        <p class="mb-4">O escrutínio qualitativo dos eventos delituosos de maior repercussão confere substância aos dados numéricos, permitindo a extração de perfis criminológicos fundamentais para a repressão qualificada.</p>
+                        
+                        <h3 class="font-bold uppercase text-stone-900 border-b border-stone-300 pb-1 mb-2">Grupo: Crimes Contra a Vida (CVLI)</h3>
+                        <ul class="list-none space-y-3 mb-6">
+                            <li><strong>BO 00199007/2026 | DH Feira | 13/03/2026 11:30:</strong> Consumação de homicídio qualificado mediante o emprego de arma de fogo de uso restrito (calibre 9mm). Qualificação oficial da vítima encontra-se pendente de recognição cadavérica. <br><span class="text-stone-600 block mt-1"><em>Análise de Inteligência:</em> O modus operandi exibe, de maneira indubitável, características intrínsecas à atuação de associações criminosas organizadas. A pluralidade de disparos direcionados à região craniana (execução sumária e "overkill") permite inferir a ocorrência de retaliações mútuas, cobrança de dívidas oriundas do tráfico de substâncias entorpecentes ou, quiçá, disputas cruentas pela hegemonia territorial em zonas de vulnerabilidade.</span></li>
+                            <li><strong>BO 00199743/2026 | 1ª COORPIN | 13/03/2026 14:56:</strong> Ocorrência de morte com circunstâncias incipientes a esclarecer. Vítima civil identificada como Miralva de Jesus. <br><span class="text-stone-600 block mt-1"><em>Análise de Inteligência:</em> O cenário não revelou sinais imediatos de arrombamento ou luta corporal. Aguarda-se, de forma peremptória, a confecção e a respectiva remessa do laudo pericial necroscópico expedido pelo Departamento de Polícia Técnica (DPT). Referido documento afigura-se imprescindível para a certificação insofismável da causa mortis e a escorreita tipificação penal do fato, não se descartando, de plano, a hipótese de evento natural ou autoextermínio.</span></li>
+                        </ul>
+
+                        <h3 class="font-bold uppercase text-stone-900 border-b border-stone-300 pb-1 mb-2">Grupo: Tentativa de Crimes Contra a Vida</h3>
+                        <ul class="list-none space-y-3 mb-6">
+                            <li><strong>BO 00197775/2026 | DH Feira | 13/03/2026 07:44:</strong> Delito de homicídio perpetrado na modalidade tentada. <br><span class="text-stone-600 block mt-1"><em>Análise de Inteligência:</em> O registro encontra-se sob escrutínio em caráter de prioridade máxima, com o escopo inarredável de individualizar, qualificar e capturar os agentes atualmente evadidos do distrito da culpa. Diligências preliminares — incluindo a captação de imagens de circuitos fechados de televisão (CFTV) adjacentes e oitivas de testemunhas oculares — encontram-se em pleno andamento, objetivando robustecer o caderno indiciário antes que ocorra a dissipação dos vestígios.</span></li>
+                        </ul>
+
+                        <h3 class="font-bold uppercase text-stone-900 border-b border-stone-300 pb-1 mb-2">Grupo: Violência Doméstica (Lei Maria da Penha)</h3>
+                        <ul class="list-none space-y-3 mb-6">
+                            <li><strong>BO 00200199/2026 | DT Tanquinho | 13/03/2026 16:28:</strong> Crime de ameaça deflagrado ostensivamente no contexto de violência doméstica e familiar contra a mulher (inteligência do Art. 147 do Código Penal Brasileiro c/c Lei nº 11.340/06). <br><span class="text-stone-600 block mt-1"><em>Análise de Inteligência:</em> Procedeu-se à qualificação cabal tanto do sujeito passivo quanto do sujeito ativo. O feito restou devidamente formalizado e encaminhado com celeridade ao escrutínio do Poder Judiciário para a adoção das medidas acautelatórias pertinentes, visando salvaguardar a integridade física e psicológica da ofendida e romper o ciclo de subjugação.</span></li>
+                            <li><strong>BO 00197621/2026 | DEAM Feira:</strong> Delito de lesão corporal (Art. 129, §9º, do CP). <br><span class="text-stone-600 block mt-1"><em>Análise de Inteligência:</em> Constatou-se, mediante a consulta aos repositórios de antecedentes, a reincidência contumaz por parte do suposto autor do fato. O episódio permanece sob estrito e rigoroso monitoramento pela unidade especializada, resguardando-se a possibilidade iminente de representação judicial pela segregação cautelar (prisão preventiva), caso tal providência extrema se afigure estritamente necessária para a garantia da ordem pública e da incolumidade da vítima.</span></li>
+                        </ul>
+
+                        <h3 class="font-bold uppercase text-stone-900 border-b border-stone-300 pb-1 mb-2">Grupo: Crimes Contra o Patrimônio (CVP)</h3>
+                        <ul class="list-none space-y-3 mb-6">
+                            <li><strong>BO 00183861/2026 | 2ª DT Feira | 09/03/2026 08:31:</strong> Crime de roubo majorado pelo emprego de arma de fogo (infração de natureza eminentemente hedionda, ex vi da novel legislação). <br><span class="text-stone-600 block mt-1"><em>Análise de Inteligência:</em> Trata-se de subtração de veículo automotor consubstanciada na imposição de grave ameaça. Observa-se, mediante mapeamento espacial, a reiteração indesejada desse padrão delitivo em horário matutino (período singularmente caracterizado pelo deslocamento laboral da população vulnerável). Postula-se que os veículos subtraídos alimentem imediatamente esquemas de clonagem ou desmonte (desmanches) em municípios lindeiros.</span></li>
+                        </ul>
+
+                        <h3 class="font-bold uppercase text-stone-900 border-b border-stone-300 pb-1 mb-2">Grupo: Estelionato e Fraudes Cibernéticas</h3>
+                        <ul class="list-none space-y-3 mb-6">
+                            <li><strong>BO 00196210/2026 | DT Tanquinho:</strong> Delito de estelionato consumado por intermédio de plataformas de redes sociais, materializado na veiculação de anúncios fáticos e enganosos (comércio fictício).</li>
+                            <li><strong>BO 00204133/2026 | 1ª DT Feira:</strong> Fraude em meio eletrônico consubstanciada na realização de transferências bancárias indevidas (falsidade ideológica via sistema PIX). <br><span class="text-stone-600 block mt-1"><em>Análise de Inteligência:</em> Identifica-se, por meio de rastreio inicial de IP, uma expressiva pluralidade de agentes ("contas de passagem"), o que suscita fortes e cristalinos indícios da atuação de associação criminosa homiziada em localidade diversa da jurisdição em comento. Tal arquitetura criminosa torna absolutamente imperiosa a formalização de representação judicial visando ao afastamento irrestrito do sigilo bancário, fiscal e de dados telefônicos dos correntistas arrolados.</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-stone-100 p-6 rounded border border-stone-300 mt-8">
+                        <h2 class="font-bold text-lg mb-4 uppercase text-stone-900">📍 6. Conclusão e Prognóstico Institucional</h2>
+                        <p class="mb-3">A apreciação pormenorizada e acurada do decurso temporal sob escrutínio desvela uma aglomeração substancial de demandas criminais na sede da comarca de Feira de Santana, restando inconteste a proeminência nefasta dos ilícitos contra o patrimônio e, de sobremaneira, das fraudes operadas em meios cibernéticos na composição dos registros policiais. A sistemática de triagem e absorção primária levada a efeito pela novel Delegacia Virtual revelou-se de importância superlativa para a adequação e otimização do fluxo procedimental inerente à 1ª DT, impedindo um colapso administrativo frente ao volume exponencial de crimes sem contato físico.</p>
+                        <p class="mb-3">Afigura-se inescusável, contudo, a manutenção e, quiçá, a ampliação do direcionamento dos recursos investigativos operacionais no âmbito da Delegacia de Homicídios (DH). Tal providência é o único meio profícuo de mitigar a letalidade violenta oriunda de embates sangrentos entre agremiações criminosas que disputam o controle do narcotráfico local. Qualquer inação neste flanco resultará no recrudescimento inaceitável dos índices de homicídio.</p>
+                        <p class="mb-3">De igual modo e com a mesma urgência, faz-se mister o recrudescimento tanto das diretrizes de cunho preventivo (mormente por meio de campanhas informativas maciças promovidas pela ASCOM) quanto das medidas repressivas especializadas em face dos estelionatos digitais, os quais evidenciam uma franca e preocupante trajetória ascendente nesta região. A sofisticação tecnológica das associações criminosas exige aparelhamento correspondente das forças estatais de persecução.</p>
+                        <p class="mb-6">Por derradeiro, conclui-se que as unidades especializadas (DEAM e DRFR) remanescem no exercício de uma função indispensável e basilar no que concerne à neutralização de ofensores contumazes, à salvaguarda das minorias vulneráveis e à desarticulação estrutural de indivíduos e quadrilhas afeitos à subtração de veículos automotores. A atuação sinérgica destas especializadas com o escopo de inteligência delineado alhures constitui o alicerce sob o qual a garantia da ordem pública deverá ser mantida nos vindouros períodos.</p>
+                        
+                        <div class="text-right border-t border-stone-300 pt-4 font-semibold text-stone-800">
+                            <p>Félix Rilton</p>
+                            <p class="text-sm font-normal text-stone-600">Investigador PCBA | Ponto Focal de Análise Criminal - DIRPIN LESTE</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-900 text-stone-400 py-4 text-center text-xs border-t border-stone-800">
+        <p>Documento Restrito • DIRPIN LESTE • Planejamento e Inteligência Policial</p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- DATA STORE ---
+        const productivityData = {
+            labels: ['1ª DT - Feira', '2ª DT - Feira', 'DEAM - Feira', 'Central de Flagrantes', 'DT - Santo Estevão'],
+            values: [386, 221, 66, 59, 42]
+        };
+
+        const riskMatrixData = [
+            {
+                city: "Feira de Santana (Sede)", risk: "Crítico", color: "bg-red-100 text-red-800 border-red-200", badgeColor: "bg-red-600",
+                fatorCritico: "Elevada incidência de CVP com emprego de arma e delitos de estelionato cibernético.",
+                dinamica: "Prevalência de subtrações mediante arma de fogo, executadas por concurso de agentes em motocicletas. Arranjo viário propicia rotas de evasão céleres. Progressão de ilícitos digitais.",
+                social: "Impacto deleterioso na percepção de segurança, precipuamente no núcleo comercial e periferias.",
+                prevencao: "Intensificação do patrulhamento tático em eixos mapeados; campanhas de alfabetização digital."
+            },
+            {
+                city: "Santo Estevão", risk: "Alto", color: "bg-orange-100 text-orange-800 border-orange-200", badgeColor: "bg-orange-500",
+                fatorCritico: "Ocorrências reiteradas de violência doméstica e roubos a transeuntes.",
+                dinamica: "Reincidência de dissabores interpessoais e violência doméstica (ameaças verbais, vias de fato), frequentemente atreladas ao consumo de psicoativos.",
+                social: "Gravosa sob a ótica dos direitos humanos, consubstanciada na desestruturação do núcleo familiar.",
+                prevencao: "Consolidação e aparelhamento do NEAM em âmbito local; articulação de redes de amparo."
+            },
+            {
+                city: "São Gonçalo Dos Campos", risk: "Médio", color: "bg-yellow-100 text-yellow-800 border-yellow-200", badgeColor: "bg-yellow-400",
+                fatorCritico: "Furtos qualificados em propriedades rurais de vasto escopo.",
+                dinamica: "Furtos qualificados e invasões em propriedades rurais (subtração de defensivos agrícolas e semoventes).",
+                social: "Preocupação justificada por parte de produtores agropecuários, afetando a cadeia produtiva local.",
+                prevencao: "Operações direcionadas a rotas de evasão rurais de difícil provimento e combate frontal a receptadores."
+            },
+            {
+                city: "Tanquinho", risk: "Médio", color: "bg-yellow-100 text-yellow-800 border-yellow-200", badgeColor: "bg-yellow-400",
+                fatorCritico: "Delitos contra a honra objetiva e subjetiva em meios telemáticos.",
+                dinamica: "Uso indiscriminado de redes para difamação e injúria.",
+                social: "Clima de animosidade interpessoal em comunidade de menor porte.",
+                prevencao: "Promoção de campanhas de mitigação de crimes de intolerância e letramento digital."
+            },
+            {
+                city: "Humildes", risk: "Médio", color: "bg-yellow-100 text-yellow-800 border-yellow-200", badgeColor: "bg-yellow-400",
+                fatorCritico: "Subtrações patrimoniais em vias de acesso intermunicipais.",
+                dinamica: "Interceptação de veículos e transeuntes em vias de ligação escuras ou ermas.",
+                social: "Sensação de insegurança no deslocamento de trabalhadores.",
+                prevencao: "Recrudescimento imperativo da atenção e barreiras nas rodovias adjacentes."
+            },
+            {
+                city: "Anguera", risk: "Baixo", color: "bg-green-100 text-green-800 border-green-200", badgeColor: "bg-green-500",
+                fatorCritico: "Sinistros no tráfego viário com lesão corporal culposa.",
+                dinamica: "Ausência de criminalidade violenta sistêmica; foco em acidentes automotivos.",
+                social: "Impacto moderado vinculado a incidentes de trânsito.",
+                prevencao: "Fomento a programas interinstitucionais de educação para o trânsito."
+            }
+        ];
+
+        const casesData = [
+            {
+                group: "Crimes Contra a Vida (CVLI)",
+                bo: "BO 00199007/2026 | DH Feira | 13/03",
+                description: "Consumação de homicídio qualificado mediante o emprego de arma de fogo de uso restrito (calibre 9mm). Pluralidade de disparos na região craniana.",
+                analysis: "O modus operandi exibe características intrínsecas à atuação de associações criminosas organizadas (execução sumária/'overkill'). Infere-se retaliações mútuas ou disputas pela hegemonia territorial."
+            },
+            {
+                group: "Crimes Contra a Vida (CVLI)",
+                bo: "BO 00199743/2026 | 1ª COORPIN | 13/03",
+                description: "Ocorrência de morte com circunstâncias incipientes a esclarecer. Vítima identificada como Miralva de Jesus. Cenário sem arrombamento prévio.",
+                analysis: "Aguarda-se de forma peremptória a confecção do laudo pericial necroscópico (DPT) para certificação insofismável da causa mortis."
+            },
+            {
+                group: "Violência Doméstica",
+                bo: "BO 00200199/2026 & BO 00197621/2026 | DEAM / DT Tanquinho",
+                description: "Ameaça e Lesão Corporal (Art. 129, §9º e Art. 147 do CPB c/c Lei Maria da Penha). Em um dos casos, constatou-se a reincidência contumaz do autor.",
+                analysis: "Casos sob estrito e rigoroso monitoramento da DEAM, com encaminhamento para adoção de medidas acautelatórias e possível representação por prisão preventiva em razão da reincidência."
+            },
+            {
+                group: "Crimes Contra o Patrimônio (CVP)",
+                bo: "BO 00183861/2026 | 2ª DT Feira | 09/03",
+                description: "Crime de roubo majorado pelo emprego de arma de fogo (Infração hedionda). Subtração de veículo automotor no horário matutino.",
+                analysis: "Padrão delitivo reiterado no horário de deslocamento laboral. Postula-se que veículos subtraídos alimentem esquemas de desmanche em municípios lindeiros."
+            },
+            {
+                group: "Estelionato e Fraudes Cibernéticas",
+                bo: "BO 00204133/2026 | 1ª DT Feira",
+                description: "Fraude em meio eletrônico consubstanciada na realização de transferências bancárias indevidas (falsidade ideológica via sistema PIX).",
+                analysis: "Identificou-se expressiva pluralidade de 'contas de passagem' (associação criminosa externa). Imperiosa a representação judicial para afastamento irrestrito do sigilo bancário e fiscal."
+            }
+        ];
+
+        // --- CORE LOGIC & INITIALIZATION ---
+        
+        // State
+        let currentSection = 'resumo';
+        let chartInstance = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initMatrizRisco();
+            initCasos();
+            // Pre-render chart so it's ready when tab is clicked
+            renderChart();
+        });
+
+        // --- NAVIGATION ---
+        function navigate(sectionId) {
+            // Update buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${sectionId}`).classList.add('active');
+
+            // Update sections
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden-section'));
+            document.getElementById(`sec-${sectionId}`).classList.remove('hidden-section');
+            
+            currentSection = sectionId;
+        }
+
+        // --- VISUALIZATION RENDERING (Chart.js) ---
+        function renderChart() {
+            const ctx = document.getElementById('prodChart').getContext('2d');
+            
+            // Required setup for ChartJS in responsive container
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: productivityData.labels,
+                    datasets: [{
+                        label: 'Volumetria de Ocorrências',
+                        data: productivityData.values,
+                        backgroundColor: [
+                            '#0369a1', // Sky 700
+                            '#0284c7', // Sky 600
+                            '#0ea5e9', // Sky 500
+                            '#38bdf8', // Sky 400
+                            '#7dd3fc'  // Sky 300
+                        ],
+                        borderWidth: 0,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // CRITICAL for custom container sizing
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#292524',
+                            titleFont: { size: 14, family: 'sans-serif' },
+                            bodyFont: { size: 13, family: 'sans-serif' },
+                            padding: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    return ` Total Registrado: ${context.parsed.y} Ocorrências`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f5f5f4' },
+                            ticks: { color: '#57534e' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { 
+                                color: '#57534e',
+                                maxRotation: 45,
+                                minRotation: 0,
+                                // Label wrapping logic (approx 16 chars max per line simulated by array returning)
+                                callback: function(val, index) {
+                                    let label = this.getLabelForValue(val);
+                                    if (label.length > 15) {
+                                        return label.split(' - ');
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- INTERACTIVE MATRIX LOGIC ---
+        function initMatrizRisco() {
+            const listContainer = document.getElementById('risk-list');
+            
+            riskMatrixData.forEach((item, index) => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-3 rounded border transition-colors flex justify-between items-center focus:outline-none hover:bg-stone-50 border-stone-200 bg-white`;
+                btn.innerHTML = `
+                    <span class="font-medium text-stone-700 text-sm truncate pr-2">${item.city}</span>
+                    <span class="text-[10px] font-bold uppercase px-2 py-1 rounded tracking-wider ${item.color}">${item.risk}</span>
+                `;
+                btn.onclick = () => showRiskDetail(index, btn);
+                listContainer.appendChild(btn);
+            });
+        }
+
+        function showRiskDetail(index, clickedBtn) {
+            // Update active state in list
+            const buttons = document.getElementById('risk-list').querySelectorAll('button');
+            buttons.forEach(b => b.classList.remove('ring-2', 'ring-sky-500', 'bg-sky-50'));
+            clickedBtn.classList.add('ring-2', 'ring-sky-500', 'bg-sky-50');
+
+            const data = riskMatrixData[index];
+            const detailContainer = document.getElementById('risk-detail-container');
+            
+            // Fade effect
+            detailContainer.style.opacity = '0.5';
+            
+            setTimeout(() => {
+                detailContainer.innerHTML = `
+                    <div class="flex justify-between items-start mb-6 border-b border-stone-200 pb-4">
+                        <div>
+                            <h3 class="text-2xl font-bold text-stone-900">${data.city}</h3>
+                            <p class="text-xs text-stone-500 mt-1 uppercase tracking-wide">Relatório de Inteligência Local</p>
+                        </div>
+                        <span class="${data.color} px-4 py-2 rounded-md font-bold text-sm tracking-wider uppercase border shadow-sm">Risco ${data.risk}</span>
+                    </div>
+                    
+                    <div class="space-y-5 flex-grow text-stone-700 text-sm">
+                        <div class="bg-stone-50 p-4 rounded-lg border border-stone-100">
+                            <h4 class="font-bold text-stone-800 mb-1 flex items-center"><span class="mr-2">⚠️</span> Fator de Criticidade</h4>
+                            <p class="leading-relaxed">${data.fatorCritico}</p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-stone-800 mb-1 flex items-center text-sky-800"><span class="mr-2">🔄</span> Dinâmica (Modus Operandi)</h4>
+                            <p class="leading-relaxed text-justify">${data.dinamica}</p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-stone-800 mb-1 flex items-center text-amber-700"><span class="mr-2">👥</span> Repercussão Sociodemográfica</h4>
+                            <p class="leading-relaxed text-justify">${data.social}</p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-stone-800 mb-1 flex items-center text-green-700"><span class="mr-2">🛡️</span> Diretriz de Prevenção</h4>
+                            <p class="leading-relaxed text-justify">${data.prevencao}</p>
+                        </div>
+                    </div>
+                `;
+                detailContainer.style.opacity = '1';
+            }, 150);
+        }
+
+        // --- ACCORDION LOGIC FOR CASES ---
+        function initCasos() {
+            const container = document.getElementById('cases-accordion');
+            
+            casesData.forEach((caso, index) => {
+                const item = document.createElement('div');
+                item.className = "border border-stone-200 rounded-lg bg-white overflow-hidden shadow-sm";
+                
+                item.innerHTML = `
+                    <button class="w-full text-left px-5 py-4 focus:outline-none flex justify-between items-center bg-stone-50 hover:bg-stone-100 transition-colors" onclick="toggleAccordion(${index})">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-sky-700 block mb-1">${caso.group}</span>
+                            <span class="font-semibold text-stone-800 text-sm md:text-base">${caso.bo}</span>
+                        </div>
+                        <span id="icon-${index}" class="text-stone-400 text-xl font-mono transform transition-transform">+</span>
+                    </button>
+                    <div id="content-${index}" class="hidden-section px-5 py-4 border-t border-stone-100 text-sm text-stone-700 leading-relaxed text-justify">
+                        <p class="mb-3"><strong class="text-stone-900">Materialidade:</strong> ${caso.description}</p>
+                        <div class="bg-sky-50 p-3 rounded border border-sky-100 text-sky-900">
+                            <strong class="block mb-1">Análise de Inteligência:</strong>
+                            ${caso.analysis}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function toggleAccordion(index) {
+            const content = document.getElementById(`content-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            
+            if (content.classList.contains('hidden-section')) {
+                content.classList.remove('hidden-section');
+                icon.textContent = '-';
+            } else {
+                content.classList.add('hidden-section');
+                icon.textContent = '+';
+            }
+        }
+    </script>
+</body>
+</html>
