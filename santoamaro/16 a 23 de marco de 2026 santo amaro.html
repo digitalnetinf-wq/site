@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Inteligência Estratégica - DIRPIN LESTE</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Serif', serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .font-institutional {
+            font-family: 'Cinzel', serif;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 400px;
+            min-height: 250px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1e293b; 
+        }
+
+        .report-paper {
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 3rem;
+            max-width: 900px;
+            margin: 0 auto;
+            border: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen">
+
+    <!-- Chosen Palette: Slate & Amber (Institucional) -->
+    
+    <!-- Application Structure Plan: Interface de Dashboard com Navegação Lateral. 
+         A estrutura foi expandida para incluir uma "página" final (aba) contendo o relatório formal em sua íntegra. 
+         A navegação via switchTab simula a troca de páginas em uma SPA, garantindo foco em cada pilar: 
+         Resumo, Casos, Dados, Riscos e o Documento Oficial. -->
+    
+    <!-- Visualization & Content Choices: 
+        1. Panorama -> Cards de KPI (HTML) para leitura imediata.
+        2. Eventos -> Cards Interativos (JS) para detalhes qualitativos.
+        3. Estatísticas -> Gráficos Chart.js (Canvas) para tendências.
+        4. Matriz -> Tabela Dinâmica (JS Filter) para gestão de risco.
+        5. Relatório Íntegra -> Layout Estilizado de Documento (HTML/Tailwind) para formalidade.
+        Confirming NO SVG/Mermaid. -->
+        
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Sidebar Navigation -->
+    <nav class="w-full md:w-72 bg-slate-900 text-slate-100 flex flex-col shadow-2xl z-20 sticky top-0 md:h-screen">
+        <div class="p-6 border-b border-slate-700 bg-slate-950 text-center">
+            <div class="text-4xl mb-2 text-amber-500">⚖️</div>
+            <h1 class="font-institutional text-xl tracking-wider text-amber-500">DIRPIN LESTE</h1>
+            <p class="text-xs text-slate-400 mt-2 uppercase tracking-widest border border-slate-700 inline-block px-2 py-1">Documento Reservado</p>
+        </div>
+        
+        <div class="flex-grow p-4 space-y-2 overflow-y-auto" id="nav-buttons">
+            <button onclick="switchTab('panorama')" class="w-full text-left px-4 py-3 rounded bg-slate-800 border-l-4 border-amber-500 hover:bg-slate-700 transition-colors nav-btn" data-target="panorama">
+                <span class="mr-2">📊</span> Sumário Executivo
+            </button>
+            <button onclick="switchTab('eventos')" class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 border-l-4 border-transparent hover:border-slate-500 transition-colors nav-btn" data-target="eventos">
+                <span class="mr-2">🔎</span> Eventos Sentinelas
+            </button>
+            <button onclick="switchTab('estatisticas')" class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 border-l-4 border-transparent hover:border-slate-500 transition-colors nav-btn" data-target="estatisticas">
+                <span class="mr-2">📈</span> Delineação Estatística
+            </button>
+            <button onclick="switchTab('matriz')" class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 border-l-4 border-transparent hover:border-slate-500 transition-colors nav-btn" data-target="matriz">
+                <span class="mr-2">⚠️</span> Matriz de Risco
+            </button>
+            <button onclick="switchTab('relatorio')" class="w-full text-left px-4 py-3 rounded hover:bg-slate-800 border-l-4 border-transparent hover:border-slate-500 transition-colors nav-btn" data-target="relatorio">
+                <span class="mr-2">📄</span> Relatório Íntegra
+            </button>
+        </div>
+
+        <div class="p-4 text-xs text-slate-500 border-t border-slate-800 bg-slate-950">
+            <p><strong>Remetente:</strong> Ponto Focal de Inteligência</p>
+            <p><strong>Status:</strong> Análise Semanal</p>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow p-4 md:p-8 overflow-y-auto">
+        
+        <!-- TAB 1: Sumário Executivo -->
+        <section id="panorama" class="tab-content active">
+            <header class="mb-8 border-b-2 border-slate-200 pb-4">
+                <h2 class="font-institutional text-2xl md:text-3xl text-slate-800">Panorama Tático Semanal</h2>
+                <p class="text-slate-600 italic mt-1">Visão macro dos indicadores de desempenho e segurança regional.</p>
+            </header>
+
+            <div class="mb-6">
+                <p class="text-lg leading-relaxed text-slate-700">
+                    <strong>Preâmbulo Analítico:</strong> A ambiência criminológica sob a jurisdição da 3ª Coordenadoria Regional de Polícia do Interior apresenta-se em estado de relativa incolumidade, caracterizado por uma <span class="bg-amber-100 px-1 font-bold text-amber-900 border border-amber-300">Estabilidade Controlada</span>.
+                </p>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white p-6 rounded shadow-sm border border-slate-200 border-t-4 border-t-emerald-600 text-center">
+                    <h3 class="text-sm text-slate-500 uppercase tracking-widest mb-1">Taxa CVLI</h3>
+                    <div class="text-5xl font-institutional text-emerald-700 mb-2">0</div>
+                    <p class="text-xs text-slate-600">Patamar Nulo</p>
+                </div>
+                <div class="bg-white p-6 rounded shadow-sm border border-slate-200 border-t-4 border-t-blue-600 text-center">
+                    <h3 class="text-sm text-slate-500 uppercase tracking-widest mb-1">Procedimentos</h3>
+                    <div class="text-5xl font-institutional text-blue-700 mb-2">52</div>
+                    <p class="text-xs text-slate-600">IPs e TCCIs Concluídos</p>
+                </div>
+                <div class="bg-white p-6 rounded shadow-sm border border-slate-200 border-t-4 border-t-amber-600 text-center">
+                    <h3 class="text-sm text-slate-500 uppercase tracking-widest mb-1">M. Protetivas</h3>
+                    <div class="text-5xl font-institutional text-amber-700 mb-2">10</div>
+                    <p class="text-xs text-slate-600">Eficácia Protetiva de Gênero</p>
+                </div>
+                <div class="bg-white p-6 rounded shadow-sm border border-slate-200 border-t-4 border-t-rose-600 text-center">
+                    <h3 class="text-sm text-slate-500 uppercase tracking-widest mb-1">Flagrantes</h3>
+                    <div class="text-5xl font-institutional text-rose-700 mb-2">05</div>
+                    <p class="text-xs text-slate-600">Intervenções Prontas</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-100 p-6 rounded border border-slate-300">
+                <h3 class="font-institutional text-xl text-slate-800 mb-3 border-b border-slate-300 pb-2">Oportunidade de Marketing Positivo</h3>
+                <p class="text-slate-700">
+                    A custódia em flagrante sob o registro 00223659/2026 exemplifica a atuação da Polícia Civil na prevenção de tragédias sociais antes de sua consumação, reforçando o papel da instituição na salvaguarda da coletividade.
+                </p>
+            </div>
+        </section>
+
+        <!-- TAB 2: Eventos Sentinelas -->
+        <section id="eventos" class="tab-content">
+            <header class="mb-8 border-b-2 border-slate-200 pb-4">
+                <h2 class="font-institutional text-2xl md:text-3xl text-slate-800">Escrutínio de Eventos Sentinelas</h2>
+                <p class="text-slate-600 italic mt-1">Detalhamento qualitativo de ocorrências de alta relevância tática.</p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="sentinel-container">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- TAB 3: Delineação Estatística -->
+        <section id="estatisticas" class="tab-content">
+            <header class="mb-8 border-b-2 border-slate-200 pb-4">
+                <h2 class="font-institutional text-2xl md:text-3xl text-slate-800">Delineação Quantitativa</h2>
+                <p class="text-slate-600 italic mt-1">Representação gráfica das tendências criminais e produtividade.</p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded shadow-sm border border-slate-200">
+                    <h3 class="font-institutional text-center text-lg text-slate-800 mb-4">Volume Delitivo (Ranking Top 5)</h3>
+                    <div class="chart-container">
+                        <canvas id="crimesChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded shadow-sm border border-slate-200">
+                    <h3 class="font-institutional text-center text-lg text-slate-800 mb-4">Produtividade Operacional</h3>
+                    <div class="chart-container">
+                        <canvas id="produtividadeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: Matriz de Risco -->
+        <section id="matriz" class="tab-content">
+            <header class="mb-8 border-b-2 border-slate-200 pb-4">
+                <h2 class="font-institutional text-2xl md:text-3xl text-slate-800">Matriz de Risco Regional</h2>
+                <p class="text-slate-600 italic mt-1">Vulnerabilidades por ente federativo e ações de gerenciamento.</p>
+            </header>
+
+            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="w-full md:w-1/3">
+                    <label for="riskFilter" class="block text-sm font-medium text-slate-700 mb-1">Filtrar Vulnerabilidade:</label>
+                    <select id="riskFilter" onchange="filterRiskMatrix()" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 rounded-md bg-white border">
+                        <option value="Todos">Exibir Todos</option>
+                        <option value="Elevado">Elevado</option>
+                        <option value="Moderado">Moderado</option>
+                        <option value="Reduzido">Reduzido</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="bg-white rounded shadow-sm border border-slate-200 overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Unidade</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Risco</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Variável</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="risk-table-body" class="bg-white divide-y divide-slate-200 text-sm">
+                        <!-- Injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TAB 5: Relatório Íntegra (Added as final tab) -->
+        <section id="relatorio" class="tab-content">
+            <header class="mb-8 border-b-2 border-slate-200 pb-4">
+                <h2 class="font-institutional text-2xl md:text-3xl text-slate-800">Documento Formal de Inteligência</h2>
+                <p class="text-slate-600 italic mt-1">Exegese analítica completa para fins de arquivo e despacho.</p>
+            </header>
+
+            <div class="report-paper font-serif leading-relaxed text-slate-900">
+                <div class="text-center mb-8">
+                    <h3 class="font-institutional text-xl font-bold uppercase underline decoration-amber-500 underline-offset-8">CABEÇALHO INSTITUCIONAL</h3>
+                </div>
+                
+                <div class="space-y-1 mb-8 text-sm">
+                    <p><strong>Epígrafe:</strong> RELATÓRIO DE EXEGESE ANALÍTICA E DINÂMICA CRIMINOLÓGICA — BIÊNIO 2026 — DIRPIN LESTE</p>
+                    <p><strong>Destinatário:</strong> Excelentíssimo Senhor Diretor da DIRPIN LESTE / Assessoria de Comunicação Social / Coordenação da 3ª COORPIN</p>
+                    <p><strong>Remetente:</strong> Ponto Focal de Inteligência e Análise Criminal — DIRPIN LESTE</p>
+                    <p><strong>Lapso Temporal:</strong> Dezesseis de março de dois mil e vinte e seis a vinte e dois de março de dois mil e vinte e seis</p>
+                    <p><strong>Objeto:</strong> Análise da Incolumidade Tática, Eficácia do Aparelho Protetivo de Gênero e Mitigação de Vulnerabilidades nas Zonas de Adjacência de Santo Amaro</p>
+                    <p><strong>Grau de Sigilo:</strong> RESERVADO</p>
+                </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="font-institutional font-bold border-b border-slate-200 mb-2">I. DA EXEGESE DOS DADOS E DOS EVENTOS SENTINELAS (OSINT & HUMINT)</h4>
+                        <p class="text-justify indent-8">Mediante o processamento técnico de dados extraídos dos sistemas de Procedimentos Policiais Eletrônicos (PPE), em concatenação com o escrutínio de fontes abertas e informes de inteligência humana, procedeu-se ao mapeamento e à contextualização dos eventos de preeminente relevância tática descritos infra:</p>
+                        
+                        <ul class="list-disc ml-8 mt-4 space-y-3 italic text-sm">
+                            <li><strong>Do Registro de Infração de Trânsito (22/03/2026):</strong> Consubstanciou-se, no registro sob o número 00223659/2026, a custódia em flagrante delito de indivíduo identificado pelas iniciais A.A.S.</li>
+                            <li><strong>Da Tutela da Integridade Infantojuvenil (22/03/2026):</strong> Sob o protocolo 00223598/2026, executou-se diligência pela 1ª Delegacia Territorial relativa à prática de maus-tratos contra menor.</li>
+                            <li><strong>Da Ofensa à Dignidade e Integridade Psíquica (20/03/2026):</strong> No âmbito da NEAM, instaurou-se o procedimento 00215941/2026 com vistas à apuração de injúria qualificada e ameaça.</li>
+                            <li><strong>Da Violação de Domicílio (18/03/2026):</strong> Registro 00211959/2026 detalha invasão sob o domínio da Lei Federal n.º 11.340/2006.</li>
+                            <li><strong>Da Subtração de Patrimônio (16/03/2026):</strong> Identificou-se a autoria de furto qualificado (Art. 155 CPB) no registro 00206080/2026.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-institutional font-bold border-b border-slate-200 mb-2">1. DO SUMÁRIO EXECUTIVO E DO PANORAMA ESTRATÉGICO</h4>
+                        <p class="text-justify indent-8">A ambiência criminológica sob a jurisdição da 3ª COORPIN apresenta-se em estado de relativa incolumidade, caracterizado por uma "Estabilidade Controlada". O indicador de maior densidade analítica é a manutenção da taxa de Crimes Violentos Letais Intencionais (CVLI) em patamar nulo.</p>
+                        <p class="text-justify indent-8 mt-2">Observa-se um fenômeno de "Criminalidade de Proximidade", no qual as infrações contra a honra e o patrimônio individual sobrepujam os delitos de vultosa complexidade logística.</p>
+                    </div>
+
+                    <div>
+                        <h4 class="font-institutional font-bold border-b border-slate-200 mb-2">2. DA ANÁLISE DA MANCHA CRIMINAL</h4>
+                        <div class="ml-4 space-y-4 text-sm">
+                            <p><strong>Santo Amaro (Sede):</strong> Prevalência de infrações de subsistência e delitos patrimoniais de oportunidade. Fator exógeno: consumo de substâncias em logradouros.</p>
+                            <p><strong>NEAM:</strong> Concentração de tipos penais atinentes à liberdade individual (ameaças). Indicador de fortalecimento da confiança institucional.</p>
+                            <p><strong>Eixo Saubara – Cachoeira:</strong> Monitoramento de vias de acesso logrou impedir estabelecimento de bases operacionais exógenas.</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-institutional font-bold border-b border-slate-200 mb-2">3. DOS RESULTADOS OPERACIONAIS</h4>
+                        <p class="text-justify indent-8">A produtividade institucional no período em exame transcendeu as projeções estatísticas: Conclusão de 52 expedientes cartorários (30 IPs / 22 TCCIs); 10 Medidas Protetivas (< 24h); 05 Flagrantes.</p>
+                    </div>
+
+                    <div>
+                        <h4 class="font-institutional font-bold border-b border-slate-200 mb-2">CONCLUSÃO E PROSPECÇÃO</h4>
+                        <p class="text-justify indent-8">O exame técnico dos dados coligidos assevera a resiliência operacional da 3ª COORPIN. A manutenção da taxa de homicídios em patamar nulo constitui o êxito de maior relevância estratégica. Projeta-se necessidade de recrudescimento no combate às fraudes eletrônicas.</p>
+                    </div>
+
+                    <div class="pt-10 text-center">
+                        <p class="font-institutional font-bold">Félix Rilton</p>
+                        <p class="text-xs">Analista de Dados Criminológicos — DIRPIN LESTE</p>
+                        <p class="text-xs uppercase">Investigador de Polícia Civil da Bahia</p>
+                        <p class="text-xs">Matrícula: [REDACTED]</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Element -->
+    <div id="textModal" class="fixed inset-0 bg-slate-900 bg-opacity-75 z-50 hidden flex justify-center items-center px-4">
+        <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 rounded-t-lg">
+                <h3 id="modalTitle" class="font-institutional text-lg font-bold text-slate-800"></h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-800 font-bold text-xl px-2">&times;</button>
+            </div>
+            <div id="modalContent" class="p-6 overflow-y-auto text-slate-700 leading-relaxed text-sm">
+            </div>
+            <div class="p-4 border-t border-slate-200 bg-slate-50 rounded-b-lg text-right">
+                <button onclick="closeModal()" class="bg-slate-800 text-white py-2 px-4 rounded text-sm">Fechar Ciência</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sentinelEvents = [
+            { id: "ev1", title: "Infração de Trânsito", date: "22/03", icon: "🚗", summary: "Art. 306 CTB - Risco Coletivo.", content: "Consubstanciou-se no registro 00223659/2026 a custódia em flagrante por embriaguez ao volante em via de vultosa circulação." },
+            { id: "ev2", title: "Maus-tratos Menor", date: "22/03", icon: "🛡️", summary: "Art. 136 CPB - Denúncia Anônima.", content: "Diligência pela 1ª DT após notícia-crime via canal anônimo. Ratifica premência da cooperação social no recôndito doméstico." },
+            { id: "ev3", title: "Ofensa Psíquica", date: "20/03", icon: "⚖️", summary: "NEAM - Medida de Afastamento.", content: "Procedimento 00215941/2026. Acolhimento pela estrutura de proteção estatal e interrupção de progressão deletéria." },
+            { id: "ev4", title: "Violação de Domicílio", date: "18/03", icon: "🚪", summary: "LMP - Risco de Evolução Grave.", content: "Registro 00211959/2026. Invasão física das barreiras residenciais após distrato relacional. Contenção policial eficaz." }
+        ];
+
+        const riskMatrixData = [
+            { location: "Santo Amaro", risk: "Moderado", variable: "Violência Doméstica", proposition: "Expansão Protetiva" },
+            { location: "Saubara", risk: "Elevado", variable: "Facções RMS", proposition: "Operações Supressão" },
+            { location: "Cachoeira", risk: "Moderado", variable: "Patrimônio Histórico", proposition: "Vigilância Perímetro" },
+            { location: "Terra Nova", risk: "Reduzido", variable: "Conflitos Agrários", proposition: "Mediação Lides" }
+        ];
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-800', 'border-amber-500');
+                btn.classList.add('border-transparent');
+                if (btn.dataset.target === tabId) {
+                    btn.classList.add('bg-slate-800', 'border-amber-500');
+                    btn.classList.remove('border-transparent');
+                }
+            });
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+
+            if (tabId === 'estatisticas') initCharts();
+        }
+
+        function renderSentinelEvents() {
+            const container = document.getElementById('sentinel-container');
+            container.innerHTML = sentinelEvents.map(ev => `
+                <div class="bg-white p-5 rounded border border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col h-full" onclick="openModal('${ev.id}')">
+                    <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+                        <span class="text-2xl">${ev.icon}</span>
+                        <span class="text-xs font-bold text-slate-500">${ev.date}</span>
+                    </div>
+                    <h4 class="font-institutional text-slate-800 font-bold mb-2">${ev.title}</h4>
+                    <p class="text-sm text-slate-600 mb-4">${ev.summary}</p>
+                    <div class="text-xs text-amber-600 font-bold uppercase mt-auto">Detalhes ➔</div>
+                </div>
+            `).join('');
+        }
+
+        function openModal(id) {
+            const ev = sentinelEvents.find(e => e.id === id);
+            if (!ev) return;
+            document.getElementById('modalTitle').innerText = `${ev.icon} ${ev.title}`;
+            document.getElementById('modalContent').innerHTML = `<p>${ev.content}</p>`;
+            document.getElementById('textModal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('textModal').classList.add('hidden'); }
+
+        function renderRiskTable(data) {
+            document.getElementById('risk-table-body').innerHTML = data.map(item => `
+                <tr>
+                    <td class="px-6 py-4 font-bold text-slate-800">${item.location}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded-full text-xs font-bold ${item.risk === 'Elevado' ? 'bg-rose-100 text-rose-800' : item.risk === 'Moderado' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
+                            ${item.risk}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-slate-600 italic">${item.variable}</td>
+                    <td class="px-6 py-4 text-slate-800">${item.proposition}</td>
+                </tr>
+            `).join('');
+        }
+
+        function filterRiskMatrix() {
+            const val = document.getElementById('riskFilter').value;
+            renderRiskTable(val === "Todos" ? riskMatrixData : riskMatrixData.filter(i => i.risk === val));
+        }
+
+        function initCharts() {
+            Chart.defaults.font.family = "'Noto Serif', serif";
+            new Chart(document.getElementById('crimesChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['V. Doméstica (42%)', 'Estelionato', 'Viários', 'Furtos', 'Maus-tratos'],
+                    datasets: [{ data: [22, 9, 8, 7, 3], backgroundColor: ['#b91c1c', '#b45309', '#334155', '#64748b', '#cbd5e1'] }]
+                },
+                options: { maintainAspectRatio: false }
+            });
+
+            new Chart(document.getElementById('produtividadeChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['IPs', 'TCCIs', 'M. Prot.', 'Flagrantes'],
+                    datasets: [{ label: 'Vol.', data: [30, 22, 10, 5], backgroundColor: '#1e293b' }]
+                },
+                options: { maintainAspectRatio: false }
+            });
+        }
+
+        window.onload = () => { renderSentinelEvents(); renderRiskTable(riskMatrixData); };
+    </script>
+</body>
+</html>

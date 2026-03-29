@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exposição Analítica Estratégica - DIRPIN LESTE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #fafaf9;
+            color: #292524;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 35vh;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+                max-height: 400px;
+            }
+        }
+        .glass-panel {
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid #e7e5e4;
+        }
+        .risk-critico { border-left-color: #991b1b; }
+        .risk-alto { border-left-color: #c2410c; }
+        .risk-medio { border-left-color: #ca8a04; }
+        
+        .badge-critico { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .badge-alto { background-color: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+        .badge-medio { background-color: #fefce8; color: #ca8a04; border: 1px solid #fef08a; }
+        
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-content.active {
+            max-height: 800px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .nav-active {
+            border-bottom: 2px solid #292524;
+            color: #1c1917;
+        }
+        
+        /* Estilização para o Relatório de Texto - Formato de Documento */
+        .doc-paper {
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+            color: #1c1917;
+        }
+        .doc-header-text {
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .doc-table th, .doc-table td {
+            border: 1px solid #292524;
+            padding: 8px;
+            text-align: left;
+        }
+        .doc-table th {
+            background-color: #f5f5f4;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Chosen Palette: Warm Neutrals (Stone/Slate) with Muted Status Accents (Crimson/Ochre) -->
+    <!-- Application Structure Plan: Dashboard interativo com navegação por abas (SPA). O conteúdo foi segmentado em quatro páginas: 1. Dashboard (KPIs e Gráficos), 2. Mancha Criminal (Análise por município), 3. Atividades (Logros operacionais) e 4. Relatório (Versão textual formal completa). Esta estrutura permite que o usuário foque em uma dimensão analítica por vez, mantendo a integridade documental. -->
+    <!-- Visualization & Content Choices: Implementação de navegação via JS para alternar visibilidade de seções. Aba 'Relatório' atualizada com o texto de extrema formalidade fornecido pelo usuário. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <header class="bg-stone-900 text-stone-100 py-6 border-b-4 border-stone-700 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-start flex-col md:flex-row gap-4">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold uppercase tracking-wider mb-1">Exposição Analítica Estratégica</h1>
+                    <h2 class="text-base text-stone-400 font-medium tracking-tight">DIRPIN LESTE – EXERCÍCIO 2026</h2>
+                </div>
+                <div class="text-right border border-stone-600 bg-stone-800 p-2 rounded-lg w-full md:w-auto">
+                    <p class="text-[10px] font-bold text-red-400 uppercase tracking-widest mb-1">&#9888; RESERVADO</p>
+                    <p class="text-[10px] text-stone-400">16/03/2026 a 23/03/2026</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex overflow-x-auto no-scrollbar gap-4 md:gap-8 py-4">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-active whitespace-nowrap text-xs font-bold text-stone-500 hover:text-stone-900 transition-all uppercase tracking-widest pb-1">Dashboard</button>
+                <button onclick="switchTab('mancha')" id="nav-mancha" class="whitespace-nowrap text-xs font-bold text-stone-500 hover:text-stone-900 transition-all uppercase tracking-widest pb-1">Mancha Criminal</button>
+                <button onclick="switchTab('operacional')" id="nav-operacional" class="whitespace-nowrap text-xs font-bold text-stone-500 hover:text-stone-900 transition-all uppercase tracking-widest pb-1">Logros Operacionais</button>
+                <button onclick="switchTab('relatorio')" id="nav-relatorio" class="whitespace-nowrap text-xs font-bold text-stone-500 hover:text-stone-900 transition-all uppercase tracking-widest pb-1">Relatório Texto</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+
+        <!-- ABA: DASHBOARD -->
+        <div id="tab-dashboard" class="tab-content active space-y-10">
+            <section>
+                <div class="mb-4">
+                    <h3 class="text-lg font-bold text-stone-800 uppercase border-b border-stone-300 pb-2 mb-3 tracking-wide">I. Sumário Executivo e Vetores de Tendência</h3>
+                    <p class="text-xs text-stone-500 italic leading-relaxed">Consolidação panorâmica dos indicadores criminais e análise macroscópica da transmutação tática regional.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8" id="kpi-container">
+                    <!-- Gerado via JS -->
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1 glass-panel p-6 rounded-xl shadow-sm flex flex-col items-center">
+                        <h4 class="text-xs font-bold text-stone-600 uppercase tracking-wider mb-6 text-center">Distribuição Delitiva Registrada</h4>
+                        <div class="chart-container">
+                            <canvas id="crimeDistributionChart"></canvas>
+                        </div>
+                        <p class="text-[10px] text-stone-400 mt-6 text-center leading-tight">Preponderância da Violência Doméstica sobre o universo de infrações catalogadas no lapso temporal.</p>
+                    </div>
+
+                    <div class="lg:col-span-2 glass-panel p-6 rounded-xl shadow-sm">
+                        <h4 class="text-xs font-bold text-stone-600 uppercase tracking-wider mb-4">Resolutividade e Desempenho por Unidade</h4>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-stone-50 rounded border border-stone-200">
+                                <span class="text-[10px] font-black text-stone-400 uppercase block mb-1">Destaque Operacional</span>
+                                <h5 class="font-bold text-stone-800 text-sm mb-1 uppercase">DEAM Alagoinhas</h5>
+                                <p class="text-xs text-stone-600 leading-relaxed">Elevado índice de conversão de notícias-crime em segregações cautelares e medidas protetivas.</p>
+                            </div>
+                            <div class="p-4 bg-stone-50 rounded border border-stone-200">
+                                <span class="text-[10px] font-black text-stone-400 uppercase block mb-1">Estratégia Logística</span>
+                                <h5 class="font-bold text-stone-800 text-sm mb-1 uppercase">DRFR Alagoinhas</h5>
+                                <p class="text-xs text-stone-600 leading-relaxed">Eficiência na identificação de cadeias de receptação e recuperação de ativos subtraídos.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ABA: MANCHA CRIMINAL -->
+        <div id="tab-mancha" class="tab-content space-y-8">
+            <section>
+                <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-stone-300 pb-2 mb-6 gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-stone-800 uppercase tracking-wide">II. Análise Geográfica da Mancha Criminal</h3>
+                        <p class="text-xs text-stone-500 italic mt-1">Fenomenologia criminal por jurisdição e respectivos estratagemas de mitigação.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label for="riskFilter" class="text-[10px] font-bold text-stone-400 uppercase">Filtrar Risco:</label>
+                        <select id="riskFilter" class="bg-white border border-stone-300 text-xs rounded p-2 outline-none focus:ring-1 focus:ring-stone-400">
+                            <option value="todos">Todos</option>
+                            <option value="Crítico">Crítico</option>
+                            <option value="Alto">Alto</option>
+                            <option value="Médio">Médio</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="municipalities-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Gerado via JS -->
+                </div>
+            </section>
+        </div>
+
+        <!-- ABA: LOGROS OPERACIONAIS -->
+        <div id="tab-operacional" class="tab-content space-y-8">
+            <section>
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-stone-800 uppercase border-b border-stone-300 pb-2 mb-3 tracking-wide">III. Logros Operacionais e Casos Críticos</h3>
+                    <p class="text-xs text-stone-500 italic">Repositório de protocolos de alta relevância investigativa resolvidos no período.</p>
+                </div>
+                <div class="space-y-4" id="occurrences-container">
+                    <!-- Gerado via JS -->
+                </div>
+            </section>
+        </div>
+
+        <!-- ABA: RELATÓRIO TEXTO -->
+        <div id="tab-relatorio" class="tab-content">
+            <section class="max-w-5xl mx-auto bg-white p-8 md:p-16 shadow-sm border border-stone-200 rounded-sm doc-paper text-stone-900">
+                
+                <!-- Cabeçalho do Documento -->
+                <div class="text-center mb-12 doc-header-text">
+                    <h3 class="text-xl font-bold uppercase mb-2">EXPOSIÇÃO ANALÍTICA ESTRATÉGICA ACERCA DA DINÂMICA CRIMINAL – EXERCÍCIO DE 2026 – DIRPIN LESTE 📍</h3>
+                    <div class="w-full h-1 bg-stone-900 mb-6"></div>
+                    
+                    <div class="text-left grid grid-cols-1 gap-1 text-sm font-semibold uppercase">
+                        <p><span class="text-stone-500">DESTINATÁRIO:</span> Digníssimo Gabinete do Diretor da DIRPIN Leste / Assessoria de Comunicação Social / Coordenação da 2ª COORPIN</p>
+                        <p><span class="text-stone-500">REMETENTE:</span> Ponto Focal de Inteligência e Análise Criminal</p>
+                        <p><span class="text-stone-500">LAPSO TEMPORAL:</span> 16 de março de 2026 a 23 de março de 2026</p>
+                        <p><span class="text-stone-500">OBJETO:</span> Diagnóstico de Alta Complexidade sobre a Transmutação Tática para a Criminalidade Tecnológica e a Gestão de Riscos Relativos a Crimes de Gênero</p>
+                        <p><span class="text-stone-500">GRAU DE SIGILO:</span> RESERVADO</p>
+                    </div>
+                </div>
+
+                <div class="space-y-8 text-base text-justify leading-relaxed">
+                    
+                    <section>
+                        <h4 class="font-bold uppercase mb-4 border-b border-stone-300 pb-1">I. DA COMPILAÇÃO DE DADOS E INTELIGÊNCIA ORIUNDA DE FONTES OSTENSIVAS E RESERVADAS 📍</h4>
+                        <p>A colheita de dados atinente ao período supracitado fundamentou-se no escrutínio dos registros constantes no Sistema de Procedimento Policial Eletrônico (PPE), em convergência com informes de inteligência coligidos em campo. Priorizou-se a qualificação analítica do fato, em detrimento da mera catalogação quantitativa, visando a compreensão da gravidade qualitativa das ocorrências no âmbito da 2ª COORPIN:</p>
+                        
+                        <div class="mt-4 space-y-4">
+                            <h5 class="font-bold italic underline">1. Do Segmento Relativo aos Delitos Contra a Dignidade Sexual e Integridade Física:</h5>
+                            <ul class="list-disc pl-6 space-y-2">
+                                <li><strong>Protocolo BO 00223779 (23/03/2026):</strong> Atinente à infração de Estupro Qualificado (1ª DT Alagoinhas). A fenomenologia indica o aproveitamento de oportunidade fortuita, sucedido por violência física de natureza extrema. A célere intervenção da unidade logrou não apenas a custódia do suposto infrator, mas outrossim a preservação do acervo probatório necessário aos exames de DNA, elementos de imprescindível valor para o futuro convencimento jurisdicional.</li>
+                                <li><strong>Protocolo BO 00204724 (16/03/2026):</strong> Relativo à Lesão Corporal de Natureza Grave (DEAM). O episódio evidencia a persistência de agressões físicas como mecanismo de controle coercitivo no microssistema doméstico, demandando monitoramento contínuo para a mitigação do risco de feminicídio.</li>
+                            </ul>
+
+                            <h5 class="font-bold italic underline">2. Do Segmento de Proteção à Mulher e Enfrentamento à Criminalidade Tecnológica:</h5>
+                            <ul class="list-disc pl-6 space-y-2">
+                                <li><strong>Protocolo BO 00219882 (20/03/2026):</strong> Concernente à Violência Psicológica perpetrada mediante Inteligência Artificial. Tal expediente configura um marco técnico-jurídico, no qual se verificou a utilização de algoritmos de Deepfake para a simulação de diálogos e imagens da vítima em contextos desabonadores, com o fito de extorsão e menoscabo. Depreende-se a necessidade de estabelecimento de novas diretrizes investigativas, nas quais a perícia digital assume o epicentro do inquérito policial.</li>
+                                <li><strong>Protocolo BO 00220284 (20/03/2026):</strong> Descumprimento de Medida Protetiva de Urgência (MPU). A inobservância de determinação judicial por parte do agressor denota ausência de percepção acerca da coercitividade estatal, o que fundamenta a necessidade de segregação cautelar imediata.</li>
+                            </ul>
+
+                            <h5 class="font-bold italic underline">3. Do Segmento de Repressão aos Crimes Violentos contra o Patrimônio (CVP):</h5>
+                            <ul class="list-disc pl-6">
+                                <li><strong>Protocolo BO 00222124 (21/03/2026):</strong> Apreensão de Veículo e Identificação de Célula de Furtos e Roubos (DRFR). A identificação de autoria e a subsequente recuperação do bem móvel indicam a existência de atuação reticular, na qual veículos subtraídos são utilizados como insumos logísticos para infrações de maior potencial ofensivo.</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h4 class="font-bold uppercase mb-4 border-b border-stone-300 pb-1">1. DO SUMÁRIO EXECUTIVO (DIRETRIZES ESTRATÉGICAS) 📍</h4>
+                        <p>Observa-se, no espectro geográfico sob jurisdição da 2ª COORPIN, um fenômeno de transmutação tática das atividades ilícitas. conquanto se verifique a estabilização estatística dos Crimes Violentos Letais Intencionais (CVLI) — decorrência de operações integradas pregressas — constata-se a migração dos esforços criminosos para modalidades que oferecem reduzido risco de embate físico e acentuado potencial de dano psíquico ou patrimonial.</p>
+                        <p class="mt-2">A ocorrência registrada sob o número 00219882 constitui o sintoma mais agudo desta transição, evidenciando que infratores locais passam a adotar ferramentas de alta tecnologia para potencializar a coação doméstica. Em contrapartida, a Delegacia de Repressão a Furtos e Roubos (DRFR) tem obtido êxito na estratégia de asfixia logística, ao priorizar a recuperação de ativos e a identificação de cadeias de receptação, o que resulta na redução reflexa dos índices de criminalidade de rua em Alagoinhas.</p>
+                    </section>
+
+                    <section>
+                        <h4 class="font-bold uppercase mb-4 border-b border-stone-300 pb-1">2. DA EXPOSIÇÃO ANALÍTICA DA MANCHA CRIMINAL POR MUNICÍPIO 📍</h4>
+                        <table class="w-full text-xs doc-table mb-4">
+                            <thead>
+                                <tr>
+                                    <th>MUNICÍPIO</th>
+                                    <th>FENOMENOLOGIA CRIMINAL</th>
+                                    <th>IMPLICAÇÕES DE ORDEM SOCIAL</th>
+                                    <th>ESTRATÉGEMA DE MITIGAÇÃO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Alagoinhas</td>
+                                    <td>Polo de CVP e Delitos Tecnológicos. Utilização de veículos motorizados para subtrações céleres e emprego de IA para coação.</td>
+                                    <td>A densidade comercial atrai agentes externos, incrementando a sensação de insegurança em períodos de fluxo laboral noturno.</td>
+                                    <td>Operação Saturação Digital: Intensificação da fiscalização de MPUs e monitoramento de centros de desmanche.</td>
+                                </tr>
+                                <tr>
+                                    <td>Entre Rios</td>
+                                    <td>Confrontos de Facções por Hegemonia. Embates armados em zonas rurais visando o controle de rotas logísticas.</td>
+                                    <td>A imposição de restrições informais à circulação prejudica o exercício do direito à livre locomoção e a economia local.</td>
+                                    <td>Inteligência Tática: Identificação de lideranças intermediárias e asfixia financeira de redes de narcotráfico.</td>
+                                </tr>
+                                <tr>
+                                    <td>Inhambupe</td>
+                                    <td>Subtrações Qualificadas contra Entes Estatais. Atentados sistemáticos contra ativos de serviços essenciais (SAAE).</td>
+                                    <td>O dano ao patrimônio público acarreta a interrupção de serviços fundamentais, podendo incitar instabilidade civil e protestos.</td>
+                                    <td>Escrutínio de Receptadores: Fiscalização rigorosa em estabelecimentos de comércio de sucatas metálicas.</td>
+                                </tr>
+                                <tr>
+                                    <td>Rio Real</td>
+                                    <td>Criminalidade Transfronteiriça. Trânsito de bens ilícitos e veículos adulterados pela rodovia federal BR-101.</td>
+                                    <td>A localização geográfica favorece a utilização do município como zona de transição para infratores oriundos de estados limítrofes.</td>
+                                    <td>Barreiras Volantes: Ações conjuntas com a Polícia Rodoviária Federal voltadas à identificação de fraudes veiculares.</td>
+                                </tr>
+                                <tr>
+                                    <td>Aporá</td>
+                                    <td>Crimes de Proximidade. Conflitos de natureza interpessoal e ameaças que evoluem para ofensas à integridade física.</td>
+                                    <td>O comprometimento da harmonia social é acentuado pela estreita relação de convivência entre os polos da lide criminal.</td>
+                                    <td>Mediação de Conflitos: Atuação preventiva das Delegacias Territoriais em contendas de menor potencial ofensivo.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <section>
+                        <h4 class="font-bold uppercase mb-4 border-b border-stone-300 pb-1">3. DOS LOGROS OPERACIONAIS E SEUS CONSECTÁRIOS 📍</h4>
+                        <p>A eficácia operativa da 2ª COORPIN no período em tela é aferível não somente pela restrição da liberdade ambulatorial de infratores, mas fundamentalmente pelo impacto dissuasório produzido:</p>
+                        <ul class="list-disc pl-6 mt-2 space-y-2">
+                            <li><strong>Da Proteção aos Vulneráveis:</strong> As prisões efetuadas por descumprimento de decisões judiciais (DEAM) ratificam a imperatividade das normas vigentes, encorajando a difusão de denúncias e possibilitando intervenções estatais precoces.</li>
+                            <li><strong>Da Recuperação de Ativos:</strong> A identificação de autores em crimes patrimoniais faculta à inteligência o mapeamento do iter criminis dos bens subtraídos, atacando-se, desta forma, o suporte econômico do crime organizado.</li>
+                            <li><strong>Da Vanguarda em Investigação Digital:</strong> O início das apurações relativas ao uso de ferramentas de Inteligência Artificial para fins ilícitos estabelece a DIRPIN Leste como paradigma técnico, evidenciando a necessidade de aportes em perícia forense digital.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h4 class="font-bold uppercase mb-4 border-b border-stone-300 pb-1">4. DA PROJEÇÃO DE RISCOS E RECOMENDAÇÕES INSTITUCIONAIS 📍</h4>
+                        <table class="w-full text-xs doc-table mb-4">
+                            <thead>
+                                <tr>
+                                    <th>MUNICÍPIO</th>
+                                    <th>NÍVEL DE RISCO</th>
+                                    <th>FATOR DETERMINANTE DE ÊXITO</th>
+                                    <th>PROPOSIÇÃO DE DIFUSÃO</th>
+                                    <th>CONSEQ. DA INÉRCIA</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Alagoinhas</td>
+                                    <td>Crítico</td>
+                                    <td>Resolutividade em delitos de IA e CVP.</td>
+                                    <td>Campanha sobre segurança digital e integridade feminina.</td>
+                                    <td>Perda da soberania técnica sobre novas infrações.</td>
+                                </tr>
+                                <tr>
+                                    <td>Entre Rios</td>
+                                    <td>Alto</td>
+                                    <td>Neutralização de lideranças facciosas.</td>
+                                    <td>Publicidade de apreensões de armamento bélico.</td>
+                                    <td>Consolidação de domínios territoriais paralelos.</td>
+                                </tr>
+                                <tr>
+                                    <td>Rio Real</td>
+                                    <td>Médio</td>
+                                    <td>Fiscalização de fluxo na BR-101.</td>
+                                    <td>Divulgação de protocolos de cooperação interestadual.</td>
+                                    <td>Incremento no tráfico de ilícitos na divisa estadual.</td>
+                                </tr>
+                                <tr>
+                                    <td>Inhambupe</td>
+                                    <td>Médio</td>
+                                    <td>Mitigação de furtos de infraestrutura.</td>
+                                    <td>Exposição de prisões de receptadores de metais.</td>
+                                    <td>Colapso recorrente de utilidade pública essencial.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="bg-stone-50 p-4 border border-stone-300 rounded-sm">
+                            <p class="font-bold uppercase text-xs mb-1">PROPOSIÇÃO DE DIFUSÃO INSTITUCIONAL (MARKETING CORPORATIVO):</p>
+                            <p class="italic text-sm">Sugere-se a realização de exposição midiática pormenorizada acerca da custódia do infrator que se utilizou de Inteligência Artificial. Tal medida visa demonstrar a modernização tecnológica da Polícia Civil da Bahia e dissuadir agentes que pretendam valer-se do anonimato digital para a prática de delitos.</p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h4 class="font-bold uppercase mb-4 border-b border-stone-300 pb-1">TABELAS TÉCNICAS E EXEGESE DE TENDÊNCIAS 📍</h4>
+                        <p class="font-bold italic text-sm mb-2">Tabela 1: Indicadores Criminais e Vetores de Tendência</p>
+                        <table class="w-full text-xs doc-table mb-6">
+                            <thead>
+                                <tr>
+                                    <th>INDICADOR</th>
+                                    <th>QUANTITATIVO</th>
+                                    <th>VETOR</th>
+                                    <th>OBSERVAÇÃO ANALÍTICA</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>CVLI (Homicídios)</td>
+                                    <td>01</td>
+                                    <td>⬇️</td>
+                                    <td>Declínio sustentado; foco em obstar retaliações entre grupos rivais.</td>
+                                </tr>
+                                <tr>
+                                    <td>CVP (Roubos/Furtos)</td>
+                                    <td>12</td>
+                                    <td>⬇️</td>
+                                    <td>A recuperação de veículos fragiliza o ciclo de reincidência patrimonial.</td>
+                                </tr>
+                                <tr>
+                                    <td>Violência Doméstica</td>
+                                    <td>22</td>
+                                    <td>⬆️</td>
+                                    <td>O incremento quantitativo denota maior confiança no aparato estatal.</td>
+                                </tr>
+                                <tr>
+                                    <td>Crimes Cibernéticos</td>
+                                    <td>01</td>
+                                    <td>⬆️</td>
+                                    <td>Fenomenologia emergente que demanda atenção prioritária.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p class="font-bold italic text-sm mb-2">Tabela 2: Escalonamento de Unidades por Resolutividade Operacional</p>
+                        <ul class="list-disc pl-6 space-y-1 text-sm">
+                            <li><strong>DEAM Alagoinhas:</strong> Elevado índice de conversão de notícias-crime em prisões e medidas protetivas.</li>
+                            <li><strong>DRFR Alagoinhas:</strong> Proficiência na identificação de autorias em crimes patrimoniais de alta complexidade.</li>
+                            <li><strong>1ª DT Alagoinhas:</strong> Celeridade na resposta a infrações de natureza ostensiva e plantonista.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h4 class="font-bold uppercase mb-4 border-b border-stone-300 pb-1">CONCLUSÃO E DIRETRIZES ESTRATÉGICAS 📍</h4>
+                        <p>O diagnóstico coligido depreende-se que, conquanto se verifique êxito no enfrentamento das infrações perpetradas mediante o uso da força física, impõe-se a necessidade de redirecionamento analítico ante o desafio da astúcia tecnológica. A desarticulação das cadeias logísticas de CVP em Alagoinhas constitui um êxito tático que deve ser replicado nas circunscrições adjacentes.</p>
+                        <div class="mt-4">
+                            <p class="font-bold italic underline">Diretrizes de Implementação Imediata:</p>
+                            <ul class="list-decimal pl-6 mt-2 space-y-1">
+                                <li><strong>Capacitação Técnica:</strong> Implementação de seminários voltados à colheita de evidências digitais e enfrentamento de Deepfakes.</li>
+                                <li><strong>Operação Sincronizada:</strong> Deflagração da "Operação Patrimônio Seguro" em Inhambupe, visando o desmonte de redes de receptação de metais.</li>
+                                <li><strong>Acolhimento Especializado:</strong> Reforço do contingente da DEAM em períodos de maior vulnerabilidade estatística (finais de semana).</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <div class="mt-16 pt-8 text-center doc-header-text">
+                        <div class="inline-block border-t border-stone-900 px-12 pt-1">
+                            <p class="font-bold uppercase text-base">Félix Rilton</p>
+                            <p class="text-xs text-stone-500 uppercase">Investigador de Polícia Civil | Análise Criminal - DIRPIN Leste</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <footer class="bg-stone-900 text-stone-500 py-6 text-center text-[10px] border-t border-stone-800 uppercase tracking-widest">
+        <p>Polícia Civil da Bahia &bull; DIRPIN LESTE &bull; 2026</p>
+    </footer>
+
+    <script>
+        const state = {
+            currentTab: 'dashboard',
+            kpis: [
+                { id: 'violencia', label: 'Violência Doméstica', value: 22, trend: 'up', obs: 'Confiança crescente no aparato estatal.', icon: '&#9888;' },
+                { id: 'cvp', label: 'CVP (Roubos)', value: 12, trend: 'down', obs: 'Asfixia logística eficiente.', icon: '&#128663;' },
+                { id: 'cvli', label: 'CVLI (Homicídios)', value: 1, trend: 'down', obs: 'Estabilização sustentada.', icon: '&#10014;' },
+                { id: 'ciber', label: 'Cibernéticos', value: 1, trend: 'up', obs: 'Nova fronteira de atuação.', icon: '&#128187;' }
+            ],
+            municipalities: [
+                {
+                    name: 'Alagoinhas', risk: 'Crítico',
+                    phenomenology: 'Polo de CVP e Delitos Tecnológicos. Uso de IA para coação psicológica.',
+                    mitigation: 'Operação Saturação Digital e monitoramento de MPUs.'
+                },
+                {
+                    name: 'Entre Rios', risk: 'Alto',
+                    phenomenology: 'Confrontos de Facções por Hegemonia e controle de rotas rurais.',
+                    mitigation: 'Inteligência Tática para identificação de lideranças.'
+                },
+                {
+                    name: 'Inhambupe', risk: 'Médio',
+                    phenomenology: 'Subtrações Qualificadas contra Entes Estatais (SAAE).',
+                    mitigation: 'Fiscalização de estabelecimentos de sucatas.'
+                },
+                {
+                    name: 'Rio Real', risk: 'Médio',
+                    phenomenology: 'Trânsito de ilícitos e veículos adulterados pela BR-101.',
+                    mitigation: 'Barreiras Volantes integradas com a PRF.'
+                },
+                {
+                    name: 'Aporá', risk: 'Baixo',
+                    phenomenology: 'Crimes de Proximidade e conflitos interpessoais.',
+                    mitigation: 'Mediação de Conflitos pela Unidade Territorial.'
+                }
+            ],
+            occurrences: [
+                {
+                    protocol: 'BO 00219882', title: 'Violência via Inteligência Artificial', unit: 'DEAM Alagoinhas',
+                    description: 'Utilização de Deepfakes para simulação de diálogos e imagens visando extorsão. Marco técnico para diretrizes de perícia digital.'
+                },
+                {
+                    protocol: 'BO 00222124', title: 'Asfixia de Cadeia Logística de CVP', unit: 'DRFR Alagoinhas',
+                    description: 'Identificação de célula de furtos e recuperação de veículos que seriam usados em ataques de maior vulto.'
+                },
+                {
+                    protocol: 'BO 00223779', title: 'Estupro Qualificado (Resposta Célere)', unit: '1ª DT Alagoinhas',
+                    description: 'Identificação e custódia imediata do infrator com preservação de material biológico para fins de DNA.'
+                }
+            ]
+        };
+
+        function switchTab(tabId) {
+            state.currentTab = tabId;
+            
+            // Update Navigation UI
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('nav-active'));
+            document.getElementById(`nav-${tabId}`).classList.add('nav-active');
+
+            // Update Content UI
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            // Specific Fix for Chart.js rendering on tab switch
+            if(tabId === 'dashboard') {
+                renderCrimeDistributionChart();
+            }
+        }
+
+        function renderKPIs() {
+            const container = document.getElementById('kpi-container');
+            container.innerHTML = state.kpis.map(kpi => `
+                <div class="glass-panel p-4 rounded-xl border border-stone-200 shadow-sm flex flex-col justify-between h-full">
+                    <div class="flex justify-between items-center mb-1">
+                        <h4 class="text-[10px] font-bold text-stone-500 uppercase tracking-widest">${kpi.label}</h4>
+                        <span class="text-sm opacity-50">${kpi.icon}</span>
+                    </div>
+                    <div class="flex items-baseline gap-2 mb-2">
+                        <span class="text-2xl font-black text-stone-800">${kpi.value}</span>
+                        <span class="text-xs ${kpi.trend === 'up' ? 'text-red-600' : 'text-green-600'} font-bold">
+                            ${kpi.trend === 'up' ? '&#8593;' : '&#8595;'}
+                        </span>
+                    </div>
+                    <p class="text-[9px] text-stone-500 border-t border-stone-100 pt-2 leading-tight uppercase font-medium">${kpi.obs}</p>
+                </div>
+            `).join('');
+        }
+
+        let myChart = null;
+        function renderCrimeDistributionChart() {
+            const canvas = document.getElementById('crimeDistributionChart');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            if(myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: state.kpis.map(k => k.label),
+                    datasets: [{
+                        data: state.kpis.map(k => k.value),
+                        backgroundColor: ['#292524', '#57534e', '#a8a29e', '#e7e5e4'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9, family: 'sans-serif' } } }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        function renderMunicipalities(filter) {
+            const container = document.getElementById('municipalities-grid');
+            const filtered = filter === 'todos' ? state.municipalities : state.municipalities.filter(m => m.risk === filter);
+            
+            container.innerHTML = filtered.map(m => {
+                const riskClass = m.risk === 'Crítico' ? 'risk-critico' : m.risk === 'Alto' ? 'risk-alto' : 'risk-medio';
+                const badgeClass = m.risk === 'Crítico' ? 'badge-critico' : m.risk === 'Alto' ? 'badge-alto' : 'badge-medio';
+                return `
+                    <div class="bg-white rounded border border-stone-200 border-l-4 ${riskClass} p-4 flex flex-col h-full shadow-sm transition-transform hover:-translate-y-1">
+                        <div class="flex justify-between items-start mb-3 border-b border-stone-50 pb-2">
+                            <h4 class="text-sm font-bold text-stone-800 uppercase">${m.name}</h4>
+                            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded ${badgeClass}">${m.risk}</span>
+                        </div>
+                        <div class="space-y-3 text-xs leading-relaxed">
+                            <p><strong class="text-stone-400 uppercase text-[9px] block">Fenomenologia:</strong> ${m.phenomenology}</p>
+                            <p class="bg-stone-50 p-2 border border-stone-100 rounded text-stone-700 font-medium">
+                                <strong class="text-stone-400 uppercase text-[9px] block mb-1">Estratégema:</strong> ${m.mitigation}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderOccurrences() {
+            const container = document.getElementById('occurrences-container');
+            container.innerHTML = state.occurrences.map((occ, idx) => `
+                <div class="border border-stone-200 rounded bg-white shadow-sm overflow-hidden">
+                    <button onclick="toggleAccordion('occ-${idx}')" class="w-full text-left p-4 flex justify-between items-center bg-stone-50 hover:bg-stone-100 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="bg-stone-800 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">${occ.protocol}</span>
+                            <span class="text-xs font-bold text-stone-800 uppercase">${occ.title}</span>
+                        </div>
+                        <span class="text-stone-400 font-black" id="icon-occ-${idx}">&#43;</span>
+                    </button>
+                    <div id="occ-${idx}" class="accordion-content">
+                        <div class="p-4 border-t border-stone-100 bg-white">
+                            <p class="text-[10px] text-stone-400 font-bold uppercase mb-2">Unidade de Apuração: ${occ.unit}</p>
+                            <p class="text-xs text-stone-700 text-justify leading-relaxed">${occ.description}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.toggleAccordion = (id) => {
+            const el = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            const isActive = el.classList.contains('active');
+            
+            document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('[id^="icon-"]').forEach(i => i.innerHTML = '&#43;');
+
+            if(!isActive) {
+                el.classList.add('active');
+                icon.innerHTML = '&#8722;';
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderKPIs();
+            renderCrimeDistributionChart();
+            renderMunicipalities('todos');
+            renderOccurrences();
+            document.getElementById('riskFilter').addEventListener('change', (e) => renderMunicipalities(e.target.value));
+        });
+    </script>
+</body>
+</html>
