@@ -93,7 +93,7 @@
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Nome da Mãe</label>
-                    <input type="text" id="filtro-mae" oninput="mascaraApenasLetras(this)" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Apenas Letras">
+                    <input type="text" id="filtro-mae" oninput="mascaraApenasLetras(this)" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Nome completo">
                 </div>
                 <div class="flex items-end">
                     <button onclick="limparFiltros()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 p-2 rounded text-sm font-medium transition-colors focus:outline-none flex items-center justify-center gap-1.5 h-[38px]">
@@ -167,30 +167,23 @@
         let presosData = [];
 
         // --- FUNÇÕES DE MÁSCARA E VALIDAÇÃO ---
-        
         function mascaraData(input) {
-            let valor = input.value.replace(/\D/g, ''); // Remove tudo que não for número
-            
-            // Adiciona as barras automaticamente
+            let valor = input.value.replace(/\D/g, ''); 
             if (valor.length > 2) valor = valor.substring(0,2) + '/' + valor.substring(2);
             if (valor.length > 5) valor = valor.substring(0,5) + '/' + valor.substring(5,9);
-            
             input.value = valor;
-            filtrarPresos(); // Chama o filtro após validar
+            filtrarPresos(); 
         }
 
         function mascaraApenasLetras(input) {
-            // Remove números e caracteres especiais, mantendo letras e espaços (inclui acentos)
             input.value = input.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
             filtrarPresos();
         }
 
         function mascaraAlfanumerico(input) {
-            // Remove caracteres especiais, mantendo letras, números e espaços
             input.value = input.value.replace(/[^a-zA-Z0-9À-ÿ\s-]/g, '');
             filtrarPresos();
         }
-
         // --- FIM DAS MÁSCARAS ---
 
         async function carregarDadosDoServidor() {
@@ -228,28 +221,33 @@
             }
         }
 
+        // --- FUNÇÃO DE RENDERIZAÇÃO OTIMIZADA ---
         function renderizarCartoes(dados) {
             const container = document.getElementById('cards-container');
             const semResultados = document.getElementById('sem-resultados');
             const contador = document.getElementById('contador-presos');
             
-            container.innerHTML = '';
             contador.innerText = dados.length;
 
             if (dados.length === 0) {
+                container.innerHTML = '';
                 semResultados.classList.remove('hidden');
                 return;
             } else {
                 semResultados.classList.add('hidden');
             }
 
+            // OTIMIZAÇÃO: Cria uma variável vazia para juntar todo o HTML primeiro
+            let htmlCartoes = '';
+
             dados.forEach(preso => {
                 const imagemFrenteAlt = `https://placehold.co/400x500/1f2937/94a3b8?text=Sem+Foto`;
                 
+                // Adicionado loading="lazy" na tag img
                 const cardHTML = `
                 <article class="bg-gray-900 rounded-xl shadow-lg hover:shadow-2xl hover:border-gray-700 transition-all duration-300 w-full overflow-hidden border border-gray-800 flex flex-col h-full">
                     <div class="relative h-64 bg-gray-800 flex items-center justify-center overflow-hidden group text-center shrink-0">
-                        <img src="${preso.fotoFrente || imagemFrenteAlt}" alt="Foto" class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" onerror="this.src='${imagemFrenteAlt}'">
+                        <img loading="lazy" src="${preso.fotoFrente || imagemFrenteAlt}" alt="Foto" class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" onerror="this.src='${imagemFrenteAlt}'">
                         <div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded border border-gray-700 text-xs font-bold text-white shadow">
                             Art. ${preso.artigo || 'N/D'}
                         </div>
@@ -270,8 +268,13 @@
                         </button>
                     </div>
                 </article>`;
-                container.innerHTML += cardHTML;
+                
+                // Vai acumulando o texto na variável (é instantâneo)
+                htmlCartoes += cardHTML; 
             });
+
+            // Envia para a tela apenas UMA vez no final!
+            container.innerHTML = htmlCartoes;
         }
 
         function filtrarPresos() {
