@@ -37,7 +37,7 @@ def extrair_dados_do_texto(texto, imagens_extraidas, dir_temporario, id_preso):
         "Profissão", "Naturalidade", "Cidade", "Bairro", "Rua", "Número",
         "Condomínio", "Bloco/Apto", "Data de entrada", "Data de saída",
         "Prisão realizada por", "Presídio/Alvará", "Observações", "FOTOS",
-        "ESTADO DA BAHIA", "SECRETARIA DE SEGURANÇA", "Perfil FRENTE"
+        "ESTADO DA BAHIA", "SECRETARIA DE SEGURANÇA", "Perfil FRENTE", "PERFIL ESQUERDO", "Perfil Direito"
     ]
 
     def buscar_campo(label_busca):
@@ -70,6 +70,7 @@ def extrair_dados_do_texto(texto, imagens_extraidas, dir_temporario, id_preso):
     if not nome_preso: nome_preso = "Não Identificado"
 
     def processar_foto(index, sufixo):
+        # Index 0 é o logótipo da polícia no documento Word, por isso começamos a usar o 1, 2 e 3
         if len(imagens_extraidas) > index:
             img_original = imagens_extraidas[index]
             extensao_original = img_original.split('.')[-1].lower()
@@ -116,9 +117,11 @@ def extrair_dados_do_texto(texto, imagens_extraidas, dir_temporario, id_preso):
         "bo": buscar_campo("Número do BO"),
         "orcrim": buscar_campo("Orcrim"),
         "dataEntrada": buscar_campo("Data de entrada"),
-        "fotoFrente": processar_foto(0, "frente"),
-        "fotoEsquerdo": processar_foto(1, "esq"),
-        "fotoDireito": processar_foto(2, "dir")
+        
+        # AQUI ESTÁ A CORREÇÃO: Usar 1, 2 e 3 para saltar o brasão da polícia (que é o 0)
+        "fotoFrente": processar_foto(1, "frente"), 
+        "fotoEsquerdo": processar_foto(2, "esq"),
+        "fotoDireito": processar_foto(3, "dir")
     }
     
     return dados
