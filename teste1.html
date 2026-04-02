@@ -183,9 +183,10 @@
 
                 // Pescamos os valores corretos das moradas, datas, BOs, etc, mesmo que estejam no campo Profissão ou RG
                 let dataEntradaResgatada = extrairValor(/Data de entrada\s*:\s*(\d{2}\/\d{2}\/\d{4})/i);
+                let dataNascResgatada = extrairValor(/Data de Nascimento\s*:\s*(\d{2}\/\d{2}\/\d{4})/i);
                 let municipioResgatado = extrairValor(/(?:MUNICIPIO|Cidade|Naturalidade)\s*:\s*([^:|]+?)(?=\s+(?:Cidade|Bairro|Rua|Estado|Data|Profissão|Cônjuge|$|\|))/i);
                 let boResgatado = extrairValor(/(?:Número do BO|BO)\s*:\s*([\w\-\/\.]+)/i);
-                let paiResgatado = extrairValor(/(?:Nome do Pai|Pai)\s*:\s*([^:|]+?)(?=\s+(?:Naturalidade|Estado Civil|Profissão|Cônjuge|RG|CPF|$|\|))/i);
+                let paiResgatado = extrairValor(/(?:Nome do Pai|Pai)\s*:\s*([^:|]+?)(?=\s+(?:Naturalidade|Estado Civil|Profissão|Cônjuge|RG|CPF|Data|$|\|))/i);
                 let rgResgatado = extrairValor(/RG\s*:\s*([\d\.\-]+)/i);
 
                 // 3. Limpeza Agressiva Campo-a-Campo
@@ -198,22 +199,32 @@
                         }
 
                         // Se um campo curto sugou meio documento (erro de scraper), apagamos o lixo
-                        if (val.length > 100 && !['endereco', 'observacao'].includes(key)) {
+                        if (val.length > 150 && !['endereco', 'observacao'].includes(key)) {
                             preso[key] = '';
                             return;
                         }
 
-                        // Detetamos se este campo contém TÍTULOS de outros campos (Ex: o campo RG tem o texto "Pai: Jose...")
+                        // Detetamos se este campo contém TÍTULOS de outros campos (Ex: o campo pai tem "Data de Nascimento:")
                         const vazamentos = [
-                            'cpf:', 'rg:', 'mãe:', 'pai:', 'naturalidade:', 'profissão:', 
-                            'municipio:', 'cidade:', 'data de entrada:', 'número do bo:', 'orcrim:'
+                            'cpf:', 'rg:', 'mãe:', 'mae:', 'pai:', 'naturalidade:', 'profissão:', 'profissao:',
+                            'municipio:', 'cidade:', 'data de entrada:', 'número do bo:', 'numero do bo:',
+                            'orcrim:', 'data de nascimento:', 'nascimento:', 'estado civil:', 'cônjuge:', 'conjuge:',
+                            'endereço:', 'endereco:', 'bairro:', 'artigo:', 'alcunha:', 'rua:', 'número:'
                         ];
 
                         let contemVazamento = vazamentos.some(vaz => {
-                            // Ignora se o vazamento for o próprio nome do campo em que estamos
-                            let chaveAbaixo = key.toLowerCase();
-                            let vazAbaixo = vaz.replace(':', '');
-                            if (chaveAbaixo === vazAbaixo || (chaveAbaixo === 'mae' && vazAbaixo === 'mãe') || (chaveAbaixo === 'profissao' && vazAbaixo === 'profissão')) return false;
+                            let chaveLimpa = key.toLowerCase().replace(/[^a-z]/g, '');
+                            let vazLimpo = vaz.toLowerCase().replace(/[^a-z]/g, '');
+                            
+                            // Permite que o campo contenha o seu próprio nome
+                            if (chaveLimpa === vazLimpo) return false;
+                            if (chaveLimpa === 'datanascimento' && vazLimpo === 'datadenascimento') return false;
+                            if (chaveLimpa === 'dataentrada' && vazLimpo === 'datadeentrada') return false;
+                            if (chaveLimpa === 'endereco' && vazLimpo === 'endereço') return false;
+                            if (chaveLimpa === 'conjuge' && vazLimpo === 'cônjuge') return false;
+                            if (chaveLimpa === 'mae' && vazLimpo === 'mãe') return false;
+                            if (chaveLimpa === 'profissao' && vazLimpo === 'profissão') return false;
+                            if (chaveLimpa === 'bo' && vazLimpo.includes('bo')) return false;
                             
                             return val.toLowerCase().includes(vaz);
                         });
@@ -221,11 +232,18 @@
                         if (contemVazamento) {
                             preso[key] = ''; // Estava sujo com dados de outros campos, apagamos!
                         } else {
-                            // Remove os prefixos indesejados (Ex: Transforma "Profissão: Pedreiro" em apenas "Pedreiro")
-                            val = val.replace(/^(nome|cpf|rg|m[ãa]e|pai|naturalidade|estado civil|profiss[ãa]o|c[ôo]njuge|alcunha|endere[çc]o|bairro|artigo|n[úu]mero do bo|bo|fac[çc][ãa]o.*|orcrim|data de entrada|municipio|cidade)\s*:\s*/i, '').trim();
+                            // Remove os prefixos indesejados e sujidades coladas (Ex: "Rua : ", "Número:")
+                            val = val.replace(/^(nome|cpf|rg|m[ãa]e|pai|naturalidade|estado civil|profiss[ãa]o|c[ôo]njuge|alcunha|endere[çc]o|rua|n[úu]mero|bairro|artigo|n[úu]mero do bo|bo|fac[çc][ãa]o.*|orcrim|data de entrada|data de nascimento|municipio|cidade|cep)\s*:\s*/i, '').trim();
                             
-                            // Se sobrou apenas o título vazio (ex: "Profissão:"), apaga de vez
-                            if (/^(nome|cpf|rg|mãe|pai|naturalidade|estado civil|profissão|cônjuge|alcunha|endereço|bairro|artigo|bo|orcrim)$/i.test(val)) {
+                            // Deteta "Lixo Exato" que sobra - Exemplo: ficou só a palavra "Número:", "Rua", "CEP"
+                            let valLimpo = val.toLowerCase().replace(/[^a-z]/g, '');
+                            const lixosExatos = [
+                                'nome', 'cpf', 'rg', 'mae', 'pai', 'naturalidade', 'estadocivil', 'profissao',
+                                'conjuge', 'alcunha', 'endereco', 'rua', 'numero', 'bairro', 'artigo', 'bo',
+                                'numerodobo', 'orcrim', 'faccao', 'datadeentrada', 'datadenascimento', 'cep', 'cidade', 'municipio'
+                            ];
+
+                            if (lixosExatos.includes(valLimpo) || valLimpo === '') {
                                 val = '';
                             }
                             preso[key] = val;
@@ -235,6 +253,7 @@
 
                 // 4. Injetar (Colocar no Lugar Certo) os dados que pescámos na fase 2!
                 if (dataEntradaResgatada && !preso.dataEntrada) preso.dataEntrada = dataEntradaResgatada;
+                if (dataNascResgatada && !preso.dataNascimento) preso.dataNascimento = dataNascResgatada;
                 if (municipioResgatado && !preso.naturalidade) preso.naturalidade = municipioResgatado;
                 if (boResgatado && !preso.bo) preso.bo = boResgatado;
                 if (paiResgatado && !preso.pai) preso.pai = paiResgatado;
