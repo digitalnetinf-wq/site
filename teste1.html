@@ -62,7 +62,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </div>
-                        <input type="text" id="input-pesquisa" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg pl-10 px-4 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Pesquisa geral (Nome, CPF ou BO)...">
+                        <input type="text" id="input-pesquisa" oninput="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg pl-10 px-4 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Pesquisa geral (Nome, CPF ou BO)...">
                     </div>
                     <button onclick="toggleFiltros()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 hover:text-white px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
@@ -77,23 +77,23 @@
             <div id="filtros-avancados" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 pt-4 mt-4 border-t border-gray-800">
                 <div>
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Data Nasc.</label>
-                    <input type="text" id="filtro-nascimento" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Ex: 28/04">
+                    <input type="text" id="filtro-nascimento" oninput="mascaraData(this)" maxlength="10" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="DD/MM/AAAA">
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Naturalidade</label>
-                    <input type="text" id="filtro-naturalidade" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Ex: Feira">
+                    <input type="text" id="filtro-naturalidade" oninput="mascaraApenasLetras(this)" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Apenas Letras">
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Crime / Artigo</label>
-                    <input type="text" id="filtro-crime" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Ex: 33">
+                    <input type="text" id="filtro-crime" oninput="mascaraAlfanumerico(this)" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Ex: 33">
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Facção / Orcrim</label>
-                    <input type="text" id="filtro-orcrim" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Sigla/Nome">
+                    <input type="text" id="filtro-orcrim" oninput="mascaraAlfanumerico(this)" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Sigla/Nome">
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Nome da Mãe</label>
-                    <input type="text" id="filtro-mae" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Nome completo">
+                    <input type="text" id="filtro-mae" oninput="mascaraApenasLetras(this)" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Apenas Letras">
                 </div>
                 <div class="flex items-end">
                     <button onclick="limparFiltros()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 p-2 rounded text-sm font-medium transition-colors focus:outline-none flex items-center justify-center gap-1.5 h-[38px]">
@@ -166,114 +166,38 @@
     <script>
         let presosData = [];
 
-        // ALGORITMO DE RESGATE DE DADOS AVANÇADO
-        // Criado para combater erros severos de raspagem/extração no JSON de origem
-        function sanitizarDados(dados) {
-            return dados.map(p => {
-                let preso = { ...p };
-                
-                // 1. Unir todo o texto disponível do preso num só "saco" para "pescar" os dados corretos perdidos
-                let textoCompleto = Object.values(preso).filter(v => typeof v === 'string').join(' | ');
-
-                // 2. Extrair dados cruciais espalhados usando Regex
-                const extrairValor = (regex) => {
-                    let match = textoCompleto.match(regex);
-                    return match && match[1] ? match[1].trim() : '';
-                };
-
-                // Pescamos os valores corretos das moradas, datas, BOs, etc, mesmo que estejam no campo Profissão ou RG
-                let dataEntradaResgatada = extrairValor(/Data de entrada\s*:\s*(\d{2}\/\d{2}\/\d{4})/i);
-                let dataNascResgatada = extrairValor(/Data de Nascimento\s*:\s*(\d{2}\/\d{2}\/\d{4})/i);
-                let municipioResgatado = extrairValor(/(?:MUNICIPIO|Cidade|Naturalidade)\s*:\s*([^:|]+?)(?=\s+(?:Cidade|Bairro|Rua|Estado|Data|Profissão|Cônjuge|$|\|))/i);
-                let boResgatado = extrairValor(/(?:Número do BO|BO)\s*:\s*([\w\-\/\.]+)/i);
-                let paiResgatado = extrairValor(/(?:Nome do Pai|Pai)\s*:\s*([^:|]+?)(?=\s+(?:Naturalidade|Estado Civil|Profissão|Cônjuge|RG|CPF|Data|$|\|))/i);
-                let rgResgatado = extrairValor(/RG\s*:\s*([\d\.\-]+)/i);
-
-                // 3. Limpeza Agressiva Campo-a-Campo
-                Object.keys(preso).forEach(key => {
-                    if (typeof preso[key] === 'string') {
-                        let val = preso[key].trim();
-                        if (!val || val === '-') {
-                            preso[key] = '';
-                            return;
-                        }
-
-                        // Se um campo curto sugou meio documento (erro de scraper), apagamos o lixo
-                        if (val.length > 150 && !['endereco', 'observacao'].includes(key)) {
-                            preso[key] = '';
-                            return;
-                        }
-
-                        // Detetamos se este campo contém TÍTULOS de outros campos (Ex: o campo pai tem "Data de Nascimento:")
-                        const vazamentos = [
-                            'cpf:', 'rg:', 'mãe:', 'mae:', 'pai:', 'naturalidade:', 'profissão:', 'profissao:',
-                            'municipio:', 'cidade:', 'data de entrada:', 'número do bo:', 'numero do bo:',
-                            'orcrim:', 'data de nascimento:', 'nascimento:', 'estado civil:', 'cônjuge:', 'conjuge:',
-                            'endereço:', 'endereco:', 'bairro:', 'artigo:', 'alcunha:', 'rua:', 'número:'
-                        ];
-
-                        let contemVazamento = vazamentos.some(vaz => {
-                            let chaveLimpa = key.toLowerCase().replace(/[^a-z]/g, '');
-                            let vazLimpo = vaz.toLowerCase().replace(/[^a-z]/g, '');
-                            
-                            // Permite que o campo contenha o seu próprio nome
-                            if (chaveLimpa === vazLimpo) return false;
-                            if (chaveLimpa === 'datanascimento' && vazLimpo === 'datadenascimento') return false;
-                            if (chaveLimpa === 'dataentrada' && vazLimpo === 'datadeentrada') return false;
-                            if (chaveLimpa === 'endereco' && vazLimpo === 'endereço') return false;
-                            if (chaveLimpa === 'conjuge' && vazLimpo === 'cônjuge') return false;
-                            if (chaveLimpa === 'mae' && vazLimpo === 'mãe') return false;
-                            if (chaveLimpa === 'profissao' && vazLimpo === 'profissão') return false;
-                            if (chaveLimpa === 'bo' && vazLimpo.includes('bo')) return false;
-                            
-                            return val.toLowerCase().includes(vaz);
-                        });
-
-                        if (contemVazamento) {
-                            preso[key] = ''; // Estava sujo com dados de outros campos, apagamos!
-                        } else {
-                            // Remove os prefixos indesejados e sujidades coladas (Ex: "Rua : ", "Número:")
-                            val = val.replace(/^(nome|cpf|rg|m[ãa]e|pai|naturalidade|estado civil|profiss[ãa]o|c[ôo]njuge|alcunha|endere[çc]o|rua|n[úu]mero|bairro|artigo|n[úu]mero do bo|bo|fac[çc][ãa]o.*|orcrim|data de entrada|data de nascimento|municipio|cidade|cep)\s*:\s*/i, '').trim();
-                            
-                            // Deteta "Lixo Exato" que sobra - Exemplo: ficou só a palavra "Número:", "Rua", "CEP"
-                            let valLimpo = val.toLowerCase().replace(/[^a-z]/g, '');
-                            const lixosExatos = [
-                                'nome', 'cpf', 'rg', 'mae', 'pai', 'naturalidade', 'estadocivil', 'profissao',
-                                'conjuge', 'alcunha', 'endereco', 'rua', 'numero', 'bairro', 'artigo', 'bo',
-                                'numerodobo', 'orcrim', 'faccao', 'datadeentrada', 'datadenascimento', 'cep', 'cidade', 'municipio'
-                            ];
-
-                            if (lixosExatos.includes(valLimpo) || valLimpo === '') {
-                                val = '';
-                            }
-                            preso[key] = val;
-                        }
-                    }
-                });
-
-                // 4. Injetar (Colocar no Lugar Certo) os dados que pescámos na fase 2!
-                if (dataEntradaResgatada && !preso.dataEntrada) preso.dataEntrada = dataEntradaResgatada;
-                if (dataNascResgatada && !preso.dataNascimento) preso.dataNascimento = dataNascResgatada;
-                if (municipioResgatado && !preso.naturalidade) preso.naturalidade = municipioResgatado;
-                if (boResgatado && !preso.bo) preso.bo = boResgatado;
-                if (paiResgatado && !preso.pai) preso.pai = paiResgatado;
-                if (rgResgatado && !preso.rg) preso.rg = rgResgatado;
-
-                // Limpeza final de apresentação
-                Object.keys(preso).forEach(k => {
-                    if(preso[k] === 'null' || preso[k] === 'Não Informado') preso[k] = '';
-                });
-
-                return preso;
-            });
+        // --- FUNÇÕES DE MÁSCARA E VALIDAÇÃO ---
+        
+        function mascaraData(input) {
+            let valor = input.value.replace(/\D/g, ''); // Remove tudo que não for número
+            
+            // Adiciona as barras automaticamente
+            if (valor.length > 2) valor = valor.substring(0,2) + '/' + valor.substring(2);
+            if (valor.length > 5) valor = valor.substring(0,5) + '/' + valor.substring(5,9);
+            
+            input.value = valor;
+            filtrarPresos(); // Chama o filtro após validar
         }
+
+        function mascaraApenasLetras(input) {
+            // Remove números e caracteres especiais, mantendo letras e espaços (inclui acentos)
+            input.value = input.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
+            filtrarPresos();
+        }
+
+        function mascaraAlfanumerico(input) {
+            // Remove caracteres especiais, mantendo letras, números e espaços
+            input.value = input.value.replace(/[^a-zA-Z0-9À-ÿ\s-]/g, '');
+            filtrarPresos();
+        }
+
+        // --- FIM DAS MÁSCARAS ---
 
         async function carregarDadosDoServidor() {
             try {
                 const resposta = await fetch('./dados.json');
                 if (resposta.ok) {
-                    const jsonBruto = await resposta.json();
-                    presosData = sanitizarDados(jsonBruto); 
+                    presosData = await resposta.json();
                 } else {
                     console.error("Erro na resposta do servidor:", resposta.status);
                     presosData = [];

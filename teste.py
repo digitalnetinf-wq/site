@@ -31,6 +31,7 @@ def extrair_dados_do_texto(texto, imagens_extraidas, dir_temporario, id_preso):
     
     def buscar_campo(label, proximo_label=None):
         if proximo_label:
+            # Captura tudo desde o label atual até encontrar o próximo label
             padrao = rf"{label}\s*:?\s*(.*?)(?=\s*{proximo_label}\s*:?|$)"
         else:
             padrao = rf"{label}\s*:?\s*([^\n]+)"
@@ -38,6 +39,7 @@ def extrair_dados_do_texto(texto, imagens_extraidas, dir_temporario, id_preso):
         match = re.search(padrao, texto, re.IGNORECASE | re.DOTALL)
         if match:
             resultado = match.group(1)
+            # Previne cortes errados se encontrar ":" dentro do próprio texto válido
             if ":" in resultado and len(resultado.split(":")[0]) < 20:
                 resultado = resultado.split(":")[0]
             return limpar_texto(resultado)
