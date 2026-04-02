@@ -23,29 +23,50 @@ ARQUIVO_JSON = './dados.json'
 os.makedirs(PASTA_FICHAS, exist_ok=True)
 os.makedirs(PASTA_FOTOS, exist_ok=True)
 
-def limpar_texto(texto):
-    if not texto: return ""
-    return re.sub(r'\s+', ' ', texto).strip()
-
 def extrair_dados_do_texto(texto, imagens_extraidas, dir_temporario, id_preso):
     
-    def buscar_campo(label, proximo_label=None):
-        if proximo_label:
-            # Captura tudo desde o label atual até encontrar o próximo label
-            padrao = rf"{label}\s*:?\s*(.*?)(?=\s*{proximo_label}\s*:?|$)"
-        else:
-            padrao = rf"{label}\s*:?\s*([^\n]+)"
+    # Achata todo o texto para uma linha só. Removemos quebras de página do Word
+    # para evitar que os dados se percam nas quebras.
+    texto_limpo = re.sub(r'\s+', ' ', texto).strip()
+
+    # LISTA DE BARREIRAS: Todas as marcações que existem na ficha.
+    # O script vai parar de extrair dados assim que bater em qualquer uma destas palavras.
+    chaves_parada = [
+        "Nome", "CPF", "Mãe", "Pai", "RG", "Data de Nascimento", "Alcunha",
+        "Orcrim", "Número do BO", "Artigo", "Estado Civil", "Cônjuge",
+        "Profissão", "Naturalidade", "Cidade", "Bairro", "Rua", "Número",
+        "Condomínio", "Bloco/Apto", "Data de entrada", "Data de saída",
+        "Prisão realizada por", "Presídio/Alvará", "Observações", "FOTOS",
+        "ESTADO DA BAHIA", "SECRETARIA DE SEGURANÇA", "Perfil FRENTE"
+    ]
+
+    def buscar_campo(label_busca):
+        # Pega em todas as chaves, mas ignora a própria palavra que estamos a procurar
+        barreiras = [c for c in chaves_parada if c.lower() != label_busca.lower()]
+        
+        # Ordenamos do maior para o menor para evitar conflitos 
+        # (ex: "Número do BO" tem de ser detetado antes da palavra "Número" sozinha)
+        barreiras.sort(key=len, reverse=True)
+        
+        # Cria a parede de Regex
+        lookahead = "|".join([rf"\b{re.escape(b)}\b" for b in barreiras])
+        
+        regex_label = re.escape(label_busca)
+        # Regra de proteção: Se for procurar a "Rua", a palavra "Número" não pode roubar o "Número do BO"
+        if label_busca == "Número":
+            regex_label = r"Número(?!\s*do\s*BO)"
             
-        match = re.search(padrao, texto, re.IGNORECASE | re.DOTALL)
+        # O padrão diz: Acha a etiqueta, os 2 pontos (opcional) e captura TUDO (.*?)
+        # de forma preguiçosa até bater numa Barreira (lookahead) ou fim do arquivo ($)
+        padrao = rf"\b{regex_label}\b\s*:?\s*(.*?)(?=\s*(?:{lookahead})\s*:?|$)"
+        
+        match = re.search(padrao, texto_limpo, re.IGNORECASE)
         if match:
-            resultado = match.group(1)
-            # Previne cortes errados se encontrar ":" dentro do próprio texto válido
-            if ":" in resultado and len(resultado.split(":")[0]) < 20:
-                resultado = resultado.split(":")[0]
-            return limpar_texto(resultado)
+            valor = match.group(1).strip()
+            return valor.rstrip(':').strip() # Remove pontuação suja no final
         return ""
 
-    nome_preso = buscar_campo("Nome", "CPF") or buscar_campo("Nome")
+    nome_preso = buscar_campo("Nome")
     if not nome_preso: nome_preso = "Não Identificado"
 
     def processar_foto(index, sufixo):
@@ -55,54 +76,49 @@ def extrair_dados_do_texto(texto, imagens_extraidas, dir_temporario, id_preso):
             
             if extensao_original in ['jpg', 'jpeg', 'png']:
                 caminho_antigo = os.path.join(dir_temporario, img_original)
-                # Forçamos salvar como jpg para padronizar e comprimir melhor
                 novo_nome = f"{id_preso}_{sufixo}.jpg"
                 caminho_novo = os.path.join(PASTA_FOTOS, novo_nome)
                 
                 if USA_PILLOW:
                     try:
                         with Image.open(caminho_antigo) as img:
-                            # Converte para RGB (evita erro se for PNG com transparência)
                             if img.mode != 'RGB':
                                 img = img.convert('RGB')
-                            # Redimensiona se a foto for muito gigante (max 800x800)
                             img.thumbnail((800, 800), Image.Resampling.LANCZOS)
-                            # Salva com compressão
                             img.save(caminho_novo, "JPEG", optimize=True, quality=70)
                         return f"./fotos/{novo_nome}"
                     except Exception as e:
-                        print(f"Erro ao comprimir foto {sufixo}, copiando original: {e}")
-                        # Fallback: se falhar, apenas copia
+                        print(f"Erro ao comprimir foto {sufixo}: {e}")
                         shutil.copy(caminho_antigo, caminho_novo)
                 else:
-                    # Se não tiver o Pillow instalado, apenas copia
                     shutil.copy(caminho_antigo, caminho_novo)
                     
                 return f"./fotos/{novo_nome}"
         return ""
 
+    # Dicionário Limpo
     dados = {
         "id": id_preso,
         "nome": nome_preso,
-        "cpf": buscar_campo("CPF", "Mãe") or buscar_campo("CPF"),
-        "mae": buscar_campo("Mãe", "Pai") or buscar_campo("Mãe") or buscar_campo("Nome da Mãe"),
-        "pai": buscar_campo("Pai", "RG") or buscar_campo("Pai") or buscar_campo("Nome do Pai"),
-        "rg": buscar_campo("RG", "Data de Nascimento") or buscar_campo("RG"),
-        "dataNascimento": buscar_campo("Data de Nascimento", "Naturalidade") or buscar_campo("Data de Nascimento"),
-        "naturalidade": buscar_campo("Naturalidade", "Estado Civil") or buscar_campo("Naturalidade"),
-        "estadoCivil": buscar_campo("Estado Civil", "Profissão") or buscar_campo("Estado Civil"),
-        "profissao": buscar_campo("Profissão", "Cônjuge") or buscar_campo("Profissão"),
-        "conjuge": buscar_campo("Cônjuge", "Alcunha") or buscar_campo("Cônjuge"),
-        "alcunha": buscar_campo("Alcunha", "Rua") or buscar_campo("Alcunha"),
-        "rua": buscar_campo("Rua", "Bairro") or buscar_campo("Rua") or buscar_campo("Endereço"),
-        "bairro": buscar_campo("Bairro", "Artigo") or buscar_campo("Bairro"),
-        "artigo": buscar_campo("Artigo", "Número do BO") or buscar_campo("Artigo") or buscar_campo("Crime"),
-        "bo": buscar_campo("Número do BO", "Orcrim") or buscar_campo("Número do BO") or buscar_campo("BO"),
-        "orcrim": buscar_campo("Orcrim", "Data de entrada") or buscar_campo("Orcrim") or buscar_campo("Facção"),
-        "dataEntrada": buscar_campo("Data de entrada", "Data de saída") or buscar_campo("Data de entrada"),
-        "fotoFrente": processar_foto(1, "frente"),
-        "fotoEsquerdo": processar_foto(2, "esq"),
-        "fotoDireito": processar_foto(3, "dir")
+        "cpf": buscar_campo("CPF"),
+        "mae": buscar_campo("Mãe"),
+        "pai": buscar_campo("Pai"),
+        "rg": buscar_campo("RG"),
+        "dataNascimento": buscar_campo("Data de Nascimento"),
+        "naturalidade": buscar_campo("Naturalidade"),
+        "estadoCivil": buscar_campo("Estado Civil"),
+        "profissao": buscar_campo("Profissão"),
+        "conjuge": buscar_campo("Cônjuge"),
+        "alcunha": buscar_campo("Alcunha"),
+        "rua": buscar_campo("Rua"),
+        "bairro": buscar_campo("Bairro"),
+        "artigo": buscar_campo("Artigo"),
+        "bo": buscar_campo("Número do BO"),
+        "orcrim": buscar_campo("Orcrim"),
+        "dataEntrada": buscar_campo("Data de entrada"),
+        "fotoFrente": processar_foto(0, "frente"),
+        "fotoEsquerdo": processar_foto(1, "esq"),
+        "fotoDireito": processar_foto(2, "dir")
     }
     
     return dados
@@ -162,7 +178,7 @@ def processar_fichas():
     if processados > 0:
         with open(ARQUIVO_JSON, 'w', encoding='utf-8') as f:
             json.dump(banco_de_dados, f, ensure_ascii=False, indent=4)
-        print(f"\n🎉 SUCESSO! {processados} ficha(s) adicionada(s).")
+        print(f"\n🎉 SUCESSO! {processados} ficha(s) adicionada(s) corretamente.")
 
 if __name__ == "__main__":
     processar_fichas()
