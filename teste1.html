@@ -48,7 +48,6 @@
 
     <div id="app-content" class="hidden p-4 md:p-8 h-screen overflow-y-auto">
 
-        <!-- Alterado para max-w-7xl para acompanhar o alargamento da página -->
         <header class="text-center mb-8 max-w-7xl mx-auto bg-gray-900 p-6 rounded-xl shadow-lg border border-gray-800">
             <h1 class="text-2xl md:text-3xl font-bold text-white uppercase tracking-wide">Secretaria de Segurança Pública<br><span class="text-lg md:text-xl text-gray-400 font-semibold">Polícia Civil da Bahia</span></h1>
             <div class="w-24 h-1 bg-blue-600 mx-auto my-4 rounded"></div>
@@ -56,7 +55,6 @@
             <h3 class="text-md text-gray-500 font-bold mt-1 tracking-widest uppercase">Custódia de Presos</h3>
         </header>
 
-        <!-- Alterado para max-w-7xl para acompanhar o alargamento da página -->
         <div class="max-w-7xl mx-auto mb-8 bg-gray-900 p-4 rounded-xl border border-gray-800">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="flex w-full md:w-3/4 gap-2">
@@ -106,7 +104,6 @@
             </div>
         </div>
 
-        <!-- UTILIZANDO GRID (grid-cols-4) em vez de FLEX para garantir 4 cartões de tamanhos iguais por linha -->
         <main id="cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto mb-10">
         </main>
 
@@ -135,7 +132,6 @@
                             <h2 id="modal-nome-titulo" class="text-xl font-bold text-white mb-1"></h2>
                         </div>
                         <div class="flex flex-wrap justify-center sm:justify-start gap-4 w-full">
-                            <!-- Fotos Modal - Inclui object-top para focar no rosto -->
                             <div class="flex flex-col items-center gap-1.5">
                                 <img id="modal-foto-frente" src="" alt="Frente" class="w-28 h-36 sm:w-32 sm:h-40 rounded-lg shadow-md border border-gray-700 object-cover object-top bg-gray-800 cursor-pointer hover:ring-2 hover:ring-blue-500 hover:scale-105 transition-all" onclick="abrirLightbox(this.src)">
                                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Frente</span>
@@ -170,60 +166,100 @@
     <script>
         let presosData = [];
 
-        // Filtro muito mais agressivo para limpar o JSON com erros de extração/raspagem
+        // ALGORITMO DE RESGATE DE DADOS AVANÇADO
+        // Criado para combater erros severos de raspagem/extração no JSON de origem
         function sanitizarDados(dados) {
-            // Regex para detetar quando um valor *começa* com um rótulo do sistema seguido de dois pontos.
-            // Exemplo: O scraper errou a linha e copiou "Número do BO: 123" para dentro do campo Facção.
-            const regexErroRaspagem = /^(nome|data de nascimento|cpf|rg|nome da m[ãa]e|m[ãa]e|nome do pai|pai|naturalidade|estado civil|profiss[ãa]o|c[ôo]njuge|alcunha|endere[çc]o|bairro|artigo|n[úu]mero do bo|bo|fac[çc][ãa]o.*|orcrim|data de entrada)\s*:/i;
-
             return dados.map(p => {
-                let presoLimpo = { ...p };
+                let preso = { ...p };
                 
-                Object.keys(presoLimpo).forEach(key => {
-                    if (typeof presoLimpo[key] === 'string') {
-                        let val = presoLimpo[key].trim();
-                        if (!val) return;
-                        
-                        // Normaliza a string (remove acentos e espaços soltos) para facilitar a validação
-                        let valNormalizado = val.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[:;\-\.]/g, '').trim();
-                        
-                        // 1. Limpa se o valor extraído for APENAS um rótulo vazio (Ex: "Profissão:" em vez da profissão real)
-                        const labelsIsoladas = [
-                            'nome completo', 'data de nascimento', 'cpf', 'rg', 'nome da mae', 'mae', 'nome do pai', 'pai', 
-                            'naturalidade', 'estado civil', 'profissao', 'conjuge', 'alcunha', 
-                            'endereco', 'rua', 'bairro', 'artigo', 'numero do bo', 'bo', 'faccao orcrim', 'faccao', 'orcrim', 'data de entrada', 'entrada'
-                        ];
-                        
-                        if (labelsIsoladas.includes(valNormalizado)) {
-                            presoLimpo[key] = ''; // Limpa o lixo
+                // 1. Unir todo o texto disponível do preso num só "saco" para "pescar" os dados corretos perdidos
+                let textoCompleto = Object.values(preso).filter(v => typeof v === 'string').join(' | ');
+
+                // 2. Extrair dados cruciais espalhados usando Regex
+                const extrairValor = (regex) => {
+                    let match = textoCompleto.match(regex);
+                    return match && match[1] ? match[1].trim() : '';
+                };
+
+                // Pescamos os valores corretos das moradas, datas, BOs, etc, mesmo que estejam no campo Profissão ou RG
+                let dataEntradaResgatada = extrairValor(/Data de entrada\s*:\s*(\d{2}\/\d{2}\/\d{4})/i);
+                let municipioResgatado = extrairValor(/(?:MUNICIPIO|Cidade|Naturalidade)\s*:\s*([^:|]+?)(?=\s+(?:Cidade|Bairro|Rua|Estado|Data|Profissão|Cônjuge|$|\|))/i);
+                let boResgatado = extrairValor(/(?:Número do BO|BO)\s*:\s*([\w\-\/\.]+)/i);
+                let paiResgatado = extrairValor(/(?:Nome do Pai|Pai)\s*:\s*([^:|]+?)(?=\s+(?:Naturalidade|Estado Civil|Profissão|Cônjuge|RG|CPF|$|\|))/i);
+                let rgResgatado = extrairValor(/RG\s*:\s*([\d\.\-]+)/i);
+
+                // 3. Limpeza Agressiva Campo-a-Campo
+                Object.keys(preso).forEach(key => {
+                    if (typeof preso[key] === 'string') {
+                        let val = preso[key].trim();
+                        if (!val || val === '-') {
+                            preso[key] = '';
                             return;
                         }
 
-                        // 2. Limpa se o valor COMEÇAR com um rótulo do sistema (Sujidade de salto)
-                        // Exemplo: Se o RG estiver preenchido com "Pai: Jose Felipe"
-                        if (regexErroRaspagem.test(val)) {
-                            presoLimpo[key] = ''; // Limpa a sujidade cruzada
+                        // Se um campo curto sugou meio documento (erro de scraper), apagamos o lixo
+                        if (val.length > 100 && !['endereco', 'observacao'].includes(key)) {
+                            preso[key] = '';
+                            return;
+                        }
+
+                        // Detetamos se este campo contém TÍTULOS de outros campos (Ex: o campo RG tem o texto "Pai: Jose...")
+                        const vazamentos = [
+                            'cpf:', 'rg:', 'mãe:', 'pai:', 'naturalidade:', 'profissão:', 
+                            'municipio:', 'cidade:', 'data de entrada:', 'número do bo:', 'orcrim:'
+                        ];
+
+                        let contemVazamento = vazamentos.some(vaz => {
+                            // Ignora se o vazamento for o próprio nome do campo em que estamos
+                            let chaveAbaixo = key.toLowerCase();
+                            let vazAbaixo = vaz.replace(':', '');
+                            if (chaveAbaixo === vazAbaixo || (chaveAbaixo === 'mae' && vazAbaixo === 'mãe') || (chaveAbaixo === 'profissao' && vazAbaixo === 'profissão')) return false;
+                            
+                            return val.toLowerCase().includes(vaz);
+                        });
+
+                        if (contemVazamento) {
+                            preso[key] = ''; // Estava sujo com dados de outros campos, apagamos!
+                        } else {
+                            // Remove os prefixos indesejados (Ex: Transforma "Profissão: Pedreiro" em apenas "Pedreiro")
+                            val = val.replace(/^(nome|cpf|rg|m[ãa]e|pai|naturalidade|estado civil|profiss[ãa]o|c[ôo]njuge|alcunha|endere[çc]o|bairro|artigo|n[úu]mero do bo|bo|fac[çc][ãa]o.*|orcrim|data de entrada|municipio|cidade)\s*:\s*/i, '').trim();
+                            
+                            // Se sobrou apenas o título vazio (ex: "Profissão:"), apaga de vez
+                            if (/^(nome|cpf|rg|mãe|pai|naturalidade|estado civil|profissão|cônjuge|alcunha|endereço|bairro|artigo|bo|orcrim)$/i.test(val)) {
+                                val = '';
+                            }
+                            preso[key] = val;
                         }
                     }
                 });
-                return presoLimpo;
+
+                // 4. Injetar (Colocar no Lugar Certo) os dados que pescámos na fase 2!
+                if (dataEntradaResgatada && !preso.dataEntrada) preso.dataEntrada = dataEntradaResgatada;
+                if (municipioResgatado && !preso.naturalidade) preso.naturalidade = municipioResgatado;
+                if (boResgatado && !preso.bo) preso.bo = boResgatado;
+                if (paiResgatado && !preso.pai) preso.pai = paiResgatado;
+                if (rgResgatado && !preso.rg) preso.rg = rgResgatado;
+
+                // Limpeza final de apresentação
+                Object.keys(preso).forEach(k => {
+                    if(preso[k] === 'null' || preso[k] === 'Não Informado') preso[k] = '';
+                });
+
+                return preso;
             });
         }
 
         async function carregarDadosDoServidor() {
             try {
-                // Tenta carregar o ficheiro JSON real
                 const resposta = await fetch('./dados.json');
                 if (resposta.ok) {
                     const jsonBruto = await resposta.json();
-                    // Aplica a limpeza super rigorosa antes de guardar na memória!
                     presosData = sanitizarDados(jsonBruto); 
                 } else {
                     console.error("Erro na resposta do servidor:", resposta.status);
                     presosData = [];
                 }
             } catch (erro) {
-                // Se falhar (ex: ficheiro inexistente ou bloqueio de CORS)
                 console.error("Erro ao tentar aceder a './dados.json':", erro);
                 presosData = [];
             }
@@ -267,9 +303,6 @@
             dados.forEach(preso => {
                 const imagemFrenteAlt = `https://placehold.co/400x500/1f2937/94a3b8?text=Sem+Foto`;
                 
-                // Removido max-w-[280px] e adicionado flex flex-col h-full para o card esticar dentro do grid
-                // A altura da imagem subiu de h-56 para h-64
-                // Adicionada a classe object-top à imagem para focar no rosto
                 const cardHTML = `
                 <article class="bg-gray-900 rounded-xl shadow-lg hover:shadow-2xl hover:border-gray-700 transition-all duration-300 w-full overflow-hidden border border-gray-800 flex flex-col h-full">
                     <div class="relative h-64 bg-gray-800 flex items-center justify-center overflow-hidden group text-center shrink-0">
