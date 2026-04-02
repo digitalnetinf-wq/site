@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custódia de Presos - Polícia Civil BA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+    </style>
+</head>
+<body class="bg-black min-h-screen font-sans text-gray-300 relative overflow-hidden">
+
+    <div id="login-screen" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-4">
+        <div class="bg-gray-900 p-8 rounded-2xl shadow-2xl border border-gray-800 w-full max-w-md relative">
+            <div class="text-center mb-8">
+                <div class="mx-auto bg-gray-800 w-16 h-16 rounded-full flex items-center justify-center mb-4 border border-gray-700 shadow-inner">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-white uppercase tracking-wider">Acesso Restrito</h2>
+                <p class="text-gray-400 mt-2 text-sm">Sistema de Custódia - 1ª COORPIN</p>
+            </div>
+
+            <form onsubmit="fazerLogin(event)" class="space-y-5">
+                <div>
+                    <label for="usuario" class="block text-sm font-medium text-gray-400 mb-1">Usuário</label>
+                    <input type="text" id="usuario" required class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Digite seu usuário">
+                </div>
+                <div>
+                    <label for="senha" class="block text-sm font-medium text-gray-400 mb-1">Senha</label>
+                    <input type="password" id="senha" required class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Digite sua senha">
+                </div>
+                
+                <p id="erro-login" class="text-red-500 text-sm hidden font-medium text-center bg-red-500/10 py-2 rounded border border-red-500/20">Usuário ou senha incorretos!</p>
+
+                <button type="submit" id="btn-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 shadow-lg shadow-blue-900/20 mt-2">
+                    Entrar no Sistema
+                </button>
+            </form>
+            <div class="mt-6 text-center border-t border-gray-800 pt-4">
+                <p class="text-xs text-gray-500">Credenciais: <strong>admin</strong> | <strong>123456</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-content" class="hidden p-4 md:p-8 h-screen overflow-y-auto">
+
+        <!-- Alterado para max-w-7xl para acompanhar o alargamento da página -->
+        <header class="text-center mb-8 max-w-7xl mx-auto bg-gray-900 p-6 rounded-xl shadow-lg border border-gray-800">
+            <h1 class="text-2xl md:text-3xl font-bold text-white uppercase tracking-wide">Secretaria de Segurança Pública<br><span class="text-lg md:text-xl text-gray-400 font-semibold">Polícia Civil da Bahia</span></h1>
+            <div class="w-24 h-1 bg-blue-600 mx-auto my-4 rounded"></div>
+            <h2 class="text-lg md:text-xl font-medium text-gray-300">1ª COORPIN – Feira de Santana</h2>
+            <h3 class="text-md text-gray-500 font-bold mt-1 tracking-widest uppercase">Custódia de Presos</h3>
+        </header>
+
+        <!-- Alterado para max-w-7xl para acompanhar o alargamento da página -->
+        <div class="max-w-7xl mx-auto mb-8 bg-gray-900 p-4 rounded-xl border border-gray-800">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex w-full md:w-3/4 gap-2">
+                    <div class="relative w-full">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <input type="text" id="input-pesquisa" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg pl-10 px-4 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Pesquisa geral (Nome, CPF ou BO)...">
+                    </div>
+                    <button onclick="toggleFiltros()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 hover:text-white px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                        <span class="hidden sm:inline">Filtros</span>
+                    </button>
+                </div>
+                <div class="text-sm text-gray-400 font-medium whitespace-nowrap">
+                    Total de Registos: <span id="contador-presos" class="text-white bg-blue-600 px-2.5 py-1 rounded-md ml-1">0</span>
+                </div>
+            </div>
+            
+            <div id="filtros-avancados" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 pt-4 mt-4 border-t border-gray-800">
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Data Nasc.</label>
+                    <input type="text" id="filtro-nascimento" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Ex: 28/04">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Naturalidade</label>
+                    <input type="text" id="filtro-naturalidade" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Ex: Feira">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Crime / Artigo</label>
+                    <input type="text" id="filtro-crime" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Ex: 33">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Facção / Orcrim</label>
+                    <input type="text" id="filtro-orcrim" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Sigla/Nome">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Nome da Mãe</label>
+                    <input type="text" id="filtro-mae" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Nome completo">
+                </div>
+                <div class="flex items-end">
+                    <button onclick="limparFiltros()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 p-2 rounded text-sm font-medium transition-colors focus:outline-none flex items-center justify-center gap-1.5 h-[38px]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        Limpar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- UTILIZANDO GRID (grid-cols-4) em vez de FLEX para garantir 4 cartões de tamanhos iguais por linha -->
+        <main id="cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto mb-10">
+        </main>
+
+        <div id="sem-resultados" class="hidden text-center py-10">
+            <svg class="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <h3 class="text-xl font-medium text-gray-400">Nenhum registo encontrado</h3>
+        </div>
+
+        <div id="detalhesModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto" onclick="fecharModal()">
+            <div class="bg-gray-900 rounded-2xl shadow-2xl border border-gray-700 w-full max-w-3xl flex flex-col overflow-hidden relative my-auto max-h-[90vh]" onclick="event.stopPropagation()">
+                <div class="flex justify-between items-center p-4 border-b border-gray-800 bg-gray-900 shrink-0">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M15 18a3 3 0 1 0-6 0"/><path d="M15 18v-4a3 3 0 1 0-6 0v4"/><path d="M15 18a3 3 0 1 1-6 0"/><path d="M15 14a3 3 0 1 0-6 0"/><path d="M15 14v-4a3 3 0 1 0-6 0v4"/><path d="M15 14a3 3 0 1 1-6 0"/><path d="M15 10a3 3 0 1 0-6 0"/><path d="M15 10V6a3 3 0 1 0-6 0v4"/><path d="M15 10a3 3 0 1 1-6 0"/><path d="M17 18H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2z"/></svg>
+                            Ficha Completa de Custódia
+                        </h3>
+                    </div>
+                    <button onclick="fecharModal()" class="text-gray-400 hover:text-red-500 transition-colors bg-gray-800 hover:bg-gray-700 p-1.5 rounded-full border border-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+                
+                <div class="p-5 overflow-y-auto">
+                    <div class="flex flex-col items-center sm:items-start gap-5 mb-6">
+                        <div class="text-center sm:text-left w-full border-b border-gray-800 pb-3">
+                            <h2 id="modal-nome-titulo" class="text-xl font-bold text-white mb-1"></h2>
+                        </div>
+                        <div class="flex flex-wrap justify-center sm:justify-start gap-4 w-full">
+                            <!-- Fotos Modal - Inclui object-top para focar no rosto -->
+                            <div class="flex flex-col items-center gap-1.5">
+                                <img id="modal-foto-frente" src="" alt="Frente" class="w-28 h-36 sm:w-32 sm:h-40 rounded-lg shadow-md border border-gray-700 object-cover object-top bg-gray-800 cursor-pointer hover:ring-2 hover:ring-blue-500 hover:scale-105 transition-all" onclick="abrirLightbox(this.src)">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Frente</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1.5">
+                                <img id="modal-foto-esquerdo" src="" alt="Perfil Esq" class="w-28 h-36 sm:w-32 sm:h-40 rounded-lg shadow-md border border-gray-700 object-cover object-top bg-gray-800 cursor-pointer hover:ring-2 hover:ring-blue-500 hover:scale-105 transition-all" onclick="abrirLightbox(this.src)">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Perfil Esq.</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1.5">
+                                <img id="modal-foto-direito" src="" alt="Perfil Dir" class="w-28 h-36 sm:w-32 sm:h-40 rounded-lg shadow-md border border-gray-700 object-cover object-top bg-gray-800 cursor-pointer hover:ring-2 hover:ring-blue-500 hover:scale-105 transition-all" onclick="abrirLightbox(this.src)">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Perfil Dir.</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-inner">
+                        <div id="modal-campos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+                    </div>
+                </div>
+                <div class="p-3 border-t border-gray-800 bg-gray-900 flex justify-end shrink-0">
+                     <button onclick="fecharModal()" class="bg-gray-800 border border-gray-700 hover:bg-gray-700 text-white text-sm font-semibold py-1.5 px-5 rounded-lg">Fechar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="lightbox" class="hidden fixed inset-0 z-[120] bg-black/95 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300" onclick="fecharLightbox()">
+            <button onclick="fecharLightbox()" class="absolute top-4 right-4 md:top-8 md:right-8 text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800 p-2 rounded-full border border-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+            <img id="lightbox-img" src="" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl border border-gray-700 scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+        </div>
+    </div>
+
+    <script>
+        let presosData = [];
+
+        // Filtro para analisar e limpar o JSON com erros de extração/raspagem
+        function sanitizarDados(dados) {
+            const labelsVazadas = [
+                'Pai:', 'Mãe:', 'Profissão:', 'Naturalidade:', 'Cônjuge:', 
+                'Orcrim:', 'Número do BO:', 'RG:', 'CPF:', 'Alcunha:'
+            ];
+            
+            return dados.map(p => {
+                let presoLimpo = { ...p };
+                
+                Object.keys(presoLimpo).forEach(key => {
+                    if (typeof presoLimpo[key] === 'string') {
+                        let val = presoLimpo[key].trim();
+                        
+                        // 1. Limpa campos que receberam apenas os nomes de outros campos (Ex: "Profissão:")
+                        if (labelsVazadas.some(l => val.toLowerCase() === l.toLowerCase() || val.toLowerCase() === l.replace(':','').toLowerCase())) {
+                            presoLimpo[key] = '';
+                        }
+                        
+                        // 2. Apaga valores sobrepostos por desalinhamento do scraper (observados na sua captura de ecrã)
+                        if (key === 'rg' && val.toLowerCase().includes('pai:')) presoLimpo[key] = '';
+                        if (key === 'profissao' && val.toLowerCase().includes('naturalidade:')) presoLimpo[key] = '';
+                        if (key === 'orcrim' && val.toLowerCase().includes('número do bo:')) presoLimpo[key] = '';
+                        if (key === 'conjuge' && val.toLowerCase().includes('profissão')) presoLimpo[key] = '';
+                        if (key === 'alcunha' && val.toLowerCase().includes('orcrim')) presoLimpo[key] = '';
+                    }
+                });
+                return presoLimpo;
+            });
+        }
+
+        async function carregarDadosDoServidor() {
+            try {
+                // Tenta carregar o ficheiro JSON real
+                const resposta = await fetch('./dados.json');
+                if (resposta.ok) {
+                    const jsonBruto = await resposta.json();
+                    // Aplica a limpeza antes de guardar na memória!
+                    presosData = sanitizarDados(jsonBruto); 
+                } else {
+                    console.error("Erro na resposta do servidor:", resposta.status);
+                    presosData = [];
+                }
+            } catch (erro) {
+                // Se falhar (ex: ficheiro inexistente ou bloqueio de CORS)
+                console.error("Erro ao tentar aceder a './dados.json':", erro);
+                presosData = [];
+            }
+        }
+
+        async function fazerLogin(event) {
+            event.preventDefault();
+            const usuario = document.getElementById('usuario').value;
+            const senha = document.getElementById('senha').value;
+            const erroMsg = document.getElementById('erro-login');
+            const btn = document.getElementById('btn-login');
+
+            if (usuario === 'admin' && senha === '123456') {
+                btn.innerText = "A carregar dados...";
+                await carregarDadosDoServidor();
+                
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-content').classList.remove('hidden');
+                document.body.classList.remove('overflow-hidden');
+                renderizarCartoes(presosData); 
+            } else {
+                erroMsg.classList.remove('hidden');
+            }
+        }
+
+        function renderizarCartoes(dados) {
+            const container = document.getElementById('cards-container');
+            const semResultados = document.getElementById('sem-resultados');
+            const contador = document.getElementById('contador-presos');
+            
+            container.innerHTML = '';
+            contador.innerText = dados.length;
+
+            if (dados.length === 0) {
+                semResultados.classList.remove('hidden');
+                return;
+            } else {
+                semResultados.classList.add('hidden');
+            }
+
+            dados.forEach(preso => {
+                const imagemFrenteAlt = `https://placehold.co/400x500/1f2937/94a3b8?text=Sem+Foto`;
+                
+                // Removido max-w-[280px] e adicionado flex flex-col h-full para o card esticar dentro do grid
+                // A altura da imagem subiu de h-56 para h-64
+                // Adicionada a classe object-top à imagem para focar no rosto
+                const cardHTML = `
+                <article class="bg-gray-900 rounded-xl shadow-lg hover:shadow-2xl hover:border-gray-700 transition-all duration-300 w-full overflow-hidden border border-gray-800 flex flex-col h-full">
+                    <div class="relative h-64 bg-gray-800 flex items-center justify-center overflow-hidden group text-center shrink-0">
+                        <img src="${preso.fotoFrente || imagemFrenteAlt}" alt="Foto" class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" onerror="this.src='${imagemFrenteAlt}'">
+                        <div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded border border-gray-700 text-xs font-bold text-white shadow">
+                            Art. ${preso.artigo || 'N/D'}
+                        </div>
+                    </div>
+                    <div class="p-5 flex flex-col flex-grow">
+                        <div class="border-b border-gray-800 pb-3 mb-3">
+                            <h2 class="text-lg font-bold text-white leading-tight mb-1 truncate" title="${preso.nome}">${preso.nome}</h2>
+                            <p class="text-red-500 font-bold flex items-center gap-2 text-xs">
+                                Nasc: ${preso.dataNascimento || 'Não Informado'}
+                            </p>
+                        </div>
+                        <div class="space-y-1.5 text-xs text-gray-400 flex-grow">
+                            <p class="flex justify-between"><strong class="text-gray-300">CPF:</strong> <span>${preso.cpf || 'Não Informado'}</span></p>
+                            <p class="flex justify-between"><strong class="text-gray-300">Entrada:</strong> <span>${preso.dataEntrada || 'Não Informada'}</span></p>
+                        </div>
+                        <button onclick="abrirModal('${preso.id}')" class="mt-4 w-full bg-gray-800 border border-gray-700 hover:bg-gray-700 hover:border-gray-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2 text-sm">
+                            Ver Detalhes
+                        </button>
+                    </div>
+                </article>`;
+                container.innerHTML += cardHTML;
+            });
+        }
+
+        function filtrarPresos() {
+            const tGeral = document.getElementById('input-pesquisa').value.toLowerCase();
+            const tNasc = document.getElementById('filtro-nascimento').value.toLowerCase();
+            const tNat = document.getElementById('filtro-naturalidade').value.toLowerCase();
+            const tCrime = document.getElementById('filtro-crime').value.toLowerCase();
+            const tOrcrim = document.getElementById('filtro-orcrim').value.toLowerCase();
+            const tMae = document.getElementById('filtro-mae').value.toLowerCase();
+
+            const filtrados = presosData.filter(p => {
+                const mGeral = tGeral === '' || (p.nome && p.nome.toLowerCase().includes(tGeral)) || (p.cpf && p.cpf.includes(tGeral)) || (p.bo && p.bo.toLowerCase().includes(tGeral));
+                const mNasc = tNasc === '' || (p.dataNascimento && p.dataNascimento.toLowerCase().includes(tNasc));
+                const mNat = tNat === '' || (p.naturalidade && p.naturalidade.toLowerCase().includes(tNat));
+                const mCrime = tCrime === '' || (p.artigo && p.artigo.toLowerCase().includes(tCrime));
+                const mOrcrim = tOrcrim === '' || (p.orcrim && p.orcrim.toLowerCase().includes(tOrcrim));
+                const mMae = tMae === '' || (p.mae && p.mae.toLowerCase().includes(tMae));
+                return mGeral && mNasc && mNat && mCrime && mOrcrim && mMae;
+            });
+            renderizarCartoes(filtrados);
+        }
+
+        function toggleFiltros() { document.getElementById('filtros-avancados').classList.toggle('hidden'); }
+        function limparFiltros() {
+            ['input-pesquisa','filtro-nascimento','filtro-naturalidade','filtro-crime','filtro-orcrim','filtro-mae'].forEach(id => document.getElementById(id).value = '');
+            filtrarPresos(); 
+        }
+
+        const modal = document.getElementById('detalhesModal');
+
+        function abrirModal(id) {
+            const preso = presosData.find(p => p.id === id);
+            if (!preso) return;
+
+            document.getElementById('modal-nome-titulo').innerText = preso.nome;
+            const baseFall = `https://placehold.co/400x500/1f2937/94a3b8?text=Sem+Foto`;
+            
+            ['frente', 'esquerdo', 'direito'].forEach(lado => {
+                const img = document.getElementById(`modal-foto-${lado}`);
+                const src = lado === 'frente' ? preso.fotoFrente : lado === 'esquerdo' ? preso.fotoEsquerdo : preso.fotoDireito;
+                img.src = src || baseFall;
+                img.onerror = () => { img.src = baseFall };
+            });
+
+            const camposGrid = document.getElementById('modal-campos');
+            camposGrid.innerHTML = ''; 
+
+            const layout = [
+                { label: 'Nome Completo', value: preso.nome, cols: 3 },
+                { label: 'Data de Nascimento', value: preso.dataNascimento },
+                { label: 'CPF', value: preso.cpf },
+                { label: 'RG', value: preso.rg },
+                { label: 'Nome da Mãe', value: preso.mae, cols: 3 },
+                { label: 'Nome do Pai', value: preso.pai, cols: 3 },
+                { label: 'Naturalidade', value: preso.naturalidade },
+                { label: 'Estado Civil', value: preso.estadoCivil },
+                { label: 'Profissão', value: preso.profissao },
+                { label: 'Cônjuge', value: preso.conjuge, cols: 2 },
+                { label: 'Alcunha', value: preso.alcunha },
+                { label: 'Endereço', value: preso.rua, cols: 2 },
+                { label: 'Bairro', value: preso.bairro },
+                { label: 'Artigo', value: preso.artigo },
+                { label: 'Número do BO', value: preso.bo },
+                { label: 'Facção / Orcrim', value: preso.orcrim },
+                { label: 'Data de Entrada', value: preso.dataEntrada },
+            ];
+
+            layout.forEach(item => {
+                const div = document.createElement('div');
+                if (item.cols === 3) div.className = 'col-span-1 sm:col-span-2 md:col-span-3';
+                else if (item.cols === 2) div.className = 'col-span-1 sm:col-span-2 md:col-span-2';
+                div.innerHTML = `<span class="block text-[10px] font-semibold text-gray-500 uppercase">${item.label}</span><span class="block text-sm text-white bg-gray-900 p-2 rounded mt-1 border border-gray-700">${item.value || '-'}</span>`;
+                camposGrid.appendChild(div);
+            });
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        function fecharModal() { modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.style.overflow = 'auto'; }
+
+        const lightbox = document.getElementById('lightbox'), lightboxImg = document.getElementById('lightbox-img');
+        function abrirLightbox(src) {
+            if (src.includes("placehold.co")) return; 
+            lightboxImg.src = src; lightbox.classList.remove('hidden');
+            setTimeout(() => { lightbox.classList.remove('opacity-0'); lightboxImg.classList.replace('scale-95', 'scale-100'); }, 10);
+        }
+        function fecharLightbox() {
+            lightbox.classList.add('opacity-0'); lightboxImg.classList.replace('scale-100', 'scale-95');
+            setTimeout(() => { lightbox.classList.add('hidden'); lightboxImg.src = ''; }, 300);
+        }
+        document.addEventListener('keydown', e => { if (e.key === "Escape") { !lightbox.classList.contains('hidden') ? fecharLightbox() : !modal.classList.contains('hidden') && fecharModal(); } });
+    </script>
+</body>
+</html>
