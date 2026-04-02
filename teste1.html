@@ -170,31 +170,40 @@
     <script>
         let presosData = [];
 
-        // Filtro para analisar e limpar o JSON com erros de extração/raspagem
+        // Filtro muito mais agressivo para limpar o JSON com erros de extração/raspagem
         function sanitizarDados(dados) {
-            const labelsVazadas = [
-                'Pai:', 'Mãe:', 'Profissão:', 'Naturalidade:', 'Cônjuge:', 
-                'Orcrim:', 'Número do BO:', 'RG:', 'CPF:', 'Alcunha:'
-            ];
-            
+            // Regex para detetar quando um valor *começa* com um rótulo do sistema seguido de dois pontos.
+            // Exemplo: O scraper errou a linha e copiou "Número do BO: 123" para dentro do campo Facção.
+            const regexErroRaspagem = /^(nome|data de nascimento|cpf|rg|nome da m[ãa]e|m[ãa]e|nome do pai|pai|naturalidade|estado civil|profiss[ãa]o|c[ôo]njuge|alcunha|endere[çc]o|bairro|artigo|n[úu]mero do bo|bo|fac[çc][ãa]o.*|orcrim|data de entrada)\s*:/i;
+
             return dados.map(p => {
                 let presoLimpo = { ...p };
                 
                 Object.keys(presoLimpo).forEach(key => {
                     if (typeof presoLimpo[key] === 'string') {
                         let val = presoLimpo[key].trim();
+                        if (!val) return;
                         
-                        // 1. Limpa campos que receberam apenas os nomes de outros campos (Ex: "Profissão:")
-                        if (labelsVazadas.some(l => val.toLowerCase() === l.toLowerCase() || val.toLowerCase() === l.replace(':','').toLowerCase())) {
-                            presoLimpo[key] = '';
+                        // Normaliza a string (remove acentos e espaços soltos) para facilitar a validação
+                        let valNormalizado = val.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[:;\-\.]/g, '').trim();
+                        
+                        // 1. Limpa se o valor extraído for APENAS um rótulo vazio (Ex: "Profissão:" em vez da profissão real)
+                        const labelsIsoladas = [
+                            'nome completo', 'data de nascimento', 'cpf', 'rg', 'nome da mae', 'mae', 'nome do pai', 'pai', 
+                            'naturalidade', 'estado civil', 'profissao', 'conjuge', 'alcunha', 
+                            'endereco', 'rua', 'bairro', 'artigo', 'numero do bo', 'bo', 'faccao orcrim', 'faccao', 'orcrim', 'data de entrada', 'entrada'
+                        ];
+                        
+                        if (labelsIsoladas.includes(valNormalizado)) {
+                            presoLimpo[key] = ''; // Limpa o lixo
+                            return;
                         }
-                        
-                        // 2. Apaga valores sobrepostos por desalinhamento do scraper (observados na sua captura de ecrã)
-                        if (key === 'rg' && val.toLowerCase().includes('pai:')) presoLimpo[key] = '';
-                        if (key === 'profissao' && val.toLowerCase().includes('naturalidade:')) presoLimpo[key] = '';
-                        if (key === 'orcrim' && val.toLowerCase().includes('número do bo:')) presoLimpo[key] = '';
-                        if (key === 'conjuge' && val.toLowerCase().includes('profissão')) presoLimpo[key] = '';
-                        if (key === 'alcunha' && val.toLowerCase().includes('orcrim')) presoLimpo[key] = '';
+
+                        // 2. Limpa se o valor COMEÇAR com um rótulo do sistema (Sujidade de salto)
+                        // Exemplo: Se o RG estiver preenchido com "Pai: Jose Felipe"
+                        if (regexErroRaspagem.test(val)) {
+                            presoLimpo[key] = ''; // Limpa a sujidade cruzada
+                        }
                     }
                 });
                 return presoLimpo;
@@ -207,7 +216,7 @@
                 const resposta = await fetch('./dados.json');
                 if (resposta.ok) {
                     const jsonBruto = await resposta.json();
-                    // Aplica a limpeza antes de guardar na memória!
+                    // Aplica a limpeza super rigorosa antes de guardar na memória!
                     presosData = sanitizarDados(jsonBruto); 
                 } else {
                     console.error("Erro na resposta do servidor:", resposta.status);
