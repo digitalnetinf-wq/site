@@ -15,7 +15,7 @@
 <body class="bg-black min-h-screen font-sans text-gray-300 relative overflow-hidden">
 
     <div id="login-screen" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-4">
-        <div class="bg-gray-900 p-8 rounded-2xl shadow-2xl border border-gray-800 w-full max-w-md relative">
+        <div class="bg-gray-900 p-8 rounded-2xl shadow-2xl border border-gray-800 w-full max-w-md relative max-h-[95vh] overflow-y-auto">
             <div class="text-center mb-8">
                 <div class="mx-auto bg-gray-800 w-16 h-16 rounded-full flex items-center justify-center mb-4 border border-gray-700 shadow-inner">
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -24,24 +24,28 @@
                 <p class="text-gray-400 mt-2 text-sm">Sistema de Custódia - 1ª COORPIN</p>
             </div>
 
-            <form onsubmit="fazerLogin(event)" class="space-y-5">
-                <div>
-                    <label for="usuario" class="block text-sm font-medium text-gray-400 mb-1">Usuário</label>
-                    <input type="text" id="usuario" required class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Digite seu usuário">
-                </div>
-                <div>
-                    <label for="senha" class="block text-sm font-medium text-gray-400 mb-1">Senha</label>
-                    <input type="password" id="senha" required class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Digite sua senha">
-                </div>
-                
-                <p id="erro-login" class="text-red-500 text-sm hidden font-medium text-center bg-red-500/10 py-2 rounded border border-red-500/20">Usuário ou senha incorretos!</p>
+            <!-- Formulário de Login -->
+            <div id="form-login-container">
+                <form onsubmit="fazerLogin(event)" class="space-y-5">
+                    <div>
+                        <label for="usuario" class="block text-sm font-medium text-gray-400 mb-1">Usuário</label>
+                        <input type="text" id="usuario" required class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Digite seu usuário">
+                    </div>
+                    <div>
+                        <label for="senha" class="block text-sm font-medium text-gray-400 mb-1">Senha</label>
+                        <input type="password" id="senha" required class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Digite sua senha">
+                    </div>
+                    
+                    <p id="erro-login" class="text-red-500 text-sm hidden font-medium text-center bg-red-500/10 py-2 rounded border border-red-500/20">Usuário ou senha incorretos!</p>
 
-                <button type="submit" id="btn-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 shadow-lg shadow-blue-900/20 mt-2">
-                    Entrar no Sistema
-                </button>
-            </form>
-            <div class="mt-6 text-center border-t border-gray-800 pt-4">
-                <p class="text-xs text-gray-500">Credenciais: <strong>admin</strong> | <strong>123456</strong></p>
+                    <button type="submit" id="btn-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 shadow-lg shadow-blue-900/20 mt-2">
+                        Entrar no Sistema
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center border-t border-gray-800 pt-4">
+                    <p class="text-xs text-gray-500">Desenvolvedor <strong>Rilton</strong></p>
+                </div>
             </div>
         </div>
     </div>
@@ -88,7 +92,7 @@
                     <input type="text" id="filtro-crime" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Ex: 33">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Facção / Orcrim</label>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Orcrim</label>
                     <input type="text" id="filtro-orcrim" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Sigla/Nome">
                 </div>
                 <div>
@@ -183,12 +187,19 @@
 
         async function fazerLogin(event) {
             event.preventDefault();
-            const usuario = document.getElementById('usuario').value;
+            const usuario = document.getElementById('usuario').value.trim();
             const senha = document.getElementById('senha').value;
             const erroMsg = document.getElementById('erro-login');
             const btn = document.getElementById('btn-login');
 
-            if (usuario === 'admin' && senha === '123456') {
+            // Verificar logins pré-definidos no sistema
+            const isAdmin = usuario.toLowerCase() === 'admin' && senha === '12643151';
+            const isSi = usuario.toLowerCase() === 'si' && senha === '205987';
+            const isCustodia = usuario.toLowerCase() === 'custodia' && senha === '309574';
+            const isDelegado = usuario.toLowerCase() === 'delegado' && senha === '929200';
+
+            // Permitir acesso se for um dos utilizadores master
+            if (isAdmin || isSi || isCustodia || isDelegado) {
                 btn.innerText = "A carregar dados...";
                 await carregarDadosDoServidor();
                 
@@ -310,12 +321,9 @@
                 { label: 'Endereço', value: preso.endereco || preso.rua, cols: 2 },
                 { label: 'Número', value: preso.numero },
                 { label: 'Bairro', value: preso.bairro },
-                { label: 'Condomínio', value: preso.condominio },
-                { label: 'Bloco/Apto', value: preso.blocoApto },
-                { label: 'Cidade / Estado', value: preso.cidadeEstado, cols: 3 },
                 { label: 'Artigo', value: preso.artigo },
                 { label: 'Número do BO', value: preso.bo },
-                { label: 'Facção / Orcrim', value: preso.orcrim },
+                { label: 'Orcrim', value: preso.orcrim },
                 { label: 'Data de Entrada', value: preso.dataEntrada },
                 { label: 'Data de Saída', value: preso.dataSaida },
                 { label: 'Presídio/Alvará (P ou A)', value: preso.presidioAlvara },
