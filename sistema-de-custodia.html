@@ -62,7 +62,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </div>
-                        <input type="text" id="input-pesquisa" oninput="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg pl-10 px-4 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Pesquisa geral (Nome, CPF ou BO)...">
+                        <input type="text" id="input-pesquisa" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg pl-10 px-4 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Pesquisa geral (Nome, CPF ou BO)...">
                     </div>
                     <button onclick="toggleFiltros()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 hover:text-white px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
@@ -77,23 +77,23 @@
             <div id="filtros-avancados" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 pt-4 mt-4 border-t border-gray-800">
                 <div>
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Data Nasc.</label>
-                    <input type="text" id="filtro-nascimento" oninput="mascaraData(this)" maxlength="10" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="DD/MM/AAAA">
+                    <input type="text" id="filtro-nascimento" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Ex: 28/04">
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Naturalidade</label>
-                    <input type="text" id="filtro-naturalidade" oninput="mascaraApenasLetras(this)" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Apenas Letras">
+                    <input type="text" id="filtro-naturalidade" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Ex: Feira">
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Crime / Artigo</label>
-                    <input type="text" id="filtro-crime" oninput="mascaraAlfanumerico(this)" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Ex: 33">
+                    <input type="text" id="filtro-crime" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Ex: 33">
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Facção / Orcrim</label>
-                    <input type="text" id="filtro-orcrim" oninput="mascaraAlfanumerico(this)" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Sigla/Nome">
+                    <input type="text" id="filtro-orcrim" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Sigla/Nome">
                 </div>
                 <div>
                     <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Nome da Mãe</label>
-                    <input type="text" id="filtro-mae" oninput="mascaraApenasLetras(this)" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Nome completo">
+                    <input type="text" id="filtro-mae" onkeyup="filtrarPresos()" class="w-full bg-gray-800 border border-gray-700 text-white rounded p-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Nome completo">
                 </div>
                 <div class="flex items-end">
                     <button onclick="limparFiltros()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 p-2 rounded text-sm font-medium transition-colors focus:outline-none flex items-center justify-center gap-1.5 h-[38px]">
@@ -166,26 +166,6 @@
     <script>
         let presosData = [];
 
-        // --- FUNÇÕES DE MÁSCARA E VALIDAÇÃO ---
-        function mascaraData(input) {
-            let valor = input.value.replace(/\D/g, ''); 
-            if (valor.length > 2) valor = valor.substring(0,2) + '/' + valor.substring(2);
-            if (valor.length > 5) valor = valor.substring(0,5) + '/' + valor.substring(5,9);
-            input.value = valor;
-            filtrarPresos(); 
-        }
-
-        function mascaraApenasLetras(input) {
-            input.value = input.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
-            filtrarPresos();
-        }
-
-        function mascaraAlfanumerico(input) {
-            input.value = input.value.replace(/[^a-zA-Z0-9À-ÿ\s-]/g, '');
-            filtrarPresos();
-        }
-        // --- FIM DAS MÁSCARAS ---
-
         async function carregarDadosDoServidor() {
             try {
                 const resposta = await fetch('./dados.json');
@@ -221,33 +201,31 @@
             }
         }
 
-        // --- FUNÇÃO DE RENDERIZAÇÃO OTIMIZADA ---
         function renderizarCartoes(dados) {
             const container = document.getElementById('cards-container');
             const semResultados = document.getElementById('sem-resultados');
             const contador = document.getElementById('contador-presos');
             
+            container.innerHTML = '';
             contador.innerText = dados.length;
 
             if (dados.length === 0) {
-                container.innerHTML = '';
                 semResultados.classList.remove('hidden');
                 return;
             } else {
                 semResultados.classList.add('hidden');
             }
 
-            // OTIMIZAÇÃO: Cria uma variável vazia para juntar todo o HTML primeiro
-            let htmlCartoes = '';
-
             dados.forEach(preso => {
                 const imagemFrenteAlt = `https://placehold.co/400x500/1f2937/94a3b8?text=Sem+Foto`;
                 
-                // Adicionado loading="lazy" na tag img
+                // 1. max-w-[280px] removido para os cards acompanharem o grid
+                // 2. h-56 alterado para h-64 para fotos maiores
+                // 3. object-top adicionado para focar no rosto
                 const cardHTML = `
                 <article class="bg-gray-900 rounded-xl shadow-lg hover:shadow-2xl hover:border-gray-700 transition-all duration-300 w-full overflow-hidden border border-gray-800 flex flex-col h-full">
                     <div class="relative h-64 bg-gray-800 flex items-center justify-center overflow-hidden group text-center shrink-0">
-                        <img loading="lazy" src="${preso.fotoFrente || imagemFrenteAlt}" alt="Foto" class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" onerror="this.src='${imagemFrenteAlt}'">
+                        <img src="${preso.fotoFrente || imagemFrenteAlt}" alt="Foto" class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" onerror="this.src='${imagemFrenteAlt}'">
                         <div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded border border-gray-700 text-xs font-bold text-white shadow">
                             Art. ${preso.artigo || 'N/D'}
                         </div>
@@ -268,13 +246,8 @@
                         </button>
                     </div>
                 </article>`;
-                
-                // Vai acumulando o texto na variável (é instantâneo)
-                htmlCartoes += cardHTML; 
+                container.innerHTML += cardHTML;
             });
-
-            // Envia para a tela apenas UMA vez no final!
-            container.innerHTML = htmlCartoes;
         }
 
         function filtrarPresos() {
@@ -329,17 +302,25 @@
                 { label: 'RG', value: preso.rg },
                 { label: 'Nome da Mãe', value: preso.mae, cols: 3 },
                 { label: 'Nome do Pai', value: preso.pai, cols: 3 },
-                { label: 'Naturalidade', value: preso.naturalidade },
+                { label: 'Naturalidade', value: preso.naturalidade || preso.municipio },
                 { label: 'Estado Civil', value: preso.estadoCivil },
                 { label: 'Profissão', value: preso.profissao },
                 { label: 'Cônjuge', value: preso.conjuge, cols: 2 },
                 { label: 'Alcunha', value: preso.alcunha },
-                { label: 'Endereço', value: preso.rua, cols: 2 },
+                { label: 'Endereço', value: preso.endereco || preso.rua, cols: 2 },
+                { label: 'Número', value: preso.numero },
                 { label: 'Bairro', value: preso.bairro },
+                { label: 'Condomínio', value: preso.condominio },
+                { label: 'Bloco/Apto', value: preso.blocoApto },
+                { label: 'Cidade / Estado', value: preso.cidadeEstado, cols: 3 },
                 { label: 'Artigo', value: preso.artigo },
                 { label: 'Número do BO', value: preso.bo },
                 { label: 'Facção / Orcrim', value: preso.orcrim },
                 { label: 'Data de Entrada', value: preso.dataEntrada },
+                { label: 'Data de Saída', value: preso.dataSaida },
+                { label: 'Presídio/Alvará (P ou A)', value: preso.presidioAlvara },
+                { label: 'Prisão Realizada Por', value: preso.prisaoRealizadaPor, cols: 3 },
+                { label: 'Observações', value: preso.observacoes, cols: 3 }
             ];
 
             layout.forEach(item => {
