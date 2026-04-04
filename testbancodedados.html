@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel em Tempo Real</title>
+    <style>
+        /* Estilo básico para a tabela ficar bonita e organizada */
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px; 
+        }
+        th, td { 
+            border: 1px solid #ddd; 
+            padding: 10px; 
+            text-align: left; 
+        }
+        th { 
+            background-color: #007bff; 
+            color: white; 
+        }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .aviso-erro { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Meus Dados da Planilha</h1>
+        <p>Atualização em tempo real ativada.</p>
+        
+        <div id="tabela-container">Carregando dados...</div>
+    </div>
+
+    <script>
+        // SUAS CREDENCIAIS
+        const sheetId = '1ur2C6eDdQvtYi8pt4JCCPm52_cnnKYXX';
+        const apiKey = 'AIzaSyA9_5NqK7MMJgPPpymmRPbFjg_uMUlF0N0';
+        
+        // NOME DA ABA DA SUA PLANILHA
+        // Importante: Se a sua aba não se chamar "Página1", mude o nome aqui!
+        const nomeDaAba = 'Página1'; 
+        const range = `${nomeDaAba}!A:Z`; // Pega de A até Z
+
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
+
+        async function carregarDados() {
+            try {
+                const resposta = await fetch(url);
+                const dados = await resposta.json();
+                
+                // Trata erros (ex: nome da aba errado ou planilha privada)
+                if (dados.error) {
+                    document.getElementById('tabela-container').innerHTML = `
+                        <p class="aviso-erro">Erro: ${dados.error.message}</p>
+                        <p>Verifique se o nome da aba está correto ("${nomeDaAba}") e se a planilha está em "Qualquer pessoa com o link pode ler".</p>
+                    `;
+                    return;
+                }
+
+                const linhas = dados.values;
+
+                if (!linhas || linhas.length === 0) {
+                    document.getElementById('tabela-container').innerHTML = '<p>A planilha está vazia.</p>';
+                    return;
+                }
+
+                // Cria a estrutura da tabela
+                let html = '<table>';
+                
+                linhas.forEach((linha, index) => {
+                    html += '<tr>';
+                    linha.forEach(celula => {
+                        if (index === 0) {
+                            // A primeira linha da planilha vira o cabeçalho azul
+                            html += `<th>${celula}</th>`;
+                        } else {
+                            html += `<td>${celula}</td>`;
+                        }
+                    });
+                    html += '</tr>';
+                });
+                
+                html += '</table>';
+                
+                // Insere a tabela pronta no site
+                document.getElementById('tabela-container').innerHTML = html;
+
+            } catch (erro) {
+                console.error('Erro na requisição:', erro);
+                document.getElementById('tabela-container').innerHTML = '<p class="aviso-erro">Erro de conexão com o Google Sheets.</p>';
+            }
+        }
+
+        // 1. Carrega os dados assim que o site abre
+        carregarDados();
+
+        // 2. Atualiza a tabela sozinho a cada 10 segundos sem precisar dar F5
+        setInterval(carregarDados, 10000); 
+    </script>
+</body>
+</html>
