@@ -1,116 +1,121 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel em Tempo Real</title>
+    <title>Painel de Dados em Tempo Real</title>
     <style>
-        /* Estilo básico para a tabela ficar bonita e organizada */
         body { 
-            font-family: Arial, sans-serif; 
-            padding: 20px; 
-            background-color: #f9f9f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 40px; 
+            background-color: #f0f2f5;
+            color: #333;
         }
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
         }
+        h1 { color: #1a73e8; margin-bottom: 10px; }
+        .status { font-size: 0.9em; color: #666; margin-bottom: 25px; display: flex; align-items: center; }
+        .ponto { height: 10px; width: 10px; background-color: #28a745; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        
         table { 
             width: 100%; 
             border-collapse: collapse; 
-            margin-top: 20px; 
+            overflow: hidden;
+            border-radius: 8px;
         }
         th, td { 
-            border: 1px solid #ddd; 
-            padding: 10px; 
+            padding: 12px 15px; 
             text-align: left; 
+            border-bottom: 1px solid #eee;
         }
         th { 
-            background-color: #007bff; 
+            background-color: #1a73e8; 
             color: white; 
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
         }
-        tr:nth-child(even) { background-color: #f2f2f2; }
-        .aviso-erro { color: red; font-weight: bold; }
+        tr:hover { background-color: #f8f9fa; }
+        .erro { color: #d93025; background: #fce8e6; padding: 15px; border-radius: 6px; border: 1px solid #fad2cf; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Meus Dados da Planilha</h1>
-        <p>Atualização em tempo real ativada.</p>
+        <h1>Monitorização de Dados</h1>
+        <div class="status"><span class="ponto"></span> Ligado à Planilha1 - Atualização automática</div>
         
-        <div id="tabela-container">Carregando dados...</div>
+        <div id="tabela-conteudo">A carregar dados do Google Drive...</div>
     </div>
 
     <script>
-        // SUAS CREDENCIAIS
         const sheetId = '1ur2C6eDdQvtYi8pt4JCCPm52_cnnKYXX';
         const apiKey = 'AIzaSyA9_5NqK7MMJgPPpymmRPbFjg_uMUlF0N0';
-        
-        // NOME DA ABA DA SUA PLANILHA
-        // Importante: Se a sua aba não se chamar "Página1", mude o nome aqui!
-        const nomeDaAba = 'Página1'; 
-        const range = `${nomeDaAba}!A:Z`; // Pega de A até Z
+        const nomeDaAba = 'Planilha1'; 
+        const range = `${nomeDaAba}!A:Z`; 
 
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
 
-        async function carregarDados() {
+        async function obterDados() {
             try {
-                const resposta = await fetch(url);
-                const dados = await resposta.json();
+                const res = await fetch(url);
+                const json = await res.json();
                 
-                // Trata erros (ex: nome da aba errado ou planilha privada)
-                if (dados.error) {
-                    document.getElementById('tabela-container').innerHTML = `
-                        <p class="aviso-erro">Erro: ${dados.error.message}</p>
-                        <p>Verifique se o nome da aba está correto ("${nomeDaAba}") e se a planilha está em "Qualquer pessoa com o link pode ler".</p>
-                    `;
+                if (json.error) {
+                    mostrarErro(json.error.message);
                     return;
                 }
 
-                const linhas = dados.values;
-
+                const linhas = json.values;
                 if (!linhas || linhas.length === 0) {
-                    document.getElementById('tabela-container').innerHTML = '<p>A planilha está vazia.</p>';
+                    document.getElementById('tabela-conteudo').innerHTML = '<p>A folha está vazia.</p>';
                     return;
                 }
 
-                // Cria a estrutura da tabela
-                let html = '<table>';
+                let tabelaHtml = '<table><thead><tr>';
                 
-                linhas.forEach((linha, index) => {
-                    html += '<tr>';
-                    linha.forEach(celula => {
-                        if (index === 0) {
-                            // A primeira linha da planilha vira o cabeçalho azul
-                            html += `<th>${celula}</th>`;
-                        } else {
-                            html += `<td>${celula}</td>`;
-                        }
-                    });
-                    html += '</tr>';
+                // Cabeçalho
+                linhas[0].forEach(cabecalho => {
+                    tabelaHtml += `<th>${cabecalho}</th>`;
                 });
-                
-                html += '</table>';
-                
-                // Insere a tabela pronta no site
-                document.getElementById('tabela-container').innerHTML = html;
+                tabelaHtml += '</tr></thead><tbody>';
 
-            } catch (erro) {
-                console.error('Erro na requisição:', erro);
-                document.getElementById('tabela-container').innerHTML = '<p class="aviso-erro">Erro de conexão com o Google Sheets.</p>';
+                // Linhas de dados
+                for (let i = 1; i < linhas.length; i++) {
+                    tabelaHtml += '<tr>';
+                    linhas[i].forEach(celula => {
+                        tabelaHtml += `<td>${celula || ''}</td>`;
+                    });
+                    tabelaHtml += '</tr>';
+                }
+                
+                tabelaHtml += '</tbody></table>';
+                document.getElementById('tabela-conteudo').innerHTML = tabelaHtml;
+
+            } catch (e) {
+                mostrarErro("Não foi possível ligar ao servidor do Google.");
             }
         }
 
-        // 1. Carrega os dados assim que o site abre
-        carregarDados();
+        function mostrarErro(msg) {
+            document.getElementById('tabela-conteudo').innerHTML = `
+                <div class="erro">
+                    <strong>Erro de Ligação:</strong> ${msg}<br>
+                    <small>Certifique-se de que a folha está partilhada como "Qualquer pessoa com o link".</small>
+                </div>`;
+        }
 
-        // 2. Atualiza a tabela sozinho a cada 10 segundos sem precisar dar F5
-        setInterval(carregarDados, 10000); 
+        // Inicia a primeira carga
+        obterDados();
+
+        // Atualiza a cada 15 segundos
+        setInterval(obterDados, 15000);
     </script>
 </body>
 </html>
