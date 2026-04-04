@@ -1,45 +1,65 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Dados em Tempo Real</title>
+    <title>Dashboard CVLI em Tempo Real</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            padding: 40px; 
+            padding: 20px; 
             background-color: #f0f2f5;
             color: #333;
+            margin: 0;
         }
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
         }
-        h1 { color: #1a73e8; margin-bottom: 10px; }
+        h1 { color: #1a73e8; margin-bottom: 5px; }
         .status { font-size: 0.9em; color: #666; margin-bottom: 25px; display: flex; align-items: center; }
         .ponto { height: 10px; width: 10px; background-color: #28a745; border-radius: 50%; display: inline-block; margin-right: 8px; }
         
+        /* Layout em Cards (Cartões) */
+        .card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        /* Área do Gráfico */
+        .grafico-container {
+            position: relative;
+            height: 400px; /* Altura do gráfico */
+            width: 100%;
+        }
+
+        /* Área da Tabela */
+        .tabela-wrapper {
+            overflow-x: auto; /* Adiciona rolagem horizontal se a tabela for muito larga */
+        }
         table { 
             width: 100%; 
             border-collapse: collapse; 
-            overflow: hidden;
-            border-radius: 8px;
+            white-space: nowrap;
         }
         th, td { 
             padding: 12px 15px; 
             text-align: left; 
             border-bottom: 1px solid #eee;
+            font-size: 0.9em;
         }
         th { 
             background-color: #1a73e8; 
             color: white; 
             text-transform: uppercase;
-            font-size: 0.85em;
+            font-size: 0.8em;
             letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
         }
         tr:hover { background-color: #f8f9fa; }
         .erro { color: #d93025; background: #fce8e6; padding: 15px; border-radius: 6px; border: 1px solid #fad2cf; }
@@ -48,21 +68,38 @@
 <body>
 
     <div class="container">
-        <h1>Monitorização de Dados</h1>
-        <div class="status"><span class="ponto"></span> Ligado à Planilha1 - Atualização automática</div>
+        <h1>Dashboard CVLI</h1>
+        <div class="status"><span class="ponto"></span> Sincronizado com Google Sheets - Atualização a cada 15s</div>
         
-        <div id="tabela-conteudo">A carregar dados do Google Drive...</div>
+        <div class="card">
+            <h2 style="margin-top:0; font-size: 1.2em; color: #444;">Resumo em Gráfico</h2>
+            <div class="grafico-container">
+                <canvas id="meuGrafico"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="margin-top:0; font-size: 1.2em; color: #444;">Base de Dados Completa</h2>
+            <div class="tabela-wrapper" id="tabela-conteudo">
+                A carregar dados...
+            </div>
+        </div>
     </div>
 
     <script>
-        // O NOVO ID DA SUA PLANILHA CONVERTIDA
+        // CREDENCIAIS DA PLANILHA
         const sheetId = '1NdN2zOxEdfV3nhxVfC378jLJFV2YwHsE5rCR4g1EMbg';
-        
         const apiKey = 'AIzaSyA9_5NqK7MMJgPPpymmRPbFjg_uMUlF0N0';
         const nomeDaAba = 'Planilha1'; 
         const range = `${nomeDaAba}!A:Z`; 
-
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
+
+        let graficoInstancia = null; // Variável para guardar o gráfico
+
+        // CONFIGURAÇÃO DO GRÁFICO
+        // Mude este número para escolher qual coluna vai gerar o gráfico.
+        // 0 = Coluna A, 1 = Coluna B, 2 = Coluna C, etc...
+        const INDICE_COLUNA_GRAFICO = 1; 
 
         async function obterDados() {
             try {
@@ -76,44 +113,98 @@
 
                 const linhas = json.values;
                 if (!linhas || linhas.length === 0) {
-                    document.getElementById('tabela-conteudo').innerHTML = '<p>A folha está vazia.</p>';
+                    document.getElementById('tabela-conteudo').innerHTML = '<p>A planilha está vazia.</p>';
                     return;
                 }
 
-                let tabelaHtml = '<table><thead><tr>';
-                
-                // Cabeçalho
-                linhas[0].forEach(cabecalho => {
-                    tabelaHtml += `<th>${cabecalho}</th>`;
-                });
-                tabelaHtml += '</tr></thead><tbody>';
-
-                // Linhas de dados
-                for (let i = 1; i < linhas.length; i++) {
-                    tabelaHtml += '<tr>';
-                    linhas[i].forEach(celula => {
-                        tabelaHtml += `<td>${celula || ''}</td>`;
-                    });
-                    tabelaHtml += '</tr>';
-                }
-                
-                tabelaHtml += '</tbody></table>';
-                document.getElementById('tabela-conteudo').innerHTML = tabelaHtml;
+                renderizarTabela(linhas);
+                renderizarGrafico(linhas);
 
             } catch (e) {
-                mostrarErro("Não foi possível ligar ao servidor do Google.");
+                mostrarErro("Não foi possível conectar ao servidor do Google.");
             }
+        }
+
+        function renderizarTabela(linhas) {
+            let tabelaHtml = '<table><thead><tr>';
+            
+            // Cabeçalho
+            linhas[0].forEach(cabecalho => {
+                tabelaHtml += `<th>${cabecalho}</th>`;
+            });
+            tabelaHtml += '</tr></thead><tbody>';
+
+            // Linhas
+            for (let i = 1; i < linhas.length; i++) {
+                tabelaHtml += '<tr>';
+                linhas[i].forEach(celula => {
+                    tabelaHtml += `<td>${celula || ''}</td>`;
+                });
+                tabelaHtml += '</tr>';
+            }
+            tabelaHtml += '</tbody></table>';
+            document.getElementById('tabela-conteudo').innerHTML = tabelaHtml;
+        }
+
+        function renderizarGrafico(linhas) {
+            const nomeDaColuna = linhas[0][INDICE_COLUNA_GRAFICO];
+            const contagem = {};
+
+            // Conta quantas vezes cada item aparece na coluna escolhida
+            for (let i = 1; i < linhas.length; i++) {
+                // Se a célula estiver vazia, ignora ou classifica como "Não informado"
+                if(linhas[i].length > INDICE_COLUNA_GRAFICO) {
+                    let valor = linhas[i][INDICE_COLUNA_GRAFICO];
+                    if(!valor || valor.trim() === '') valor = 'Não informado';
+                    
+                    contagem[valor] = (contagem[valor] || 0) + 1;
+                }
+            }
+
+            // Separa os nomes e os valores para o gráfico
+            const labels = Object.keys(contagem);
+            const dados = Object.values(contagem);
+
+            // Se já existir um gráfico renderizado, destruímos ele antes de desenhar o novo (para a atualização em tempo real funcionar)
+            if (graficoInstancia) {
+                graficoInstancia.destroy();
+            }
+
+            const ctx = document.getElementById('meuGrafico').getContext('2d');
+            graficoInstancia = new Chart(ctx, {
+                type: 'bar', // Pode mudar para 'pie' (pizza) ou 'line' (linha)
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Quantidade por ${nomeDaColuna}`,
+                        data: dados,
+                        backgroundColor: 'rgba(26, 115, 232, 0.7)',
+                        borderColor: 'rgba(26, 115, 232, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
         }
 
         function mostrarErro(msg) {
             document.getElementById('tabela-conteudo').innerHTML = `
                 <div class="erro">
-                    <strong>Erro de Ligação:</strong> ${msg}<br>
-                    <small>Certifique-se de que a folha está partilhada como "Qualquer pessoa com o link".</small>
+                    <strong>Erro de Conexão:</strong> ${msg}
                 </div>`;
         }
 
+        // 1. Carrega os dados assim que abre
         obterDados();
+
+        // 2. Atualiza sozinho a cada 15 segundos
         setInterval(obterDados, 15000);
     </script>
 </body>
