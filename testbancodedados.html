@@ -55,7 +55,9 @@
     </div>
 
     <script>
-        const sheetId = '1ur2C6eDdQvtYi8pt4JCCPm52_cnnKYXX';
+        // O NOVO ID DA SUA PLANILHA CONVERTIDA
+        const sheetId = '1NdN2zOxEdfV3nhxVfC378jLJFV2YwHsE5rCR4g1EMbg';
+        
         const apiKey = 'AIzaSyA9_5NqK7MMJgPPpymmRPbFjg_uMUlF0N0';
         const nomeDaAba = 'Planilha1'; 
         const range = `${nomeDaAba}!A:Z`; 
@@ -111,10 +113,7 @@
                 </div>`;
         }
 
-        // Inicia a primeira carga
         obterDados();
-
-        // Atualiza a cada 15 segundos
         setInterval(obterDados, 15000);
     </script>
 </body>
