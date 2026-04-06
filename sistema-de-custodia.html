@@ -24,7 +24,6 @@
                 <p class="text-gray-400 mt-2 text-sm">Sistema de Custódia - 1ª COORPIN</p>
             </div>
 
-            <!-- Formulário de Login -->
             <div id="form-login-container">
                 <form onsubmit="fazerLogin(event)" class="space-y-5">
                     <div>
@@ -230,13 +229,13 @@
             dados.forEach(preso => {
                 const imagemFrenteAlt = `https://placehold.co/400x500/1f2937/94a3b8?text=Sem+Foto`;
                 
-                // 1. max-w-[280px] removido para os cards acompanharem o grid
-                // 2. h-56 alterado para h-64 para fotos maiores
-                // 3. object-top adicionado para focar no rosto
+                // Mapeia possíveis nomes da foto principal no seu JSON
+                const fotoPrincipal = preso.fotoFrente || preso.foto1 || (preso.fotos ? preso.fotos[0] : null) || imagemFrenteAlt;
+                
                 const cardHTML = `
                 <article class="bg-gray-900 rounded-xl shadow-lg hover:shadow-2xl hover:border-gray-700 transition-all duration-300 w-full overflow-hidden border border-gray-800 flex flex-col h-full">
                     <div class="relative h-64 bg-gray-800 flex items-center justify-center overflow-hidden group text-center shrink-0">
-                        <img src="${preso.fotoFrente || imagemFrenteAlt}" alt="Foto" class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" onerror="this.src='${imagemFrenteAlt}'">
+                        <img src="${fotoPrincipal}" alt="Foto" class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105" onerror="this.src='${imagemFrenteAlt}'">
                         <div class="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded border border-gray-700 text-xs font-bold text-white shadow">
                             Art. ${preso.artigo || 'N/D'}
                         </div>
@@ -296,10 +295,20 @@
             document.getElementById('modal-nome-titulo').innerText = preso.nome;
             const baseFall = `https://placehold.co/400x500/1f2937/94a3b8?text=Sem+Foto`;
             
+            // Tratamento robusto para encontrar as fotos independentemente do nome usado no JSON
+            const srcFrente = preso.fotoFrente || preso.foto1 || (preso.fotos ? preso.fotos[0] : null);
+            const srcEsq = preso.fotoEsquerdo || preso.fotoPerfilEsquerdo || preso.foto2 || (preso.fotos ? preso.fotos[1] : null);
+            const srcDir = preso.fotoDireito || preso.fotoPerfilDireito || preso.foto3 || (preso.fotos ? preso.fotos[2] : null);
+
+            const imagensParaMostrar = {
+                'frente': srcFrente,
+                'esquerdo': srcEsq,
+                'direito': srcDir
+            };
+
             ['frente', 'esquerdo', 'direito'].forEach(lado => {
                 const img = document.getElementById(`modal-foto-${lado}`);
-                const src = lado === 'frente' ? preso.fotoFrente : lado === 'esquerdo' ? preso.fotoEsquerdo : preso.fotoDireito;
-                img.src = src || baseFall;
+                img.src = imagensParaMostrar[lado] || baseFall;
                 img.onerror = () => { img.src = baseFall };
             });
 

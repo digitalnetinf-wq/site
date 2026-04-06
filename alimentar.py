@@ -29,11 +29,10 @@ def extrair_dados_do_texto(texto, imagens_extraidas, dir_temporario, id_preso):
     # para evitar que os dados se percam nas quebras.
     texto_limpo = re.sub(r'\s+', ' ', texto).strip()
 
-    # LISTA DE BARREIRAS: Todas as marcações que existem na ficha.
-    # O script vai parar de extrair dados assim que bater em qualquer uma destas palavras.
+    # LISTA DE BARREIRAS: Atualizada com todos os campos solicitados
     chaves_parada = [
         "Nome", "CPF", "Mãe", "Pai", "RG", "Data de Nascimento", "Alcunha",
-        "Orcrim", "Número do BO", "Artigo", "Estado Civil", "Cônjuge",
+        "Facção/Orcrim", "Número do BO", "Artigo", "Estado Civil", "Cônjuge",
         "Profissão", "Naturalidade", "Cidade", "Bairro", "Rua", "Número",
         "Condomínio", "Bloco/Apto", "Data de entrada", "Data de saída",
         "Prisão realizada por", "Presídio/Alvará", "Observações", "FOTOS",
@@ -97,7 +96,7 @@ def extrair_dados_do_texto(texto, imagens_extraidas, dir_temporario, id_preso):
                 return f"./fotos/{novo_nome}"
         return ""
 
-    # Dicionário Limpo
+    # Dicionário Limpo com todos os campos adicionados
     dados = {
         "id": id_preso,
         "nome": nome_preso,
@@ -106,19 +105,26 @@ def extrair_dados_do_texto(texto, imagens_extraidas, dir_temporario, id_preso):
         "pai": buscar_campo("Pai"),
         "rg": buscar_campo("RG"),
         "dataNascimento": buscar_campo("Data de Nascimento"),
-        "naturalidade": buscar_campo("Naturalidade"),
-        "estadoCivil": buscar_campo("Estado Civil"),
-        "profissao": buscar_campo("Profissão"),
-        "conjuge": buscar_campo("Cônjuge"),
         "alcunha": buscar_campo("Alcunha"),
-        "rua": buscar_campo("Rua"),
-        "bairro": buscar_campo("Bairro"),
-        "artigo": buscar_campo("Artigo"),
+        "faccaoOrcrim": buscar_campo("Facção/Orcrim"),
         "bo": buscar_campo("Número do BO"),
-        "orcrim": buscar_campo("Orcrim"),
+        "artigo": buscar_campo("Artigo"),
+        "estadoCivil": buscar_campo("Estado Civil"),
+        "conjuge": buscar_campo("Cônjuge"),
+        "profissao": buscar_campo("Profissão"),
+        "naturalidade": buscar_campo("Naturalidade"),
+        "cidade": buscar_campo("Cidade"),
+        "bairro": buscar_campo("Bairro"),
+        "rua": buscar_campo("Rua"),
+        "numero": buscar_campo("Número"),
+        "condominio": buscar_campo("Condomínio"),
+        "blocoApto": buscar_campo("Bloco/Apto"),
         "dataEntrada": buscar_campo("Data de entrada"),
+        "dataSaida": buscar_campo("Data de saída"),
+        "prisaoRealizadaPor": buscar_campo("Prisão realizada por"),
+        "presidioAlvara": buscar_campo("Presídio/Alvará"),
+        "observacoes": buscar_campo("Observações"),
         
-        # AQUI ESTÁ A CORREÇÃO: Usar 1, 2 e 3 para saltar o brasão da polícia (que é o 0)
         "fotoFrente": processar_foto(1, "frente"), 
         "fotoEsquerdo": processar_foto(2, "esq"),
         "fotoDireito": processar_foto(3, "dir")
