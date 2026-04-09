@@ -128,6 +128,13 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
 ::-webkit-scrollbar-thumb{background:var(--dim);border-radius:3px;}
 @media(max-width:1100px){.cols-5,.cols-4{grid-template-columns:repeat(3,1fr);}.g2,.g3,.gbig{grid-template-columns:1fr;}}
 @media(max-width:640px){.cols-5,.cols-4,.cols-3{grid-template-columns:1fr 1fr;}.container{padding:12px;}}
+.excel-table th{background:#1a1e29;color:#a1a1aa;font-weight:600;text-align:center;border:1px solid var(--border);}
+.excel-table td{border:1px solid rgba(30,35,48,.5);text-align:center;}
+.excel-table td:first-child{text-align:left;font-weight:500;background:rgba(26,30,41,0.4);}
+.excel-table .total-row td{background:rgba(59,130,246,0.1);color:var(--blue);font-weight:600;border-top:2px solid var(--blue);}
+.excel-table .subtotal-row td{background:rgba(230,57,70,0.1);color:var(--accent);font-weight:600;}
+.excel-table .semestre-row td{background:rgba(34,197,94,0.08);color:var(--green);font-style:italic;}
+.excel-table td.cell-zero{color:var(--dim);}
 </style>
 </head>
 <body>
@@ -156,7 +163,9 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
   <button class="tab-btn" onclick="showTab('vitimas',this)">👤 Perfil das Vítimas (2026)</button>
   <button class="tab-btn" onclick="showTab('modalidade',this)">🔍 Modalidade (2026)</button>
   <button class="tab-btn" onclick="showTab('coorpin',this)">🗺️ COORPIN (25 vs 26)</button>
+  <button class="tab-btn" onclick="showTab('tabelas',this)">📑 Tabelas Resumo</button>
   <button class="tab-btn" onclick="showTab('registros',this)">📋 Banco de Dados CVLIs</button>
+  <button class="tab-btn" onclick="showTab('suporte',this)">📞 Suporte</button>
 </nav>
 
 <!-- ABA 1 -->
@@ -190,8 +199,8 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
 <div class="tab-page" id="tab-evolucao">
 <div class="container">
   <div class="kpi-grid cols-4">
-    <div class="kpi-card red"><div class="kpi-lbl">Total Acumulado 2025</div><div class="kpi-val red" id="ev-tot25">—</div><div class="kpi-sub">COORPIN (Ano todo)</div></div>
-    <div class="kpi-card blue"><div class="kpi-lbl">Total Acumulado 2026</div><div class="kpi-val blue" id="ev-tot26">—</div><div class="kpi-sub">COORPIN (Jan–atual)</div></div>
+    <div class="kpi-card red"><div class="kpi-lbl">Total Acumulado 2025</div><div class="kpi-val red" id="ev-tot25">—</div><div class="kpi-sub" id="ev-tot25-sub">COORPIN (Jan-atual)</div></div>
+    <div class="kpi-card blue"><div class="kpi-lbl">Total Acumulado 2026</div><div class="kpi-val blue" id="ev-tot26">—</div><div class="kpi-sub" id="ev-tot26-sub">COORPIN (Jan–atual)</div></div>
     <div class="kpi-card orange"><div class="kpi-lbl">Pico Mensal 2025</div><div class="kpi-val" id="ev-pico25" style="font-size:28px">—</div><div class="kpi-sub">ocorrências</div></div>
     <div class="kpi-card green"><div class="kpi-lbl">Pico Mensal 2026</div><div class="kpi-val green" id="ev-pico26" style="font-size:28px">—</div><div class="kpi-sub">ocorrências</div></div>
   </div>
@@ -276,17 +285,49 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
 <div class="tab-page" id="tab-coorpin">
 <div class="container">
   <div class="kpi-grid cols-4">
-    <div class="kpi-card red"><div class="kpi-lbl">COORPIN Total 2025</div><div class="kpi-val red" id="co-t25">—</div><div class="kpi-sub">Jan–atual</div></div>
-    <div class="kpi-card blue"><div class="kpi-lbl">COORPIN Total 2026</div><div class="kpi-val blue" id="co-t26">—</div><div class="kpi-sub">Jan–atual</div></div>
+    <div class="kpi-card red"><div class="kpi-lbl">COORPIN Acumulado 2025</div><div class="kpi-val red" id="co-t25">—</div><div class="kpi-sub" id="co-t25-sub">Jan–atual</div></div>
+    <div class="kpi-card blue"><div class="kpi-lbl">COORPIN Acumulado 2026</div><div class="kpi-val blue" id="co-t26">—</div><div class="kpi-sub" id="co-t26-sub">Jan–atual</div></div>
     <div class="kpi-card orange"><div class="kpi-lbl">Municípios Afetados</div><div class="kpi-val" id="co-mun">—</div><div class="kpi-sub">na área da COORPIN</div></div>
-    <div class="kpi-card green"><div class="kpi-lbl">Variação Global (1ºTri)</div><div class="kpi-val green" id="co-var">—</div><div class="kpi-sub">jan–mar 25 vs 26</div></div>
+    <div class="kpi-card green"><div class="kpi-lbl">Variação Global (Acumulado)</div><div class="kpi-val green" id="co-var">—</div><div class="kpi-sub" id="co-var-sub">Jan-atual 25 vs 26</div></div>
   </div>
   <div class="sec-label">Comparativo de Municípios (2025 vs 2026)</div>
-  <div class="gbig">
-    <div class="card"><div class="card-hd"><span class="card-title">CVLI por Município — 2025 vs 2026</span><span class="card-tag">COORPIN</span></div><div class="card-body"><canvas id="co-mun-comp" style="max-height:360px;"></canvas></div></div>
-    <div class="card"><div class="card-hd"><span class="card-title">Evolução Mensal (Top Municípios)</span><span class="card-tag">SÉRIE 25/26</span></div><div class="card-body"><canvas id="co-evolucao" style="max-height:360px;"></canvas></div></div>
+  
+  <div class="card mb16">
+    <div class="card-hd"><span class="card-title">CVLI por Município — 2025 vs 2026</span><span class="card-tag">COORPIN</span></div>
+    <div class="card-body"><canvas id="co-mun-comp" style="max-height:360px;"></canvas></div>
   </div>
+  
+  <div class="card mb16">
+    <div class="card-hd"><span class="card-title">Evolução Mensal (Top Municípios)</span><span class="card-tag">SÉRIE 25/26</span></div>
+    <div class="card-body"><canvas id="co-evolucao" style="max-height:360px;"></canvas></div>
+  </div>
+  
   <div class="card mb16"><div class="card-hd"><span class="card-title">Tabela Comparativa — COORPIN 2025 vs 2026</span><span class="card-tag">DETALHADO</span></div><div class="card-body tbl-wrap" id="co-tabela"></div></div>
+</div>
+</div>
+
+<!-- ABA 8 - TABELAS TIPO EXCEL -->
+<div class="tab-page" id="tab-tabelas">
+<div class="container">
+  <div class="sec-label">Comparativo Acumulado — 2025 vs 2026</div>
+  <div class="g2">
+    <div class="card mb16">
+      <div class="card-hd"><span class="card-title">Por Tipificação</span><span class="card-tag">VAR %</span></div>
+      <div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-comp-tip"></table></div>
+    </div>
+    <div class="card mb16">
+      <div class="card-hd"><span class="card-title">Por Município</span><span class="card-tag">VAR %</span></div>
+      <div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-comp-mun"></table></div>
+    </div>
+  </div>
+  
+  <div class="sec-label" style="margin-top:20px;">Tabelas de Produtividade Mensal — Por Tipificação</div>
+  <div class="card mb16"><div class="card-hd"><span class="card-title">ANO 2025</span><span class="card-tag">COORPIN</span></div><div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-tip-2025"></table></div></div>
+  <div class="card mb16"><div class="card-hd"><span class="card-title">ANO 2026</span><span class="card-tag blue">COORPIN</span></div><div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-tip-2026"></table></div></div>
+  
+  <div class="sec-label" style="margin-top:30px;">Tabelas de Produtividade — Por Município</div>
+  <div class="card mb16"><div class="card-hd"><span class="card-title">CVLI - MUNICÍPIOS 2025</span><span class="card-tag">COORPIN</span></div><div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-mun-2025"></table></div></div>
+  <div class="card mb16"><div class="card-hd"><span class="card-title">CVLI - MUNICÍPIOS 2026</span><span class="card-tag blue">COORPIN</span></div><div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-mun-2026"></table></div></div>
 </div>
 </div>
 
@@ -318,7 +359,7 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
       <button class="f-btn" data-group="meio" data-val="ARMA BRANCA" onclick="setRegF('meio','ARMA BRANCA',this)">ARMA BRANCA</button>
       <button class="f-btn" data-group="meio" data-val="outros" onclick="setRegF('meio','outros',this)">OUTROS</button>
     </div>
-    <button class="f-btn" onclick="reloadSheets()" style="border-color:var(--blue);color:var(--blue);" title="Buscar dados atualizados da planilha">↻ Sincronizar</button>
+    <button class="f-btn" onclick="reloadSheets()" style="border-color:var(--blue);color:var(--blue);" title="Sincronizar dados da planilha">↻ Sincronizar</button>
   </div>
   <div class="search-box">
     <span style="color:var(--muted);">🔍</span>
@@ -337,6 +378,43 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
     <div style="padding:10px 18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
       <div class="pg-info" id="reg-pg-info">—</div>
       <div class="pagination" id="reg-pg"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ABA 9 - SUPORTE -->
+<div class="tab-page" id="tab-suporte">
+<div class="container">
+  <div class="sec-label">Suporte Técnico e Contato</div>
+  <div class="card" style="max-width: 400px; margin: 0 auto; margin-top: 40px;">
+    <div class="card-hd"><span class="card-title">Informações de Contato</span><span class="card-tag">DEV</span></div>
+    <div class="card-body" style="display: flex; flex-direction: column; gap: 20px; padding: 24px;">
+      
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="width: 48px; height: 48px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">👤</div>
+        <div>
+          <div style="font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;">Nome</div>
+          <div style="font-size: 16px; font-weight: 500; color: var(--text);">Félix Rilton</div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="width: 48px; height: 48px; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">📱</div>
+        <div>
+          <div style="font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;">Telefone / WhatsApp</div>
+          <div class="mono" style="font-size: 15px; color: var(--green);">(75) 98114-9491</div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="width: 48px; height: 48px; background: rgba(230,57,70,0.1); border: 1px solid rgba(230,57,70,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">✉️</div>
+        <div>
+          <div style="font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;">Email Institucional</div>
+          <div class="mono" style="font-size: 13px; color: var(--accent);">felix.rilton@pcivil.ba.gov.br</div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -361,16 +439,16 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
     </div>
     <div style="display:flex;gap:10px;">
       <button onclick="document.getElementById('diag-modal').style.display='none';reloadSheets();" style="flex:1;padding:10px;background:#e63946;border:none;border-radius:8px;color:#fff;font-family:Bebas Neue,sans-serif;font-size:16px;cursor:pointer;">TENTAR NOVAMENTE</button>
-      <button onclick="document.getElementById('diag-modal').style.display='none';" style="padding:10px 18px;background:#161922;border:1px solid #1e2330;border-radius:8px;color:#6b7280;cursor:pointer;">Ver Dados de Teste</button>
+      <button onclick="document.getElementById('diag-modal').style.display='none';" style="padding:10px 18px;background:#161922;border:1px solid #1e2330;border-radius:8px;color:#6b7280;cursor:pointer;">FECHAR</button>
     </div>
   </div>
 </div>
 
 <script>
 // ══════════════════════════════════════════════════════
-// DADOS ESTÁTICOS (fallback caso planilha não carregue)
+// DADOS ESTÁTICOS (Totalmente limpo)
 // ══════════════════════════════════════════════════════
-const DADOS_FALLBACK = [{"n": "1", "vitima": "PAULO ANDRÉ CARVALHO DAS VIRGENS CONCEIÇÃO", "idade": "18", "ocorrencia": "1139/2025", "data": "01/01/2025", "hora": "19:58:00", "autoria": "NÃO", "motivo": "NÃO", "meio": "ARMA DE FOGO", "meio_norm": "ARMA DE FOGO", "tipificacao": "HOMICÍDIO", "bairro": "RUA NOVA", "logradouro": "RUA HERÁCLITO DE CARVALHO", "cidade": "FEIRA DE SANTANA", "obs": "", "ano": "2025", "mes": 1, "mes_ano": "2025-01"}];
+const DADOS_FALLBACK = [];
 
 // ══════════════════════════════════════════════════════
 // CONFIGURAÇÃO DA PLANILHA GOOGLE SHEETS
@@ -396,134 +474,173 @@ const COL_MAP = {
 };
 
 // ══════════════════════════════════════════════════════
-// PARSE CSV — Robusto com deteção automática de cabeçalhos
+// PARSE CSV — Robusto com leitura avançada caractere por caractere
 // ══════════════════════════════════════════════════════
 function parseCSV(text) {
-  text = text.replace(/^\uFEFF/, '');
-  const lines = text.split(/\r?\n/).filter(l => l.trim());
-  if (lines.length < 2) return [];
-
-  // 1. Detetar o melhor separador observando as primeiras linhas
-  let commas = 0, semicolons = 0;
-  for (let i = 0; i < Math.min(10, lines.length); i++) {
-    commas += (lines[i].match(/,/g) || []).length;
-    semicolons += (lines[i].match(/;/g) || []).length;
-  }
-  const sep = semicolons > commas ? ';' : ',';
-
-  // 2. Procurar a linha que contém os cabeçalhos (pode não ser a primeira linha)
-  let headerRowIdx = 0;
-  let maxMatches = 0;
-  let colIdx = {};
-
-  for (let i = 0; i < Math.min(15, lines.length); i++) {
-    const rawHeaders = parseCSVLine(lines[i], sep).map(h => (h||'').toLowerCase().trim()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    );
-
-    let matches = 0;
-    let tempColIdx = {};
+  try {
+    text = text.replace(/^\uFEFF/, ''); // Remove BOM se houver
     
-    Object.entries(COL_MAP).forEach(([key, aliases]) => {
-      const idx = rawHeaders.findIndex(h => {
-        const cleanH = h.replace(/[^a-z0-9]/g, ''); // limpa pontuação
-        return aliases.some(a => {
-          const cleanA = a.replace(/[^a-z0-9]/g, '');
-          // Para evitar que "n" ache a letra N no meio da palavra "nome"
-          if (cleanA.length <= 2) return cleanH === cleanA;
-          return cleanH === cleanA || cleanH.includes(cleanA);
+    // 1. Detetar o separador correto avaliando o texto inicial
+    let sample = text.substring(0, 1000);
+    let commas = (sample.match(/,/g) || []).length;
+    let semis = (sample.match(/;/g) || []).length;
+    const sep = semis > commas ? ';' : ',';
+
+    // 2. Extração linha a linha tolerante a quebras de linha dentro de células
+    const parsedRows = [];
+    let curRow = [];
+    let curCell = '';
+    let inQuote = false;
+
+    for (let i = 0; i < text.length; i++) {
+      let ch = text[i];
+      if (ch === '"') {
+        if (inQuote && text[i+1] === '"') {
+          curCell += '"';
+          i++;
+        } else {
+          inQuote = !inQuote;
+        }
+      } else if (ch === sep && !inQuote) {
+        curRow.push(curCell);
+        curCell = '';
+      } else if ((ch === '\n' || ch === '\r') && !inQuote) {
+        if (ch === '\r' && text[i+1] === '\n') i++; 
+        curRow.push(curCell);
+        if (curRow.some(c => c.trim() !== '')) parsedRows.push(curRow);
+        curRow = [];
+        curCell = '';
+      } else {
+        curCell += ch;
+      }
+    }
+    // Pega o que sobrar no final do arquivo
+    if (curCell || curRow.length > 0) {
+      curRow.push(curCell);
+      if (curRow.some(c => c.trim() !== '')) parsedRows.push(curRow);
+    }
+
+    if (parsedRows.length < 2) return [];
+
+    // 3. Procurar a linha de cabeçalho
+    let headerRowIdx = 0;
+    let maxMatches = 0;
+    let colIdx = {};
+
+    for (let i = 0; i < Math.min(15, parsedRows.length); i++) {
+      const rawHeaders = parsedRows[i].map(h => (h||'').toLowerCase().trim()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      );
+
+      let matches = 0;
+      let tempColIdx = {};
+      
+      Object.entries(COL_MAP).forEach(([key, aliases]) => {
+        const idx = rawHeaders.findIndex(h => {
+          const cleanH = h.replace(/[^a-z0-9]/g, '');
+          return aliases.some(a => {
+            const cleanA = a.replace(/[^a-z0-9]/g, '');
+            if (cleanA.length <= 2) return cleanH === cleanA;
+            return cleanH === cleanA || cleanH.includes(cleanA);
+          });
         });
+        if (idx >= 0 && tempColIdx[key] === undefined) { 
+          tempColIdx[key] = idx; 
+          matches++; 
+        }
       });
-      
-      // Se achou a coluna e ainda não mapeou
-      if (idx >= 0 && tempColIdx[key] === undefined) { 
-        tempColIdx[key] = idx; 
-        matches++; 
-      }
-    });
 
-    // Assume que a linha com mais colunas identificadas é a linha de cabeçalho
-    if (matches > maxMatches) {
-      maxMatches = matches;
-      headerRowIdx = i;
-      colIdx = tempColIdx;
-    }
-  }
-
-  // Lança erro caso não ache nada (evita encher de Registro 1 sem dados)
-  if (maxMatches === 0) {
-    throw new Error("Não foi possível encontrar os cabeçalhos (Vítima, Data, Bairro...) na planilha.");
-  }
-
-  const rows = [];
-  // 3. Ler os dados começando apenas DEPOIS da linha de cabeçalhos
-  for (let i = headerRowIdx + 1; i < lines.length; i++) {
-    const cols = parseCSVLine(lines[i], sep);
-    if (!cols.length || cols.every(c => !c.trim())) continue;
-
-    const get = (key) => colIdx[key] !== undefined ? (cols[colIdx[key]] || '').trim() : '';
-
-    let dataStr = get('data');
-    let mesNum = 1, anoStr = '';
-    
-    // Tratamento extra para pegar a data mesmo se tiver Hora colada (Ex: "01/01/2026 14:00")
-    if (dataStr) {
-      dataStr = dataStr.split(' ')[0]; 
-      const mDMY = dataStr.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
-      const mYMD = dataStr.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
-      
-      if (mDMY) { 
-        mesNum = parseInt(mDMY[2], 10); 
-        anoStr = mDMY[3].length === 2 ? '20' + mDMY[3] : mDMY[3]; 
-      } else if (mYMD) { 
-        mesNum = parseInt(mYMD[2], 10); 
-        anoStr = mYMD[1]; 
+      if (matches > maxMatches) {
+        maxMatches = matches;
+        headerRowIdx = i;
+        colIdx = tempColIdx;
       }
     }
 
-    const meio = get('meio') || '';
-    const row = {
-      n: get('n') || String(rows.length + 1),
-      vitima: get('vitima') || `REGISTRO ${rows.length + 1}`,
-      idade: get('idade'),
-      ocorrencia: get('ocorrencia'),
-      data: dataStr,
-      hora: get('hora'),
-      autoria: get('autoria') || 'NÃO',
-      motivo: get('motivo') || 'NÃO',
-      meio: meio,
-      meio_norm: normMeio(meio),
-      tipificacao: get('tipificacao') || 'HOMICÍDIO',
-      bairro: get('bairro') || 'NÃO INFORMADO',
-      logradouro: get('logradouro') || '',
-      cidade: (get('cidade') || 'FEIRA DE SANTANA').toUpperCase().trim(),
-      obs: get('obs') || '',
-      ano: anoStr,
-      mes: mesNum,
-      mes_ano: anoStr ? `${anoStr}-${String(mesNum).padStart(2,'0')}` : ''
-    };
-    rows.push(row);
-  }
-
-  return rows;
-}
-
-function parseCSVLine(line, sep=',') {
-  const result = [];
-  let cur = '', inQuote = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      if (inQuote && line[i+1] === '"') { cur += '"'; i++; }
-      else inQuote = !inQuote;
-    } else if (ch === sep && !inQuote) {
-      result.push(cur); cur = '';
-    } else {
-      cur += ch;
+    if (maxMatches === 0) {
+      throw new Error("Não foi possível encontrar os cabeçalhos (Vítima, Data, Bairro...) na planilha.");
     }
+
+    const rows = [];
+    // 4. Ler e mapear os dados das linhas seguintes
+    for (let i = headerRowIdx + 1; i < parsedRows.length; i++) {
+      const cols = parsedRows[i];
+      if (!cols.length || cols.every(c => !c.trim())) continue;
+
+      const get = (key) => colIdx[key] !== undefined ? (cols[colIdx[key]] || '').trim() : '';
+
+      let dataStr = get('data');
+      let mesNum = NaN, anoStr = '';
+      let dia = NaN;
+      
+      if (dataStr) {
+        let rawDate = dataStr.trim().split(/[ T]/)[0].replace(/[^\d\/\-]/g, '');
+        const mDMY = rawDate.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+        const mYMD = rawDate.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+        const mesesAbv = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+        if (mDMY) { 
+          let p1 = parseInt(mDMY[1], 10);
+          let p2 = parseInt(mDMY[2], 10);
+          let p3 = parseInt(mDMY[3], 10);
+          
+          if (p3 >= 2000 || (p3 >= 20 && p3 <= 99)) {
+             anoStr = p3 < 100 ? '20' + String(p3).padStart(2, '0') : String(p3);
+             // O 1º número é o DIA, o 2º número é o MÊS
+             dia = p1;
+             mesNum = p2;
+             
+             // Fallback de segurança: se o mês for > 12, inverte
+             if (mesNum > 12) {
+                 dia = p2;
+                 mesNum = p1;
+             }
+          }
+        } else if (mYMD) { 
+          mesNum = parseInt(mYMD[2], 10); 
+          anoStr = mYMD[1]; 
+          dia = parseInt(mYMD[3], 10);
+        }
+
+        if (!isNaN(mesNum) && mesNum >= 1 && mesNum <= 12 && !isNaN(dia) && anoStr) {
+            let mesStr = mesesAbv[mesNum - 1];
+            // Exibição visual corrigida para: DD/MMM/AAAA (Ex: 01/Abr/2026)
+            dataStr = String(dia).padStart(2, '0') + '/' + mesStr + '/' + anoStr;
+        } else {
+            mesNum = NaN; 
+        }
+      }
+
+      const meio = get('meio') || '';
+      const tip = get('tipificacao') || 'HOMICÍDIO';
+      
+      rows.push({
+        n: get('n') || String(rows.length + 1),
+        vitima: get('vitima') || `REGISTRO ${rows.length + 1}`,
+        idade: get('idade'),
+        ocorrencia: get('ocorrencia'),
+        data: dataStr,
+        hora: get('hora'),
+        autoria: get('autoria') || 'NÃO',
+        motivo: get('motivo') || 'NÃO',
+        meio: meio,
+        meio_norm: normMeio(meio),
+        tipificacao: tip,
+        bairro: get('bairro') || 'NÃO INFORMADO',
+        logradouro: get('logradouro') || '',
+        cidade: String(get('cidade') || 'FEIRA DE SANTANA').toUpperCase().trim(),
+        obs: get('obs') || '',
+        ano: anoStr,
+        mes: mesNum,
+        mes_ano: anoStr && !isNaN(mesNum) ? `${anoStr}-${String(mesNum).padStart(2,'0')}` : ''
+      });
+    }
+
+    return rows;
+  } catch (error) {
+    console.error("Erro interno durante o processamento do CSV:", error);
+    throw error;
   }
-  result.push(cur);
-  return result;
 }
 
 // ══════════════════════════════════════════════════════
@@ -536,18 +653,19 @@ let usingSheets = false;
 function setSheetsStatus(state, text) {
   const badge = document.getElementById('sheets-badge');
   const status = document.getElementById('sheets-status');
-  badge.className = `sheets-badge ${state}`;
-  status.textContent = text;
+  if(badge) badge.className = `sheets-badge ${state}`;
+  if(status) status.textContent = text;
 }
 
 function showToast(msg, color='var(--green)') {
   const t = document.getElementById('toast');
-  t.innerHTML = `<span style="color:${color};font-size:14px;">●</span> ${msg}`;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 5000);
+  if(t) {
+      t.innerHTML = `<span style="color:${color};font-size:14px;">●</span> ${msg}`;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 5000);
+  }
 }
 
-// Carregamento principal, apenas usando `fetch` padrão.
 async function reloadSheets() {
   setSheetsStatus('loading', 'BAIXANDO CSV...');
   showToast('Conectando à planilha...', 'var(--accent3)');
@@ -555,25 +673,19 @@ async function reloadSheets() {
   try {
     const response = await fetch(SHEETS_CSV_URL, { cache: 'no-store' });
     
-    if (!response.ok) {
-      throw new Error(`Erro HTTP: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
 
     const csvText = await response.text();
 
-    if (!csvText || csvText.length < 10) {
-      throw new Error('A planilha retornou um arquivo vazio.');
-    }
+    if (!csvText || csvText.length < 10) throw new Error('A planilha retornou um arquivo vazio.');
     
     if (csvText.trim().toLowerCase().startsWith('<html') || csvText.trim().toLowerCase().startsWith('<!doctype')) {
-      throw new Error('A resposta recebida foi em HTML em vez de CSV. Verifique se publicou a planilha corretamente.');
+      throw new Error('A resposta recebida foi em HTML. Verifique se a planilha está publicada na web como CSV corretamente.');
     }
 
     const rows = parseCSV(csvText);
     
-    if (!rows || rows.length === 0) {
-      throw new Error('Nenhuma linha ou dado compatível encontrado no CSV.');
-    }
+    if (!rows || rows.length === 0) throw new Error('Nenhuma linha ou dado compatível encontrado no CSV.');
 
     processSheetRows(rows);
 
@@ -590,26 +702,32 @@ async function reloadSheets() {
 }
 
 function processSheetRows(rows) {
-  sheetsRowCount = rows.length;
-  sheetsLoadedAt = new Date();
-  usingSheets = true;
-  DB.registros = rows;
-  recalcStats();
-  
-  const timeStr = sheetsLoadedAt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  setSheetsStatus('ok', `✓ LIVE · ${sheetsRowCount} REG · ${timeStr}`);
-  showToast(`✓ ${sheetsRowCount} registros carregados com sucesso! · ${timeStr}`, 'var(--green)');
-  
-  document.getElementById('hsub-txt').textContent =
-    `Crimes Violentos Letais Intencionais · Feira de Santana / COORPIN · ${DB.registros.length} Registros`;
-  document.getElementById('footer-txt').textContent =
-    `PAINEL ANÁLISE CVLI · FEIRA DE SANTANA / COORPIN · 2025–2026 · ${DB.registros.length} REGISTROS · SYNC ${timeStr}`;
-    
-  const tabId = document.querySelector('.tab-page.active')?.id?.replace('tab-','');
-  if (tabId) buildTab(tabId);
+  try {
+      sheetsRowCount = rows.length;
+      sheetsLoadedAt = new Date();
+      usingSheets = true;
+      DB.registros = rows;
+      
+      recalcStats();
+      
+      const timeStr = sheetsLoadedAt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      setSheetsStatus('ok', `✓ LIVE · ${sheetsRowCount} REG · ${timeStr}`);
+      showToast(`✓ ${sheetsRowCount} registros carregados com sucesso! · ${timeStr}`, 'var(--green)');
+      
+      const hsub = document.getElementById('hsub-txt');
+      if(hsub) hsub.textContent = `Crimes Violentos Letais Intencionais · Feira de Santana / COORPIN · ${DB.registros.length} Registros`;
+      
+      const footer = document.getElementById('footer-txt');
+      if(footer) footer.textContent = `PAINEL ANÁLISE CVLI · FEIRA DE SANTANA / COORPIN · 2025–2026 · ${DB.registros.length} REGISTROS · SYNC ${timeStr}`;
+        
+      const tabId = document.querySelector('.tab-page.active')?.id?.replace('tab-','');
+      if (tabId) buildTab(tabId);
+  } catch (e) {
+      console.error("Erro fatal ao processar gráficos e UI:", e);
+      showToast('Erro interno ao desenhar gráficos.', 'var(--red)');
+  }
 }
 
-// Auto-refresh a cada 5 minutos
 setInterval(() => {
   if (document.visibilityState === 'visible') reloadSheets();
 }, 5 * 60 * 1000);
@@ -626,6 +744,22 @@ function normMeio(m){
   return 'OUTROS';
 }
 
+function normTipificacao(t) {
+  if (!t) return 'HOMICÍDIO'; 
+  var clean = String(t).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  if (clean.includes('FEMINIC')) return 'FEMINICÍDIO';
+  if (clean.includes('LATROC')) return 'LATROCÍNIO';
+  if (clean.includes('LESAO') || clean.includes('SEGUIDA DE MORTE') || clean.includes('ESPANCAMENTO') || clean.includes('CORPORAL')) return 'LESÃO C.SEG. MORTE';
+  if (clean.includes('HOMICIDIO') || clean.includes('HOMICID')) return 'HOMICÍDIO';
+  if (clean.length < 3) return 'HOMICÍDIO';
+  return String(t).toUpperCase().trim();
+}
+
+function isCVLI(t) {
+  const norm = normTipificacao(t);
+  return ['HOMICÍDIO', 'FEMINICÍDIO', 'LESÃO C.SEG. MORTE', 'LATROCÍNIO'].includes(norm);
+}
+
 function initData(){
   DB.registros = DADOS_FALLBACK.map(r => ({...r, meio_norm: normMeio(r.meio_norm||r.meio)}));
   recalcStats();
@@ -638,15 +772,20 @@ function recalcStats(){
   DB.cidades26={}; DB.bairros26={}; DB.meio26={}; DB.tipo26={}; DB.motivo26={};
   DB.coorpin25={}; DB.coorpin26={}; DB.meses25={}; DB.meses26={};
   DB.t25_coorpin=0; DB.t26_coorpin=0;
+  
+  let maxM26 = -1;
 
   DB.registros.forEach(r=>{
     const is25=String(r.ano)==='2025', is26=String(r.ano)==='2026';
     
-    // Tratativa de segurança extrema contra NaN para que os gráficos não quebrem
     let mi = parseInt(r.mes, 10) - 1;
-    if (isNaN(mi) || mi < 0 || mi > 11) mi = 0; 
+    if (isNaN(mi) || mi < 0 || mi > 11) return; 
+    
+    if(!isCVLI(r.tipificacao)) return;
 
-    const cid=(r.cidade||'FEIRA DE SANTANA').toUpperCase().trim();
+    if (is26 && mi > maxM26) maxM26 = mi;
+
+    const cid=String(r.cidade||'FEIRA DE SANTANA').toUpperCase().trim();
     if(is25){
       DB.coorpin_25[mi]++;
       if(cid==='FEIRA DE SANTANA') DB.feira_25[mi]++;
@@ -662,20 +801,42 @@ function recalcStats(){
       DB.meses26[cid][mi]++;
       DB.cidades26[cid]=(DB.cidades26[cid]||0)+1;
       if(cid==='FEIRA DE SANTANA'){
-        const b=(r.bairro||'NÃO INFORMADO').toUpperCase();
+        const b=String(r.bairro||'NÃO INFORMADO').toUpperCase();
         DB.bairros26[b]=(DB.bairros26[b]||0)+1;
       }
       DB.meio26[r.meio_norm]=(DB.meio26[r.meio_norm]||0)+1;
-      DB.tipo26[r.tipificacao]=(DB.tipo26[r.tipificacao]||0)+1;
-      const mot=(r.motivo||'').trim().toUpperCase();
+      
+      let tipNorm = normTipificacao(r.tipificacao);
+      DB.tipo26[tipNorm]=(DB.tipo26[tipNorm]||0)+1;
+      
+      const mot=String(r.motivo||'').trim().toUpperCase();
       if(mot&&mot!=='NÃO'&&mot!=='NAO'&&mot!=='NÃO'&&mot.length>1) DB.motivo26[mot]=(DB.motivo26[mot]||0)+1;
       DB.t26_coorpin++;
+    }
+  });
+  
+  if (maxM26 === -1) maxM26 = new Date().getMonth();
+  DB.maxM26 = maxM26;
+
+  DB.t25_ytd = 0;
+  DB.coorpin25_ytd = {};
+  
+  for (let i = 0; i <= maxM26; i++) {
+    DB.t25_ytd += DB.coorpin_25[i] || 0;
+  }
+  
+  DB.registros.forEach(r => {
+    const is25 = String(r.ano) === '2025';
+    let mi = parseInt(r.mes, 10) - 1;
+    if (is25 && mi >= 0 && mi <= maxM26 && isCVLI(r.tipificacao)) {
+        const cid = String(r.cidade || 'FEIRA DE SANTANA').toUpperCase().trim();
+        DB.coorpin25_ytd[cid] = (DB.coorpin25_ytd[cid] || 0) + 1;
     }
   });
 }
 
 // ══════════════════════════════════════════════════════
-// CHARTS
+// CHARTS E MONTAGEM DE ABAS
 // ══════════════════════════════════════════════════════
 Chart.defaults.color='#6b7280';
 Chart.defaults.borderColor='#1e2330';
@@ -684,7 +845,17 @@ const M=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'
 const P=['#e63946','#ff6b35','#ffd60a','#3b82f6','#22c55e','#a855f7','#06b6d4','#f59e0b','#ec4899','#64748b'];
 const TT={backgroundColor:'#161922',borderColor:'#1e2330',borderWidth:1,titleColor:'#e8eaf0',bodyColor:'#9ca3af',padding:10};
 const CR={};
-function mkC(id,cfg){if(CR[id])CR[id].destroy();const el=document.getElementById(id);if(!el)return;CR[id]=new Chart(el.getContext('2d'),cfg);}
+
+function mkC(id,cfg){
+    try {
+        if(CR[id])CR[id].destroy();
+        const el=document.getElementById(id);
+        if(!el)return;
+        CR[id]=new Chart(el.getContext('2d'),cfg);
+    } catch(e) {
+        console.error("Falha ao desenhar gráfico " + id, e);
+    }
+}
 
 function showTab(id,btn){
   document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));
@@ -701,23 +872,25 @@ function buildTab(t){
   else if(t==='vitimas')buildVIT();
   else if(t==='modalidade')buildMOD();
   else if(t==='coorpin')buildCO();
+  else if(t==='tabelas')buildTABELAS();
   else if(t==='registros')buildREG();
 }
 
 function buildVG(){
-  const regs26=DB.registros.filter(r=>String(r.ano)==='2026');
+  const regs26=DB.registros.filter(r=>String(r.ano)==='2026' && isCVLI(r.tipificacao));
   const idades26=regs26.map(r=>parseInt(r.idade)).filter(i=>!isNaN(i)&&i>0);
   const mediaIdade26=idades26.length?(idades26.reduce((a,b)=>a+b,0)/idades26.length):0;
-  const autoriaSim26=regs26.filter(r=>(r.autoria||'').toUpperCase().includes('SIM')).length;
+  const autoriaSim26=regs26.filter(r=>String(r.autoria||'').toUpperCase().includes('SIM')).length;
   const pctAutoria26=regs26.length?Math.round((autoriaSim26/regs26.length)*100):0;
-  document.getElementById('vg-t').textContent=DB.feira_26.reduce((a,b)=>a+b,0);
-  document.getElementById('vg-26').textContent=DB.t26_coorpin;
-  document.getElementById('vg-idade').textContent=mediaIdade26.toFixed(1);
-  document.getElementById('vg-aut').textContent=pctAutoria26+'%';
+  
+  if(document.getElementById('vg-t')) document.getElementById('vg-t').textContent=DB.feira_26.reduce((a,b)=>a+b,0);
+  if(document.getElementById('vg-26')) document.getElementById('vg-26').textContent=DB.t26_coorpin;
+  if(document.getElementById('vg-idade')) document.getElementById('vg-idade').textContent=mediaIdade26.toFixed(1);
+  if(document.getElementById('vg-aut')) document.getElementById('vg-aut').textContent=pctAutoria26+'%';
 
   mkC('vg-mensal',{type:'line',data:{labels:M,datasets:[
     {label:'Feira 2025',data:DB.feira_25,borderColor:'#e63946',backgroundColor:'rgba(230,57,70,.08)',borderWidth:2,tension:.4,fill:true,pointRadius:3},
-    {label:'Feira 2026',data:DB.feira_26,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',borderWidth:2,tension:.4,fill:true,borderDash:[5,3],pointRadius:3}
+    {label:'Feira 2026',data:DB.feira_26.map((v,i)=>i>DB.maxM26?null:v),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',borderWidth:2,tension:.4,fill:true,borderDash:[5,3],pointRadius:3}
   ]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#9ca3af',font:{size:10},boxWidth:12,padding:10}},tooltip:TT},scales:{x:{grid:{color:'#1e2330'},ticks:{font:{size:10}}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
 
   const me=Object.entries(DB.meio26).sort((a,b)=>b[1]-a[1]);
@@ -732,38 +905,55 @@ function buildVG(){
   mkC('vg-autd',{type:'doughnut',data:{labels:['Com Autoria','Sem Autoria'],datasets:[{data:[autoriaSim26,regs26.length-autoriaSim26],backgroundColor:['#e63946','#1e2330'],borderWidth:0,hoverOffset:5}]},options:{responsive:true,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:'#9ca3af',font:{size:10},boxWidth:10,padding:8}},tooltip:TT}}});
 
   const c25=DB.coorpin_25,c26=DB.coorpin_26;
-  document.getElementById('vg-comp').innerHTML=M.map((m,i)=>{
-    if(c25[i]===0&&c26[i]===0)return'';
-    const v25=c25[i],v26=c26[i],tot=v25+v26||1,p25=Math.round(v25/tot*100),p26=100-p25;
-    const d=v26-v25,col=d>0?'var(--red)':d<0?'var(--green)':'var(--muted)';
-    const icon=d>0?'▲':d<0?'▼':'=';
-    return`<div class="prog-item"><div class="prog-row"><span>${m}</span><span class="mono" style="font-size:11px;">2025:<b style="color:#e8eaf0"> ${v25}</b> · 2026:<b style="color:#3b82f6"> ${v26}</b> <span style="color:${col};margin-left:6px;font-weight:600;">${icon} ${Math.abs(d)}</span></span></div><div class="prog-track"><div class="prog-a" style="width:${p25}%;background:var(--accent);">${p25>14?'25':''}</div><div class="prog-a" style="width:${p26}%;background:var(--blue);">${p26>14?'26':''}</div></div></div>`;
-  }).join('');
+  const compContainer = document.getElementById('vg-comp');
+  if(compContainer){
+      compContainer.innerHTML=M.map((m,i)=>{
+        if(i > DB.maxM26) return '';
+        if(c25[i]===0&&c26[i]===0)return'';
+        const v25=c25[i],v26=c26[i],tot=v25+v26||1,p25=Math.round(v25/tot*100),p26=100-p25;
+        const d=v26-v25,col=d>0?'var(--red)':d<0?'var(--green)':'var(--muted)';
+        const icon=d>0?'▲':d<0?'▼':'=';
+        return`<div class="prog-item"><div class="prog-row"><span>${m}</span><span class="mono" style="font-size:11px;">2025:<b style="color:#e8eaf0"> ${v25}</b> · 2026:<b style="color:#3b82f6"> ${v26}</b> <span style="color:${col};margin-left:6px;font-weight:600;">${icon} ${Math.abs(d)}</span></span></div><div class="prog-track"><div class="prog-a" style="width:${p25}%;background:var(--accent);">${p25>14?'25':''}</div><div class="prog-a" style="width:${p26}%;background:var(--blue);">${p26>14?'26':''}</div></div></div>`;
+      }).join('');
+  }
 
   const entries=Object.entries(DB.bairros26).sort((a,b)=>b[1]-a[1]).slice(0,10);
   const max=entries.length?entries[0][1]:1;
-  document.getElementById('vg-bairros').innerHTML=entries.map(([b,v],i)=>`<div class="bar-item"><div class="bar-row"><span class="bar-lbl">${b}</span><span class="bar-val">${v}</span></div><div class="bar-track"><div class="bar-fill" style="width:${(v/max*100).toFixed(1)}%;background:${P[i%P.length]}"></div></div></div>`).join('');
+  const bairrosContainer = document.getElementById('vg-bairros');
+  if(bairrosContainer){
+      bairrosContainer.innerHTML=entries.map(([b,v],i)=>`<div class="bar-item"><div class="bar-row"><span class="bar-lbl">${b}</span><span class="bar-val">${v}</span></div><div class="bar-track"><div class="bar-fill" style="width:${(v/max*100).toFixed(1)}%;background:${P[i%P.length]}"></div></div></div>`).join('');
+  }
 }
 
 function buildEV(){
-  const pico25=Math.max(...DB.coorpin_25), picoM25=DB.coorpin_25.indexOf(pico25);
-  const pico26=Math.max(...DB.coorpin_26), picoM26=DB.coorpin_26.indexOf(pico26);
-  document.getElementById('ev-tot25').textContent=DB.t25_coorpin;
-  document.getElementById('ev-tot26').textContent=DB.t26_coorpin;
-  document.getElementById('ev-pico25').textContent=pico25;
-  document.getElementById('ev-pico26').textContent=pico26;
-  document.querySelector('#ev-pico25').nextElementSibling && (document.querySelector('.kpi-card.orange .kpi-sub').textContent = M[picoM25]+' · ocorrências');
-  document.querySelector('.kpi-card.green .kpi-sub').textContent = M[picoM26]+' · ocorrências';
+  const pico25=Math.max(...DB.coorpin_25, 0), picoM25=DB.coorpin_25.indexOf(pico25);
+  const pico26=Math.max(...DB.coorpin_26, 0), picoM26=DB.coorpin_26.indexOf(pico26);
+  
+  if(document.getElementById('ev-tot25')) document.getElementById('ev-tot25').textContent=DB.t25_ytd;
+  if(document.getElementById('ev-tot26')) document.getElementById('ev-tot26').textContent=DB.t26_coorpin;
+  
+  const mName = M[DB.maxM26] || 'Atual';
+  if(document.getElementById('ev-tot25-sub')) document.getElementById('ev-tot25-sub').textContent=`COORPIN (Jan–${mName})`;
+  if(document.getElementById('ev-tot26-sub')) document.getElementById('ev-tot26-sub').textContent=`COORPIN (Jan–${mName})`;
+  
+  if(document.getElementById('ev-pico25')) document.getElementById('ev-pico25').textContent=pico25;
+  if(document.getElementById('ev-pico26')) document.getElementById('ev-pico26').textContent=pico26;
+  
+  const p25Sub = document.querySelector('#ev-pico25')?.nextElementSibling;
+  if(p25Sub) p25Sub.textContent = (M[picoM25] || '—') +' · ocorrências';
+  
+  const p26Sub = document.querySelector('#ev-pico26')?.nextElementSibling;
+  if(p26Sub) p26Sub.textContent = (M[picoM26] || '—') +' · ocorrências';
 
   mkC('ev-full',{type:'line',data:{labels:M,datasets:[
     {label:'COORPIN 2025',data:DB.coorpin_25,borderColor:'#e63946',backgroundColor:'rgba(230,57,70,.07)',borderWidth:2,tension:.4,fill:true,pointRadius:4},
     {label:'Feira 2025',data:DB.feira_25,borderColor:'#ff6b35',backgroundColor:'transparent',borderWidth:1.5,tension:.4,fill:false,borderDash:[3,2],pointRadius:3},
-    {label:'COORPIN 2026',data:DB.coorpin_26,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.07)',borderWidth:2,tension:.4,fill:true,borderDash:[6,3],pointRadius:4},
-    {label:'Feira 2026',data:DB.feira_26,borderColor:'#22c55e',backgroundColor:'transparent',borderWidth:1.5,tension:.4,fill:false,borderDash:[3,2],pointRadius:3}
+    {label:'COORPIN 2026',data:DB.coorpin_26.map((v,i)=>i>DB.maxM26?null:v),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.07)',borderWidth:2,tension:.4,fill:true,borderDash:[6,3],pointRadius:4},
+    {label:'Feira 2026',data:DB.feira_26.map((v,i)=>i>DB.maxM26?null:v),borderColor:'#22c55e',backgroundColor:'transparent',borderWidth:1.5,tension:.4,fill:false,borderDash:[3,2],pointRadius:3}
   ]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#9ca3af',font:{size:10},boxWidth:12,padding:10}},tooltip:TT},scales:{x:{grid:{color:'#1e2330'},ticks:{font:{size:10}}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
 
-  let s=0;const a25=DB.coorpin_25.map(v=>(s+=v,s));
-  let s2=0;const a26=DB.coorpin_26.map(v=>(s2+=v,s2));
+  let s=0;const a25=DB.coorpin_25.map(v=>(s+=(v||0),s));
+  let s2=0;const a26=DB.coorpin_26.map((v,i)=>{if(i>DB.maxM26)return null; s2+=(v||0);return s2;});
   mkC('ev-acum',{type:'line',data:{labels:M,datasets:[
     {label:'Acumulado 2025',data:a25,borderColor:'#e63946',backgroundColor:'rgba(230,57,70,.05)',borderWidth:2,tension:.4,fill:true,pointRadius:3},
     {label:'Acumulado 2026',data:a26,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',borderWidth:2,tension:.4,fill:true,pointRadius:3}
@@ -773,10 +963,15 @@ function buildEV(){
   const maxV=Math.max(...allV)||1;
   let h='<div class="hm-cell hm-hdr"></div>';
   M.forEach(m=>h+=`<div class="hm-cell hm-hdr">${m}</div>`);
-  [{lbl:'Feira 2025',data:DB.feira_25},{lbl:'Feira 2026',data:DB.feira_26}].forEach(({lbl,data})=>{
-    const totalRow=data.reduce((a,b)=>a+b,0);
+  [{lbl:'Feira 2025',data:DB.feira_25},{lbl:'Feira 2026',data:DB.feira_26}].forEach(({lbl,data}, objIndex)=>{
+    const totalRow=data.reduce((a,b)=>a+(b||0),0);
     h+=`<div class="hm-cell hm-lbl">${lbl}</div>`;
-    data.forEach(v=>{
+    data.forEach((v, i)=>{
+      if(objIndex === 1 && i > DB.maxM26) {
+          h+=`<div class="hm-cell" style="background:rgba(230,57,70,0.02);color:#c8cad4;flex-direction:column;line-height:1.1;"></div>`;
+          return;
+      }
+      v = v || 0;
       const a=v>0?(0.12+0.72*(v/maxV)).toFixed(2):.04;
       const tc=v/maxV>.5?'#fff':'#c8cad4';
       const pct=totalRow>0?((v/totalRow)*100).toFixed(1):0;
@@ -784,7 +979,8 @@ function buildEV(){
       h+=`<div class="hm-cell" style="background:rgba(230,57,70,${a});color:${tc};flex-direction:column;line-height:1.1;">${content}</div>`;
     });
   });
-  document.getElementById('ev-heatmap').innerHTML=h;
+  const evHeatmap = document.getElementById('ev-heatmap');
+  if(evHeatmap) evHeatmap.innerHTML=h;
 
   const trim25=[DB.coorpin_25[0]+DB.coorpin_25[1]+DB.coorpin_25[2],DB.coorpin_25[3]+DB.coorpin_25[4]+DB.coorpin_25[5],DB.coorpin_25[6]+DB.coorpin_25[7]+DB.coorpin_25[8],DB.coorpin_25[9]+DB.coorpin_25[10]+DB.coorpin_25[11]];
   const trim26=[DB.coorpin_26[0]+DB.coorpin_26[1]+DB.coorpin_26[2],DB.coorpin_26[3]+DB.coorpin_26[4]+DB.coorpin_26[5],DB.coorpin_26[6]+DB.coorpin_26[7]+DB.coorpin_26[8],DB.coorpin_26[9]+DB.coorpin_26[10]+DB.coorpin_26[11]];
@@ -792,13 +988,15 @@ function buildEV(){
 
   let htmlTab='<table><thead><tr><th>Mês</th><th>Feira 2025</th><th>Feira 2026</th><th>Var. Feira</th><th>COORPIN 2025</th><th>COORPIN 2026</th><th>Var. COORPIN</th></tr></thead><tbody>';
   M.forEach((m,i)=>{
+    if (i > DB.maxM26) return;
     const f25=DB.feira_25[i],f26=DB.feira_26[i],c25=DB.coorpin_25[i],c26=DB.coorpin_26[i];
     if(c25===0&&c26===0)return;
     const df=f26-f25,dc=c26-c25;
     htmlTab+=`<tr><td style="font-weight:600;">${m}</td><td class="mono">${f25}</td><td class="mono" style="color:var(--blue);font-weight:600;">${f26}</td><td class="mono" style="color:${df>0?'var(--red)':df<0?'var(--green)':'var(--muted)'}">${df>0?'+':''}${df}</td><td class="mono">${c25}</td><td class="mono" style="color:var(--blue);font-weight:600;">${c26}</td><td class="mono" style="color:${dc>0?'var(--red)':dc<0?'var(--green)':'var(--muted)'}">${dc>0?'+':''}${dc}</td></tr>`;
   });
   htmlTab+='</tbody></table>';
-  document.getElementById('ev-tabela-mes').innerHTML=htmlTab;
+  const evTabela = document.getElementById('ev-tabela-mes');
+  if(evTabela) evTabela.innerHTML=htmlTab;
 }
 
 function buildGEO(){
@@ -806,21 +1004,25 @@ function buildGEO(){
   const bairros=Object.entries(DB.bairros26).sort((a,b)=>b[1]-a[1]);
   const totFeira=DB.feira_26.reduce((a,b)=>a+b,0);
   const totOutros=DB.t26_coorpin-totFeira;
-  document.getElementById('geo-pior').textContent=cidades.length?cidades[0][0]:'—';
-  document.getElementById('geo-pior-sub').textContent=cidades.length?`${cidades[0][1]} ocorrências`:'—';
-  document.getElementById('geo-afetados').textContent=cidades.length;
-  document.getElementById('geo-tot-feira').textContent=totFeira;
-  document.getElementById('geo-tot-outros').textContent=totOutros;
+  
+  if(document.getElementById('geo-pior')) document.getElementById('geo-pior').textContent=cidades.length?cidades[0][0]:'—';
+  if(document.getElementById('geo-pior-sub')) document.getElementById('geo-pior-sub').textContent=cidades.length?`${cidades[0][1]} ocorrências`:'—';
+  if(document.getElementById('geo-afetados')) document.getElementById('geo-afetados').textContent=cidades.length;
+  if(document.getElementById('geo-tot-feira')) document.getElementById('geo-tot-feira').textContent=totFeira;
+  if(document.getElementById('geo-tot-outros')) document.getElementById('geo-tot-outros').textContent=totOutros;
 
   mkC('geo-horiz',{type:'bar',data:{labels:cidades.map(e=>e[0]),datasets:[{label:'CVLI 2026',data:cidades.map(e=>e[1]),backgroundColor:cidades.map((_,i)=>P[i%P.length]),borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:9}}}}}});
 
   const max=bairros.length?bairros[0][1]:1;
-  document.getElementById('geo-barlist').innerHTML=bairros.slice(0,15).map(([b,v],i)=>`<div class="bar-item"><div class="bar-row"><span class="bar-lbl">${b}</span><span class="bar-val">${v}</span></div><div class="bar-track"><div class="bar-fill" style="width:${(v/max*100).toFixed(1)}%;background:${P[i%P.length]}"></div></div></div>`).join('');
+  const barList = document.getElementById('geo-barlist');
+  if(barList){
+      barList.innerHTML=bairros.slice(0,15).map(([b,v],i)=>`<div class="bar-item"><div class="bar-row"><span class="bar-lbl">${b}</span><span class="bar-val">${v}</span></div><div class="bar-track"><div class="bar-fill" style="width:${(v/max*100).toFixed(1)}%;background:${P[i%P.length]}"></div></div></div>`).join('');
+  }
 
   const zonasDef={'TOMBA':'ZONA SUL','GABRIELA':'ZONA SUL','PAPAGAIO':'ZONA SUL','AVIÁRIO':'ZONA SUL','BRASÍLIA':'ZONA SUL','CAMPO LIMPO':'ZONA NORTE','QUEIMADINHA':'ZONA NORTE','PARQUE IPÊ':'ZONA NORTE','ASA BRANCA':'ZONA NORTE','CENTRO':'CENTRO/LESTE','CONCEIÇÃO':'CENTRO/LESTE','MANGABEIRA':'CENTRO/LESTE','CASEB':'CENTRO/LESTE'};
   let zv={'ZONA SUL':0,'ZONA NORTE':0,'CENTRO/LESTE':0,'DISTRITOS/RURAL':0,'OUTROS BAIRROS':0};
   Object.entries(DB.bairros26).forEach(([b,v])=>{
-    const up=b.toUpperCase();
+    const up=String(b).toUpperCase();
     if(up.includes('DIST.')) zv['DISTRITOS/RURAL']+=v;
     else if(zonasDef[up]) zv[zonasDef[up]]+=v;
     else zv['OUTROS BAIRROS']+=v;
@@ -830,7 +1032,7 @@ function buildGEO(){
 }
 
 function buildVIT(){
-  const regs26=DB.registros.filter(r=>String(r.ano)==='2026');
+  const regs26=DB.registros.filter(r=>String(r.ano)==='2026' && isCVLI(r.tipificacao));
   let menores=0,jovens=0,somaIdade=0,qtdIdade=0,maxIdade=0;
   const faixas={'<18':0,'18–24':0,'25–29':0,'30–39':0,'40–49':0,'50+':0};
   let autoriaCount={sim:0,nao:0};
@@ -851,16 +1053,16 @@ function buildVIT(){
       if(!meiosIdade[r.meio_norm])meiosIdade[r.meio_norm]={soma:0,qtd:0};
       meiosIdade[r.meio_norm].soma+=id;meiosIdade[r.meio_norm].qtd++;
     }
-    if((r.autoria||'').toUpperCase().includes('SIM'))autoriaCount.sim++;else autoriaCount.nao++;
-    const mot=(r.motivo||'').trim().toUpperCase();
-    if(mot&&mot!=='NÃO'&&mot!=='NAO'&&mot.length>1){motivos[mot]=(motivos[mot]||0)+1;}
+    if(String(r.autoria||'').toUpperCase().includes('SIM'))autoriaCount.sim++;else autoriaCount.nao++;
+    const mot=String(r.motivo||'').trim().toUpperCase();
+    if(mot&&mot!=='NÃO'&&mot!=='NAO'&&mot!=='NÃO'&&mot.length>1){motivos[mot]=(motivos[mot]||0)+1;}
   });
 
-  document.getElementById('vit-tot').textContent=regs26.length;
-  document.getElementById('vit-menor').textContent=menores;
-  document.getElementById('vit-1824').textContent=jovens;
-  document.getElementById('vit-media').textContent=qtdIdade?(somaIdade/qtdIdade).toFixed(1):'—';
-  document.getElementById('vit-max').textContent=maxIdade||'—';
+  if(document.getElementById('vit-tot')) document.getElementById('vit-tot').textContent=regs26.length;
+  if(document.getElementById('vit-menor')) document.getElementById('vit-menor').textContent=menores;
+  if(document.getElementById('vit-1824')) document.getElementById('vit-1824').textContent=jovens;
+  if(document.getElementById('vit-media')) document.getElementById('vit-media').textContent=qtdIdade?(somaIdade/qtdIdade).toFixed(1):'—';
+  if(document.getElementById('vit-max')) document.getElementById('vit-max').textContent=maxIdade||'—';
 
   const feLabels=Object.keys(faixas);
   mkC('vit-faixa',{type:'bar',data:{labels:feLabels,datasets:[{data:feLabels.map(k=>faixas[k]),backgroundColor:P,borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
@@ -868,7 +1070,10 @@ function buildVIT(){
   mkC('vit-aut',{type:'doughnut',data:{labels:['Com Autoria','Sem Autoria'],datasets:[{data:[autoriaCount.sim,autoriaCount.nao],backgroundColor:['#e63946','#1e2330'],borderWidth:0,hoverOffset:5}]},options:{responsive:true,cutout:'65%',plugins:{legend:{display:false},tooltip:TT}}});
 
   const pctSim=regs26.length?Math.round((autoriaCount.sim/regs26.length)*100):0;
-  document.getElementById('vit-aut-lbl').innerHTML=`<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--muted)">Com autoria</span><span class="mono" style="color:var(--accent)">${autoriaCount.sim} (${pctSim}%)</span></div><div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--muted)">Sem autoria</span><span class="mono">${autoriaCount.nao} (${100-pctSim}%)</span></div>`;
+  const autLbl = document.getElementById('vit-aut-lbl');
+  if(autLbl){
+      autLbl.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--muted)">Com autoria</span><span class="mono" style="color:var(--accent)">${autoriaCount.sim} (${pctSim}%)</span></div><div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--muted)">Sem autoria</span><span class="mono">${autoriaCount.nao} (${100-pctSim}%)</span></div>`;
+  }
 
   const sortedMotivos=Object.entries(motivos).sort((a,b)=>b[1]-a[1]).slice(0,6);
   if(sortedMotivos.length>0)mkC('vit-motivo',{type:'bar',data:{labels:sortedMotivos.map(e=>e[0]),datasets:[{data:sortedMotivos.map(e=>e[1]),backgroundColor:'#ff6b35',borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
@@ -876,24 +1081,28 @@ function buildVIT(){
 
   const meiosArr=Object.entries(meiosIdade).map(([m,val])=>[m,Math.round(val.soma/val.qtd)]).sort((a,b)=>b[1]-a[1]);
   const maxId=meiosArr.length?Math.max(...meiosArr.map(e=>e[1])):1;
-  document.getElementById('vit-meio-idade').innerHTML=meiosArr.map(([m,v],i)=>`<div class="bar-item"><div class="bar-row"><span class="bar-lbl">${m}</span><span class="bar-val">~${v} anos</span></div><div class="bar-track"><div class="bar-fill" style="width:${(v/maxId*100).toFixed(1)}%;background:${P[i%P.length]}"></div></div></div>`).join('');
+  const vitMeio = document.getElementById('vit-meio-idade');
+  if(vitMeio){
+      vitMeio.innerHTML=meiosArr.map(([m,v],i)=>`<div class="bar-item"><div class="bar-row"><span class="bar-lbl">${m}</span><span class="bar-val">~${v} anos</span></div><div class="bar-track"><div class="bar-fill" style="width:${(v/maxId*100).toFixed(1)}%;background:${P[i%P.length]}"></div></div></div>`).join('');
+  }
 }
 
 function buildMOD(){
-  const regs26=DB.registros.filter(r=>String(r.ano)==='2026');
+  const regs26=DB.registros.filter(r=>String(r.ano)==='2026' && isCVLI(r.tipificacao));
   let fogo=0,branca=0,outros=0;
   Object.entries(DB.meio26).forEach(([m,v])=>{
     if(m==='ARMA DE FOGO')fogo+=v;
     else if(m==='ARMA BRANCA')branca+=v;
     else outros+=v;
   });
-  document.getElementById('mod-fogo').textContent=fogo;
-  document.getElementById('mod-fogo-sub').textContent=`${regs26.length?((fogo/regs26.length)*100).toFixed(1):0}% dos casos`;
-  document.getElementById('mod-branca').textContent=branca;
-  document.getElementById('mod-branca-sub').textContent=`${regs26.length?((branca/regs26.length)*100).toFixed(1):0}% dos casos`;
-  document.getElementById('mod-lesao').textContent=outros;
-  document.getElementById('mod-lesao-sub').textContent=`${regs26.length?((outros/regs26.length)*100).toFixed(1):0}% dos casos`;
-  document.getElementById('mod-outros').textContent=Object.keys(DB.tipo26).length;
+  
+  if(document.getElementById('mod-fogo')) document.getElementById('mod-fogo').textContent=fogo;
+  if(document.getElementById('mod-fogo-sub')) document.getElementById('mod-fogo-sub').textContent=`${regs26.length?((fogo/regs26.length)*100).toFixed(1):0}% dos casos`;
+  if(document.getElementById('mod-branca')) document.getElementById('mod-branca').textContent=branca;
+  if(document.getElementById('mod-branca-sub')) document.getElementById('mod-branca-sub').textContent=`${regs26.length?((branca/regs26.length)*100).toFixed(1):0}% dos casos`;
+  if(document.getElementById('mod-lesao')) document.getElementById('mod-lesao').textContent=outros;
+  if(document.getElementById('mod-lesao-sub')) document.getElementById('mod-lesao-sub').textContent=`${regs26.length?((outros/regs26.length)*100).toFixed(1):0}% dos casos`;
+  if(document.getElementById('mod-outros')) document.getElementById('mod-outros').textContent=Object.keys(DB.tipo26).length;
 
   const me=Object.entries(DB.meio26).sort((a,b)=>b[1]-a[1]);
   mkC('mod-meio',{type:'bar',data:{labels:me.map(e=>e[0]),datasets:[{data:me.map(e=>e[1]),backgroundColor:P,borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:35}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
@@ -906,112 +1115,313 @@ function buildMOD(){
 }
 
 function buildCO(){
-  document.getElementById('co-t25').textContent=DB.t25_coorpin;
-  document.getElementById('co-t26').textContent=DB.t26_coorpin;
+  if(document.getElementById('co-t25')) document.getElementById('co-t25').textContent=DB.t25_ytd;
+  if(document.getElementById('co-t26')) document.getElementById('co-t26').textContent=DB.t26_coorpin;
+  const mName = M[DB.maxM26] || 'Atual';
+  if(document.getElementById('co-t25-sub')) document.getElementById('co-t25-sub').textContent=`Jan–${mName}`;
+  if(document.getElementById('co-t26-sub')) document.getElementById('co-t26-sub').textContent=`Jan–${mName}`;
+  
   const munis=new Set([...Object.keys(DB.coorpin25),...Object.keys(DB.coorpin26)]);
-  document.getElementById('co-mun').textContent=munis.size;
+  if(document.getElementById('co-mun')) document.getElementById('co-mun').textContent=munis.size;
 
-  const q1_25=DB.coorpin_25[0]+DB.coorpin_25[1]+DB.coorpin_25[2];
-  const q1_26=DB.coorpin_26[0]+DB.coorpin_26[1]+DB.coorpin_26[2];
-  const diff=q1_26-q1_25;
-  document.getElementById('co-var').textContent=`${diff>0?'+':''}${diff} (${q1_25}→${q1_26})`;
-  document.getElementById('co-var').style.color=diff>0?'var(--red)':'var(--green)';
+  const ytd_25=DB.t25_ytd;
+  const ytd_26=DB.t26_coorpin;
+  const diff=ytd_26-ytd_25;
+  const coVar = document.getElementById('co-var');
+  if(coVar) {
+      coVar.textContent=`${diff>0?'+':''}${diff} (${ytd_25}→${ytd_26})`;
+      coVar.style.color=diff>0?'var(--red)':'var(--green)';
+  }
+  if(document.getElementById('co-var-sub')) document.getElementById('co-var-sub').textContent=`Jan-${mName} 25 vs 26`;
 
   const cities=Array.from(munis).sort((a,b)=>(DB.coorpin26[b]||0)-(DB.coorpin26[a]||0));
-  mkC('co-mun-comp',{type:'bar',data:{labels:cities,datasets:[{label:'2025',data:cities.map(c=>DB.coorpin25[c]||0),backgroundColor:'rgba(230,57,70,.8)',borderRadius:4},{label:'2026',data:cities.map(c=>DB.coorpin26[c]||0),backgroundColor:'rgba(59,130,246,.8)',borderRadius:4}]},options:{responsive:true,plugins:{legend:{labels:{color:'#9ca3af',font:{size:10},boxWidth:12}},tooltip:TT},scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:40}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
+  
+  const data25_ytd = cities.map(c => {
+    let sum = 0;
+    if (DB.meses25[c]) {
+      for (let i = 0; i <= DB.maxM26; i++) sum += DB.meses25[c][i] || 0;
+    }
+    return sum;
+  });
+
+  mkC('co-mun-comp',{type:'bar',data:{labels:cities,datasets:[{label:`2025 (Jan-${mName})`,data:data25_ytd,backgroundColor:'rgba(230,57,70,.8)',borderRadius:4},{label:`2026 (Jan-${mName})`,data:cities.map(c=>DB.coorpin26[c]||0),backgroundColor:'rgba(59,130,246,.8)',borderRadius:4}]},options:{responsive:true,plugins:{legend:{labels:{color:'#9ca3af',font:{size:10},boxWidth:12}},tooltip:TT},scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:40}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
 
   const topC=cities.slice(0,4);
   mkC('co-evolucao',{type:'line',data:{labels:M,datasets:topC.flatMap((c,i)=>[
     {label:`${c} (25)`,data:DB.meses25[c]||Array(12).fill(0),borderColor:P[i%P.length],backgroundColor:'transparent',borderWidth:1,tension:.4,borderDash:[3,3],pointRadius:2},
-    {label:`${c} (26)`,data:DB.meses26[c]||Array(12).fill(0),borderColor:P[i%P.length],backgroundColor:'transparent',borderWidth:3,tension:.4,pointRadius:4}
+    {label:`${c} (26)`,data:(DB.meses26[c]||Array(12).fill(0)).map((v,idx)=>idx>DB.maxM26?null:v),borderColor:P[i%P.length],backgroundColor:'transparent',borderWidth:3,tension:.4,pointRadius:4}
   ])},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#9ca3af',font:{size:9},boxWidth:10,padding:6}},tooltip:TT},scales:{x:{grid:{color:'#1e2330'}},y:{grid:{color:'#1e2330'},beginAtZero:true}}}});
 
-  document.getElementById('co-tabela').innerHTML=`<table><thead><tr><th>Município</th><th>Total 2025</th><th>Total 2026</th><th>1º Tri 2025</th><th>1º Tri 2026</th><th>Variação</th></tr></thead><tbody>${cities.map(c=>{
+  let htmlTab='<table><thead><tr><th>Município</th><th>Total 2025</th><th>Total 2026</th><th>1º Tri 2025</th><th>1º Tri 2026</th><th>Variação</th></tr></thead><tbody>';
+  htmlTab += cities.map(c=>{
     const t25=DB.coorpin25[c]||0,t26=DB.coorpin26[c]||0;
     const q1c25=(DB.meses25[c]||Array(12).fill(0)).slice(0,3).reduce((a,b)=>a+b,0);
     const q1c26=(DB.meses26[c]||Array(12).fill(0)).slice(0,3).reduce((a,b)=>a+b,0);
     const d=q1c26-q1c25;
     return`<tr><td style="font-weight:600;white-space:nowrap;">${c}</td><td class="mono" style="color:var(--accent);">${t25}</td><td class="mono" style="color:var(--blue);font-weight:600;">${t26}</td><td class="mono">${q1c25}</td><td class="mono" style="color:var(--blue);">${q1c26}</td><td class="mono" style="color:${d<0?'var(--green)':d>0?'var(--red)':'var(--muted)'};">${d>0?'+':''}${d}</td></tr>`;
-  }).join('')}</tbody></table>`;
+  }).join('');
+  htmlTab += '</tbody></table>';
+  
+  if(document.getElementById('co-tabela')) document.getElementById('co-tabela').innerHTML=htmlTab;
 }
 
-// ══════════════════════════════════════════════════════
-// ABA 7 — REGISTROS
-// ══════════════════════════════════════════════════════
-const PG=25;
-let rF={ano:'todos',mes:'todos',meio:'todos'},rPage=1,rData=[];
+function buildTABELAS() {
+  var maxM26 = (DB.maxM26 >= 0 && DB.maxM26 <= 11) ? DB.maxM26 : new Date().getMonth();
+  var mName = M[maxM26] ? M[maxM26].toUpperCase() : 'ATUAL';
+  
+  var mesesHeaderAbsolute = '<thead><tr><th>MESES</th>' + M.map(function(m) { return '<th>' + m.toUpperCase() + '</th>'; }).join('') + '<th>TOTAL</th></tr></thead>';
 
-function buildREG(){applyFilters();}
+  function calcVar(v25, v26) {
+    if (v25 === 0 && v26 === 0) return '<span style="color:var(--muted)">-</span>';
+    if (v25 === 0) return '<span style="color:var(--red)">+' + v26 + '</span>';
+    if (v26 === 0) return '<span style="color:var(--green)">-100.0%</span>';
+    var diff = v26 - v25;
+    var pct = (diff / v25) * 100;
+    var color = diff > 0 ? 'var(--red)' : (diff < 0 ? 'var(--green)' : 'var(--muted)');
+    var sign = diff > 0 ? '+' : '';
+    return '<span style="color:' + color + ';font-weight:600;">' + sign + pct.toFixed(1) + '%</span>';
+  }
 
-function setRegF(key,val,btn){
-  rF[key]=val;rPage=1;
-  if(btn&&btn.tagName==='BUTTON'){
-    document.querySelectorAll(`#tab-registros .f-btn[data-group="${key}"]`).forEach(b=>b.classList.remove('active'));
+  var periodoLabel = 'JAN–' + mName;
+  var tipHtml = '<thead><tr><th>TIPIFICAÇÃO</th><th>2025 (' + periodoLabel + ')</th><th>2026 (' + periodoLabel + ')</th><th>VAR %</th></tr></thead><tbody>';
+  var tips = ['HOMICÍDIO', 'FEMINICÍDIO', 'LESÃO C.SEG. MORTE', 'LATROCÍNIO'];
+  var d25T = { 'HOMICÍDIO': 0, 'FEMINICÍDIO': 0, 'LESÃO C.SEG. MORTE': 0, 'LATROCÍNIO': 0 };
+  var d26T = { 'HOMICÍDIO': 0, 'FEMINICÍDIO': 0, 'LESÃO C.SEG. MORTE': 0, 'LATROCÍNIO': 0 };
+  var t25T = 0, t26T = 0;
+  var d25M = {}, d26M = {};
+
+  DB.registros.forEach(function(r) {
+    var mi = parseInt(r.mes, 10) - 1;
+    if (isNaN(mi) || mi > maxM26 || !isCVLI(r.tipificacao)) return;
+    var tip = normTipificacao(r.tipificacao);
+    var cid = String(r.cidade || 'FEIRA DE SANTANA').toUpperCase().trim();
+    if (String(r.ano) === '2025') {
+      if (d25T[tip] !== undefined) { d25T[tip]++; t25T++; }
+      d25M[cid] = (d25M[cid] || 0) + 1;
+    } else if (String(r.ano) === '2026') {
+      if (d26T[tip] !== undefined) { d26T[tip]++; t26T++; }
+      d26M[cid] = (d26M[cid] || 0) + 1;
+    }
+  });
+
+  tips.forEach(function(t) {
+    tipHtml += '<tr><td>' + t + '</td><td>' + d25T[t] + '</td><td style="color:var(--blue);font-weight:600;">' + d26T[t] + '</td><td>' + calcVar(d25T[t], d26T[t]) + '</td></tr>';
+  });
+  tipHtml += '<tr class="total-row"><td>TOTAL CVLI</td><td>' + t25T + '</td><td>' + t26T + '</td><td>' + calcVar(t25T, t26T) + '</td></tr></tbody>';
+  
+  if(document.getElementById('tabela-comp-tip')) document.getElementById('tabela-comp-tip').innerHTML = tipHtml;
+
+  var munHtml = '<thead><tr><th>MUNICÍPIO</th><th>2025 (' + periodoLabel + ')</th><th>2026 (' + periodoLabel + ')</th><th>VAR %</th></tr></thead><tbody>';
+  var allCids = Object.keys(Object.assign({}, d25M, d26M)).sort(function(a, b) {
+    if (a === 'FEIRA DE SANTANA') return -1;
+    if (b === 'FEIRA DE SANTANA') return 1;
+    return a.localeCompare(b);
+  });
+  allCids.forEach(function(c) {
+    var v25 = d25M[c] || 0, v26 = d26M[c] || 0;
+    munHtml += '<tr><td>' + c + '</td><td>' + v25 + '</td><td style="color:var(--blue);font-weight:600;">' + v26 + '</td><td>' + calcVar(v25, v26) + '</td></tr>';
+  });
+  munHtml += '<tr class="total-row"><td>TOTAL COORPIN</td><td>' + t25T + '</td><td>' + t26T + '</td><td>' + calcVar(t25T, t26T) + '</td></tr></tbody>';
+  
+  if(document.getElementById('tabela-comp-mun')) document.getElementById('tabela-comp-mun').innerHTML = munHtml;
+
+  function getTableTip(ano) {
+    var data = { 'HOMICÍDIO': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 'FEMINICÍDIO': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 'LESÃO C.SEG. MORTE': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 'LATROCÍNIO': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] };
+    DB.registros.forEach(function(r) {
+      if (String(r.ano) === String(ano) && isCVLI(r.tipificacao)) {
+        var mi = parseInt(r.mes, 10) - 1;
+        if (!isNaN(mi) && mi >= 0 && mi <= 11) {
+          var tip = normTipificacao(r.tipificacao);
+          if (data[tip]) data[tip][mi]++;
+        }
+      }
+    });
+    var html = mesesHeaderAbsolute + '<tbody>';
+    var cvliMensal = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    var totalGeral = 0;
+    ['HOMICÍDIO', 'FEMINICÍDIO', 'LESÃO C.SEG. MORTE', 'LATROCÍNIO'].forEach(function(tip) {
+      var rowTotal = 0;
+      var rowHtml = '<tr><td>' + tip + '</td>';
+      for (var i = 0; i < 12; i++) {
+        var val = data[tip][i];
+        rowTotal += val;
+        cvliMensal[i] += val;
+        if (String(ano) === '2026' && i > maxM26) rowHtml += '<td class="cell-zero"></td>';
+        else rowHtml += '<td class="' + (val === 0 ? 'cell-zero' : '') + '">' + (val || '-') + '</td>';
+      }
+      totalGeral += rowTotal;
+      html += rowHtml + '<td>' + (rowTotal || '-') + '</td></tr>';
+    });
+    html += '<tr class="total-row"><td>CVLI</td>';
+    cvliMensal.forEach(function(val, i) {
+      if (String(ano) === '2026' && i > maxM26) html += '<td></td>';
+      else html += '<td class="' + (val === 0 ? 'cell-zero' : '') + '">' + (val || 0) + '</td>';
+    });
+    html += '<td>' + totalGeral + '</td></tr>';
+    html += '<tr class="subtotal-row"><td>subtotal dos crimes CVLI</td>';
+    var acumulado = 0;
+    cvliMensal.forEach(function(val, i) {
+      if (String(ano) === '2026' && i > maxM26) html += '<td></td>';
+      else { acumulado += val; html += '<td>' + (acumulado || '') + '</td>'; }
+    });
+    html += '<td></td></tr>';
+    html += '<tr class="semestre-row"><td>segundo semestre</td>';
+    var acumuladoSem2 = 0;
+    for (var i = 0; i < 12; i++) {
+      if (i < 6) html += '<td></td>';
+      else if (String(ano) === '2026' && i > maxM26) html += '<td></td>';
+      else { acumuladoSem2 += cvliMensal[i]; html += '<td>' + (acumuladoSem2 || '') + '</td>'; }
+    }
+    html += '<td></td></tr>';
+
+    if (String(ano) === '2026') {
+      var cvli25 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      DB.registros.forEach(function(r) {
+        if (String(r.ano) === '2025' && isCVLI(r.tipificacao)) {
+          var mi = parseInt(r.mes, 10) - 1;
+          if (!isNaN(mi) && mi >= 0 && mi <= 11) cvli25[mi]++;
+        }
+      });
+      
+      html += '<tr style="background:rgba(107,114,128,0.05);"><td style="font-weight:600;color:var(--text);font-style:italic;">variação % mensal (vs 2025)</td>';
+      var tot25 = 0;
+      for (var i = 0; i < 12; i++) {
+        tot25 += cvli25[i];
+        if (i > maxM26) html += '<td class="cell-zero"></td>';
+        else html += '<td>' + calcVar(cvli25[i], cvliMensal[i]) + '</td>';
+      }
+      html += '<td>' + calcVar(tot25, totalGeral) + '</td></tr>';
+
+      html += '<tr style="background:rgba(107,114,128,0.05);border-bottom:2px solid var(--border);"><td style="font-weight:600;color:var(--text);font-style:italic;">variação % acumulada (vs 2025)</td>';
+      var ac25 = 0, ac26 = 0;
+      for (var i = 0; i < 12; i++) {
+        if (i > maxM26) html += '<td class="cell-zero"></td>';
+        else {
+          ac25 += cvli25[i];
+          ac26 += cvliMensal[i];
+          html += '<td>' + calcVar(ac25, ac26) + '</td>';
+        }
+      }
+      html += '<td></td></tr>';
+    }
+
+    html += '</tbody>';
+    return html;
+  }
+
+  function getTableMun(ano) {
+    var munData = {};
+    DB.registros.forEach(function(r) {
+      if (String(r.ano) === String(ano) && isCVLI(r.tipificacao)) {
+        var mi = parseInt(r.mes, 10) - 1;
+        if (!isNaN(mi) && mi >= 0 && mi <= 11) {
+          var cid = String(r.cidade || 'FEIRA DE SANTANA').toUpperCase().trim();
+          if (!munData[cid]) munData[cid] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+          munData[cid][mi]++;
+        }
+      }
+    });
+    var cidades = Object.keys(munData).sort(function(a, b) {
+      if (a === 'FEIRA DE SANTANA') return -1;
+      if (b === 'FEIRA DE SANTANA') return 1;
+      return a.localeCompare(b);
+    });
+    var html = mesesHeaderAbsolute + '<tbody>';
+    var cvliMensal = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    var totalGeral = 0;
+    cidades.forEach(function(cid) {
+      var rowTotal = 0;
+      var rowHtml = '<tr><td>' + cid + '</td>';
+      for (var i = 0; i < 12; i++) {
+        var val = munData[cid][i];
+        rowTotal += val; cvliMensal[i] += val;
+        if (String(ano) === '2026' && i > maxM26) rowHtml += '<td class="cell-zero"></td>';
+        else rowHtml += '<td class="' + (val === 0 ? 'cell-zero' : '') + '">' + (val || '-') + '</td>';
+      }
+      totalGeral += rowTotal;
+      html += rowHtml + '<td>' + (rowTotal || '-') + '</td></tr>';
+    });
+    html += '<tr class="total-row"><td>TOTAL CVLI COORPIN</td>';
+    cvliMensal.forEach(function(val, i) {
+      if (String(ano) === '2026' && i > maxM26) html += '<td></td>';
+      else html += '<td class="' + (val === 0 ? 'cell-zero' : '') + '">' + (val || 0) + '</td>';
+    });
+    html += '<td>' + totalGeral + '</td></tr></tbody>';
+    return html;
+  }
+
+  if(document.getElementById('tabela-tip-2026')) document.getElementById('tabela-tip-2026').innerHTML = getTableTip('2026');
+  if(document.getElementById('tabela-tip-2025')) document.getElementById('tabela-tip-2025').innerHTML = getTableTip('2025');
+  if(document.getElementById('tabela-mun-2026')) document.getElementById('tabela-mun-2026').innerHTML = getTableMun('2026');
+  if(document.getElementById('tabela-mun-2025')) document.getElementById('tabela-mun-2025').innerHTML = getTableMun('2025');
+}
+
+var PG = 25;
+var rF = { ano: 'todos', mes: 'todos', meio: 'todos' }, rPage = 1, rData = [];
+
+function buildREG() { applyFilters(); }
+function setRegF(key, val, btn) {
+  rF[key] = val; rPage = 1;
+  if (btn && btn.tagName === 'BUTTON') {
+    document.querySelectorAll('#tab-registros .f-btn[data-group="' + key + '"]').forEach(function(b) { b.classList.remove('active'); });
     btn.classList.add('active');
   }
   applyFilters();
 }
-
-function applyFilters(){
-  const q=(document.getElementById('reg-search')?.value||'').toLowerCase();
-  rData=DB.registros.filter(r=>{
-    if(rF.ano!=='todos'&&String(r.ano).trim()!==String(rF.ano).trim())return false;
-    if(rF.mes!=='todos'&&String(r.mes)!==String(rF.mes))return false;
-    if(rF.meio!=='todos'){
-      if(rF.meio==='outros'){if(r.meio_norm==='ARMA DE FOGO'||r.meio_norm==='ARMA BRANCA')return false;}
-      else if(r.meio_norm!==rF.meio)return false;
+function applyFilters() {
+  var q = (document.getElementById('reg-search')?.value || '').toLowerCase();
+  rData = DB.registros.filter(function(r) {
+    if (rF.ano !== 'todos' && String(r.ano).trim() !== String(rF.ano).trim()) return false;
+    if (rF.mes !== 'todos' && String(r.mes) !== String(rF.mes)) return false;
+    if (rF.meio !== 'todos') {
+      if (rF.meio === 'outros') { if (r.meio_norm === 'ARMA DE FOGO' || r.meio_norm === 'ARMA BRANCA') return false; }
+      else if (r.meio_norm !== rF.meio) return false;
     }
-    if(q&&!(r.vitima||'').toLowerCase().includes(q)&&!(r.bairro||'').toLowerCase().includes(q)&&!(r.ocorrencia||'').toLowerCase().includes(q)&&!(r.cidade||'').toLowerCase().includes(q))return false;
+    if (q && !(r.vitima || '').toLowerCase().includes(q) && !(r.bairro || '').toLowerCase().includes(q) && !(r.ocorrencia || '').toLowerCase().includes(q) && !(r.cidade || '').toLowerCase().includes(q)) return false;
     return true;
   });
-  const tot=rData.length,pgs=Math.max(1,Math.ceil(tot/PG));
-  rPage=Math.min(rPage,pgs);
-  document.getElementById('reg-filt-kpi').textContent=tot;
-  document.getElementById('reg-pg-kpi').textContent=`${rPage}/${pgs}`;
-  document.getElementById('reg-tag').textContent=`${tot} registros`;
-  document.getElementById('reg-tot-kpi').textContent=DB.registros.length;
-  renderRegTable(tot,pgs);
+  var tot = rData.length, pgs = Math.max(1, Math.ceil(tot / PG));
+  rPage = Math.min(rPage, pgs);
+  
+  if(document.getElementById('reg-filt-kpi')) document.getElementById('reg-filt-kpi').textContent = tot || 0;
+  if(document.getElementById('reg-pg-kpi')) document.getElementById('reg-pg-kpi').textContent = rPage + '/' + pgs;
+  if(document.getElementById('reg-tag')) document.getElementById('reg-tag').textContent = tot + ' registros';
+  if(document.getElementById('reg-tot-kpi')) document.getElementById('reg-tot-kpi').textContent = DB.registros.length || 0;
+  renderRegTable(tot, pgs);
 }
-
-function renderRegTable(tot,pgs){
-  const tot2=tot??rData.length,pgs2=pgs??Math.max(1,Math.ceil(rData.length/PG));
-  const start=(rPage-1)*PG;
-  document.getElementById('reg-tbody').innerHTML=rData.slice(start,start+PG).map(r=>{
-    const mb=r.meio_norm==='ARMA DE FOGO'?'b-red':r.meio_norm==='ARMA BRANCA'?'b-orange':'b-muted';
-    const ab=(r.autoria||'').toUpperCase().includes('SIM')?'b-green':'b-muted';
-    return`<tr>
-      <td class="mono" style="color:var(--muted);">${r.n}</td>
-      <td class="td-wrap" style="font-weight:500;">${r.vitima}</td>
-      <td class="mono" style="text-align:center;">${r.idade||'—'}</td>
-      <td class="mono">${r.ocorrencia}</td>
-      <td class="mono" style="color:var(--muted);">${r.data}</td>
-      <td class="mono">${r.hora}</td>
-      <td><span class="badge ${ab}">${r.autoria}</span></td>
-      <td style="font-size:10px;">${r.motivo}</td>
-      <td><span class="badge ${mb}">${r.meio}</span></td>
-      <td style="font-size:10px;">${r.tipificacao}</td>
-      <td style="font-size:11px;font-weight:600;color:var(--blue);">${r.bairro}</td>
-      <td class="td-wrap" style="font-size:10px;">${r.logradouro}</td>
-      <td style="font-size:11px;font-weight:600;">${r.cidade}</td>
-      <td class="td-wrap" style="font-size:10px;color:var(--muted);">${r.obs}</td>
-    </tr>`;
-  }).join('');
-  document.getElementById('reg-pg-info').textContent=`Mostrando ${start+1}–${Math.min(start+PG,tot2)} de ${tot2}`;
-  const show=[];
-  if(pgs2<=7){for(let i=1;i<=pgs2;i++)show.push(i);}
-  else{show.push(1);if(rPage>3)show.push('…');for(let i=Math.max(2,rPage-1);i<=Math.min(pgs2-1,rPage+1);i++)show.push(i);if(rPage<pgs2-2)show.push('…');show.push(pgs2);}
-  let ph=rPage>1?`<div class="pg-btn" onclick="goPg(${rPage-1})">‹</div>`:'';
-  show.forEach(p=>{ph+=p==='…'?`<div class="pg-btn" style="cursor:default;">…</div>`:`<div class="pg-btn ${p===rPage?'active':''}" onclick="goPg(${p})">${p}</div>`;});
-  if(rPage<pgs2)ph+=`<div class="pg-btn" onclick="goPg(${rPage+1})">›</div>`;
-  document.getElementById('reg-pg').innerHTML=ph;
+function renderRegTable(tot, pgs) {
+  var tot2 = tot !== undefined ? tot : rData.length;
+  var pgs2 = pgs !== undefined ? pgs : Math.max(1, Math.ceil(rData.length / PG));
+  var start = (rPage - 1) * PG;
+  const tbody = document.getElementById('reg-tbody');
+  
+  if(tbody) {
+      tbody.innerHTML = rData.slice(start, start + PG).map(function(r) {
+        var mb = r.meio_norm === 'ARMA DE FOGO' ? 'b-red' : r.meio_norm === 'ARMA BRANCA' ? 'b-orange' : 'b-muted';
+        var ab = String(r.autoria || '').toUpperCase().includes('SIM') ? 'b-green' : 'b-muted';
+        var safeLog = String(r.logradouro || '').replace(/\n/g, '<br>');
+        var safeObs = String(r.obs || '').replace(/\n/g, '<br>');
+        return '<tr><td class="mono" style="color:var(--muted);">' + r.n + '</td><td class="td-wrap" style="font-weight:500;">' + r.vitima + '</td><td class="mono" style="text-align:center;">' + (r.idade || '—') + '</td><td class="mono">' + r.ocorrencia + '</td><td class="mono" style="color:var(--muted);">' + r.data + '</td><td class="mono">' + r.hora + '</td><td><span class="badge ' + ab + '">' + r.autoria + '</span></td><td style="font-size:10px;">' + r.motivo + '</td><td><span class="badge ' + mb + '">' + r.meio + '</span></td><td style="font-size:10px;">' + r.tipificacao + '</td><td style="font-size:11px;font-weight:600;color:var(--blue);">' + r.bairro + '</td><td class="td-wrap" style="font-size:10px;">' + safeLog + '</td><td style="font-size:11px;font-weight:600;">' + r.cidade + '</td><td class="td-wrap" style="font-size:10px;color:var(--muted);">' + safeObs + '</td></tr>';
+      }).join('');
+  }
+  
+  if(document.getElementById('reg-pg-info')) document.getElementById('reg-pg-info').textContent = 'Mostrando ' + (start + 1) + '–' + Math.min(start + PG, tot2) + ' de ' + tot2;
+  
+  var show = [];
+  if (pgs2 <= 7) { for (var i = 1; i <= pgs2; i++) show.push(i); }
+  else { show.push(1); if (rPage > 3) show.push('…'); for (var i = Math.max(2, rPage - 1); i <= Math.min(pgs2 - 1, rPage + 1); i++) show.push(i); if (rPage < pgs2 - 2) show.push('…'); show.push(pgs2); }
+  
+  var ph = rPage > 1 ? '<div class="pg-btn" onclick="goPg(' + (rPage - 1) + ')">‹</div>' : '';
+  show.forEach(function(p) { ph += p === '…' ? '<div class="pg-btn" style="cursor:default;">…</div>' : '<div class="pg-btn ' + (p === rPage ? 'active' : '') + '" onclick="goPg(' + p + ')"> ' + p + '</div>'; });
+  if (rPage < pgs2) ph += '<div class="pg-btn" onclick="goPg(' + (rPage + 1) + ')">›</div>';
+  if(document.getElementById('reg-pg')) document.getElementById('reg-pg').innerHTML = ph;
 }
-
-function goPg(p){rPage=p;renderRegTable();}
+function goPg(p) { rPage = p; applyFilters(); }
 
 // ══════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════
-document.getElementById('hdate').textContent=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase();
+document.getElementById('hdate').textContent = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
 
 initData();
 buildVG();
