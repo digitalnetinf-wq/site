@@ -165,7 +165,6 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
   <button class="tab-btn" onclick="showTab('coorpin',this)">🗺️ COORPIN (25 vs 26)</button>
   <button class="tab-btn" onclick="showTab('tabelas',this)">📑 Tabelas Resumo</button>
   <button class="tab-btn" onclick="showTab('registros',this)">📋 Banco de Dados CVLIs</button>
-  <button class="tab-btn" onclick="showTab('suporte',this)">📞 Suporte</button>
 </nav>
 
 <!-- ABA 1 -->
@@ -190,7 +189,7 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
   <div class="sec-label">Comparativo Mês a Mês</div>
   <div class="g2">
     <div class="card"><div class="card-hd"><span class="card-title">Variação Mensal 2025 vs 2026</span><span class="card-tag blue">COORPIN TOTAL</span></div><div class="card-body" id="vg-comp" style="max-height:250px;overflow-y:auto;"></div></div>
-    <div class="card"><div class="card-hd"><span class="card-title">Top Bairros — Feira</span><span class="card-tag">2026</span></div><div class="card-body"><div class="bar-list" id="vg-bairros"></div></div></div>
+    <div class="card"><div class="card-hd"><span class="card-title">Ranking Bairros — Feira</span><span class="card-tag">TODOS</span></div><div class="card-body" style="max-height:250px;overflow-y:auto;"><div class="bar-list" id="vg-bairros"></div></div></div>
   </div>
 </div>
 </div>
@@ -199,8 +198,8 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
 <div class="tab-page" id="tab-evolucao">
 <div class="container">
   <div class="kpi-grid cols-4">
-    <div class="kpi-card red"><div class="kpi-lbl">Total Acumulado 2025</div><div class="kpi-val red" id="ev-tot25">—</div><div class="kpi-sub" id="ev-tot25-sub">COORPIN (Jan-atual)</div></div>
-    <div class="kpi-card blue"><div class="kpi-lbl">Total Acumulado 2026</div><div class="kpi-val blue" id="ev-tot26">—</div><div class="kpi-sub" id="ev-tot26-sub">COORPIN (Jan–atual)</div></div>
+    <div class="kpi-card red"><div class="kpi-lbl">Total Acumulado 2025</div><div class="kpi-val red" id="ev-tot25">—</div><div class="kpi-sub" id="ev-tot25-sub">COORPIN (Jan–mês atual)</div></div>
+    <div class="kpi-card blue"><div class="kpi-lbl">Total Acumulado 2026</div><div class="kpi-val blue" id="ev-tot26">—</div><div class="kpi-sub" id="ev-tot26-sub">COORPIN (Jan–mês atual)</div></div>
     <div class="kpi-card orange"><div class="kpi-lbl">Pico Mensal 2025</div><div class="kpi-val" id="ev-pico25" style="font-size:28px">—</div><div class="kpi-sub">ocorrências</div></div>
     <div class="kpi-card green"><div class="kpi-lbl">Pico Mensal 2026</div><div class="kpi-val green" id="ev-pico26" style="font-size:28px">—</div><div class="kpi-sub">ocorrências</div></div>
   </div>
@@ -228,7 +227,7 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
   <div class="sec-label">Distribuição Geográfica (2026)</div>
   <div class="gbig">
     <div class="card"><div class="card-hd"><span class="card-title">Todas as Cidades — 2026</span><span class="card-tag">HORIZONTAL</span></div><div class="card-body"><canvas id="geo-horiz" style="max-height:360px;"></canvas></div></div>
-    <div class="card"><div class="card-hd"><span class="card-title">Ranking Bairros — Feira</span><span class="card-tag">2026</span></div><div class="card-body"><div class="bar-list" id="geo-barlist"></div></div></div>
+    <div class="card"><div class="card-hd"><span class="card-title">Ranking Bairros — Feira</span><span class="card-tag">TODOS</span></div><div class="card-body" style="max-height:360px;overflow-y:auto;"><div class="bar-list" id="geo-barlist"></div></div></div>
   </div>
   <div class="g2">
     <div class="card"><div class="card-hd"><span class="card-title">Agrupamento por Zona (Feira)</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="geo-zona"></canvas></div></div>
@@ -254,8 +253,8 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
   </div>
   <div class="g3">
     <div class="card"><div class="card-hd"><span class="card-title">Autoria Identificada</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vit-aut"></canvas><div id="vit-aut-lbl" style="margin-top:10px;display:flex;flex-direction:column;gap:7px;"></div></div></div>
-    <div class="card"><div class="card-hd"><span class="card-title">Motivos Identificados</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vit-motivo"></canvas></div></div>
-    <div class="card"><div class="card-hd"><span class="card-title">Idade Média por Meio</span><span class="card-tag">2026</span></div><div class="card-body"><div class="bar-list" id="vit-meio-idade"></div></div></div>
+    <div class="card"><div class="card-hd"><span class="card-title">Motivos Identificados</span><span class="card-tag">TODOS</span></div><div class="card-body"><canvas id="vit-motivo"></canvas></div></div>
+    <div class="card"><div class="card-hd"><span class="card-title">Idade Média por Meio</span><span class="card-tag">TODOS</span></div><div class="card-body"><canvas id="vit-meio-idade"></canvas></div></div>
   </div>
 </div>
 </div>
@@ -276,7 +275,7 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
   </div>
   <div class="g2">
     <div class="card"><div class="card-hd"><span class="card-title">Tipificação dos Crimes</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="mod-tipo"></canvas></div></div>
-    <div class="card"><div class="card-hd"><span class="card-title">Motivos Identificados</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="mod-motivo"></canvas></div></div>
+    <div class="card"><div class="card-hd"><span class="card-title">Motivos Identificados</span><span class="card-tag">TODOS</span></div><div class="card-body"><canvas id="mod-motivo"></canvas></div></div>
   </div>
 </div>
 </div>
@@ -285,8 +284,8 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
 <div class="tab-page" id="tab-coorpin">
 <div class="container">
   <div class="kpi-grid cols-4">
-    <div class="kpi-card red"><div class="kpi-lbl">COORPIN Acumulado 2025</div><div class="kpi-val red" id="co-t25">—</div><div class="kpi-sub" id="co-t25-sub">Jan–atual</div></div>
-    <div class="kpi-card blue"><div class="kpi-lbl">COORPIN Acumulado 2026</div><div class="kpi-val blue" id="co-t26">—</div><div class="kpi-sub" id="co-t26-sub">Jan–atual</div></div>
+    <div class="kpi-card red"><div class="kpi-lbl">COORPIN Acumulado 2025</div><div class="kpi-val red" id="co-t25">—</div><div class="kpi-sub" id="co-t25-sub">Jan–mês atual</div></div>
+    <div class="kpi-card blue"><div class="kpi-lbl">COORPIN Acumulado 2026</div><div class="kpi-val blue" id="co-t26">—</div><div class="kpi-sub" id="co-t26-sub">Jan–mês atual</div></div>
     <div class="kpi-card orange"><div class="kpi-lbl">Municípios Afetados</div><div class="kpi-val" id="co-mun">—</div><div class="kpi-sub">na área da COORPIN</div></div>
     <div class="kpi-card green"><div class="kpi-lbl">Variação Global (Acumulado)</div><div class="kpi-val green" id="co-var">—</div><div class="kpi-sub" id="co-var-sub">Jan-atual 25 vs 26</div></div>
   </div>
@@ -378,43 +377,6 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
     <div style="padding:10px 18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
       <div class="pg-info" id="reg-pg-info">—</div>
       <div class="pagination" id="reg-pg"></div>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- ABA 9 - SUPORTE -->
-<div class="tab-page" id="tab-suporte">
-<div class="container">
-  <div class="sec-label">Suporte Técnico e Contato</div>
-  <div class="card" style="max-width: 400px; margin: 0 auto; margin-top: 40px;">
-    <div class="card-hd"><span class="card-title">Informações de Contato</span><span class="card-tag">DEV</span></div>
-    <div class="card-body" style="display: flex; flex-direction: column; gap: 20px; padding: 24px;">
-      
-      <div style="display: flex; align-items: center; gap: 16px;">
-        <div style="width: 48px; height: 48px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">👤</div>
-        <div>
-          <div style="font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;">Nome</div>
-          <div style="font-size: 16px; font-weight: 500; color: var(--text);">Félix Rilton</div>
-        </div>
-      </div>
-
-      <div style="display: flex; align-items: center; gap: 16px;">
-        <div style="width: 48px; height: 48px; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">📱</div>
-        <div>
-          <div style="font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;">Telefone / WhatsApp</div>
-          <div class="mono" style="font-size: 15px; color: var(--green);">(75) 98114-9491</div>
-        </div>
-      </div>
-
-      <div style="display: flex; align-items: center; gap: 16px;">
-        <div style="width: 48px; height: 48px; background: rgba(230,57,70,0.1); border: 1px solid rgba(230,57,70,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">✉️</div>
-        <div>
-          <div style="font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;">Email Institucional</div>
-          <div class="mono" style="font-size: 13px; color: var(--accent);">felix.rilton@pcivil.ba.gov.br</div>
-        </div>
-      </div>
-
     </div>
   </div>
 </div>
@@ -774,6 +736,7 @@ function recalcStats(){
   DB.t25_coorpin=0; DB.t26_coorpin=0;
   
   let maxM26 = -1;
+  const currentRealMonth = new Date().getMonth(); // 0 a 11 (Mês exato do mundo real)
 
   DB.registros.forEach(r=>{
     const is25=String(r.ano)==='2025', is26=String(r.ano)==='2026';
@@ -804,10 +767,11 @@ function recalcStats(){
         const b=String(r.bairro||'NÃO INFORMADO').toUpperCase();
         DB.bairros26[b]=(DB.bairros26[b]||0)+1;
       }
-      DB.meio26[r.meio_norm]=(DB.meio26[r.meio_norm]||0)+1;
+      const meioBruto = String(r.meio || 'NÃO INFORMADO').toUpperCase().trim();
+      DB.meio26[meioBruto]=(DB.meio26[meioBruto]||0)+1;
       
-      let tipNorm = normTipificacao(r.tipificacao);
-      DB.tipo26[tipNorm]=(DB.tipo26[tipNorm]||0)+1;
+      let tipBruto = String(r.tipificacao || 'NÃO INFORMADO').toUpperCase().trim();
+      DB.tipo26[tipBruto]=(DB.tipo26[tipBruto]||0)+1;
       
       const mot=String(r.motivo||'').trim().toUpperCase();
       if(mot&&mot!=='NÃO'&&mot!=='NAO'&&mot!=='NÃO'&&mot.length>1) DB.motivo26[mot]=(DB.motivo26[mot]||0)+1;
@@ -815,22 +779,27 @@ function recalcStats(){
     }
   });
   
-  if (maxM26 === -1) maxM26 = new Date().getMonth();
+  if (maxM26 === -1) maxM26 = currentRealMonth;
   DB.maxM26 = maxM26;
+  DB.limitMonth = currentRealMonth; // Limita os cálculos de acumulado estritamente até o mês atual
 
   DB.t25_ytd = 0;
+  DB.t26_ytd = 0;
   DB.coorpin25_ytd = {};
+  DB.coorpin26_ytd = {};
   
-  for (let i = 0; i <= maxM26; i++) {
+  // Cálculo exato de Janeiro até o Mês Atual
+  for (let i = 0; i <= DB.limitMonth; i++) {
     DB.t25_ytd += DB.coorpin_25[i] || 0;
+    DB.t26_ytd += DB.coorpin_26[i] || 0;
   }
   
   DB.registros.forEach(r => {
-    const is25 = String(r.ano) === '2025';
     let mi = parseInt(r.mes, 10) - 1;
-    if (is25 && mi >= 0 && mi <= maxM26 && isCVLI(r.tipificacao)) {
+    if (mi >= 0 && mi <= DB.limitMonth && isCVLI(r.tipificacao)) {
         const cid = String(r.cidade || 'FEIRA DE SANTANA').toUpperCase().trim();
-        DB.coorpin25_ytd[cid] = (DB.coorpin25_ytd[cid] || 0) + 1;
+        if (String(r.ano) === '2025') DB.coorpin25_ytd[cid] = (DB.coorpin25_ytd[cid] || 0) + 1;
+        if (String(r.ano) === '2026') DB.coorpin26_ytd[cid] = (DB.coorpin26_ytd[cid] || 0) + 1;
     }
   });
 }
@@ -890,13 +859,14 @@ function buildVG(){
 
   mkC('vg-mensal',{type:'line',data:{labels:M,datasets:[
     {label:'Feira 2025',data:DB.feira_25,borderColor:'#e63946',backgroundColor:'rgba(230,57,70,.08)',borderWidth:2,tension:.4,fill:true,pointRadius:3},
-    {label:'Feira 2026',data:DB.feira_26.map((v,i)=>i>DB.maxM26?null:v),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',borderWidth:2,tension:.4,fill:true,borderDash:[5,3],pointRadius:3}
+    {label:'Feira 2026',data:DB.feira_26,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',borderWidth:2,tension:.4,fill:true,borderDash:[5,3],pointRadius:3}
   ]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#9ca3af',font:{size:10},boxWidth:12,padding:10}},tooltip:TT},scales:{x:{grid:{color:'#1e2330'},ticks:{font:{size:10}}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
 
   const me=Object.entries(DB.meio26).sort((a,b)=>b[1]-a[1]);
-  mkC('vg-meio',{type:'doughnut',data:{labels:me.map(e=>e[0]),datasets:[{data:me.map(e=>e[1]),backgroundColor:P,borderWidth:0,hoverOffset:5}]},options:{responsive:true,cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:'#9ca3af',font:{size:9},boxWidth:10,padding:6}},tooltip:{...TT,callbacks:{label:c=>` ${c.parsed} (${regs26.length?((c.parsed/regs26.length)*100).toFixed(1):0}%)`}}}}});
+  mkC('vg-meio',{type:'doughnut',data:{labels:me.map(e=>e[0]),datasets:[{data:me.map(e=>e[1]),backgroundColor:P,borderWidth:0,hoverOffset:5}]},options:{responsive:true,cutout:'60%',plugins:{legend:{display: me.length <= 8, position:'bottom',labels:{color:'#9ca3af',font:{size:9},boxWidth:10,padding:6}},tooltip:{...TT,callbacks:{label:c=>` ${c.parsed} (${regs26.length?((c.parsed/regs26.length)*100).toFixed(1):0}%)`}}}}});
 
-  mkC('vg-tipo',{type:'bar',data:{labels:Object.keys(DB.tipo26),datasets:[{data:Object.values(DB.tipo26),backgroundColor:P,borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
+  const tiposArrVG=Object.entries(DB.tipo26).sort((a,b)=>b[1]-a[1]);
+  mkC('vg-tipo',{type:'bar',data:{labels:tiposArrVG.map(e=>e[0]),datasets:[{data:tiposArrVG.map(e=>e[1]),backgroundColor:P,borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:9}}}}}});
 
   const faixas={'<18':0,'18–24':0,'25–29':0,'30–39':0,'40–49':0,'50+':0};
   idades26.forEach(id=>{if(id<18)faixas['<18']++;else if(id<=24)faixas['18–24']++;else if(id<=29)faixas['25–29']++;else if(id<=39)faixas['30–39']++;else if(id<=49)faixas['40–49']++;else faixas['50+']++;});
@@ -908,7 +878,6 @@ function buildVG(){
   const compContainer = document.getElementById('vg-comp');
   if(compContainer){
       compContainer.innerHTML=M.map((m,i)=>{
-        if(i > DB.maxM26) return '';
         if(c25[i]===0&&c26[i]===0)return'';
         const v25=c25[i],v26=c26[i],tot=v25+v26||1,p25=Math.round(v25/tot*100),p26=100-p25;
         const d=v26-v25,col=d>0?'var(--red)':d<0?'var(--green)':'var(--muted)';
@@ -917,11 +886,11 @@ function buildVG(){
       }).join('');
   }
 
-  const entries=Object.entries(DB.bairros26).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const entries=Object.entries(DB.bairros26).sort((a,b)=>b[1]-a[1]);
   const max=entries.length?entries[0][1]:1;
   const bairrosContainer = document.getElementById('vg-bairros');
   if(bairrosContainer){
-      bairrosContainer.innerHTML=entries.map(([b,v],i)=>`<div class="bar-item"><div class="bar-row"><span class="bar-lbl">${b}</span><span class="bar-val">${v}</span></div><div class="bar-track"><div class="bar-fill" style="width:${(v/max*100).toFixed(1)}%;background:${P[i%P.length]}"></div></div></div>`).join('');
+      bairrosContainer.innerHTML=entries.map(([b,v],i)=>`<div class="bar-item"><div class="bar-row"><span class="bar-lbl" style="font-size:10px;">${b}</span><span class="bar-val">${v}</span></div><div class="bar-track"><div class="bar-fill" style="width:${(v/max*100).toFixed(1)}%;background:${P[i%P.length]}"></div></div></div>`).join('');
   }
 }
 
@@ -930,9 +899,9 @@ function buildEV(){
   const pico26=Math.max(...DB.coorpin_26, 0), picoM26=DB.coorpin_26.indexOf(pico26);
   
   if(document.getElementById('ev-tot25')) document.getElementById('ev-tot25').textContent=DB.t25_ytd;
-  if(document.getElementById('ev-tot26')) document.getElementById('ev-tot26').textContent=DB.t26_coorpin;
+  if(document.getElementById('ev-tot26')) document.getElementById('ev-tot26').textContent=DB.t26_ytd;
   
-  const mName = M[DB.maxM26] || 'Atual';
+  const mName = M[DB.limitMonth] || 'Atual';
   if(document.getElementById('ev-tot25-sub')) document.getElementById('ev-tot25-sub').textContent=`COORPIN (Jan–${mName})`;
   if(document.getElementById('ev-tot26-sub')) document.getElementById('ev-tot26-sub').textContent=`COORPIN (Jan–${mName})`;
   
@@ -948,12 +917,12 @@ function buildEV(){
   mkC('ev-full',{type:'line',data:{labels:M,datasets:[
     {label:'COORPIN 2025',data:DB.coorpin_25,borderColor:'#e63946',backgroundColor:'rgba(230,57,70,.07)',borderWidth:2,tension:.4,fill:true,pointRadius:4},
     {label:'Feira 2025',data:DB.feira_25,borderColor:'#ff6b35',backgroundColor:'transparent',borderWidth:1.5,tension:.4,fill:false,borderDash:[3,2],pointRadius:3},
-    {label:'COORPIN 2026',data:DB.coorpin_26.map((v,i)=>i>DB.maxM26?null:v),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.07)',borderWidth:2,tension:.4,fill:true,borderDash:[6,3],pointRadius:4},
-    {label:'Feira 2026',data:DB.feira_26.map((v,i)=>i>DB.maxM26?null:v),borderColor:'#22c55e',backgroundColor:'transparent',borderWidth:1.5,tension:.4,fill:false,borderDash:[3,2],pointRadius:3}
+    {label:'COORPIN 2026',data:DB.coorpin_26,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.07)',borderWidth:2,tension:.4,fill:true,borderDash:[6,3],pointRadius:4},
+    {label:'Feira 2026',data:DB.feira_26,borderColor:'#22c55e',backgroundColor:'transparent',borderWidth:1.5,tension:.4,fill:false,borderDash:[3,2],pointRadius:3}
   ]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#9ca3af',font:{size:10},boxWidth:12,padding:10}},tooltip:TT},scales:{x:{grid:{color:'#1e2330'},ticks:{font:{size:10}}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
 
   let s=0;const a25=DB.coorpin_25.map(v=>(s+=(v||0),s));
-  let s2=0;const a26=DB.coorpin_26.map((v,i)=>{if(i>DB.maxM26)return null; s2+=(v||0);return s2;});
+  let s2=0;const a26=DB.coorpin_26.map(v=>(s2+=(v||0),s2));
   mkC('ev-acum',{type:'line',data:{labels:M,datasets:[
     {label:'Acumulado 2025',data:a25,borderColor:'#e63946',backgroundColor:'rgba(230,57,70,.05)',borderWidth:2,tension:.4,fill:true,pointRadius:3},
     {label:'Acumulado 2026',data:a26,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',borderWidth:2,tension:.4,fill:true,pointRadius:3}
@@ -963,14 +932,10 @@ function buildEV(){
   const maxV=Math.max(...allV)||1;
   let h='<div class="hm-cell hm-hdr"></div>';
   M.forEach(m=>h+=`<div class="hm-cell hm-hdr">${m}</div>`);
-  [{lbl:'Feira 2025',data:DB.feira_25},{lbl:'Feira 2026',data:DB.feira_26}].forEach(({lbl,data}, objIndex)=>{
+  [{lbl:'Feira 2025',data:DB.feira_25},{lbl:'Feira 2026',data:DB.feira_26}].forEach(({lbl,data})=>{
     const totalRow=data.reduce((a,b)=>a+(b||0),0);
     h+=`<div class="hm-cell hm-lbl">${lbl}</div>`;
-    data.forEach((v, i)=>{
-      if(objIndex === 1 && i > DB.maxM26) {
-          h+=`<div class="hm-cell" style="background:rgba(230,57,70,0.02);color:#c8cad4;flex-direction:column;line-height:1.1;"></div>`;
-          return;
-      }
+    data.forEach(v=>{
       v = v || 0;
       const a=v>0?(0.12+0.72*(v/maxV)).toFixed(2):.04;
       const tc=v/maxV>.5?'#fff':'#c8cad4';
@@ -988,7 +953,6 @@ function buildEV(){
 
   let htmlTab='<table><thead><tr><th>Mês</th><th>Feira 2025</th><th>Feira 2026</th><th>Var. Feira</th><th>COORPIN 2025</th><th>COORPIN 2026</th><th>Var. COORPIN</th></tr></thead><tbody>';
   M.forEach((m,i)=>{
-    if (i > DB.maxM26) return;
     const f25=DB.feira_25[i],f26=DB.feira_26[i],c25=DB.coorpin_25[i],c26=DB.coorpin_26[i];
     if(c25===0&&c26===0)return;
     const df=f26-f25,dc=c26-c25;
@@ -1016,7 +980,7 @@ function buildGEO(){
   const max=bairros.length?bairros[0][1]:1;
   const barList = document.getElementById('geo-barlist');
   if(barList){
-      barList.innerHTML=bairros.slice(0,15).map(([b,v],i)=>`<div class="bar-item"><div class="bar-row"><span class="bar-lbl">${b}</span><span class="bar-val">${v}</span></div><div class="bar-track"><div class="bar-fill" style="width:${(v/max*100).toFixed(1)}%;background:${P[i%P.length]}"></div></div></div>`).join('');
+      barList.innerHTML=bairros.map(([b,v],i)=>`<div class="bar-item"><div class="bar-row"><span class="bar-lbl" style="font-size:10px;">${b}</span><span class="bar-val">${v}</span></div><div class="bar-track"><div class="bar-fill" style="width:${(v/max*100).toFixed(1)}%;background:${P[i%P.length]}"></div></div></div>`).join('');
   }
 
   const zonasDef={'TOMBA':'ZONA SUL','GABRIELA':'ZONA SUL','PAPAGAIO':'ZONA SUL','AVIÁRIO':'ZONA SUL','BRASÍLIA':'ZONA SUL','CAMPO LIMPO':'ZONA NORTE','QUEIMADINHA':'ZONA NORTE','PARQUE IPÊ':'ZONA NORTE','ASA BRANCA':'ZONA NORTE','CENTRO':'CENTRO/LESTE','CONCEIÇÃO':'CENTRO/LESTE','MANGABEIRA':'CENTRO/LESTE','CASEB':'CENTRO/LESTE'};
@@ -1050,8 +1014,10 @@ function buildVIT(){
       else if(id<=39)faixas['30–39']++;
       else if(id<=49)faixas['40–49']++;
       else faixas['50+']++;
-      if(!meiosIdade[r.meio_norm])meiosIdade[r.meio_norm]={soma:0,qtd:0};
-      meiosIdade[r.meio_norm].soma+=id;meiosIdade[r.meio_norm].qtd++;
+      
+      const meioBruto = String(r.meio || 'NÃO INFORMADO').toUpperCase().trim();
+      if(!meiosIdade[meioBruto])meiosIdade[meioBruto]={soma:0,qtd:0};
+      meiosIdade[meioBruto].soma+=id;meiosIdade[meioBruto].qtd++;
     }
     if(String(r.autoria||'').toUpperCase().includes('SIM'))autoriaCount.sim++;else autoriaCount.nao++;
     const mot=String(r.motivo||'').trim().toUpperCase();
@@ -1075,24 +1041,22 @@ function buildVIT(){
       autLbl.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--muted)">Com autoria</span><span class="mono" style="color:var(--accent)">${autoriaCount.sim} (${pctSim}%)</span></div><div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--muted)">Sem autoria</span><span class="mono">${autoriaCount.nao} (${100-pctSim}%)</span></div>`;
   }
 
-  const sortedMotivos=Object.entries(motivos).sort((a,b)=>b[1]-a[1]).slice(0,6);
-  if(sortedMotivos.length>0)mkC('vit-motivo',{type:'bar',data:{labels:sortedMotivos.map(e=>e[0]),datasets:[{data:sortedMotivos.map(e=>e[1]),backgroundColor:'#ff6b35',borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  const sortedMotivos=Object.entries(motivos).sort((a,b)=>b[1]-a[1]);
+  if(sortedMotivos.length>0)mkC('vit-motivo',{type:'bar',data:{labels:sortedMotivos.map(e=>e[0]),datasets:[{data:sortedMotivos.map(e=>e[1]),backgroundColor:'#ff6b35',borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:9}}}}}});
   else{const el=document.getElementById('vit-motivo');if(el)el.parentNode.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px;">Maioria dos casos sem motivo identificado</div>';}
 
   const meiosArr=Object.entries(meiosIdade).map(([m,val])=>[m,Math.round(val.soma/val.qtd)]).sort((a,b)=>b[1]-a[1]);
-  const maxId=meiosArr.length?Math.max(...meiosArr.map(e=>e[1])):1;
-  const vitMeio = document.getElementById('vit-meio-idade');
-  if(vitMeio){
-      vitMeio.innerHTML=meiosArr.map(([m,v],i)=>`<div class="bar-item"><div class="bar-row"><span class="bar-lbl">${m}</span><span class="bar-val">~${v} anos</span></div><div class="bar-track"><div class="bar-fill" style="width:${(v/maxId*100).toFixed(1)}%;background:${P[i%P.length]}"></div></div></div>`).join('');
-  }
+  if(meiosArr.length>0)mkC('vit-meio-idade',{type:'bar',data:{labels:meiosArr.map(e=>e[0]),datasets:[{data:meiosArr.map(e=>e[1]),backgroundColor:'#3b82f6',borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:9}}}}}});
+  else{const el=document.getElementById('vit-meio-idade');if(el)el.parentNode.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px;">Sem dados</div>';}
 }
 
 function buildMOD(){
   const regs26=DB.registros.filter(r=>String(r.ano)==='2026' && isCVLI(r.tipificacao));
   let fogo=0,branca=0,outros=0;
   Object.entries(DB.meio26).forEach(([m,v])=>{
-    if(m==='ARMA DE FOGO')fogo+=v;
-    else if(m==='ARMA BRANCA')branca+=v;
+    const norm = normMeio(m);
+    if(norm==='ARMA DE FOGO')fogo+=v;
+    else if(norm==='ARMA BRANCA')branca+=v;
     else outros+=v;
   });
   
@@ -1105,19 +1069,22 @@ function buildMOD(){
   if(document.getElementById('mod-outros')) document.getElementById('mod-outros').textContent=Object.keys(DB.tipo26).length;
 
   const me=Object.entries(DB.meio26).sort((a,b)=>b[1]-a[1]);
-  mkC('mod-meio',{type:'bar',data:{labels:me.map(e=>e[0]),datasets:[{data:me.map(e=>e[1]),backgroundColor:P,borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:35}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
-  mkC('mod-pizza',{type:'doughnut',data:{labels:me.map(e=>e[0]),datasets:[{data:me.map(e=>e[1]),backgroundColor:P,borderWidth:0,hoverOffset:5}]},options:{responsive:true,cutout:'55%',plugins:{legend:{position:'right',labels:{color:'#9ca3af',font:{size:9},boxWidth:8,padding:6}},tooltip:{...TT,callbacks:{label:c=>` ${c.parsed} (${regs26.length?((c.parsed/regs26.length)*100).toFixed(1):0}%)`}}}}});
-  mkC('mod-tipo',{type:'bar',data:{labels:Object.keys(DB.tipo26),datasets:[{data:Object.values(DB.tipo26),backgroundColor:P,borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
+  mkC('mod-meio',{type:'bar',data:{labels:me.map(e=>e[0]),datasets:[{data:me.map(e=>e[1]),backgroundColor:P,borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:9}}}}}});
+  mkC('mod-pizza',{type:'doughnut',data:{labels:me.map(e=>e[0]),datasets:[{data:me.map(e=>e[1]),backgroundColor:P,borderWidth:0,hoverOffset:5}]},options:{responsive:true,cutout:'55%',plugins:{legend:{display: me.length <= 8, position:'right',labels:{color:'#9ca3af',font:{size:9},boxWidth:8,padding:6}},tooltip:{...TT,callbacks:{label:c=>` ${c.parsed} (${regs26.length?((c.parsed/regs26.length)*100).toFixed(1):0}%)`}}}}});
+  
+  const tiposArrMOD=Object.entries(DB.tipo26).sort((a,b)=>b[1]-a[1]);
+  mkC('mod-tipo',{type:'bar',data:{labels:tiposArrMOD.map(e=>e[0]),datasets:[{data:tiposArrMOD.map(e=>e[1]),backgroundColor:P,borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:9}}}}}});
 
   const sortedMot=Object.entries(DB.motivo26).sort((a,b)=>b[1]-a[1]);
-  if(sortedMot.length>0)mkC('mod-motivo',{type:'bar',data:{labels:sortedMot.map(e=>e[0]),datasets:[{data:sortedMot.map(e=>e[1]),backgroundColor:'#e63946',borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  if(sortedMot.length>0)mkC('mod-motivo',{type:'bar',data:{labels:sortedMot.map(e=>e[0]),datasets:[{data:sortedMot.map(e=>e[1]),backgroundColor:'#e63946',borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:9}}}}}});
   else{const el=document.getElementById('mod-motivo');if(el)el.parentNode.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px;">Maioria dos casos sem motivo identificado</div>';}
 }
 
 function buildCO(){
   if(document.getElementById('co-t25')) document.getElementById('co-t25').textContent=DB.t25_ytd;
-  if(document.getElementById('co-t26')) document.getElementById('co-t26').textContent=DB.t26_coorpin;
-  const mName = M[DB.maxM26] || 'Atual';
+  if(document.getElementById('co-t26')) document.getElementById('co-t26').textContent=DB.t26_ytd;
+  
+  const mName = M[DB.limitMonth] || 'Atual';
   if(document.getElementById('co-t25-sub')) document.getElementById('co-t25-sub').textContent=`Jan–${mName}`;
   if(document.getElementById('co-t26-sub')) document.getElementById('co-t26-sub').textContent=`Jan–${mName}`;
   
@@ -1125,31 +1092,26 @@ function buildCO(){
   if(document.getElementById('co-mun')) document.getElementById('co-mun').textContent=munis.size;
 
   const ytd_25=DB.t25_ytd;
-  const ytd_26=DB.t26_coorpin;
+  const ytd_26=DB.t26_ytd;
   const diff=ytd_26-ytd_25;
   const coVar = document.getElementById('co-var');
   if(coVar) {
       coVar.textContent=`${diff>0?'+':''}${diff} (${ytd_25}→${ytd_26})`;
       coVar.style.color=diff>0?'var(--red)':'var(--green)';
   }
-  if(document.getElementById('co-var-sub')) document.getElementById('co-var-sub').textContent=`Jan-${mName} 25 vs 26`;
+  if(document.getElementById('co-var-sub')) document.getElementById('co-var-sub').textContent=`Jan–${mName} 25 vs 26`;
 
   const cities=Array.from(munis).sort((a,b)=>(DB.coorpin26[b]||0)-(DB.coorpin26[a]||0));
   
-  const data25_ytd = cities.map(c => {
-    let sum = 0;
-    if (DB.meses25[c]) {
-      for (let i = 0; i <= DB.maxM26; i++) sum += DB.meses25[c][i] || 0;
-    }
-    return sum;
-  });
+  const data25_ytd_chart = cities.map(c => DB.coorpin25_ytd[c] || 0);
+  const data26_ytd_chart = cities.map(c => DB.coorpin26_ytd[c] || 0);
 
-  mkC('co-mun-comp',{type:'bar',data:{labels:cities,datasets:[{label:`2025 (Jan-${mName})`,data:data25_ytd,backgroundColor:'rgba(230,57,70,.8)',borderRadius:4},{label:`2026 (Jan-${mName})`,data:cities.map(c=>DB.coorpin26[c]||0),backgroundColor:'rgba(59,130,246,.8)',borderRadius:4}]},options:{responsive:true,plugins:{legend:{labels:{color:'#9ca3af',font:{size:10},boxWidth:12}},tooltip:TT},scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:40}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
+  mkC('co-mun-comp',{type:'bar',data:{labels:cities,datasets:[{label:`2025 (Jan-${mName})`,data:data25_ytd_chart,backgroundColor:'rgba(230,57,70,.8)',borderRadius:4},{label:`2026 (Jan-${mName})`,data:data26_ytd_chart,backgroundColor:'rgba(59,130,246,.8)',borderRadius:4}]},options:{responsive:true,plugins:{legend:{labels:{color:'#9ca3af',font:{size:10},boxWidth:12}},tooltip:TT},scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:40}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
 
   const topC=cities.slice(0,4);
   mkC('co-evolucao',{type:'line',data:{labels:M,datasets:topC.flatMap((c,i)=>[
     {label:`${c} (25)`,data:DB.meses25[c]||Array(12).fill(0),borderColor:P[i%P.length],backgroundColor:'transparent',borderWidth:1,tension:.4,borderDash:[3,3],pointRadius:2},
-    {label:`${c} (26)`,data:(DB.meses26[c]||Array(12).fill(0)).map((v,idx)=>idx>DB.maxM26?null:v),borderColor:P[i%P.length],backgroundColor:'transparent',borderWidth:3,tension:.4,pointRadius:4}
+    {label:`${c} (26)`,data:DB.meses26[c]||Array(12).fill(0),borderColor:P[i%P.length],backgroundColor:'transparent',borderWidth:3,tension:.4,pointRadius:4}
   ])},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#9ca3af',font:{size:9},boxWidth:10,padding:6}},tooltip:TT},scales:{x:{grid:{color:'#1e2330'}},y:{grid:{color:'#1e2330'},beginAtZero:true}}}});
 
   let htmlTab='<table><thead><tr><th>Município</th><th>Total 2025</th><th>Total 2026</th><th>1º Tri 2025</th><th>1º Tri 2026</th><th>Variação</th></tr></thead><tbody>';
@@ -1166,8 +1128,8 @@ function buildCO(){
 }
 
 function buildTABELAS() {
-  var maxM26 = (DB.maxM26 >= 0 && DB.maxM26 <= 11) ? DB.maxM26 : new Date().getMonth();
-  var mName = M[maxM26] ? M[maxM26].toUpperCase() : 'ATUAL';
+  var limitMonth = DB.limitMonth;
+  var mName = M[limitMonth] ? M[limitMonth].toUpperCase() : 'ATUAL';
   
   var mesesHeaderAbsolute = '<thead><tr><th>MESES</th>' + M.map(function(m) { return '<th>' + m.toUpperCase() + '</th>'; }).join('') + '<th>TOTAL</th></tr></thead>';
 
@@ -1192,7 +1154,7 @@ function buildTABELAS() {
 
   DB.registros.forEach(function(r) {
     var mi = parseInt(r.mes, 10) - 1;
-    if (isNaN(mi) || mi > maxM26 || !isCVLI(r.tipificacao)) return;
+    if (isNaN(mi) || mi > limitMonth || !isCVLI(r.tipificacao)) return;
     var tip = normTipificacao(r.tipificacao);
     var cid = String(r.cidade || 'FEIRA DE SANTANA').toUpperCase().trim();
     if (String(r.ano) === '2025') {
@@ -1246,7 +1208,7 @@ function buildTABELAS() {
         var val = data[tip][i];
         rowTotal += val;
         cvliMensal[i] += val;
-        if (String(ano) === '2026' && i > maxM26) rowHtml += '<td class="cell-zero"></td>';
+        if (String(ano) === '2026' && i > limitMonth) rowHtml += '<td class="cell-zero"></td>';
         else rowHtml += '<td class="' + (val === 0 ? 'cell-zero' : '') + '">' + (val || '-') + '</td>';
       }
       totalGeral += rowTotal;
@@ -1254,14 +1216,14 @@ function buildTABELAS() {
     });
     html += '<tr class="total-row"><td>CVLI</td>';
     cvliMensal.forEach(function(val, i) {
-      if (String(ano) === '2026' && i > maxM26) html += '<td></td>';
+      if (String(ano) === '2026' && i > limitMonth) html += '<td></td>';
       else html += '<td class="' + (val === 0 ? 'cell-zero' : '') + '">' + (val || 0) + '</td>';
     });
     html += '<td>' + totalGeral + '</td></tr>';
     html += '<tr class="subtotal-row"><td>subtotal dos crimes CVLI</td>';
     var acumulado = 0;
     cvliMensal.forEach(function(val, i) {
-      if (String(ano) === '2026' && i > maxM26) html += '<td></td>';
+      if (String(ano) === '2026' && i > limitMonth) html += '<td></td>';
       else { acumulado += val; html += '<td>' + (acumulado || '') + '</td>'; }
     });
     html += '<td></td></tr>';
@@ -1269,7 +1231,7 @@ function buildTABELAS() {
     var acumuladoSem2 = 0;
     for (var i = 0; i < 12; i++) {
       if (i < 6) html += '<td></td>';
-      else if (String(ano) === '2026' && i > maxM26) html += '<td></td>';
+      else if (String(ano) === '2026' && i > limitMonth) html += '<td></td>';
       else { acumuladoSem2 += cvliMensal[i]; html += '<td>' + (acumuladoSem2 || '') + '</td>'; }
     }
     html += '<td></td></tr>';
@@ -1287,7 +1249,7 @@ function buildTABELAS() {
       var tot25 = 0;
       for (var i = 0; i < 12; i++) {
         tot25 += cvli25[i];
-        if (i > maxM26) html += '<td class="cell-zero"></td>';
+        if (i > limitMonth) html += '<td class="cell-zero"></td>';
         else html += '<td>' + calcVar(cvli25[i], cvliMensal[i]) + '</td>';
       }
       html += '<td>' + calcVar(tot25, totalGeral) + '</td></tr>';
@@ -1295,7 +1257,7 @@ function buildTABELAS() {
       html += '<tr style="background:rgba(107,114,128,0.05);border-bottom:2px solid var(--border);"><td style="font-weight:600;color:var(--text);font-style:italic;">variação % acumulada (vs 2025)</td>';
       var ac25 = 0, ac26 = 0;
       for (var i = 0; i < 12; i++) {
-        if (i > maxM26) html += '<td class="cell-zero"></td>';
+        if (i > limitMonth) html += '<td class="cell-zero"></td>';
         else {
           ac25 += cvli25[i];
           ac26 += cvliMensal[i];
@@ -1335,7 +1297,7 @@ function buildTABELAS() {
       for (var i = 0; i < 12; i++) {
         var val = munData[cid][i];
         rowTotal += val; cvliMensal[i] += val;
-        if (String(ano) === '2026' && i > maxM26) rowHtml += '<td class="cell-zero"></td>';
+        if (String(ano) === '2026' && i > limitMonth) rowHtml += '<td class="cell-zero"></td>';
         else rowHtml += '<td class="' + (val === 0 ? 'cell-zero' : '') + '">' + (val || '-') + '</td>';
       }
       totalGeral += rowTotal;
@@ -1343,7 +1305,7 @@ function buildTABELAS() {
     });
     html += '<tr class="total-row"><td>TOTAL CVLI COORPIN</td>';
     cvliMensal.forEach(function(val, i) {
-      if (String(ano) === '2026' && i > maxM26) html += '<td></td>';
+      if (String(ano) === '2026' && i > limitMonth) html += '<td></td>';
       else html += '<td class="' + (val === 0 ? 'cell-zero' : '') + '">' + (val || 0) + '</td>';
     });
     html += '<td>' + totalGeral + '</td></tr></tbody>';
