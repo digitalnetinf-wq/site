@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Anti-Fraude - Segurança Digital 2026</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Markdown Parser for AI responses -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #18181b; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Modal Backdrop */
+        .modal-backdrop { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
+        
+        /* FAQ Accordion Transition */
+        .faq-answer { transition: max-height 0.3s ease-out, opacity 0.3s ease-out; max-height: 0; opacity: 0; overflow: hidden; }
+        .faq-answer.open { max-height: 500px; opacity: 1; }
+
+        /* AI Analysis Styles */
+        .ai-result-content strong { color: #60a5fa; font-weight: 600; }
+        .ai-result-content ul { list-style-type: disc; padding-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
+        .ai-result-content p { margin-bottom: 0.75rem; }
+        
+        .loading-dots:after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-black border-b border-zinc-800 sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('home')">
+                    <i data-lucide="shield" class="w-8 h-8 text-white"></i>
+                    <span class="font-bold text-xl tracking-tight">Anti-Fraude</span>
+                </div>
+                
+                <!-- Desktop Menu (Hidden on small screens) -->
+                <div class="hidden lg:block">
+                    <div class="ml-10 flex items-baseline space-x-2">
+                        <button onclick="navigateTo('home')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition" data-page="home">Início</button>
+                        <button onclick="navigateTo('analisador')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition flex items-center gap-1" data-page="analisador">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-yellow-400"></i> Analisador IA
+                        </button>
+                        <button onclick="navigateTo('sobre')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition" data-page="sobre">Sobre</button>
+                        <button onclick="navigateTo('ranking')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition" data-page="ranking">Ranking</button>
+                        <button onclick="navigateTo('golpes')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition" data-page="golpes">Biblioteca</button>
+                        <button onclick="navigateTo('midia')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition" data-page="midia">Notícias</button>
+                        <button onclick="navigateTo('duvidas')" class="nav-btn hover:bg-zinc-800 text-zinc-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition flex items-center gap-1" data-page="duvidas">
+                            Dúvidas <span class="bg-blue-600 text-[10px] px-1 rounded text-white">IA</span>
+                        </button>
+                        <button onclick="navigateTo('emergencia')" class="bg-red-700 hover:bg-red-800 animate-pulse border border-red-500 text-white px-3 py-2 rounded-md text-sm font-medium transition ml-2">Emergência</button>
+                        <!-- Settings Button -->
+                        <button onclick="openSettingsModal()" class="ml-2 text-zinc-400 hover:text-white transition" title="Configurar API Key">
+                            <i data-lucide="settings" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="-mr-2 flex lg:hidden">
+                    <button onclick="toggleMobileMenu()" class="inline-flex items-center justify-center p-2 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 focus:outline-none">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu (Dropdown) -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-zinc-900 border-b border-zinc-800">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <button onclick="navigateTo('home')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Início</button>
+                <button onclick="navigateTo('analisador')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4 text-yellow-400"></i> Analisador IA</button>
+                <button onclick="navigateTo('sobre')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Sobre o Crime</button>
+                <button onclick="navigateTo('ranking')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Ranking</button>
+                <button onclick="navigateTo('golpes')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Biblioteca</button>
+                <button onclick="navigateTo('midia')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Notícias</button>
+                <button onclick="navigateTo('duvidas')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white">Dúvidas (IA)</button>
+                <button onclick="navigateTo('emergencia')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-500 hover:bg-zinc-800">Emergência</button>
+                <button onclick="openSettingsModal()" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-blue-400 hover:bg-zinc-800 flex items-center gap-2">
+                    <i data-lucide="settings" class="w-4 h-4"></i> Configurar API
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENT SECTIONS -->
+    <main id="content-container" class="flex-grow">
+        
+        <!-- 1. HOME PAGE -->
+        <div id="page-home" class="page-section fade-in">
+            <section class="relative text-white py-20 lg:py-32 px-4 border-b border-zinc-800 overflow-hidden min-h-[85vh] flex items-center">
+                <div class="absolute inset-0 z-0">
+                    <div class="absolute inset-0 bg-black/90 z-10"></div>
+                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1920" class="w-full h-full object-cover opacity-30">
+                </div>
+                <div class="max-w-7xl mx-auto w-full relative z-20">
+                    <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 mb-6 backdrop-blur-md">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                </span>
+                                <span class="text-sm font-medium text-blue-300 uppercase tracking-wider">Segurança Digital 2026</span>
+                            </div>
+                            <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-tight leading-tight">
+                                Portal <br/>
+                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500">Anti-Fraude</span>
+                            </h1>
+                            <p class="text-xl text-zinc-400 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                                Não seja a próxima vítima. Informe-se sobre as <span class="text-white font-bold">40 fraudes mais comuns</span> do momento e aprenda a blindar sua vida financeira.
+                            </p>
+                            <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                                <button onclick="navigateTo('analisador')" class="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white font-bold py-4 px-8 rounded-full transition shadow-lg transform hover:-translate-y-1 flex items-center justify-center gap-2 border border-yellow-500/30">
+                                    <i data-lucide="sparkles" class="w-5 h-5"></i> Analisador IA
+                                </button>
+                                <button onclick="navigateTo('golpes')" class="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-bold py-4 px-8 rounded-full transition flex items-center justify-center gap-2">
+                                    <i data-lucide="search" class="w-5 h-5"></i> Biblioteca de Golpes
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex-1 relative w-full max-w-lg lg:max-w-xl mt-10 lg:mt-0">
+                            <div class="relative group">
+                                <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                                <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=1000" alt="Cyber Security" class="relative rounded-2xl shadow-2xl border border-zinc-800 bg-zinc-900 w-full object-cover aspect-[4/3]">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- PAGE: ANALISADOR IA -->
+        <div id="page-analisador" class="page-section hidden fade-in py-20 bg-black px-4 relative">
+            <div class="absolute top-0 right-0 w-1/3 h-1/3 bg-blue-900/10 blur-[120px] rounded-full pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-1/3 h-1/3 bg-purple-900/10 blur-[120px] rounded-full pointer-events-none"></div>
+
+            <div class="max-w-4xl mx-auto relative z-10">
+                <div class="text-center mb-10">
+                    <div class="inline-flex items-center justify-center p-3 bg-yellow-500/10 rounded-full mb-4 border border-yellow-500/20">
+                        <i data-lucide="sparkles" class="w-8 h-8 text-yellow-400"></i>
+                    </div>
+                    <h2 class="text-4xl font-bold text-white mb-4">Detector de Golpes com IA</h2>
+                    <p class="text-zinc-400 max-w-2xl mx-auto text-lg">
+                        Cole uma mensagem suspeita abaixo e nossa Inteligência Artificial analisará os gatilhos mentais e sinais de fraude.
+                    </p>
+                </div>
+
+                <div class="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-2xl p-6 md:p-8 shadow-2xl">
+                    <div class="mb-6">
+                        <label for="scamInput" class="block text-sm font-medium text-zinc-300 mb-2">Cole a mensagem (SMS, E-mail, WhatsApp):</label>
+                        <textarea id="scamInput" rows="5" class="w-full bg-black border border-zinc-700 rounded-xl p-4 text-white placeholder-zinc-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none" placeholder="Ex: 'Banco informa: compra aprovada de R$ 2.000. Caso não reconheça, ligue...'"></textarea>
+                    </div>
+                    
+                    <button onclick="analyzeMessage()" id="analyzeBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span id="btnText">Analisar Risco</span>
+                        <i data-lucide="zap" class="w-5 h-5 group-hover:scale-110 transition-transform" id="btnIcon"></i>
+                    </button>
+
+                    <div id="analysisResult" class="hidden mt-8 border-t border-zinc-800 pt-8 animate-[fadeIn_0.5s_ease-out]">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div id="riskBadge" class="px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider border"></div>
+                            <span class="text-zinc-500 text-sm">Análise Gemini AI</span>
+                        </div>
+                        <div class="prose prose-invert max-w-none ai-result-content bg-zinc-950/50 p-6 rounded-xl border border-zinc-800/50">
+                            <div id="analysisText" class="text-zinc-300 leading-relaxed"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. SOBRE O CRIME PAGE -->
+        <div id="page-sobre" class="page-section hidden fade-in py-20 bg-zinc-950 px-4">
+             <div class="max-w-6xl mx-auto">
+                <div class="flex items-center justify-center gap-3 mb-10">
+                    <i data-lucide="scale" class="w-8 h-8 text-zinc-100"></i>
+                    <h2 class="text-3xl font-bold text-white text-center">Entendendo o Cibercrime</h2>
+                </div>
+                <div class="bg-zinc-900/50 p-8 rounded-2xl border border-zinc-800 mb-8">
+                    <h3 class="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                        <i data-lucide="info" class="w-5 h-5"></i> O que é Cibercrime?
+                    </h3>
+                    <p class="text-zinc-400 leading-relaxed">
+                        Cibercrime é qualquer atividade criminosa que envolva um computador, dispositivo em rede ou uma rede. 
+                        Abrange desde ataques hackers até fraudes tradicionais cometidas via internet (como estelionato).
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. RANKING PAGE -->
+        <div id="page-ranking" class="page-section hidden fade-in py-20 bg-zinc-950 px-4">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-center gap-3 mb-10">
+                    <i data-lucide="bar-chart" class="w-8 h-8 text-zinc-100"></i>
+                    <h2 class="text-3xl font-bold text-white text-center">Top 100 - Golpes 2025</h2>
+                </div>
+                <div id="ranking-list" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto"></div>
+                <p class="text-center text-zinc-600 mt-10 text-sm">*Estimativa baseada em relatórios de segurança.</p>
+            </div>
+        </div>
+
+        <!-- 4. GOLPES (LIBRARY) PAGE -->
+        <div id="page-golpes" class="page-section hidden fade-in py-20 bg-black px-4">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col items-center justify-center gap-3 mb-10">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="alert-triangle" class="w-8 h-8 text-zinc-100"></i>
+                        <h2 class="text-3xl font-bold text-white text-center">Biblioteca de Golpes</h2>
+                    </div>
+                    <p class="text-zinc-400 text-center max-w-2xl">Conheça as táticas mais usadas pelos criminosos.</p>
+                </div>
+                <div id="category-filters" class="flex flex-wrap justify-center gap-2 mb-10"></div>
+                <div id="scams-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+            </div>
+        </div>
+
+        <!-- 5. PREVENCAO PAGE -->
+        <div id="page-prevencao" class="page-section hidden fade-in py-20 bg-zinc-900 text-white px-4">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-3xl font-bold text-center mb-12">20 Mandamentos da Prevenção</h2>
+                <div id="prevention-grid" class="grid md:grid-cols-2 gap-6"></div>
+            </div>
+        </div>
+
+        <!-- 6. NOTICIAS PAGE -->
+        <div id="page-midia" class="page-section hidden fade-in py-20 bg-zinc-950 px-4">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex flex-col md:flex-row items-center justify-center gap-3 mb-12">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="newspaper" class="w-8 h-8 text-zinc-100"></i>
+                        <h2 class="text-3xl font-bold text-white text-center">Notícias e Atualizações</h2>
+                    </div>
+                    <span id="news-date-badge" class="inline-flex items-center rounded-md bg-blue-900/30 px-3 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-700/50 ml-2 animate-pulse">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span> Google News • Brasil
+                    </span>
+                </div>
+
+                <!-- Botão de Atualização Manual -->
+                <div class="flex justify-end mb-4">
+                    <button onclick="updateNewsFeed()" id="refreshNewsBtn" class="text-xs text-zinc-500 hover:text-blue-400 flex items-center gap-1 transition">
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> Atualizar
+                    </button>
+                </div>
+
+                <div class="flex flex-col gap-12">
+                    <!-- Feed de Notícias (Gerado por JS) -->
+                    <div id="news-feed-container">
+                        <div class="flex flex-col items-center justify-center py-20 text-zinc-500">
+                            <div class="loading-dots text-2xl font-bold mb-2">Conectando ao Google News</div>
+                            <p class="text-sm">Buscando ocorrências reais em todo o Brasil...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. DUVIDAS PAGE -->
+        <div id="page-duvidas" class="page-section hidden fade-in py-20 bg-black px-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center justify-center gap-3 mb-8">
+                    <i data-lucide="help-circle" class="w-8 h-8 text-zinc-100"></i>
+                    <h2 class="text-3xl font-bold text-white text-center">Tire suas Dúvidas</h2>
+                </div>
+
+                <!-- AI Assistant Block -->
+                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-12 shadow-xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-[50px] rounded-full pointer-events-none"></div>
+                    
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                            <i data-lucide="bot" class="w-5 h-5 text-blue-400"></i> Assistente de Segurança 24h
+                        </h3>
+                        <p class="text-zinc-400 text-sm mb-4">Tem alguma dúvida específica? Pergunte à nossa Inteligência Artificial.</p>
+                        
+                        <div class="flex gap-2">
+                            <input type="text" id="assistantInput" class="flex-1 bg-black border border-zinc-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Ex: Como proteger meu Instagram de invasões?">
+                            <button onclick="askAssistant()" id="askBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-lg font-medium transition flex items-center gap-2 whitespace-nowrap">
+                                <span id="askBtnText">Perguntar</span>
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <div id="assistantResponse" class="hidden mt-6 bg-zinc-950/80 border border-zinc-800 rounded-xl p-5 animate-in fade-in slide-in-from-top-2">
+                            <div class="flex items-start gap-3">
+                                <div class="p-2 bg-blue-500/10 rounded-lg shrink-0">
+                                    <i data-lucide="sparkles" class="w-4 h-4 text-blue-400"></i>
+                                </div>
+                                <div class="prose prose-invert prose-sm max-w-none text-zinc-300 leading-relaxed" id="assistantText"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="text-xl font-bold text-white mb-6 pl-2 border-l-4 border-zinc-700">Perguntas Frequentes</h3>
+                <div id="faq-list" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- 8. EMERGENCIA PAGE -->
+        <div id="page-emergencia" class="page-section hidden fade-in py-20 bg-black px-4 relative overflow-hidden">
+            <div class="absolute inset-0 z-0">
+                <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1920" class="w-full h-full object-cover opacity-20">
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/90 to-red-950/40"></div>
+            </div>
+            <div class="max-w-4xl mx-auto text-center relative z-10">
+                <div class="inline-block p-4 bg-red-900/20 rounded-full mb-6 border border-red-900/50 backdrop-blur-sm">
+                    <i data-lucide="alert-triangle" class="w-12 h-12 text-red-500"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-red-500 mb-6 drop-shadow-lg">Fui vítima, e agora?</h2>
+                <div id="emergency-grid" class="grid md:grid-cols-3 gap-6 text-left mb-16"></div>
+
+                <!-- GERADOR DE RELATO -->
+                <div class="bg-zinc-900/90 backdrop-blur-md border border-zinc-800 rounded-2xl p-8 relative overflow-hidden text-left shadow-2xl">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-red-900/10 blur-[80px] rounded-full pointer-events-none"></div>
+                    
+                    <div class="relative z-10">
+                        <h3 class="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+                            <i data-lucide="file-text" class="w-6 h-6 text-red-500"></i> Gerador de Relato para B.O. ✨
+                        </h3>
+                        <p class="text-zinc-400 mb-6">Preencha os dados abaixo e a IA escreverá um relato formal e detalhado para você copiar e colar no Boletim de Ocorrência ou Contestação Bancária.</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="text-xs text-zinc-500 uppercase font-bold mb-1 block">Tipo do Golpe</label>
+                                <input id="reportType" type="text" placeholder="Ex: Urubu do Pix, Falso Leilão" class="w-full bg-black border border-zinc-700 rounded-lg px-4 py-2 text-white focus:border-red-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="text-xs text-zinc-500 uppercase font-bold mb-1 block">Data e Hora</label>
+                                <input id="reportDate" type="text" placeholder="Ex: Ontem às 14:30" class="w-full bg-black border border-zinc-700 rounded-lg px-4 py-2 text-white focus:border-red-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="text-xs text-zinc-500 uppercase font-bold mb-1 block">Valor Perdido</label>
+                                <input id="reportValue" type="text" placeholder="Ex: R$ 500,00" class="w-full bg-black border border-zinc-700 rounded-lg px-4 py-2 text-white focus:border-red-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="text-xs text-zinc-500 uppercase font-bold mb-1 block">Plataforma/Banco</label>
+                                <input id="reportBank" type="text" placeholder="Ex: WhatsApp / Banco X" class="w-full bg-black border border-zinc-700 rounded-lg px-4 py-2 text-white focus:border-red-500 outline-none">
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label class="text-xs text-zinc-500 uppercase font-bold mb-1 block">Detalhes Adicionais</label>
+                            <textarea id="reportDetails" rows="2" placeholder="Ex: O golpista disse ser funcionário do banco e pediu minha senha..." class="w-full bg-black border border-zinc-700 rounded-lg px-4 py-2 text-white focus:border-red-500 outline-none resize-none"></textarea>
+                        </div>
+                        
+                        <button onclick="generateReport()" id="genReportBtn" class="w-full bg-red-700 hover:bg-red-600 text-white font-bold py-3 rounded-lg transition shadow-lg flex items-center justify-center gap-2">
+                            <span id="genReportText">Gerar Relato Formal</span>
+                            <i data-lucide="sparkles" class="w-4 h-4"></i>
+                        </button>
+                        
+                        <div id="reportOutputContainer" class="hidden mt-6 bg-black border border-zinc-800 rounded-lg p-6 relative group">
+                            <button onclick="navigator.clipboard.writeText(document.getElementById('reportText').innerText); this.innerHTML = '<i data-lucide=\'check\'></i> Copiado!';" class="absolute top-4 right-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1 rounded text-xs flex items-center gap-1 transition">
+                                <i data-lucide="copy" class="w-3 h-3"></i> Copiar
+                            </button>
+                            <div id="reportText" class="prose prose-invert prose-sm max-w-none text-zinc-300 font-mono whitespace-pre-wrap"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black text-zinc-500 py-8 px-4 text-center border-t border-zinc-900 mt-auto">
+        <div class="max-w-7xl mx-auto">
+            <p class="text-sm mb-2">&copy; <span id="year"></span> Anti-Fraude. Todos os direitos reservados.</p>
+            <p class="text-xs text-zinc-800 font-mono mt-6 pt-4 border-t border-zinc-900/50 inline-block px-4">Desenvolvido por F.R.B.S</p>
+        </div>
+    </footer>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="fixed inset-0 z-[60] hidden modal-backdrop flex items-center justify-center p-4">
+        <div class="bg-zinc-900 w-full max-w-md rounded-2xl border border-zinc-700 shadow-2xl p-6 relative animate-[zoomIn_0.2s_ease-out]">
+            <button onclick="closeSettingsModal()" class="absolute top-4 right-4 p-1 rounded-full bg-black/50 hover:bg-zinc-800 text-zinc-400 hover:text-white transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <i data-lucide="settings" class="w-5 h-5 text-blue-500"></i> Configurar API
+            </h3>
+            <p class="text-sm text-zinc-400 mb-4">
+                Para que as funções de IA (Analisador, Assistente e Gerador de Relato) funcionem "no ar", insira sua chave de API do Google Gemini abaixo. Ela será salva apenas no seu navegador.
+                <br><br>
+                <strong class="text-green-400">Nota:</strong> As Notícias funcionam automaticamente via Google News e não requerem chave.
+            </p>
+            <div class="mb-4">
+                <label class="text-xs text-zinc-500 font-bold uppercase mb-1 block">Google Gemini API Key</label>
+                <input type="password" id="userApiKeyInput" class="w-full bg-black border border-zinc-700 rounded px-3 py-2 text-white focus:border-blue-500 outline-none" placeholder="Cole sua API Key aqui">
+            </div>
+            <div class="flex justify-end gap-2">
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 underline self-center mr-auto">Obter chave grátis</a>
+                <button onclick="saveApiKey()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium transition">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT MODAL -->
+    <div id="modal" class="fixed inset-0 z-[60] hidden modal-backdrop flex items-center justify-center p-4">
+        <div class="bg-zinc-900 w-full max-w-2xl rounded-2xl border border-zinc-700 shadow-2xl overflow-hidden relative animate-[zoomIn_0.2s_ease-out] max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal()" class="absolute top-4 right-4 p-2 rounded-full bg-black/50 hover:bg-zinc-800 text-zinc-400 hover:text-white transition z-20">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <div id="modal-content">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- GEMINI API CONFIGURATION ---
+        const apiKey = ""; // API Key injected by environment (Keep empty for user input override)
+
+        // --- DATA ---
+        const categories = ["Todos", "Digitais e Financeiros", "Engenharia Social", "Turísticos e de Rua", "Comércio e Utilitários", "Benefícios Sociais"];
+        
+        const scams = [
+            { id: 1, category: "Digitais e Financeiros", title: "Urubu do Pix / Bug do Pix", description: "Promessa em redes sociais de que transferir um valor (ex: R$ 50) retorna o décuplo (R$ 500). É pirâmide; o dinheiro nunca volta.", prevention: "Não existe dinheiro fácil ou bug de sistema que devolve dinheiro em dobro. Bloqueie o perfil.", icon: "trending-up", riskLevel: "Altíssimo" },
+            { id: 2, category: "Digitais e Financeiros", title: "Golpe do Pix Agendado", description: "O golpista envia um comprovante de agendamento como se fosse pagamento real. O vendedor entrega o produto, e o golpista cancela o agendamento depois.", prevention: "Só entregue o produto quando o dinheiro estiver LIBERADO na conta, não apenas agendado.", icon: "clock", riskLevel: "Alto" },
+            { id: 3, category: "Digitais e Financeiros", title: "Falsa Central de Segurança (0800)", description: "SMS ou ligação afirmando que houve uma compra suspeita no seu cartão. Pedem para ligar num 0800 falso, onde 'atendentes' roubam seus dados.", prevention: "Nunca ligue para números recebidos por SMS. Ligue apenas para o número no verso do seu cartão.", icon: "phone", riskLevel: "Altíssimo" },
+            { id: 4, category: "Digitais e Financeiros", title: "Mão Fantasma (Acesso Remoto)", description: "O falso atendente convence a vítima a instalar um app (TeamViewer, AnyDesk) para 'limpar vírus'. Eles assumem o controle do celular e limpam as contas.", prevention: "Bancos nunca pedem para instalar apps de suporte remoto. Desligue imediatamente.", icon: "monitor", riskLevel: "Altíssimo" },
+            { id: 5, category: "Engenharia Social", title: "Golpe do Falso Motoboy", description: "O banco liga dizendo que o cartão foi clonado e manda um motoboy buscar o cartão cortado na sua casa. O chip (que contém os dados) é roubado intacto.", prevention: "Bancos NUNCA enviam pessoas para buscar cartões. Destrua o chip se for descartar.", icon: "truck", riskLevel: "Alto" },
+            { id: 6, category: "Digitais e Financeiros", title: "Troca de Cartão (Ambulantes)", description: "O vendedor pega seu cartão, passa na máquina, e devolve um cartão idêntico (do mesmo banco) mas que pertence a outra pessoa, ficando com o seu e a senha.", prevention: "Nunca entregue o cartão na mão de ninguém. Insira você mesmo e confira o nome ao receber de volta.", icon: "credit-card", riskLevel: "Médio" },
+            { id: 7, category: "Digitais e Financeiros", title: "Golpe da Maquininha (Visor)", description: "O vendedor diz que o visor está ruim, você digita a senha achando que é R$ 10,00, mas a cobrança é de R$ 1.000,00.", prevention: "Confira o valor no visor ou peça o comprovante antes de digitar a senha. Ative notificações de compra.", icon: "alert-triangle", riskLevel: "Alto" },
+            { id: 8, category: "Engenharia Social", title: "Pix Errado (Fraude do MED)", description: "O golpista deposita dinheiro 'por engano' e pede estorno. Você devolve via Pix. Depois, ele aciona o MED dizendo que foi golpe, e o banco retira o valor de novo.", prevention: "Não devolva manualmente. Avise seu banco e peça para eles estornarem via mecanismo oficial.", icon: "alert-circle", riskLevel: "Médio" },
+            { id: 9, category: "Digitais e Financeiros", title: "Clonagem de WhatsApp", description: "Roubam seu acesso (via código SMS) e pedem dinheiro aos seus contatos fingindo ser você.", prevention: "Ative a confirmação em duas etapas e nunca compartilhe códigos SMS de 6 dígitos.", icon: "message-square", riskLevel: "Altíssimo" },
+            { id: 10, category: "Digitais e Financeiros", title: "Phishing de Pontos/Milhas", description: "E-mail ou SMS dizendo que seus pontos do cartão vão expirar hoje. O link leva a um site falso para roubar senhas.", prevention: "Não clique em links. Acesse o site do programa de fidelidade diretamente pelo navegador.", icon: "plane", riskLevel: "Médio" }
+        ];
+
+        const ranking = [
+            { position: 1, name: "Urubu do Pix / Robô do Pix", percentage: "32.0%" },
+            { position: 2, name: "Falsa Central de Segurança (0800)", percentage: "28.5%" },
+            { position: 3, name: "Clonagem de WhatsApp", percentage: "25.2%" },
+            { position: 4, name: "Golpe do Intermediário (OLX)", percentage: "22.8%" },
+            { position: 5, name: "Mão Fantasma (Acesso Remoto)", percentage: "19.5%" }
+        ];
+
+        const preventionTips = [
+            { id: 1, title: "Ative a autenticação de 2 fatores", short: "Ative a autenticação de 2 fatores (2FA) em todos os apps.", description: "A autenticação de dois fatores cria uma camada extra de segurança.", icon: "lock" },
+            { id: 2, title: "Senhas e Códigos SMS", short: "Nunca forneça senhas ou códigos recebidos por SMS.", description: "Golpistas frequentemente ligam fingindo ser de empresas e pedem o código que chegou no seu celular.", icon: "message-square" }
+        ];
+
+        const emergencySteps = [
+            { id: 1, title: "1. Acione o MED (Pix)", short: "Se foi Pix, acione o Mecanismo Especial de Devolução imediatamente.", description: "**O que fazer:**\n1. Entre em contato com o **seu banco** imediatamente.\n2. Solicite o **MED**.", icon: "rotate-ccw", image: "https://images.unsplash.com/photo-1616077168079-7e09a677fb2c?auto=format&fit=crop&q=80&w=800" },
+            { id: 2, title: "2. Boletim de Ocorrência", short: "Registre o B.O. online com todas as provas digitais.", description: "Acesse a Delegacia Virtual do seu estado.", icon: "file-text", image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=800" },
+            { id: 3, title: "3. Proteção e Bloqueios", short: "Bloqueie contas, cartões e avise contatos.", description: "Peça o bloqueio preventivo dos cartões.", icon: "lock", image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=800" }
+        ];
+
+        const faqs = [
+            { question: "Como sei se um link recebido por SMS é seguro?", answer: "Não clique em links de números desconhecidos. Verifique se o domínio corresponde ao site oficial." },
+            { question: "O que fazer se enviei um Pix para um golpista?", answer: "Entre em contato com seu banco imediatamente e solicite o MED. Faça também um B.O." }
+        ];
+
+        // --- UTILS FOR API KEY MANAGEMENT ---
+        function getEffectiveApiKey() {
+            const storedKey = localStorage.getItem('gemini_api_key');
+            return storedKey || apiKey;
+        }
+
+        function openSettingsModal() {
+            document.getElementById('userApiKeyInput').value = localStorage.getItem('gemini_api_key') || "";
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('userApiKeyInput').value.trim();
+            if (key) {
+                localStorage.setItem('gemini_api_key', key);
+                alert("API Key salva com sucesso! As funções de IA agora funcionarão.");
+                closeSettingsModal();
+            } else {
+                localStorage.removeItem('gemini_api_key');
+                alert("API Key removida.");
+                closeSettingsModal();
+            }
+        }
+
+        // --- GEMINI AI FUNCTIONS ---
+        
+        // 1. ANALISADOR DE GOLPES
+        async function analyzeMessage() {
+            const input = document.getElementById('scamInput').value.trim();
+            const btn = document.getElementById('analyzeBtn');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            const resultDiv = document.getElementById('analysisResult');
+            const resultText = document.getElementById('analysisText');
+            const riskBadge = document.getElementById('riskBadge');
+
+            if (!input) { alert("Cole uma mensagem para analisar."); return; }
+
+            const key = getEffectiveApiKey();
+            if (!key) {
+                openSettingsModal();
+                alert("Para usar o analisador, você precisa configurar uma API Key nas configurações.");
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.innerHTML = "Analisando<span class='loading-dots'></span>";
+            btnIcon.classList.add('animate-spin');
+            resultDiv.classList.add('hidden');
+
+            const prompt = `Você é um especialista em cibersegurança focado em golpes brasileiros. Analise este texto: "${input}". Responda em Markdown: 1. Nível de Risco (Baixo/Médio/Alto) 2. Tipo de Golpe 3. Análise Breve 4. Recomendação.`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await response.json();
+                if (data.error) throw new Error(data.error.message);
+                const text = data.candidates[0].content.parts[0].text;
+                
+                resultText.innerHTML = marked.parse(text);
+                
+                let badgeColor = text.includes("Altíssimo") || text.includes("Alto") ? "bg-red-900/30 border-red-500 text-red-400" : (text.includes("Médio") ? "bg-yellow-900/30 border-yellow-500 text-yellow-400" : "bg-green-900/30 border-green-500 text-green-400");
+                riskBadge.innerText = text.includes("Altíssimo") || text.includes("Alto") ? "RISCO ALTO" : (text.includes("Médio") ? "RISCO MÉDIO" : "RISCO BAIXO");
+                riskBadge.className = `px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider border ${badgeColor}`;
+                
+                resultDiv.classList.remove('hidden');
+            } catch (e) { 
+                console.error(e);
+                alert("Erro na IA: " + e.message + ". Verifique sua API Key nas configurações."); 
+            } 
+            finally { btn.disabled = false; btnText.textContent = "Analisar Risco"; btnIcon.classList.remove('animate-spin'); }
+        }
+
+        // 2. ASSISTENTE DE DÚVIDAS
+        async function askAssistant() {
+            const input = document.getElementById('assistantInput').value.trim();
+            const btn = document.getElementById('askBtn');
+            const btnText = document.getElementById('askBtnText');
+            const resultDiv = document.getElementById('assistantResponse');
+            const resultText = document.getElementById('assistantText');
+
+            if (!input) return;
+
+            const key = getEffectiveApiKey();
+            if (!key) {
+                openSettingsModal();
+                alert("Configure sua API Key para usar o assistente.");
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.textContent = "...";
+            
+            const prompt = `Você é um assistente educativo de segurança digital no Brasil. Responda à dúvida do usuário de forma curta, direta e amigável (max 3 parágrafos). Use markdown. Dúvida: "${input}"`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await response.json();
+                if (data.error) throw new Error(data.error.message);
+                resultText.innerHTML = marked.parse(data.candidates[0].content.parts[0].text);
+                resultDiv.classList.remove('hidden');
+            } catch (e) { alert("Erro ao contatar o assistente. Verifique sua API Key."); }
+            finally { btn.disabled = false; btnText.textContent = "Perguntar"; }
+        }
+
+        // 3. ATUALIZAÇÃO AUTOMÁTICA DE NOTÍCIAS (VIA GOOGLE NEWS RSS - SEM API KEY)
+        async function updateNewsFeed() {
+            const container = document.getElementById('news-feed-container');
+            const refreshBtn = document.getElementById('refreshNewsBtn');
+            const dateBadge = document.getElementById('news-date-badge');
+            
+            const today = new Date().toLocaleDateString('pt-BR');
+            if(dateBadge) dateBadge.innerHTML = `<span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span> Google News • Brasil • ${today}`;
+
+            // Estado de carregamento
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-20 text-zinc-500 animate-pulse">
+                    <i data-lucide="rss" class="w-8 h-8 animate-spin mb-4 text-blue-500"></i>
+                    <p class="text-sm">Buscando últimas notícias no Google News...</p>
+                </div>
+            `;
+            if(refreshBtn) {
+                refreshBtn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Atualizando...`;
+                refreshBtn.disabled = true;
+            }
+            lucide.createIcons();
+
+            // Usando RSS2JSON para acessar o feed do Google News sem bloqueio de CORS e sem API Key
+            // Query: "golpe OR estelionato OR fraude digital" focado no Brasil nos últimos 7 dias
+            const rssUrl = 'https://news.google.com/rss/search?q=golpe+estelionato+fraude+digital+brasil+when:7d&hl=pt-BR&gl=BR&ceid=BR:pt-419';
+            // Usamos um proxy JSON público para ler o RSS
+            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (data.status !== 'ok') throw new Error('Não foi possível carregar o feed RSS');
+
+                const newsItems = data.items.slice(0, 8); // Pegar as 8 primeiras notícias
+
+                let html = `
+                    <div class="mb-10">
+                        <h3 class="text-xl font-bold text-blue-400 mb-6 flex items-center gap-2 border-b border-zinc-800 pb-2">
+                            <i data-lucide="globe" class="w-5 h-5"></i> Últimas do Plantão (Google News)
+                        </h3>
+                        <div class="space-y-4">
+                `;
+
+                if (newsItems.length === 0) {
+                    html += `<p class="text-zinc-500 text-center">Nenhuma notícia recente encontrada.</p>`;
+                }
+
+                newsItems.forEach(item => {
+                    // Limpeza básica do título (Google News costuma colocar " - Fonte" no final)
+                    let cleanTitle = item.title;
+                    let source = "Google News";
+                    
+                    if(item.title.includes(' - ')) {
+                        const parts = item.title.lastIndexOf(' - ');
+                        cleanTitle = item.title.substring(0, parts);
+                        source = item.title.substring(parts + 3);
+                    }
+
+                    // Formatar Data
+                    let pubDate = new Date(item.pubDate);
+                    let dateStr = pubDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' às ' + pubDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                    html += `
+                        <a href="${item.link}" target="_blank" class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-zinc-900/60 p-6 rounded-xl border border-zinc-800 hover:border-blue-500 hover:bg-zinc-900 transition cursor-pointer group">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="text-xs text-blue-400 font-bold uppercase bg-blue-950/30 px-2 py-0.5 rounded border border-blue-900/50">Notícia</span>
+                                    <span class="text-xs text-zinc-500 font-mono flex items-center gap-1"><i data-lucide="rss" class="w-3 h-3"></i> ${source}</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-white group-hover:text-blue-300 transition-colors">${cleanTitle}</h4>
+                            </div>
+                            <div class="shrink-0 text-right sm:text-right w-full sm:w-auto border-t sm:border-t-0 border-zinc-800 pt-3 sm:pt-0">
+                                <p class="text-xs text-zinc-500 font-medium">${dateStr}</p>
+                                <span class="text-xs text-blue-500 group-hover:underline flex items-center gap-1 justify-end mt-1">Ler completa <i data-lucide="external-link" class="w-3 h-3"></i></span>
+                            </div>
+                        </a>
+                    `;
+                });
+
+                html += `</div></div>`;
+                
+                // Rodapé informativo
+                html += `
+                    <div class="text-center mt-8 pt-4 border-t border-zinc-900">
+                        <p class="text-xs text-zinc-600">As notícias acima são agregadas automaticamente do Google News e não representam a opinião oficial deste portal.</p>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error("Erro ao buscar notícias RSS:", error);
+                renderFallbackNews(container, "Modo Offline (Falha na conexão com Google News)");
+            } finally {
+                if(refreshBtn) {
+                    refreshBtn.innerHTML = `<i data-lucide="refresh-cw" class="w-3 h-3"></i> Atualizar`;
+                    refreshBtn.disabled = false;
+                }
+                lucide.createIcons();
+            }
+        }
+
+        function renderFallbackNews(container, title) {
+            container.innerHTML = `
+                <div class="mb-10">
+                    <h3 class="text-xl font-bold text-orange-400 mb-6 flex items-center gap-2 border-b border-zinc-800 pb-2">
+                        <i data-lucide="alert-triangle" class="w-5 h-5"></i> ${title}
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="bg-zinc-900/60 p-6 rounded-xl border border-zinc-800 border-l-4 border-l-orange-500">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-xs text-orange-400 font-bold uppercase">Alerta Geral</span>
+                                <span class="text-xs text-zinc-500">Brasil</span>
+                            </div>
+                            <h4 class="text-lg font-bold text-white">Golpe do "Valores a Receber": Site falso imita Banco Central</h4>
+                            <p class="text-zinc-400 text-sm mt-1">Criminosos enviam links por SMS prometendo resgate de dinheiro esquecido. O site oficial é apenas valoresareceber.bcb.gov.br.</p>
+                        </div>
+                        <div class="bg-zinc-900/60 p-6 rounded-xl border border-zinc-800">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-xs text-blue-400 font-bold uppercase">Bahia</span>
+                            </div>
+                            <h4 class="text-lg font-bold text-white">Operação desmantela central de golpes do Pix em Salvador</h4>
+                            <p class="text-zinc-400 text-sm mt-1">Polícia Civil apreende dezenas de celulares usados para aplicar golpes de falso perfil no WhatsApp.</p>
+                        </div>
+                         <div class="bg-zinc-900/60 p-6 rounded-xl border border-zinc-800">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-xs text-purple-400 font-bold uppercase">São Paulo</span>
+                            </div>
+                            <h4 class="text-lg font-bold text-white">Novo vírus bancário "GhostTouch" afeta celulares Android</h4>
+                            <p class="text-zinc-400 text-sm mt-1">Malware permite que hackers controlem o celular da vítima remotamente sem que ela perceba.</p>
+                        </div>
+                    </div>
+                    <p class="text-center text-xs text-zinc-600 mt-6">Não foi possível conectar ao Google News no momento. Exibindo notícias arquivadas.</p>
+                </div>
+            `;
+        }
+
+        // 4. GERADOR DE RELATO (NEW)
+        async function generateReport() {
+            const type = document.getElementById('reportType').value;
+            const date = document.getElementById('reportDate').value;
+            const value = document.getElementById('reportValue').value;
+            const bank = document.getElementById('reportBank').value;
+            const details = document.getElementById('reportDetails').value;
+            
+            const btn = document.getElementById('genReportBtn');
+            const btnText = document.getElementById('genReportText');
+            const outputDiv = document.getElementById('reportOutputContainer');
+            const outputText = document.getElementById('reportText');
+
+            if(!type || !value) { alert('Preencha pelo menos o tipo e o valor.'); return; }
+
+            const key = getEffectiveApiKey();
+            if (!key) {
+                openSettingsModal();
+                alert("Configure sua API Key para usar o gerador de relatos.");
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.innerHTML = "Gerando Relato<span class='loading-dots'></span>";
+            outputDiv.classList.add('hidden');
+
+            const prompt = `
+                Atue como um advogado especialista em crimes digitais. 
+                Crie um relato formal em primeira pessoa para registro de Boletim de Ocorrência e contestação bancária (MED) com base nestes dados:
+                - Tipo de Golpe: ${type}
+                - Data/Hora: ${date}
+                - Valor: ${value}
+                - Envolvidos (Bancos/Plataformas): ${bank}
+                - Detalhes: ${details}
+                
+                O texto deve ser objetivo, cronológico e mencionar que a vítima foi induzida ao erro (art. 171 do CP) e solicitar o bloqueio cautelar dos valores. Não use markdown, apenas texto puro formatado com parágrafos.
+            `;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await response.json();
+                if (data.error) throw new Error(data.error.message);
+                outputText.innerText = data.candidates[0].content.parts[0].text;
+                outputDiv.classList.remove('hidden');
+            } catch (e) { alert("Erro ao gerar relato: " + e.message); }
+            finally { btn.disabled = false; btnText.textContent = "Gerar Relato Formal"; }
+        }
+
+        // --- FUNCTIONS ---
+        function init() {
+            lucide.createIcons();
+            document.getElementById('year').textContent = new Date().getFullYear();
+            renderRanking(); renderScams('Todos'); renderPrevention(); renderEmergency(); renderCategoryFilters(); renderFAQ();
+        }
+
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page-section').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById('page-' + pageId);
+            if (target) { target.classList.remove('hidden'); lucide.createIcons(); }
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.dataset.page === pageId) { btn.classList.add('bg-zinc-800', 'text-white'); btn.classList.remove('text-zinc-400'); } 
+                else { btn.classList.remove('bg-zinc-800', 'text-white'); btn.classList.add('text-zinc-400'); }
+            });
+            document.getElementById('mobile-menu').classList.add('hidden');
+            window.scrollTo(0, 0);
+
+            // Trigger news update specifically for midia page
+            if (pageId === 'midia') {
+                updateNewsFeed();
+            }
+        }
+
+        function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('hidden'); }
+        
+        function toggleFAQ(index) {
+            const answer = document.getElementById(`faq-answer-${index}`);
+            const icon = document.getElementById(`faq-icon-${index}`);
+            if (answer.classList.contains('open')) { answer.classList.remove('open'); icon.style.transform = 'rotate(0deg)'; } 
+            else { answer.classList.add('open'); icon.style.transform = 'rotate(180deg)'; }
+        }
+
+        function renderRanking() {
+            document.getElementById('ranking-list').innerHTML = ranking.map(item => `<div class="bg-zinc-900 p-4 rounded-lg border border-zinc-800 flex items-center hover:border-zinc-600 transition group"><div class="bg-black w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg text-white border border-zinc-700 mr-3 shrink-0 group-hover:border-blue-500 transition-colors">#${item.position}</div><div class="flex-1 min-w-0"><h3 class="font-bold text-sm text-white truncate pr-2">${item.name}</h3><div class="w-full bg-zinc-800 rounded-full h-1.5 mt-2"><div class="bg-white h-1.5 rounded-full" style="width: ${item.percentage}"></div></div></div><span class="ml-3 font-mono font-bold text-xs text-zinc-400">${item.percentage}</span></div>`).join('');
+        }
+
+        function renderCategoryFilters() {
+            document.getElementById('category-filters').innerHTML = categories.map(cat => `<button onclick="renderScams('${cat}')" class="filter-btn px-4 py-2 rounded-full text-sm font-medium transition-all ${cat === 'Todos' ? 'bg-blue-600 text-white' : 'bg-zinc-900 text-zinc-400 border border-zinc-800'}">${cat}</button>`).join('');
+        }
+
+        function renderScams(category) {
+            const filtered = category === 'Todos' ? scams : scams.filter(s => s.category === category);
+            document.getElementById('scams-grid').innerHTML = filtered.map(scam => `<div onclick="openScamModal(${scam.id})" class="group cursor-pointer bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 hover:border-zinc-500 hover:scale-[1.02] transition-all duration-300 relative"><div class="p-6 h-full flex flex-col"><div class="flex justify-between items-start mb-4"><div class="p-3 bg-black rounded-lg border border-zinc-800"><i data-lucide="${scam.icon}" class="w-6 h-6 text-white"></i></div><span class="px-3 py-1 rounded-full text-xs font-bold uppercase border border-blue-900 bg-blue-900/30 text-blue-400">${scam.riskLevel}</span></div><h3 class="text-xl font-bold text-white mb-2">${scam.title}</h3><p class="text-zinc-400 mb-4 text-sm line-clamp-3">${scam.description}</p></div></div>`).join('');
+            lucide.createIcons();
+        }
+
+        function renderPrevention() {
+            document.getElementById('prevention-grid').innerHTML = preventionTips.map(tip => `<div onclick="openPreventionModal(${tip.id})" class="flex items-start gap-4 p-4 bg-black border border-zinc-800 rounded-lg hover:border-blue-500 transition cursor-pointer"><i data-lucide="check-circle" class="w-6 h-6 text-green-500 mt-1"></i><div><p class="text-lg font-medium text-zinc-300">${tip.short}</p></div></div>`).join('');
+            lucide.createIcons();
+        }
+
+        function renderFAQ() {
+            document.getElementById('faq-list').innerHTML = faqs.map((faq, index) => `<div class="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden"><button onclick="toggleFAQ(${index})" class="w-full flex items-center justify-between p-4 text-left"><span class="font-medium text-white">${faq.question}</span><i id="faq-icon-${index}" data-lucide="chevron-down" class="w-5 h-5 text-zinc-400"></i></button><div id="faq-answer-${index}" class="faq-answer bg-black/30 px-4"><div class="py-4 text-zinc-400 text-sm border-t border-zinc-800/50">${faq.answer}</div></div></div>`).join('');
+        }
+
+        function renderEmergency() {
+            document.getElementById('emergency-grid').innerHTML = emergencySteps.map(step => `<div onclick="openEmergencyModal(${step.id})" class="bg-zinc-900/80 p-6 rounded-lg border border-zinc-800 hover:border-red-500/50 cursor-pointer"><div class="flex items-center gap-2 font-bold text-red-500 mb-3"><h3 class="text-xl">${step.title}</h3></div><p class="text-zinc-400 text-sm mb-4">${step.short}</p></div>`).join('');
+            lucide.createIcons();
+        }
+
+        // --- MODAL FUNCTIONS --- 
+        function openScamModal(id) { const scam = scams.find(s => s.id === id); const modalContent = document.getElementById('modal-content'); modalContent.innerHTML = `<div class="p-8"><h3 class="text-2xl font-bold text-white mb-4">${scam.title}</h3><p class="text-zinc-300">${scam.description}</p><div class="mt-4 bg-blue-900/30 p-4 rounded border border-blue-900"><h4 class="font-bold text-blue-400 mb-2">Prevenção</h4><p class="text-sm">${scam.prevention}</p></div><div class="mt-6 flex justify-end"><button onclick="closeModal()" class="px-6 py-2 bg-zinc-800 text-white rounded">Fechar</button></div></div>`; document.getElementById('modal').classList.remove('hidden'); }
+        function openPreventionModal(id) { const tip = preventionTips.find(t => t.id === id); const modalContent = document.getElementById('modal-content'); modalContent.innerHTML = `<div class="p-8"><h3 class="text-2xl font-bold text-white mb-4">${tip.title}</h3><p class="text-zinc-300">${tip.description}</p><div class="mt-6 flex justify-end"><button onclick="closeModal()" class="px-6 py-2 bg-zinc-800 text-white rounded">Fechar</button></div></div>`; document.getElementById('modal').classList.remove('hidden'); }
+        function openEmergencyModal(id) { const step = emergencySteps.find(s => s.id === id); const modalContent = document.getElementById('modal-content'); modalContent.innerHTML = `<div class="p-8"><h3 class="text-2xl font-bold text-white mb-4">${step.title}</h3><p class="text-zinc-300">${step.description.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>')}</p><div class="mt-6 flex justify-end"><button onclick="closeModal()" class="px-6 py-2 bg-zinc-800 text-white rounded">Fechar</button></div></div>`; document.getElementById('modal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
