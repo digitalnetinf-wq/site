@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel Análise CVLI</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0a0c10;--panel:#111318;--panel2:#161922;--border:#1e2330;--accent:#e63946;--accent2:#ff6b35;--accent3:#ffd60a;--text:#e8eaf0;--muted:#6b7280;--dim:#2a2f3e;--blue:#3b82f6;--green:#22c55e;--red:#ef4444;--purple:#a855f7;}
@@ -135,6 +137,13 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
 .excel-table .subtotal-row td{background:rgba(230,57,70,0.1);color:var(--accent);font-weight:600;}
 .excel-table .semestre-row td{background:rgba(34,197,94,0.08);color:var(--green);font-style:italic;}
 .excel-table td.cell-zero{color:var(--dim);}
+
+/* LEAFLET CUSTOM DARK THEME */
+.leaflet-container { background: #0a0c10 !important; font-family: 'DM Sans', sans-serif; z-index: 1; }
+.leaflet-popup-content-wrapper { background: #161922; color: #e8eaf0; border: 1px solid #1e2330; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+.leaflet-popup-tip { background: #161922; border: 1px solid #1e2330; border-top: none; border-left: none; }
+.leaflet-popup-content { margin: 12px; }
+.leaflet-popup-close-button { color: #6b7280 !important; }
 </style>
 </head>
 <body>
@@ -160,12 +169,11 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
   <button class="tab-btn active" onclick="showTab('visao-geral',this)">📊 Visão Geral</button>
   <button class="tab-btn" onclick="showTab('evolucao',this)">📈 Evolução Temporal</button>
   <button class="tab-btn" onclick="showTab('geografico',this)">📍 Geográfico (2026)</button>
+  <button class="tab-btn" onclick="showTab('mancha',this)">🗺️ Mancha Criminal</button>
   <button class="tab-btn" onclick="showTab('vitimas',this)">👤 Perfil das Vítimas (2026)</button>
   <button class="tab-btn" onclick="showTab('modalidade',this)">🔍 Modalidade (2026)</button>
   <button class="tab-btn" onclick="showTab('coorpin',this)">🗺️ COORPIN (25 vs 26)</button>
-  <button class="tab-btn" onclick="showTab('tabelas',this)">📑 Tabelas Resumo</button>
   <button class="tab-btn" onclick="showTab('registros',this)">📋 Banco de Dados CVLIs</button>
-  <button class="tab-btn" onclick="showTab('suporte',this)">📞 Suporte</button>
 </nav>
 
 <!-- ABA 1 -->
@@ -237,6 +245,45 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
 </div>
 </div>
 
+<!-- ABA MANCHA CRIMINAL -->
+<div class="tab-page" id="tab-mancha">
+<div class="container">
+  <div class="kpi-grid cols-4">
+    <div class="kpi-card blue"><div class="kpi-lbl">Vítimas Mapeadas</div><div class="kpi-val blue" id="mancha-tot">—</div><div class="kpi-sub">com coordenadas válidas</div></div>
+    <div class="kpi-card" style="border-top-color: #ec4899;"><div class="kpi-lbl">Feminicídio</div><div class="kpi-val" style="color:#ec4899;" id="mancha-feminicidio">—</div><div class="kpi-sub">no mapa (rosa)</div></div>
+    <div class="kpi-card yellow"><div class="kpi-lbl">Menores de 18</div><div class="kpi-val yellow" id="mancha-menores">—</div><div class="kpi-sub">azul (<18) e amarelo (<12)</div></div>
+    <div class="kpi-card red"><div class="kpi-lbl">Adultos / Outros</div><div class="kpi-val red" id="mancha-adultos">—</div><div class="kpi-sub">no mapa (vermelho)</div></div>
+  </div>
+  <div class="sec-label">Distribuição Espacial — CVLI</div>
+  <div class="card mb16">
+    <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
+        <div><span class="card-title">Mapa de Ocorrências</span><span class="card-tag">COORDENADAS</span></div>
+        <div style="display:flex; gap:14px; font-size:11px; font-family:'JetBrains Mono',monospace; flex-wrap: wrap;">
+            <span style="display:flex; align-items:center; gap:6px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512" fill="#ec4899" style="width:12px;height:12px;"><path d="M128 0c35.346 0 64 28.654 64 64s-28.654 64-64 64c-35.346 0-64-28.654-64-64S92.654 0 128 0m119.283 354.179l-48-192A24 24 0 0 0 176 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H80a24 24 0 0 0-23.283 18.179l-48 192C4.935 369.305 16.383 384 32 384h56v104c0 13.255 10.745 24 24 24h32c13.255 0 24-10.745 24-24V384h56c15.591 0 27.071-14.671 23.283-29.821z"/></svg>
+                Feminicídio
+            </span>
+            <span style="display:flex; align-items:center; gap:6px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512" fill="#ffd60a" style="width:12px;height:12px;"><path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z"/></svg>
+                < 12 anos
+            </span>
+            <span style="display:flex; align-items:center; gap:6px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512" fill="#3b82f6" style="width:12px;height:12px;"><path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z"/></svg>
+                12 a 17 anos
+            </span>
+            <span style="display:flex; align-items:center; gap:6px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512" fill="#e63946" style="width:12px;height:12px;"><path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z"/></svg>
+                Adultos (Outros)
+            </span>
+        </div>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <div id="map" style="width:100%; height:600px; border-radius:0 0 12px 12px;"></div>
+    </div>
+  </div>
+</div>
+</div>
+
 <!-- ABA 4 -->
 <div class="tab-page" id="tab-vitimas">
 <div class="container">
@@ -298,18 +345,14 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
   </div>
   
   <div class="card mb16">
-    <div class="card-hd"><span class="card-title">Evolução Mensal (Top Municípios)</span><span class="card-tag">SÉRIE 25/26</span></div>
+    <div class="card-hd"><span class="card-title">Evolução Mensal (todos os Municípios)</span><span class="card-tag">SÉRIE 25/26</span></div>
     <div class="card-body"><canvas id="co-evolucao" style="max-height:360px;"></canvas></div>
   </div>
   
   <div class="card mb16"><div class="card-hd"><span class="card-title">Tabela Comparativa — COORPIN 2025 vs 2026</span><span class="card-tag">DETALHADO</span></div><div class="card-body tbl-wrap" id="co-tabela"></div></div>
-</div>
-</div>
 
-<!-- ABA 8 - TABELAS TIPO EXCEL -->
-<div class="tab-page" id="tab-tabelas">
-<div class="container">
-  <div class="sec-label">Comparativo Acumulado — 2025 vs 2026</div>
+  <!-- CONTEÚDO MOVIDO DAS TABELAS RESUMO -->
+  <div class="sec-label" style="margin-top:30px;">Comparativo Acumulado — 2025 vs 2026</div>
   <div class="g2">
     <div class="card mb16">
       <div class="card-hd"><span class="card-title">Por Tipificação</span><span class="card-tag">VAR %</span></div>
@@ -328,10 +371,11 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
   <div class="sec-label" style="margin-top:30px;">Tabelas de Produtividade — Por Município</div>
   <div class="card mb16"><div class="card-hd"><span class="card-title">CVLI - MUNICÍPIOS 2025</span><span class="card-tag">COORPIN</span></div><div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-mun-2025"></table></div></div>
   <div class="card mb16"><div class="card-hd"><span class="card-title">CVLI - MUNICÍPIOS 2026</span><span class="card-tag blue">COORPIN</span></div><div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-mun-2026"></table></div></div>
+
 </div>
 </div>
 
-<!-- ABA 7 -->
+<!-- ABA 7 - REGISTROS -->
 <div class="tab-page" id="tab-registros">
 <div class="container">
   <div class="kpi-grid cols-3">
@@ -368,9 +412,9 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
   <div class="card mb16">
     <div class="card-hd"><span class="card-title">Base de Dados CVLI — Íntegra</span><span class="card-tag" id="reg-tag">— registros</span></div>
     <div class="card-body tbl-wrap" style="padding:0;">
-      <table style="width:100%;min-width:1500px;">
+      <table style="width:100%;min-width:1600px;">
         <thead><tr>
-          <th>Nº</th><th>Vítima</th><th>Idade</th><th>Ocorrência</th><th>Data</th><th>Hora</th><th>Autoria</th><th>Motivo</th><th>Meio Empregado</th><th>Tipificação</th><th>Bairro</th><th>Logradouro</th><th>Cidade</th><th>Obs</th>
+          <th>Nº</th><th>Vítima</th><th>Idade</th><th>Ocorrência</th><th>Data</th><th>Hora</th><th>Autoria</th><th>Motivo</th><th>Meio Empregado</th><th>Tipificação</th><th>Bairro</th><th>Logradouro</th><th>Cidade</th><th>Georeferência</th><th>Obs</th>
         </tr></thead>
         <tbody id="reg-tbody"></tbody>
       </table>
@@ -378,29 +422,6 @@ tbody td{padding:9px 12px;color:var(--text);white-space:nowrap;}
     <div style="padding:10px 18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
       <div class="pg-info" id="reg-pg-info">—</div>
       <div class="pagination" id="reg-pg"></div>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- ABA SUPORTE -->
-<div class="tab-page" id="tab-suporte">
-<div class="container">
-  <div class="sec-label">Suporte e Manutenção</div>
-  <div class="card" style="max-width:450px; margin:40px auto; text-align:center; animation:fadeUp 0.5s ease both;">
-    <div class="card-body" style="padding:40px 24px;">
-      <div style="width:80px; height:80px; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:36px;">👨‍💻</div>
-      <h2 style="font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:2px; color:var(--text); margin-bottom:4px;">Félix Rilton</h2>
-      <p style="color:var(--accent); font-family:'JetBrains Mono',monospace; font-size:12px; margin-bottom:32px; font-weight:500;">TÉCNICO IPC</p>
-      
-      <div style="display:flex; flex-direction:column; gap:12px; align-items:center;">
-        <a href="https://wa.me/5575981149491" target="_blank" style="text-decoration:none; display:flex; align-items:center; justify-content:center; gap:12px; background:var(--bg); padding:16px 24px; border-radius:10px; border:1px solid var(--border); width:100%; transition:all 0.2s; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:14px;" onmouseover="this.style.borderColor='var(--green)'; this.style.color='var(--green)';" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text)';">
-          <span style="font-size:18px;">📱</span> (75) 98114-9491
-        </a>
-        <a href="mailto:felix.rilton@pcivil.ba.gov.br" style="text-decoration:none; display:flex; align-items:center; justify-content:center; gap:12px; background:var(--bg); padding:16px 24px; border-radius:10px; border:1px solid var(--border); width:100%; transition:all 0.2s; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:13px;" onmouseover="this.style.borderColor='var(--blue)'; this.style.color='var(--blue)';" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text)';">
-          <span style="font-size:18px;">✉️</span> felix.rilton@pcivil.ba.gov.br
-        </a>
-      </div>
     </div>
   </div>
 </div>
@@ -446,9 +467,10 @@ const COL_MAP = {
   n: ['n','#','nº','num','numero','id','ordem'],
   vitima: ['vitima','nome','victim'],
   idade: ['idade','age'],
-  ocorrencia: ['ocorrencia','oc','bopm','numeroocorrencia','guia','bo','registro'],
+  ocorrencia: ['ocorrencia','oc','bopm','numeroocorrencia','guia','bo','registro','boletim','nº ocorrencia','numero ocorrencia'],
   data: ['data','date','dataocorrencia','dia'],
   hora: ['hora','hour','horario'],
+  sexo: ['sexo','genero','gênero','gender'],
   autoria: ['autoria','autoridentificado','autor'],
   motivo: ['motivo','motivacao'],
   meio: ['meio','meioempregado','arma','instrumento'],
@@ -456,6 +478,9 @@ const COL_MAP = {
   bairro: ['bairro','neighborhood','localidade'],
   logradouro: ['logradouro','endereco','local','rua','avenida'],
   cidade: ['cidade','municipio','city'],
+  georef: ['georeferencia', 'georeferência', 'geo', 'coordenadas', 'coordenada'],
+  lat: ['lat', 'latitude', 'y', 'coord y', 'coordy'],
+  lng: ['lon', 'lng', 'longitude', 'long', 'x', 'coord x', 'coordx'],
   obs: ['obs','observacoes','observacao','remarks']
 };
 
@@ -599,14 +624,34 @@ function parseCSV(text) {
 
       const meio = get('meio') || '';
       const tip = get('tipificacao') || 'HOMICÍDIO';
+      const sexo = get('sexo') || 'NÃO INFORMADO';
+      
+      let latVal = NaN, lngVal = NaN;
+      let geoStr = get('georef');
+      
+      // Extrair da coluna unificada georeferencia
+      if (geoStr) {
+        let parts = geoStr.replace(/;/g, ',').split(',');
+        if (parts.length >= 2) {
+          latVal = parseFloat(parts[0].replace(',', '.').trim());
+          lngVal = parseFloat(parts[1].replace(',', '.').trim());
+        }
+      } else {
+        // Fallback para as colunas isoladas se existirem
+        let latStr = get('lat').replace(',', '.');
+        let lngStr = get('lng').replace(',', '.');
+        latVal = parseFloat(latStr);
+        lngVal = parseFloat(lngStr);
+      }
       
       rows.push({
         n: get('n') || String(rows.length + 1),
         vitima: get('vitima') || `REGISTRO ${rows.length + 1}`,
         idade: get('idade'),
-        ocorrencia: get('ocorrencia'),
+        ocorrencia: get('ocorrencia') || 'NÃO INFORMADA',
         data: dataStr,
         hora: get('hora'),
+        sexo: sexo,
         autoria: get('autoria') || 'NÃO',
         motivo: get('motivo') || 'NÃO',
         meio: meio,
@@ -615,6 +660,9 @@ function parseCSV(text) {
         bairro: get('bairro') || 'NÃO INFORMADO',
         logradouro: get('logradouro') || '',
         cidade: String(get('cidade') || 'FEIRA DE SANTANA').toUpperCase().trim(),
+        georeferencia: geoStr || '',
+        lat: isNaN(latVal) ? null : latVal,
+        lng: isNaN(lngVal) ? null : lngVal,
         obs: get('obs') || '',
         ano: anoStr,
         mes: mesNum,
@@ -707,7 +755,11 @@ function processSheetRows(rows) {
       if(footer) footer.textContent = `PAINEL ANÁLISE CVLI · FEIRA DE SANTANA / COORPIN · 2025–2026 · ${DB.registros.length} REGISTROS · SYNC ${timeStr}`;
         
       const tabId = document.querySelector('.tab-page.active')?.id?.replace('tab-','');
-      if (tabId) buildTab(tabId);
+      if (tabId) {
+          setTimeout(() => {
+              buildTab(tabId);
+          }, 50);
+      }
   } catch (e) {
       console.error("Erro fatal ao processar gráficos e UI:", e);
       showToast('Erro interno ao desenhar gráficos.', 'var(--red)');
@@ -839,6 +891,9 @@ const P=['#e63946','#ff6b35','#ffd60a','#3b82f6','#22c55e','#a855f7','#06b6d4','
 const TT={backgroundColor:'#161922',borderColor:'#1e2330',borderWidth:1,titleColor:'#e8eaf0',bodyColor:'#9ca3af',padding:10};
 const CR={};
 
+let mapInstance = null;
+let markerLayer = null;
+
 function mkC(id,cfg){
     try {
         if(CR[id])CR[id].destroy();
@@ -851,21 +906,30 @@ function mkC(id,cfg){
 }
 
 function showTab(id,btn){
+  const targetPage = document.getElementById('tab-'+id);
+  if(!targetPage) return; 
+  
   document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  btn.classList.add('active');
-  buildTab(id);
+  targetPage.classList.add('active');
+  if(btn) btn.classList.add('active');
+  
+  setTimeout(() => {
+    if(id === 'mancha' && mapInstance) {
+      mapInstance.invalidateSize();
+    }
+    buildTab(id);
+  }, 50);
 }
 
 function buildTab(t){
   if(t==='visao-geral')buildVG();
   else if(t==='evolucao')buildEV();
   else if(t==='geografico')buildGEO();
+  else if(t==='mancha')buildMANCHA();
   else if(t==='vitimas')buildVIT();
   else if(t==='modalidade')buildMOD();
   else if(t==='coorpin')buildCO();
-  else if(t==='tabelas')buildTABELAS();
   else if(t==='registros')buildREG();
 }
 
@@ -1019,6 +1083,103 @@ function buildGEO(){
   mkC('geo-pizza',{type:'pie',data:{labels:cidades.map(e=>e[0]),datasets:[{data:cidades.map(e=>e[1]),backgroundColor:cidades.map((_,i)=>P[i%P.length]),borderWidth:0,hoverOffset:5}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#9ca3af',font:{size:9},boxWidth:10,padding:6}},tooltip:{...TT,callbacks:{label:c=>` ${c.parsed} (${DB.t26_coorpin?((c.parsed/DB.t26_coorpin)*100).toFixed(1):0}%)`}}}}});
 }
 
+function buildMANCHA() {
+  const mapEl = document.getElementById('map');
+  if (!mapEl || mapEl.clientWidth === 0) return; // Evita construir o mapa se a aba estiver oculta
+
+  const regsComCoords = DB.registros.filter(r => isCVLI(r.tipificacao) && r.lat !== null && r.lng !== null);
+  
+  let qtdFeminicidio = 0, qtdMenores = 0, qtdAdultos = 0, totalVitimasMap = 0;
+  
+  if (!mapInstance) {
+    mapInstance = L.map('map').setView([-12.266, -38.966], 12);
+    L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+      attribution: '&copy; Google Maps',
+      maxZoom: 20
+    }).addTo(mapInstance);
+  }
+
+  mapInstance.invalidateSize(); // Atualiza dimensões ANTES do mapa
+  
+  if (markerLayer) mapInstance.removeLayer(markerLayer);
+
+  markerLayer = L.layerGroup().addTo(mapInstance);
+
+  regsComCoords.forEach(r => {
+    
+    let isFeminicidio = normTipificacao(r.tipificacao) === 'FEMINICÍDIO';
+    let idade = parseInt(r.idade);
+    let isMenor12 = !isNaN(idade) && idade < 12;
+    let isMenor18 = !isNaN(idade) && idade >= 12 && idade < 18;
+    
+    let tipUp = String(r.tipificacao).toUpperCase();
+    let numBonecos = 1;
+    if (tipUp.includes('DUPLO')) numBonecos = 2;
+    else if (tipUp.includes('TRIPLO')) numBonecos = 3;
+    else if (tipUp.includes('QUÁDRUPLO') || tipUp.includes('QUADRUPLO')) numBonecos = 4;
+    else if (tipUp.includes('QUÍNTUPLO') || tipUp.includes('QUINTUPLO')) numBonecos = 5;
+    else if (tipUp.includes('SÉXTUPLO') || tipUp.includes('SEXTUPLO')) numBonecos = 6;
+    
+    totalVitimasMap += numBonecos;
+
+    let baseSvg = '';
+    
+    if (isFeminicidio) {
+        qtdFeminicidio += numBonecos;
+        baseSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512" fill="#ec4899" style="width:24px;height:24px;filter:drop-shadow(0px 2px 4px rgba(0,0,0,0.8));"><path d="M128 0c35.346 0 64 28.654 64 64s-28.654 64-64 64c-35.346 0-64-28.654-64-64S92.654 0 128 0m119.283 354.179l-48-192A24 24 0 0 0 176 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H80a24 24 0 0 0-23.283 18.179l-48 192C4.935 369.305 16.383 384 32 384h56v104c0 13.255 10.745 24 24 24h32c13.255 0 24-10.745 24-24V384h56c15.591 0 27.071-14.671 23.283-29.821z"/></svg>`;
+    } else if (isMenor12) {
+        qtdMenores += numBonecos;
+        baseSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512" fill="#ffd60a" style="width:24px;height:24px;filter:drop-shadow(0px 2px 4px rgba(0,0,0,0.8));"><path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z"/></svg>`;
+    } else if (isMenor18) {
+        qtdMenores += numBonecos;
+        baseSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512" fill="#3b82f6" style="width:24px;height:24px;filter:drop-shadow(0px 2px 4px rgba(0,0,0,0.8));"><path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z"/></svg>`;
+    } else {
+        qtdAdultos += numBonecos;
+        baseSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512" fill="#e63946" style="width:24px;height:24px;filter:drop-shadow(0px 2px 4px rgba(0,0,0,0.8));"><path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z"/></svg>`;
+    }
+
+    let combinedSvg = `<div style="display:flex; gap:1px;">`;
+    for(let i = 0; i < numBonecos; i++) {
+        combinedSvg += baseSvg;
+    }
+    combinedSvg += `</div>`;
+
+    let totalWidth = (24 * numBonecos) + (1 * (numBonecos - 1));
+
+    let customMarker = L.divIcon({
+      html: combinedSvg,
+      className: '', // Remove fundos brancos nativos do Leaflet
+      iconSize: [totalWidth, 24],
+      iconAnchor: [totalWidth / 2, 24], // Base do ícone fica exatamente em cima da coordenada
+      popupAnchor: [0, -20]
+    });
+
+    const marker = L.marker([r.lat, r.lng], { icon: customMarker });
+    
+    marker.bindPopup(`<div style="font-size:12px; line-height:1.4; max-width:220px;">
+        <strong style="color:var(--accent); font-size:13px;">${r.vitima}</strong><br>
+        <span style="color:var(--muted)">Ocorrência:</span> <span class="mono" style="color:var(--blue); font-weight:600;">${r.ocorrencia}</span><br>
+        <span style="color:var(--muted)">Idade:</span> ${r.idade || 'N/I'} anos<br>
+        <span style="color:var(--muted)">Data:</span> ${r.data} ${r.hora ? 'às '+r.hora : ''}<br>
+        <span style="color:var(--muted)">Local:</span> ${r.bairro} (${r.cidade})<br>
+        <span style="color:var(--muted)">Meio:</span> ${r.meio}<br>
+        <span style="color:var(--muted)">Tipo:</span> <span style="${isFeminicidio ? 'color:#ec4899;font-weight:600;' : ''}">${r.tipificacao}</span>
+        ${r.obs ? `<div style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); font-size:11px; color:var(--text); line-height:1.3;">${r.obs.replace(/\n/g, '<br>')}</div>` : ''}
+    </div>`);
+    markerLayer.addLayer(marker);
+  });
+
+  if (regsComCoords.length > 0) {
+     const bounds = L.latLngBounds(regsComCoords.map(r => [r.lat, r.lng]));
+     mapInstance.fitBounds(bounds, {padding: [30, 30], maxZoom: 16});
+  }
+  
+  if(document.getElementById('mancha-tot')) document.getElementById('mancha-tot').textContent = totalVitimasMap;
+  if(document.getElementById('mancha-feminicidio')) document.getElementById('mancha-feminicidio').textContent = qtdFeminicidio;
+  if(document.getElementById('mancha-menores')) document.getElementById('mancha-menores').textContent = qtdMenores;
+  if(document.getElementById('mancha-adultos')) document.getElementById('mancha-adultos').textContent = qtdAdultos;
+}
+
 function buildVIT(){
   const regs26=DB.registros.filter(r=>String(r.ano)==='2026' && isCVLI(r.tipificacao));
   let menores=0,jovens=0,somaIdade=0,qtdIdade=0,maxIdade=0;
@@ -1132,8 +1293,7 @@ function buildCO(){
 
   mkC('co-mun-comp',{type:'bar',data:{labels:cities,datasets:[{label:`2025 (Jan-${mName})`,data:data25_ytd_chart,backgroundColor:'rgba(230,57,70,.8)',borderRadius:4},{label:`2026 (Jan-${mName})`,data:data26_ytd_chart,backgroundColor:'rgba(59,130,246,.8)',borderRadius:4}]},options:{responsive:true,plugins:{legend:{labels:{color:'#9ca3af',font:{size:10},boxWidth:12}},tooltip:TT},scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:40}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
 
-  const topC=cities.slice(0,4);
-  mkC('co-evolucao',{type:'line',data:{labels:M,datasets:topC.flatMap((c,i)=>[
+  mkC('co-evolucao',{type:'line',data:{labels:M,datasets:cities.flatMap((c,i)=>[
     {label:`${c} (25)`,data:DB.meses25[c]||Array(12).fill(0),borderColor:P[i%P.length],backgroundColor:'transparent',borderWidth:1,tension:.4,borderDash:[3,3],pointRadius:2},
     {label:`${c} (26)`,data:DB.meses26[c]||Array(12).fill(0),borderColor:P[i%P.length],backgroundColor:'transparent',borderWidth:3,tension:.4,pointRadius:4}
   ])},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#9ca3af',font:{size:9},boxWidth:10,padding:6}},tooltip:TT},scales:{x:{grid:{color:'#1e2330'}},y:{grid:{color:'#1e2330'},beginAtZero:true}}}});
@@ -1149,12 +1309,12 @@ function buildCO(){
   htmlTab += '</tbody></table>';
   
   if(document.getElementById('co-tabela')) document.getElementById('co-tabela').innerHTML=htmlTab;
+  
+  buildTABELAS();
 }
 
-function buildTABELAS() {
-  var limitMonth = DB.limitMonth;
-  var mName = M[limitMonth] ? M[limitMonth].toUpperCase() : 'ATUAL';
-  
+function buildMANCHA() {
+  const mapEl = document.getElementById('map');
   var mesesHeaderAbsolute = '<thead><tr><th>MESES</th>' + M.map(function(m) { return '<th>' + m.toUpperCase() + '</th>'; }).join('') + '<th>TOTAL</th></tr></thead>';
 
   function calcVar(v25, v26) {
@@ -1387,7 +1547,8 @@ function renderRegTable(tot, pgs) {
         var ab = String(r.autoria || '').toUpperCase().includes('SIM') ? 'b-green' : 'b-muted';
         var safeLog = String(r.logradouro || '').replace(/\n/g, '<br>');
         var safeObs = String(r.obs || '').replace(/\n/g, '<br>');
-        return '<tr><td class="mono" style="color:var(--muted);">' + r.n + '</td><td class="td-wrap" style="font-weight:500;">' + r.vitima + '</td><td class="mono" style="text-align:center;">' + (r.idade || '—') + '</td><td class="mono">' + r.ocorrencia + '</td><td class="mono" style="color:var(--muted);">' + r.data + '</td><td class="mono">' + r.hora + '</td><td><span class="badge ' + ab + '">' + r.autoria + '</span></td><td style="font-size:10px;">' + r.motivo + '</td><td><span class="badge ' + mb + '">' + r.meio + '</span></td><td style="font-size:10px;">' + r.tipificacao + '</td><td style="font-size:11px;font-weight:600;color:var(--blue);">' + r.bairro + '</td><td class="td-wrap" style="font-size:10px;">' + safeLog + '</td><td style="font-size:11px;font-weight:600;">' + r.cidade + '</td><td class="td-wrap" style="font-size:10px;color:var(--muted);">' + safeObs + '</td></tr>';
+        var geoDisplay = r.georeferencia ? r.georeferencia : (r.lat !== null && r.lng !== null ? r.lat + ', ' + r.lng : '—');
+        return '<tr><td class="mono" style="color:var(--muted);">' + r.n + '</td><td class="td-wrap" style="font-weight:500;">' + r.vitima + '</td><td class="mono" style="text-align:center;">' + (r.idade || '—') + '</td><td><span class="badge b-blue" style="font-size:11px; letter-spacing: 0.5px;">' + (r.ocorrencia || 'NÃO INFORMADA') + '</span></td><td class="mono" style="color:var(--muted);">' + r.data + '</td><td class="mono">' + r.hora + '</td><td><span class="badge ' + ab + '">' + r.autoria + '</span></td><td style="font-size:10px;">' + r.motivo + '</td><td><span class="badge ' + mb + '">' + r.meio + '</span></td><td style="font-size:10px;">' + r.tipificacao + '</td><td style="font-size:11px;font-weight:600;color:var(--blue);">' + r.bairro + '</td><td class="td-wrap" style="font-size:10px;">' + safeLog + '</td><td style="font-size:11px;font-weight:600;">' + r.cidade + '</td><td class="mono" style="font-size:10px;color:var(--muted);white-space:nowrap;">' + geoDisplay + '</td><td class="td-wrap" style="font-size:10px;color:var(--muted);">' + safeObs + '</td></tr>';
       }).join('');
   }
   
