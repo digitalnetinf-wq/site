@@ -1313,8 +1313,9 @@ function buildCO(){
   buildTABELAS();
 }
 
-function buildMANCHA() {
-  const mapEl = document.getElementById('map');
+function buildTABELAS() {
+  const limitMonth = DB.limitMonth !== undefined ? DB.limitMonth : new Date().getMonth();
+  const mName = M[limitMonth] || 'Atual';
   var mesesHeaderAbsolute = '<thead><tr><th>MESES</th>' + M.map(function(m) { return '<th>' + m.toUpperCase() + '</th>'; }).join('') + '<th>TOTAL</th></tr></thead>';
 
   function calcVar(v25, v26) {
@@ -1328,7 +1329,7 @@ function buildMANCHA() {
     return '<span style="color:' + color + ';font-weight:600;">' + sign + pct.toFixed(1) + '%</span>';
   }
 
-  var periodoLabel = 'JAN–' + mName;
+  var periodoLabel = 'JAN–' + mName.toUpperCase();
   var tipHtml = '<thead><tr><th>TIPIFICAÇÃO</th><th>2025 (' + periodoLabel + ')</th><th>2026 (' + periodoLabel + ')</th><th>VAR %</th></tr></thead><tbody>';
   var tips = ['HOMICÍDIO', 'FEMINICÍDIO', 'LESÃO C.SEG. MORTE', 'LATROCÍNIO'];
   var d25T = { 'HOMICÍDIO': 0, 'FEMINICÍDIO': 0, 'LESÃO C.SEG. MORTE': 0, 'LATROCÍNIO': 0 };
