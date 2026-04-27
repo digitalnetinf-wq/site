@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geocodificador de Endereços Brasileiros</title>
+    
+    <!-- Tailwind CSS para Estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet CSS & JS para o Mapa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <style>
+        body { background-color: #f8f9fa; }
+        .spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border-left-color: #ffffff;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="text-gray-800 font-sans p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Cabeçalho -->
+        <h2 class="text-3xl font-bold text-center mb-8 text-blue-800">📍 Geocodificador de Endereços Brasileiros</h2>
+
+        <div class="flex flex-col md:flex-row gap-8">
+            
+            <!-- Painel Lateral (Inputs) -->
+            <div class="w-full md:w-1/3 bg-white p-6 rounded-lg shadow-md h-fit">
+                <h4 class="text-xl font-semibold mb-2">Insira o Endereço</h4>
+                <p class="text-sm text-gray-600 mb-4">Busque por Logradouro/Número, Bairro, CEP ou Coordenadas Geográficas.</p>
+                <hr class="mb-4">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Logradouro (Rua, Av, etc):</label>
+                    <input type="text" id="logradouro" placeholder="Ex: Avenida Getúlio Vargas" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Número:</label>
+                    <input type="text" id="numero" placeholder="Ex: 123 ou S/N" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Bairro:</label>
+                    <input type="text" id="bairro" placeholder="Ex: Centro ou Tomba" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">CEP:</label>
+                    <input type="text" id="cep_input" placeholder="Ex: 44001-000" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Coordenadas (Lat, Lon):</label>
+                    <input type="text" id="coords_input" placeholder="Ex: -12.266600, -38.966300" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" title="Busca direta por latitude e longitude.">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Município:</label>
+                    <select id="municipio" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="Anguera">Anguera</option>
+                        <option value="Antônio Cardoso">Antônio Cardoso</option>
+                        <option value="Feira de Santana" selected>Feira de Santana</option>
+                        <option value="Ipecaetá">Ipecaetá</option>
+                        <option value="Rafael Jambeiro">Rafael Jambeiro</option>
+                        <option value="Santo Estêvão">Santo Estêvão</option>
+                        <option value="São Gonçalo dos Campos">São Gonçalo dos Campos</option>
+                        <option value="Serra Preta">Serra Preta</option>
+                        <option value="Tanquinho">Tanquinho</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Estado (Sigla):</label>
+                    <input type="text" id="estado" value="BA" readonly class="w-full border border-gray-300 rounded-md p-2 bg-gray-100 text-gray-600 cursor-not-allowed focus:ring-blue-500 focus:border-blue-500" title="Fixo em Bahia">
+                </div>
+                
+                <div class="flex flex-col gap-3">
+                    <button id="btn_geocode" onclick="buscarCoordenadas()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200 flex justify-center items-center gap-2">
+                        <span id="btn-text">🔍 Buscar Coordenadas</span>
+                        <div id="loading" class="spinner hidden"></div>
+                    </button>
+                    
+                    <button id="btn_limpar" onclick="limparCampos()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition duration-200 flex justify-center items-center gap-2">
+                        <span>🗑️ Limpar Tudo</span>
+                    </button>
+                </div>
+                
+                <hr class="my-4">
+                <p class="text-xs text-gray-500">Nota: Esta versão utiliza a API OpenStreetMap (Nominatim). A precisão do número depende do mapeamento da região.</p>
+            </div>
+
+            <!-- Painel Principal (Resultados e Mapa) -->
+            <div class="w-full md:w-2/3 bg-white p-6 rounded-lg shadow-md">
+                
+                <h4 class="text-xl font-semibold mb-4 border-b pb-2">Resultado da Busca</h4>
+                
+                <!-- Mensagem de Erro/Aviso -->
+                <div id="mensagem" class="hidden mb-4 p-3 rounded text-sm"></div>
+
+                <!-- Tabela de Resultados -->
+                <div class="overflow-x-auto mb-8">
+                    <table class="min-w-full divide-y divide-gray-200 border">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logradouro</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bairro</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Município</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">UF</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CEP</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coordenadas (Lat, Lon)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela_body" class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="7" class="px-4 py-4 text-center text-gray-500">Nenhuma busca realizada ainda.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h4 class="text-xl font-semibold mb-4 border-b pb-2">Localização no Mapa (Satélite)</h4>
+                <!-- Container do Mapa -->
+                <div id="mapa" class="w-full h-[400px] rounded-md border border-gray-300 z-0"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Chave de API inserida conforme solicitado
+        const apiKey = "IzaSyBe1mPXgphdfzYlUfjGzkgWq8Dd2PcLWj8";
+        
+        let map;
+        let marker;
+
+        // Inicializar o mapa do Leaflet com camada de Satélite
+        function initMap() {
+            map = L.map('mapa').setView([-12.2666, -38.9663], 9);
+            
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Satélite'
+            }).addTo(map);
+        }
+
+        window.onload = initMap;
+
+        function mostrarMensagem(texto, tipo) {
+            const msgDiv = document.getElementById('mensagem');
+            msgDiv.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-blue-100', 'text-blue-700', 'bg-yellow-100', 'text-yellow-700');
+            
+            if (tipo === 'erro') msgDiv.classList.add('bg-red-100', 'text-red-700');
+            else if (tipo === 'info') msgDiv.classList.add('bg-blue-100', 'text-blue-700');
+            else if (tipo === 'aviso') msgDiv.classList.add('bg-yellow-100', 'text-yellow-700');
+            
+            msgDiv.innerText = texto;
+            msgDiv.classList.remove('hidden');
+        }
+
+        async function buscarCoordenadas() {
+            const logradouro = document.getElementById('logradouro').value.trim();
+            const numero = document.getElementById('numero').value.trim();
+            const bairroInput = document.getElementById('bairro').value.trim();
+            const cepInput = document.getElementById('cep_input').value.trim();
+            const coordsInput = document.getElementById('coords_input').value.trim();
+            const municipio = document.getElementById('municipio').value.trim();
+            const estado = document.getElementById('estado').value.trim();
+
+            // Validação mínima: Precisa de Coordenadas OU (Logradouro/CEP + Município)
+            if (!coordsInput && !logradouro && !cepInput) {
+                mostrarMensagem("Por favor, informe o Logradouro, o CEP ou as Coordenadas.", "aviso");
+                return;
+            }
+
+            const btnText = document.getElementById('btn-text');
+            const loading = document.getElementById('loading');
+            btnText.innerText = "Processando...";
+            loading.classList.remove('hidden');
+            mostrarMensagem("Buscando localização... Aguarde.", "info");
+
+            let url = '';
+            let isReverse = false;
+
+            if (coordsInput) {
+                const parts = coordsInput.split(',');
+                if (parts.length !== 2) {
+                    mostrarMensagem("Formato de coordenadas inválido. Use: Latitude, Longitude", "erro");
+                    finalizarLoading();
+                    return;
+                }
+                const lat = parseFloat(parts[0].trim());
+                const lon = parseFloat(parts[1].trim());
+                url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`;
+                isReverse = true;
+            } else {
+                // Montagem da query priorizando Logradouro, Número e Bairro
+                let queryParts = [];
+                if (logradouro) queryParts.push(logradouro);
+                if (numero) queryParts.push(numero);
+                if (bairroInput) queryParts.push(bairroInput);
+                queryParts.push(municipio);
+                queryParts.push(estado);
+                if (cepInput) queryParts.push(cepInput);
+                queryParts.push("Brasil");
+
+                const queryString = queryParts.join(', ');
+                url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(queryString)}&limit=1`;
+            }
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                const res = isReverse ? (data.error ? null : data) : (data[0] || null);
+
+                if (res) {
+                    const lat = parseFloat(res.lat);
+                    const lon = parseFloat(res.lon);
+                    const addr = res.address || {};
+
+                    const logradouroFinal = addr.road || logradouro || "-";
+                    const numeroFinal = addr.house_number || numero || "-";
+                    const bairroFinal = addr.suburb || addr.neighbourhood || addr.city_district || addr.district || bairroInput || "-";
+                    const municipioFinal = addr.city || addr.town || addr.village || municipio;
+                    const estadoFinal = addr.state || estado;
+                    const cepFinal = addr.postcode || cepInput || "-";
+
+                    // Atualiza Tabela
+                    document.getElementById('tabela_body').innerHTML = `
+                        <tr>
+                            <td class="px-4 py-2 text-sm text-gray-900">${logradouroFinal}</td>
+                            <td class="px-4 py-2 text-sm text-gray-900">${numeroFinal}</td>
+                            <td class="px-4 py-2 text-sm text-gray-900">${bairroFinal}</td>
+                            <td class="px-4 py-2 text-sm text-gray-900">${municipioFinal}</td>
+                            <td class="px-4 py-2 text-sm text-gray-900">${estadoFinal}</td>
+                            <td class="px-4 py-2 text-sm text-gray-900">${cepFinal}</td>
+                            <td class="px-4 py-2 text-sm text-gray-900 font-mono">${lat.toFixed(6)}, ${lon.toFixed(6)}</td>
+                        </tr>
+                    `;
+
+                    // Atualiza Mapa
+                    if (marker) map.removeLayer(marker);
+                    marker = L.marker([lat, lon]).addTo(map);
+                    marker.bindPopup(`<b>${logradouroFinal}, ${numeroFinal}</b><br>${municipioFinal} - ${estadoFinal}`).openPopup();
+                    map.setView([lat, lon], 17);
+                    
+                    document.getElementById('mensagem').classList.add('hidden');
+                } else {
+                    mostrarMensagem("Nenhum local encontrado com estes dados.", "erro");
+                }
+            } catch (err) {
+                mostrarMensagem("Erro de conexão com o serviço de mapas.", "erro");
+            } finally {
+                finalizarLoading();
+            }
+        }
+
+        function finalizarLoading() {
+            document.getElementById('btn-text').innerText = "🔍 Buscar Coordenadas";
+            document.getElementById('loading').classList.add('hidden');
+        }
+
+        function limparCampos() {
+            document.getElementById('logradouro').value = '';
+            document.getElementById('numero').value = '';
+            document.getElementById('bairro').value = '';
+            document.getElementById('cep_input').value = '';
+            document.getElementById('coords_input').value = '';
+            document.getElementById('mensagem').classList.add('hidden');
+            document.getElementById('tabela_body').innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center text-gray-500">Nenhuma busca realizada ainda.</td></tr>';
+            if (marker) map.removeLayer(marker);
+            map.setView([-12.2666, -38.9663], 9);
+        }
+    </script>
+</body>
+</html>
