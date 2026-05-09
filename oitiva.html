@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oitiva Guiada — Sistema Escrivão</title>
+    <!-- Fontes e Ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        :root {
+            /* Paleta Dark Premium (Slate) */
+            --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+            --color-bg-app: #020617;      /* Fundo da tela (Slate 950) */
+            --color-bg-card: #0f172a;     /* Fundo dos cartões (Slate 900) */
+            --color-bg-input: #1e293b;    /* Fundo dos inputs e notas (Slate 800) */
+            
+            --color-border-light: #334155; /* Bordas suaves (Slate 700) */
+            --color-border-focus: #3b82f6; /* Azul foco */
+            
+            --color-text-title: #f8fafc;   /* Branco para títulos */
+            --color-text-primary: #e2e8f0; /* Cinza bem claro para textos */
+            --color-text-secondary: #94a3b8; /* Cinza médio para textos secundários */
+            
+            /* Cores de Ação (Ajustadas para Dark Mode) */
+            --color-primary: #3b82f6;        /* Azul vibrante */
+            --color-primary-hover: #60a5fa;  /* Azul claro hover */
+            --color-primary-light: rgba(59, 130, 246, 0.15); /* Fundo azul translúcido */
+            
+            --color-teal: #14b8a6;           /* Verde água/Teal vibrante */
+            --color-teal-hover: #2dd4bf;     /* Teal claro hover */
+            --color-teal-light: rgba(20, 184, 166, 0.15); /* Fundo teal translúcido */
+            
+            /* Status */
+            --color-danger: #ef4444;
+            --color-danger-hover: #f87171;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            
+            /* Sombras e Arredondamento */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+            
+            /* Transições */
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: var(--font-sans); 
+            background-color: var(--color-bg-app); 
+            color: var(--color-text-primary); 
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Scrollbar customizada para tema escuro */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--color-bg-app); }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .app { max-width: 840px; margin: 0 auto; padding: 2rem 1.5rem; }
+        
+        /* HEADER */
+        .header { 
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border: 1px solid var(--color-border-light); 
+            border-radius: var(--radius-lg); 
+            padding: 1.25rem 1.5rem; 
+            margin-bottom: 1.5rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 16px; 
+            box-shadow: var(--shadow-sm); 
+        }
+        .badge { background: var(--color-primary); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.5px; white-space: nowrap; }
+        .badge-esc { background: var(--color-teal); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.5px; white-space: nowrap; }
+        
+        /* CARDS */
+        .card { 
+            background: var(--color-bg-card); 
+            border: 1px solid var(--color-border-light); 
+            border-radius: var(--radius-lg); 
+            padding: 1.5rem; 
+            margin-bottom: 1.25rem; 
+            box-shadow: var(--shadow-md); 
+            transition: var(--transition);
+        }
+        .card-title { font-size: 16px; font-weight: 700; color: var(--color-text-title); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .card-title i { color: var(--color-primary); font-size: 20px; }
+        .card-sub { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1.25rem; }
+        .hidden { display: none !important; }
+        
+        /* GRID DE OPÇÕES (Tipos de Oitiva) */
+        .tipo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1rem; }
+        .tipo-opt { 
+            padding: 1rem 0.5rem; 
+            border: 1px solid var(--color-border-light);
+            background: var(--color-bg-input);
+            border-radius: var(--radius-md); 
+            cursor: pointer; 
+            text-align: center; 
+            font-size: 13px; 
+            font-weight: 500;
+            color: var(--color-text-secondary); 
+            transition: var(--transition); 
+        }
+        .tipo-opt i { font-size: 28px; display: block; margin-bottom: 8px; color: #64748b; transition: var(--transition); }
+        .tipo-opt:hover { background: #334155; transform: translateY(-2px); box-shadow: var(--shadow-sm); color: var(--color-text-primary); }
+        .tipo-opt:hover i { color: var(--color-text-primary); }
+        
+        .tipo-opt.sel { 
+            border-color: var(--color-primary); 
+            color: #bfdbfe; 
+            background: var(--color-primary-light); 
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+        .tipo-opt.sel i { color: var(--color-primary); }
+        
+        .tipo-opt.sel-condutor { 
+            border-color: var(--color-teal); 
+            color: #99f6e4; 
+            background: var(--color-teal-light); 
+            box-shadow: 0 4px 12px rgba(20, 184, 166, 0.2);
+        }
+        .tipo-opt.sel-condutor i { color: var(--color-teal); }
+        
+        /* LAYOUT PRINCIPAL (Oitiva Ao Vivo) */
+        .main-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; margin-bottom: 1.25rem; }
+        .video-panel { 
+            border: 1px solid var(--color-border-light); 
+            border-radius: var(--radius-lg); 
+            overflow: hidden; 
+            background: #000000; 
+            position: relative; 
+            aspect-ratio: 4/3; 
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+        }
+        video { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .vid-ph { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b; font-size: 14px; font-weight: 500; gap: 10px; }
+        .vid-ph i { font-size: 42px; color: #475569; }
+        
+        /* OVERLAYS DE GRAVAÇÃO */
+        .rec-overlay { position: absolute; top: 16px; left: 16px; display: flex; align-items: center; gap: 8px; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(4px); padding: 6px 12px; border-radius: 999px; font-size: 12px; color: #fff; font-weight: 700; border: 1px solid rgba(255,255,255,0.05); }
+        .rec-dot { width: 10px; height: 10px; background: var(--color-danger); border-radius: 50%; animation: blink 1.2s ease-in-out infinite; flex-shrink: 0; box-shadow: 0 0 8px var(--color-danger); }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+        .timer-ov { position: absolute; top: 16px; right: 16px; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(4px); padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; font-family: ui-monospace, monospace; color: #fff; display: none; border: 1px solid rgba(255,255,255,0.05); }
+        
+        /* PAINEL DE PERGUNTAS */
+        .pergunta-panel { 
+            border: 1px solid var(--color-border-light); 
+            border-radius: var(--radius-lg); 
+            padding: 1.5rem; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            background: var(--color-bg-card); 
+            box-shadow: var(--shadow-sm);
+        }
+        .perg-step { font-size: 12px; color: var(--color-text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .perg-num { font-size: 36px; font-weight: 800; line-height: 1; color: var(--color-primary); }
+        .perg-num.teal { color: var(--color-teal); }
+        .perg-txt { font-size: 16px; font-weight: 600; color: var(--color-text-title); line-height: 1.6; flex: 1; }
+        .perg-dica { font-size: 13px; color: #cbd5e1; font-style: normal; line-height: 1.5; background: var(--color-bg-input); padding: 12px 14px; border-radius: var(--radius-md); border-left: 4px solid var(--color-border-light); }
+        .perg-nav { display: flex; gap: 10px; margin-top: auto; padding-top: 16px; }
+        
+        /* BOTÕES */
+        .bn, .bs, button { 
+            padding: 10px 16px; 
+            border-radius: var(--radius-sm); 
+            border: 1px solid var(--color-border-light); 
+            background: var(--color-bg-input); 
+            color: var(--color-text-primary); 
+            font-size: 13px; 
+            font-family: inherit;
+            cursor: pointer; 
+            transition: var(--transition); 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-weight: 600; 
+        }
+        .bn:hover, .bs:hover, button:hover { background: #334155; transform: translateY(-1px); box-shadow: var(--shadow-sm); border-color: #475569; }
+        .bn:active, .bs:active, button:active { transform: translateY(0); }
+        
+        .bn-p, .bp { border: none; background: var(--color-primary); color: white; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3); }
+        .bn-p:hover, .bp:hover { background: var(--color-primary-hover); box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.4); }
+        
+        .bn-t, .bt { border: none; background: var(--color-teal); color: white; box-shadow: 0 4px 6px -1px rgba(20, 184, 166, 0.3); }
+        .bn-t:hover, .bt:hover { background: var(--color-teal-hover); box-shadow: 0 6px 8px -1px rgba(20, 184, 166, 0.4); }
+        
+        .bn:disabled, .bs:disabled, .btn-rec:disabled, .bp:disabled, button:disabled { opacity: .4; cursor: not-allowed; transform: none; box-shadow: none; background: var(--color-bg-input); border-color: var(--color-border-light); color: var(--color-text-secondary); }
+        
+        /* CONTROLES DE GRAVAÇÃO */
+        .rec-controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: var(--color-bg-input); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--color-border-light); }
+        .btn-rec { padding: 10px 20px; border-radius: var(--radius-sm); border: none; background: var(--color-danger); color: white; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: var(--transition); box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3); }
+        .btn-rec:hover { background: var(--color-danger-hover); transform: translateY(-1px); box-shadow: 0 6px 8px -1px rgba(239, 68, 68, 0.4); }
+        
+        /* PROGRESSÃO (Dots) */
+        .perg-dots { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; justify-content: center; }
+        .pdot { width: 24px; height: 6px; border-radius: 3px; background: var(--color-border-light); cursor: pointer; transition: var(--transition); }
+        .pdot:hover { background: #475569; }
+        .pdot.done { background: var(--color-success); }
+        .pdot.active-blue { background: var(--color-primary); width: 32px; box-shadow: 0 0 8px rgba(59, 130, 246, 0.6); }
+        .pdot.active-teal { background: var(--color-teal); width: 32px; box-shadow: 0 0 8px rgba(20, 184, 166, 0.6); }
+        
+        /* NOTAS DO ESCRIVÃO */
+        .nota-row { display: flex; gap: 12px; margin-bottom: 1.25rem; }
+        .nota-row textarea { flex: 1; font-size: 14px; min-height: 60px; resize: vertical; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--color-border-light); font-family: inherit; background: var(--color-bg-input); color: var(--color-text-primary); transition: var(--transition); }
+        .nota-row textarea:focus { outline: none; border-color: var(--color-border-focus); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .nota-row button { align-self: flex-end; padding: 10px 16px; }
+        .notas-log { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 6px; }
+        
+        .nota-item { font-size: 14px; padding: 12px 16px; border-radius: var(--radius-md); background: var(--color-bg-input); border-left: 4px solid var(--color-primary); line-height: 1.6; color: #cbd5e1; }
+        .nota-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* STATUS E AVISOS */
+        .status { padding: 12px 16px; border-radius: var(--radius-sm); font-size: 14px; display: flex; align-items: center; gap: 10px; margin-top: 12px; font-weight: 500; }
+        .s-info { background: rgba(59, 130, 246, 0.1); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .s-ok { background: rgba(16, 185, 129, 0.1); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .s-warn { background: rgba(245, 158, 11, 0.1); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .s-err { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); }
+        
+        .adv-box { font-size: 14px; line-height: 1.6; padding: 16px; border-radius: var(--radius-md); margin-bottom: 12px; font-weight: 500; }
+        .adv-blue { background: rgba(59, 130, 246, 0.1); color: #bfdbfe; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .adv-teal { background: rgba(20, 184, 166, 0.1); color: #99f6e4; border: 1px solid rgba(20, 184, 166, 0.2); }
+        
+        /* TABELAS DE RESUMO */
+        .ri { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--color-border-light); font-size: 14px; }
+        .ri:last-child { border-bottom: none; }
+        .rk { color: var(--color-text-secondary); font-weight: 500; }
+        .rv { color: var(--color-text-title); font-weight: 600; max-width: 60%; text-align: right; word-break: break-word; }
+        
+        /* FORMULÁRIOS */
+        .fg { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .fg.s { grid-template-columns: 1fr; }
+        .fg.t { grid-template-columns: 1fr 1fr 1fr; }
+        label { font-size: 13px; color: var(--color-text-title); display: block; margin-bottom: 6px; font-weight: 600; }
+        input, select { 
+            width: 100%; 
+            font-size: 14px; 
+            padding: 10px 12px; 
+            border-radius: var(--radius-sm); 
+            border: 1px solid var(--color-border-light); 
+            background-color: var(--color-bg-input);
+            font-family: inherit; 
+            color: var(--color-text-title);
+            transition: var(--transition); 
+        }
+        input:focus, select:focus { outline: none; border-color: var(--color-border-focus); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        input::placeholder, textarea::placeholder { color: #64748b; }
+        
+        /* ANIMAÇÕES */
+        .ldots { display: inline-flex; gap: 4px; vertical-align: middle; }
+        .ldots span { width: 6px; height: 6px; background: currentColor; border-radius: 50%; animation: b2 1s infinite; }
+        .ldots span:nth-child(2) { animation-delay: .2s; }
+        .ldots span:nth-child(3) { animation-delay: .4s; }
+        @keyframes b2 { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-4px); } }
+        
+        /* BADGES */
+        .badge-tipo { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 999px; }
+        .badge-blue { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .badge-teal { background: rgba(20, 184, 166, 0.15); color: #5eead4; border: 1px solid rgba(20, 184, 166, 0.3); }
+        
+        .escrivao-tag { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: var(--color-text-primary); padding: 12px 16px; background: var(--color-bg-card); border: 1px solid var(--color-border-light); border-radius: var(--radius-md); margin-bottom: 1.5rem; box-shadow: var(--shadow-sm); }
+        .escrivao-tag i { color: var(--color-primary); font-size: 20px; }
+
+        /* UTILITÁRIOS */
+        .action-bar { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+        .btn-sm { padding: 8px 14px !important; font-size: 13px !important; }
+        .input-error { border-color: var(--color-danger) !important; background-color: rgba(239, 68, 68, 0.05) !important; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important; }
+
+        /* RESPONSIVIDADE */
+        @media (max-width: 768px) {
+            .tipo-grid { grid-template-columns: 1fr 1fr; }
+            .main-layout { grid-template-columns: 1fr; }
+            .fg, .fg.t { grid-template-columns: 1fr; gap: 12px; }
+            .rec-controls { justify-content: center; }
+            .rec-controls button { flex: 1; justify-content: center; }
+            .header { flex-direction: column; align-items: flex-start; text-align: left; }
+            .header > div:last-child { margin-left: 0; text-align: left; margin-top: 8px; }
+            .app { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden">Oitiva guiada — sistema para escrivão conduzir depoimentos com câmera ao vivo e roteiro</h1>
+
+    <div class="header">
+        <div style="display:flex;flex-direction:column;gap:6px">
+            <span class="badge">POLÍCIA CIVIL</span>
+            <span class="badge-esc"><i class="ti ti-writing" aria-hidden="true"></i> Escrivão</span>
+        </div>
+        <div>
+            <div style="font-size:20px;font-weight:700;color:var(--color-text-title); letter-spacing: -0.5px;">Oitiva Guiada</div>
+            <div style="font-size:13px;color:var(--color-text-secondary); font-weight: 500;">Roteiro dinâmico e câmera ao vivo</div>
+        </div>
+        <div style="margin-left:auto;font-size:13px;color:var(--color-text-secondary);text-align:right">
+            <div id="clock" style="font-weight: 700; color: var(--color-text-title); font-size: 15px; font-variant-numeric: tabular-nums;"></div>
+            <div style="margin-top:2px;">IP em andamento</div>
+        </div>
+    </div>
+
+    <!-- TELA CONFIGURAÇÃO INICIAL -->
+    <div id="tela-config">
+
+        <div class="escrivao-tag">
+            <i class="ti ti-info-circle" aria-hidden="true"></i>
+            O escrivão conduz a oitiva. As perguntas aparecerão na tela enquanto a câmera grava o depoente.
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="ti ti-users" aria-hidden="true"></i> Natureza da Oitiva</div>
+            <div class="card-sub">Selecione o papel da pessoa que será ouvida neste procedimento</div>
+            <div class="tipo-grid">
+                <div class="tipo-opt sel" id="t-testemunha" onclick="setTipo('testemunha')">
+                    <i class="ti ti-eye" aria-hidden="true"></i>Testemunha
+                    <div style="font-size:12px;margin-top:6px;opacity:.8;font-weight:400;">Presenciou o fato</div>
+                </div>
+                <div class="tipo-opt" id="t-vitima" onclick="setTipo('vitima')">
+                    <i class="ti ti-heart-broken" aria-hidden="true"></i>Vítima
+                    <div style="font-size:12px;margin-top:6px;opacity:.8;font-weight:400;">Sofreu o dano</div>
+                </div>
+                <div class="tipo-opt" id="t-investigado" onclick="setTipo('investigado')">
+                    <i class="ti ti-user-exclamation" aria-hidden="true"></i>Investigado
+                    <div style="font-size:12px;margin-top:6px;opacity:.8;font-weight:400;">Suspeito / Indiciado</div>
+                </div>
+                <div class="tipo-opt" id="t-condutor" onclick="setTipo('condutor')">
+                    <i class="ti ti-shield-check" aria-hidden="true"></i>Condutor
+                    <div style="font-size:12px;margin-top:6px;opacity:.8;font-weight:400;">Policial</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="card-aviso-condutor" style="display:none;background:rgba(20, 184, 166, 0.1);border-color:rgba(20, 184, 166, 0.3);">
+            <div class="card-title" style="color:#5eead4"><i class="ti ti-shield" aria-hidden="true"></i> Oitiva de Condutor da Ocorrência</div>
+            <div style="font-size:14px;color:#ccfbf1;line-height:1.6;font-weight:400;">O condutor é o agente de segurança que atendeu a ocorrência e apresentou o fato. Seu depoimento documenta as circunstâncias, reforçando a cadeia de custódia e a legalidade da apresentação.</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="ti ti-id-badge" aria-hidden="true"></i> Dados do Depoente</div>
+            <div class="card-sub">Preencha as informações de qualificação antes de iniciar a gravação</div>
+            <div class="fg" id="row-nome-cpf">
+                <div><label>Nome completo *</label><input type="text" id="s-nome" placeholder="Ex: João da Silva"></div>
+                <div id="wrapper-cpf"><label>CPF</label><input type="text" id="s-cpf" placeholder="000.000.000-00"></div>
+            </div>
+            <div class="fg s" id="linha-dados-extra">
+                <div id="wrapper-matricula" style="display:none;"><label>Matrícula</label><input type="text" id="s-matricula" placeholder="Matrícula funcional"></div>
+                <div><label>Profissão / Posto</label><input type="text" id="s-prof" placeholder="Ex: Comerciante / Soldado PM"></div>
+                <div id="wrapper-unidade" style="display:none;"><label>Unidade / Lotação</label><input type="text" id="s-unidade" placeholder="Ex: 1º Batalhão"></div>
+            </div>
+            <div class="fg s" id="wrapper-end">
+                <div><label>Endereço completo</label><input type="text" id="s-end" placeholder="Rua, número, bairro, cidade..."></div>
+            </div>
+            <div class="fg" id="wrapper-advogado" style="display:none;">
+                <div><label>Nome do Advogado(a) (se presente)</label><input type="text" id="s-adv-nome" placeholder="Nome do defensor"></div>
+                <div><label>Nº OAB</label><input type="text" id="s-adv-oab" placeholder="Ex: 12345/SP"></div>
+            </div>
+            <div class="fg">
+                <div><label>IP / BO nº</label><input type="text" id="s-ip" placeholder="Ex: IP 000/2024"></div>
+                <div><label>Data e hora da oitiva</label><input type="datetime-local" id="s-data"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="ti ti-writing" aria-hidden="true"></i> Escrivão Responsável</div>
+            <div class="fg">
+                <div><label>Nome do escrivão</label><input type="text" id="s-escrivao" placeholder="Nome completo do agente"></div>
+                <div><label>Matrícula</label><input type="text" id="s-mat" placeholder="Matrícula funcional"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="ti ti-camera" aria-hidden="true"></i> Teste de Equipamento</div>
+            <div class="card-sub">Verifique o enquadramento e o áudio antes de iniciar oficialmente.</div>
+            <div style="width:100%;max-width:320px;aspect-ratio:4/3;background:#000000;border-radius:var(--radius-md);overflow:hidden;position:relative;margin-bottom:16px;border: 1px solid var(--color-border-light);box-shadow:inset 0 2px 10px rgba(0,0,0,0.8);">
+                <video id="cam-test" autoplay muted playsinline></video>
+                <div id="cam-ph" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:14px;font-weight:500;flex-direction:column;gap:12px">
+                    <i class="ti ti-video-off" style="font-size:40px;color:#475569" aria-hidden="true"></i>Câmera desligada
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <button class="bs" onclick="testarCam()"><i class="ti ti-camera" aria-hidden="true"></i> Ligar / Testar Câmera</button>
+                <button class="bp" onclick="iniciarOitiva()"><i class="ti ti-player-play-filled" aria-hidden="true"></i> Ir para Sala de Oitiva</button>
+            </div>
+            <div id="status-config"></div>
+        </div>
+    </div>
+
+    <!-- TELA DA OITIVA AO VIVO -->
+    <div id="tela-oitiva" class="hidden">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px">
+                <span id="badge-tipo-ativo" class="badge-tipo badge-blue"></span>
+                <span style="font-size:16px;font-weight:700;color:var(--color-text-title)" id="nome-ativo"></span>
+            </div>
+            <div style="font-size:13px;color:var(--color-text-title);display:flex;align-items:center;gap:8px;background:var(--color-bg-input);padding:6px 14px;border-radius:999px;border:1px solid var(--color-border-light);box-shadow:var(--shadow-sm);">
+                <i class="ti ti-writing" aria-hidden="true" style="color:var(--color-primary)"></i> Escrivão: <span id="escrivao-ativo" style="font-weight:700;"></span>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <div class="video-panel">
+                <video id="cam-live" autoplay muted playsinline></video>
+                <div class="vid-ph" id="live-ph"><i class="ti ti-video" aria-hidden="true"></i><span>Aguardando sinal...</span></div>
+                <div class="rec-overlay" id="rec-overlay" style="display:none"><div class="rec-dot"></div><span id="rec-label">GRAVANDO</span></div>
+                <div class="timer-ov" id="timer-ov">00:00</div>
+            </div>
+
+            <div class="pergunta-panel">
+                <div class="perg-step" id="perg-step">Pergunta 1</div>
+                <div class="perg-num blue" id="perg-num">01</div>
+                <div class="perg-txt" id="perg-txt">—</div>
+                <div class="perg-dica" id="perg-dica"></div>
+                <div class="perg-nav">
+                    <button class="bn" id="btn-prev" onclick="prevP()"><i class="ti ti-arrow-left" aria-hidden="true"></i> Anterior</button>
+                    <button class="bn bn-p" id="btn-prox" onclick="proxP()" style="margin-left:auto">Avançar <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="perg-dots" id="perg-dots"></div>
+
+        <div class="card" style="padding:1.25rem 1.5rem">
+            <div class="card-title" style="margin-bottom:12px;font-size:14px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px;"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i> Painel de Controle</div>
+            <div class="rec-controls">
+                <button class="btn-rec" id="btn-rec" onclick="startRec()"><i class="ti ti-player-record-filled" aria-hidden="true"></i> Iniciar Gravação</button>
+                <button class="bs" id="btn-pause" onclick="pauseRec()" disabled><i class="ti ti-player-pause-filled" aria-hidden="true"></i> Pausar</button>
+                <button class="bs" id="btn-stop-rec" onclick="stopRec()" disabled><i class="ti ti-player-stop-filled" aria-hidden="true"></i> Parar</button>
+                <button id="btn-encerrar" class="bp" onclick="encerrar()" style="margin-left:auto"><i class="ti ti-check" aria-hidden="true"></i> Encerrar Procedimento</button>
+            </div>
+            <div id="status-rec"></div>
+        </div>
+
+        <div class="card" id="card-adv">
+            <div class="card-title" style="margin-bottom:12px" id="adv-titulo"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Advertência Legal</div>
+            <div class="adv-box" id="adv-texto"></div>
+            <label style="display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer;margin-top:16px;padding:12px;background:var(--color-bg-input);border-radius:var(--radius-sm);border:1px solid var(--color-border-light);">
+                <input type="checkbox" id="adv-ok" style="width:18px;height:18px;accent-color:var(--color-primary);"> 
+                Confirmo que a advertência foi lida e compreendida pelo depoente
+            </label>
+        </div>
+
+        <div class="card">
+            <div class="card-title" style="margin-bottom:8px"><i class="ti ti-pencil" aria-hidden="true"></i> Diário de Bordo (Notas)</div>
+            <div class="card-sub">Anote pontos-chave, contradições ou o resumo das respostas para ajudar na confecção do termo.</div>
+            <div class="nota-row">
+                <textarea id="nota-inp" placeholder="Ex: O depoente relatou que o veículo suspeito era da cor prata..."></textarea>
+                <button class="bp" onclick="salvarNota()"><i class="ti ti-plus" aria-hidden="true"></i> Registrar Nota</button>
+            </div>
+            <div class="notas-log" id="notas-log"></div>
+        </div>
+    </div>
+
+    <!-- TELA FINAL E GERAÇÃO DE TERMO -->
+    <div id="tela-fim" class="hidden">
+        <div class="card" style="border-top:6px solid var(--color-success)">
+            <div class="card-title" style="color:#34d399;font-size:20px"><i class="ti ti-circle-check-filled" aria-hidden="true"></i> Oitiva Concluída com Sucesso</div>
+            <div class="card-sub" id="fim-sub" style="font-size:14px;margin-bottom:1.5rem"></div>
+            <div id="resumo-content"></div>
+        </div>
+
+        <div class="card" id="card-pb" style="display:none">
+            <div class="card-title"><i class="ti ti-video" aria-hidden="true"></i> Arquivo Multimídia (Vídeo)</div>
+            <video id="pb-vid" controls style="width:100%;border-radius:var(--radius-md);margin-top:12px;background:#000000;border:1px solid var(--color-border-light);box-shadow:var(--shadow-md);"></video>
+            <div class="action-bar" style="justify-content: flex-end; margin-top: 16px;">
+                <button class="bs btn-sm" id="btn-download-vid" onclick="baixarVideo()"><i class="ti ti-download" aria-hidden="true"></i> Exportar Vídeo (.webm)</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title" style="color: var(--color-primary)"><i class="ti ti-ear" aria-hidden="true"></i> Transcrição Automática (Speech-to-Text)</div>
+            <div class="card-sub">Texto captado ao vivo durante a gravação. Você pode utilizar a Inteligência Artificial para refinar o áudio caso haja falhas.</div>
+            <textarea id="box-transcricao" style="width: 100%; min-height: 140px; font-size: 14px; line-height: 1.7; padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--color-border-light); background: var(--color-bg-input); color: var(--color-text-title); resize: vertical; font-family: inherit; transition: var(--transition);" placeholder="A transcrição aparecerá aqui..."></textarea>
+            <div class="action-bar" style="justify-content: flex-end; margin-top: 12px;">
+                <button class="bp btn-sm" onclick="degravarAgora()" id="btn-degravar"><i class="ti ti-wand" aria-hidden="true"></i> Degravar com IA Avançada</button>
+                <button class="bs btn-sm" onclick="copiarDegravacao()"><i class="ti ti-copy" aria-hidden="true"></i> Copiar Texto</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="ti ti-notes" aria-hidden="true"></i> Registros do Escrivão</div>
+            <div class="notas-log" id="notas-fim" style="max-height:250px;margin-top:12px"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title" style="font-size: 18px;"><i class="ti ti-sparkles" aria-hidden="true" style="color:var(--color-primary)"></i> Assistente Jurídico (IA)</div>
+            <div class="card-sub" style="font-size: 14px;">Utilize Inteligência Artificial para redigir a peça processual completa, unindo as anotações, os dados qualificativos e a transcrição do áudio.</div>
+            <button onclick="gerarTermo()" style="width:100%;padding:16px;border-radius:var(--radius-md);border:1px dashed #60a5fa;background:var(--color-primary-light);color:#bfdbfe;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:var(--transition);margin-top:8px;">
+                <i class="ti ti-file-text-ai" aria-hidden="true" style="font-size:24px;"></i> Elaborar Termo de Depoimento Oficial
+            </button>
+            <div id="termo-box-container" style="display:none; margin-top:20px;">
+                <div class="action-bar" style="justify-content: flex-end; margin-bottom: 12px;">
+                    <button class="bs btn-sm" onclick="copiarTermo()"><i class="ti ti-copy" aria-hidden="true"></i> Copiar Rascunho</button>
+                    <button class="bs btn-sm" onclick="baixarTermo()"><i class="ti ti-download" aria-hidden="true"></i> Baixar Documento (.txt)</button>
+                </div>
+                <div id="termo-box" style="background:var(--color-bg-input);border:1px solid var(--color-border-light);border-radius:var(--radius-md);padding:24px;font-size:15px;line-height:1.8;color:var(--color-text-title);white-space:pre-wrap;font-family:serif;min-height: 150px;box-shadow:inset 0 2px 4px rgba(0,0,0,0.2);"></div>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:2rem">
+            <button class="bp" style="padding: 12px 24px; font-size: 15px;" onclick="nova()"><i class="ti ti-refresh" aria-hidden="true"></i> Iniciar Novo Procedimento</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Variáveis Globais de Estado
+let tipo = 'testemunha';
+let pergIdx = 0;
+let notas = [];
+let recSecs = 0;
+let recTimer = null;
+let mediaRec = null;
+let chunks = [];
+let videoBlob = null;
+let liveStream = null;
+let testStream = null;
+
+// Variáveis para Degravação (Speech Recognition)
+let recognition = null;
+let transcricaoCompleta = '';
+let isRecordingState = false;
+
+// Inicializa o Motor de Reconhecimento de Voz (se suportado pelo navegador)
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRec();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = 'pt-BR';
+
+    recognition.onresult = (event) => {
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                transcricaoCompleta += event.results[i][0].transcript + ' ';
+            }
+        }
+    };
+    
+    // Auto-restart para evitar que o reconhecimento pare sozinho enquanto grava
+    recognition.onend = () => {
+        if (isRecordingState) {
+            try { recognition.start(); } catch(e) {}
+        }
+    };
+}
+
+// Configurações por Tipo
+const cores = {
+    testemunha: {num:'blue', nav:'bn-p', dot:'active-blue', adv:'adv-blue', badge:'badge-blue', enc:'bp'},
+    vitima: {num:'blue', nav:'bn-p', dot:'active-blue', adv:'adv-blue', badge:'badge-blue', enc:'bp'},
+    investigado: {num:'blue', nav:'bn-p', dot:'active-blue', adv:'adv-blue', badge:'badge-blue', enc:'bp'},
+    condutor: {num:'teal', nav:'bn-t', dot:'active-teal', adv:'adv-teal', badge:'badge-teal', enc:'bt'},
+};
+
+const tipoLabels = { testemunha: 'Testemunha', vitima: 'Vítima', investigado: 'Investigado', condutor: 'Condutor da Ocorrência' };
+const tipoIcons = { testemunha: 'ti-eye', vitima: 'ti-heart-broken', investigado: 'ti-user-exclamation', condutor: 'ti-shield-check' };
+
+// Base de Conhecimento: Perguntas e Roteiros
+const perguntas = {
+    testemunha: [
+        {q:'O senhor(a) é advertido de que tem obrigação legal de dizer a verdade, sob pena do crime de falso testemunho (art. 342 CP). Está ciente?', d:'Aguarde a confirmação verbal antes de prosseguir com as perguntas do fato.'},
+        {q:'Tem algum grau de parentesco, amizade íntima ou inimizade com as partes envolvidas?', d:'Verifique se há impedimentos ou suspeição para testemunhar.'},
+        {q:'Relate livremente o que sabe sobre os fatos — tudo que viu ou ouviu.', d:'Não interrompa. Deixe o relato fluir naturalmente. Anote os pontos centrais para aprofundar a seguir.'},
+        {q:'Onde exatamente os fatos ocorreram? Descreva o local.', d:'Anote endereço, pontos de referência, se era área pública, privada, iluminação, etc.'},
+        {q:'Quando ocorreram os fatos? Data e horário aproximado.', d:'Se não souber a hora exata, peça referência do período do dia (manhã, noite).'},
+        {q:'Quem mais estava presente? Pode descrever essas pessoas?', d:'Nomes, apelidos, características físicas (altura, cor, roupas) e veículos utilizados.'},
+        {q:'Como os fatos se desenrolaram? Descreva a sequência de ações.', d:'Explore a cronologia: antes do fato, o momento exato e a fuga/desfecho.'},
+        {q:'Alguma arma ou objeto foi utilizado na ação? Pode descrever?', d:'Faca, arma de fogo, ferramentas. Tipo, cor, marca, características.'},
+        {q:'Na sua percepção, qual foi o motivo do ocorrido?', d:'Pode ser uma hipótese da testemunha. Registre para guiar a linha de investigação.'},
+        {q:'Há mais alguma informação relevante que o senhor(a) deseje acrescentar?', d:'Perguntas abertas no final frequentemente trazem informações que o depoente esqueceu.'},
+        {q:'Confirma integralmente as declarações prestadas e concorda em assinar o termo?', d:'Encerramento formal. Registre se houver ressalvas ou retificações solicitadas.'},
+    ],
+    vitima: [
+        {q:'Relate com o maior número de detalhes possível o que aconteceu.', d:'Deixe a vítima falar livremente. Mantenha um ambiente acolhedor e sem julgamentos.'},
+        {q:'Onde exatamente o fato ocorreu? Como era o local?', d:'Endereço completo, se estava sozinho(a) ou acompanhado(a).'},
+        {q:'Quando ocorreu? Lembre-se da data e do horário aproximado.', d:'A precisão temporal é muito importante para buscar câmeras de segurança.'},
+        {q:'Conhecia o autor(a) do fato? Se não, como pode descrevê-lo(a)?', d:'Solicite características físicas: rosto, voz, vestuário, tatuagens, cicatrizes, sotaque.'},
+        {q:'O que o autor(a) disse ou fez exatamente? Houve agressão ou ameaça de morte?', d:'Tente transcrever as falas literais se a vítima lembrar (palavrões, exigências).'},
+        {q:'Quais foram os danos e prejuízos sofridos? Lesões, bens roubados, objetos quebrados?', d:'Cada item citado embasará requisições periciais e laudos de avaliação.'},
+        {q:'Há alguma testemunha que tenha presenciado ou que possa confirmar o ocorrido?', d:'Anote nomes, contatos, ou se a testemunha chegou logo após o fato.'},
+        {q:'Isso já havia ocorrido antes? Existe algum histórico com o autor(a)?', d:'Importante para reincidência, quebra de medida protetiva ou escalada de violência.'},
+        {q:'Possui alguma prova, como fotos, mensagens de celular, áudios ou vídeos?', d:'Oriente a vítima a não apagar nada e solicitar compartilhamento no cartório da delegacia.'},
+        {q:'Deseja representar criminalmente contra o autor(a)?', d:'Pergunta fundamental para crimes de ação pública condicionada à representação (ex: ameaça, estelionato).'},
+        {q:'Confirma as declarações e concorda em assinar o termo?', d:'Encerramento formal da oitiva.'},
+    ],
+    investigado: [
+        {q:'O senhor(a) tem o direito constitucional de permanecer em silêncio (art. 5º, LXIII, CF) sem que isso o prejudique. Deseja responder às perguntas ou ficar em silêncio?', d:'Registre literalmente. Se optar pelo silêncio, encerre as perguntas sobre o fato.'},
+        {q:'Deseja a presença de um advogado ou defensor público neste ato?', d:'Direito fundamental. Se exigir advogado, suspenda o interrogatório até a chegada do profissional.'},
+        {q:'Tem conhecimento do motivo pelo qual está sendo ouvido hoje?', d:'Não revele todo o inquérito de imediato. Deixe-o expor o que sabe primeiro.'},
+        {q:'Onde o senhor(a) estava no dia e horário em que os fatos teriam ocorrido?', d:'Busca de álibi. Peça detalhes rígidos: local, pessoas com quem estava, tickets, extratos.'},
+        {q:'Pode apresentar alguma testemunha ou prova material que confirme sua localização e versão?', d:'Nomes, contatos, câmeras de trabalho, registros digitais.'},
+        {q:'Conhece a vítima ou as demais partes envolvidas? Como é a relação de vocês?', d:'Vínculo pré-existente, histórico criminal compartilhado, inimizades, dívidas.'},
+        {q:'Tem conhecimento dos fatos que estão sendo investigados? Qual é a sua versão do ocorrido?', d:'Ouça sem debater. Deixe-o criar a narrativa. Anote contradições para confrontar depois.'},
+        {q:'Houve a participação de outras pessoas nesses fatos? Pode identificá-las?', d:'Busca de co-autores ou partícipes. Apelidos, locais onde encontrá-los.'},
+        {q:'Há mais alguma informação ou esclarecimento que considere importante acrescentar?', d:'Espaço aberto para o investigado apresentar atenuantes ou justificativas.'},
+        {q:'Confirma as declarações prestadas e concorda em assinar o termo de interrogatório?', d:'Encerramento formal. Registre se houver recusa em assinar.'},
+    ],
+    condutor: [
+        {q:'Qual seu nome completo, matrícula funcional, posto e unidade de lotação?', d:'Qualificação funcional do agente. Confirme a matrícula apresentada.'},
+        {q:'Em qual data, horário e endereço exato ocorreu o atendimento desta ocorrência?', d:'A precisão é o que baliza a legalidade do estado de flagrância.'},
+        {q:'Como a equipe tomou conhecimento da ocorrência? (CICOM, denúncia anônima, patrulhamento de rotina)?', d:'Registre o meio de acionamento e o número do chamado (CAD/talão), se houver.'},
+        {q:'Descreva as circunstâncias em que chegaram ao local. O que a equipe visualizou e encontrou?', d:'Cenário encontrado: pessoas correndo, vítima pedindo socorro, sinais de arrombamento.'},
+        {q:'Como se deu a abordagem ou detenção do conduzido? Houve resistência ou tentativa de fuga?', d:'Série de ações: ordem de parada, busca pessoal, uso de algemas (Súmula Vinculante 11), uso de força moderada.'},
+        {q:'Foram encontrados objetos ilícitos (armas, drogas), produtos de crime ou instrumentos na posse do conduzido?', d:'Onde exatamente estavam escondidos? Quem os apreendeu? Base crucial para a cadeia de custódia.'},
+        {q:'Houve a leitura e garantia dos direitos constitucionais ao conduzido no momento da prisão?', d:'Direito ao silêncio e contato com advogado/familiar. Indispensável relatar.'},
+        {q:'O conduzido informou algo informalmente à equipe no momento da abordagem?', d:'Declarações informais, confissões no calor do momento. (Atenção: valor probatório relativo).'},
+        {q:'Havia apoio de outras viaturas ou agentes envolvidos no cerco/atendimento? Quais?', d:'Citar prefixo de viaturas e nomes dos componentes de apoio.'},
+        {q:'A equipe identificou câmeras no local ou testemunhas civis que presenciaram a ação?', d:'Qualquer civil arrolado ajuda a embasar o flagrante perante o juiz.'},
+        {q:'Confirma o relato prestado e concorda em assinar o termo como condutor e 1ª testemunha do flagrante?', d:'Encerramento. O agente assina dando fé pública da apresentação da ocorrência.'},
+    ],
+};
+
+const advertencias = {
+    testemunha: {titulo: 'Advertência Legal — Testemunha', txt: 'O senhor(a) está sendo ouvido na condição de TESTEMUNHA e tem o dever legal de dizer a verdade. A prestação de depoimento falso, calar ou ocultar a verdade configura o crime de FALSO TESTEMUNHO (art. 342 do Código Penal), punível com reclusão de 2 a 4 anos, e multa.', cls: 'adv-blue'},
+    vitima: {titulo: 'Orientação — Vítima', txt: 'O senhor(a) está sendo ouvido na condição de VÍTIMA. Relate os fatos com a maior riqueza de detalhes que conseguir se recordar. O senhor(a) tem o direito de ser tratado com dignidade e proteção durante todo o procedimento investigatório.', cls: 'adv-blue'},
+    investigado: {titulo: 'Direitos Constitucionais — Investigado', txt: 'O senhor(a) está sendo interrogado na condição de INVESTIGADO. É garantido o seu direito ao SILÊNCIO (art. 5º, LXIII, da CF/88), sem que isso seja interpretado em prejuízo da sua defesa. Tem direito de comunicar-se com advogado e de não produzir provas contra si mesmo.', cls: 'adv-blue'},
+    condutor: {titulo: 'Compromisso Legal — Agente Público', txt: 'O senhor está sendo ouvido na condição de CONDUTOR DA OCORRÊNCIA. Na qualidade de agente público, tem o dever funcional de relatar com fidelidade e exatidão as circunstâncias materiais da prisão/apreensão. O seu depoimento materializa a legalidade da medida e a cadeia de custódia das provas. Informo que esta oitiva está sendo gravada em áudio e vídeo.', cls: 'adv-teal'},
+};
+
+// Funções de UI
+function setTipo(t) {
+    tipo = t;
+    ['testemunha', 'vitima', 'investigado', 'condutor'].forEach(x => {
+        const el = document.getElementById('t-' + x);
+        el.className = 'tipo-opt' + (x === t ? (x === 'condutor' ? ' sel-condutor' : ' sel') : '');
+    });
+    document.getElementById('card-aviso-condutor').style.display = (t === 'condutor' ? 'block' : 'none');
+    
+    // Controle de exibição dinâmico de campos baseados no tipo de oitiva
+    const wrapperUnidade = document.getElementById('wrapper-unidade');
+    const linhaDadosExtra = document.getElementById('linha-dados-extra');
+    const wrapperCpf = document.getElementById('wrapper-cpf');
+    const wrapperMatricula = document.getElementById('wrapper-matricula');
+    const wrapperEnd = document.getElementById('wrapper-end');
+    const wrapperAdvogado = document.getElementById('wrapper-advogado');
+    const rowNomeCpf = document.getElementById('row-nome-cpf');
+    
+    if (t === 'condutor') {
+        wrapperUnidade.style.display = 'block';
+        wrapperMatricula.style.display = 'block';
+        wrapperCpf.style.display = 'none';
+        wrapperEnd.style.display = 'none';
+        wrapperAdvogado.style.display = 'none';
+        
+        rowNomeCpf.className = 'fg s'; // Nome ocupa a linha toda
+        linhaDadosExtra.className = 'fg t'; // Matrícula, Profissão e Unidade lado a lado (3 colunas)
+    } else {
+        wrapperUnidade.style.display = 'none';
+        wrapperMatricula.style.display = 'none';
+        wrapperCpf.style.display = 'block';
+        wrapperEnd.style.display = 'block';
+        wrapperAdvogado.style.display = (t === 'vitima' || t === 'investigado') ? '' : 'none';
+        
+        rowNomeCpf.className = 'fg'; // Nome e CPF
+        linhaDadosExtra.className = 'fg s'; // Apenas Profissão (1 coluna)
+    }
+}
+
+function showSt(id, cls, html) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<div class="status ${cls}">${html}</div>`;
+}
+
+setInterval(() => {
+    const el = document.getElementById('clock');
+    if (el) el.textContent = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+}, 1000);
+
+// Define a data e hora atual corrigida para o fuso horário local
+const dataAtual = new Date();
+dataAtual.setMinutes(dataAtual.getMinutes() - dataAtual.getTimezoneOffset());
+document.getElementById('s-data').value = dataAtual.toISOString().slice(0, 16);
+
+// Funções de Mídia e Câmera
+async function testarCam() {
+    try {
+        if (testStream) testStream.getTracks().forEach(tr => tr.stop());
+        testStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+        const v = document.getElementById('cam-test');
+        v.srcObject = testStream;
+        v.style.display = 'block';
+        document.getElementById('cam-ph').style.display = 'none';
+        showSt('status-config', 's-ok', '<i class="ti ti-circle-check"></i> Equipamento funcionando perfeitamente.');
+    } catch(e) {
+        showSt('status-config', 's-err', '<i class="ti ti-video-off"></i> Erro ao acessar câmera. Verifique as permissões do navegador.');
+    }
+}
+
+async function iniciarOitiva() {
+    const inputNome = document.getElementById('s-nome');
+    if (!inputNome.value.trim()) {
+        inputNome.classList.add('input-error');
+        showSt('status-config', 's-warn', '<i class="ti ti-alert-triangle"></i> Atenção: O nome do depoente é obrigatório.');
+        setTimeout(() => inputNome.classList.remove('input-error'), 3000);
+        return;
+    }
+    try {
+        if (testStream) testStream.getTracks().forEach(tr => tr.stop());
+        liveStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+        const v = document.getElementById('cam-live');
+        v.srcObject = liveStream;
+        v.style.display = 'block';
+        document.getElementById('live-ph').style.display = 'none';
+        
+        // Transição de telas
+        document.getElementById('tela-config').classList.add('hidden');
+        document.getElementById('tela-oitiva').classList.remove('hidden');
+        window.scrollTo(0,0);
+        
+        // Reset da Oitiva
+        pergIdx = 0; 
+        notas = [];
+        const c = cores[tipo];
+        
+        // Setup visual da Oitiva
+        const badge = document.getElementById('badge-tipo-ativo');
+        badge.className = 'badge-tipo ' + c.badge;
+        badge.innerHTML = '<i class="ti ' + tipoIcons[tipo] + '" aria-hidden="true"></i> ' + tipoLabels[tipo];
+        
+        document.getElementById('nome-ativo').textContent = document.getElementById('s-nome').value;
+        document.getElementById('escrivao-ativo').textContent = document.getElementById('s-escrivao').value || 'Não identificado';
+        document.getElementById('perg-num').className = 'perg-num ' + (tipo === 'condutor' ? 'teal' : 'blue');
+        document.getElementById('btn-prox').className = 'bn ' + c.nav;
+        document.getElementById('btn-encerrar').className = c.enc;
+        
+        // Advertência Legal
+        const adv = advertencias[tipo];
+        document.getElementById('adv-titulo').innerHTML = '<i class="ti ti-alert-triangle" aria-hidden="true"></i> ' + adv.titulo;
+        document.getElementById('adv-texto').className = 'adv-box ' + adv.cls;
+        document.getElementById('adv-texto').textContent = adv.txt;
+        
+        renderPerg();
+        buildDots();
+        showSt('status-rec', 's-info', '<i class="ti ti-info-circle"></i> Sala virtual pronta. Clique em "Iniciar Gravação" para começar.');
+    } catch(e) {
+        showSt('status-config', 's-err', '<i class="ti ti-x"></i> Erro crítico: Falha ao acessar a câmera/microfone.');
+    }
+}
+
+// Lógica de Perguntas (Roteiro)
+function renderPerg() {
+    const ps = perguntas[tipo];
+    const p = ps[pergIdx];
+    document.getElementById('perg-step').textContent = 'Pergunta ' + (pergIdx + 1) + ' de ' + ps.length;
+    document.getElementById('perg-num').textContent = String(pergIdx + 1).padStart(2, '0');
+    document.getElementById('perg-txt').textContent = p.q;
+    document.getElementById('perg-dica').textContent = 'Nota Técnica: ' + p.d;
+    document.getElementById('btn-prev').disabled = (pergIdx === 0);
+    document.getElementById('btn-prox').disabled = (pergIdx === ps.length - 1);
+    updateDots();
+
+    // NOVO: Adiciona a pergunta à degravação automaticamente ao mudar de pergunta se estiver gravando
+    if (isRecordingState) {
+        // Remove interrogações duplicadas no final caso a string original já tenha, e adiciona um "?" garantido.
+        const qText = p.q.trim().replace(/\?+$/, '') + '?';
+        const nomeDepoente = document.getElementById('s-nome').value.trim() || 'o depoente';
+        
+        if (pergIdx === 0) {
+            transcricaoCompleta += `\n\nQuando perguntado ${qText}\n[DADOS DA OITIVA]:\n${getDadosOitivaText()}\n\n`;
+        } else {
+            transcricaoCompleta += `\n\nQuando perguntado ${qText}, ${nomeDepoente} respondeu que `;
+        }
+    }
+}
+
+function buildDots() {
+    const ps = perguntas[tipo];
+    const c = document.getElementById('perg-dots');
+    c.innerHTML = '';
+    ps.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = 'pdot' + (i === pergIdx ? ' ' + cores[tipo].dot : '');
+        d.title = 'Pergunta ' + (i + 1);
+        d.onclick = () => { pergIdx = i; renderPerg(); };
+        c.appendChild(d);
+    });
+}
+
+function updateDots() {
+    document.querySelectorAll('.pdot').forEach((d, i) => {
+        d.className = 'pdot' + (i < pergIdx ? ' done' : i === pergIdx ? ' ' + cores[tipo].dot : '');
+    });
+}
+
+function prevP() { if (pergIdx > 0) { pergIdx--; renderPerg(); } }
+function proxP() { const ps = perguntas[tipo]; if (pergIdx < ps.length - 1) { pergIdx++; renderPerg(); } }
+
+// Lógica de Gravação de Vídeo
+function startRec() {
+    if (!liveStream) return;
+    chunks = [];
+    try { 
+        mediaRec = new MediaRecorder(liveStream, {mimeType: 'video/webm'});
+    } catch(e) { 
+        mediaRec = new MediaRecorder(liveStream); 
+    }
+    
+    mediaRec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    mediaRec.onstop = () => { videoBlob = new Blob(chunks, {type: 'video/webm'}); };
+    mediaRec.start(500); // grava chunks a cada 500ms
+    
+    // Inicia Degravação
+    isRecordingState = true;
+    transcricaoCompleta = '';
+    
+    // NOVO: Registra a primeira pergunta na degravação antes do áudio começar
+    const p = perguntas[tipo][pergIdx];
+    const qText = p.q.trim().replace(/\?+$/, '') + '?';
+    const nomeDepoente = document.getElementById('s-nome').value.trim() || 'o depoente';
+    
+    if (pergIdx === 0) {
+        transcricaoCompleta += `Quando perguntado ${qText}\n[DADOS DA OITIVA]:\n${getDadosOitivaText()}\n\n`;
+    } else {
+        transcricaoCompleta += `Quando perguntado ${qText}, ${nomeDepoente} respondeu que `;
+    }
+    
+    if (recognition) {
+        try { recognition.start(); } catch(e) {}
+    }
+    
+    recSecs = 0;
+    recTimer = setInterval(() => {
+        recSecs++;
+        const m = String(Math.floor(recSecs / 60)).padStart(2, '0');
+        const s = String(recSecs % 60).padStart(2, '0');
+        document.getElementById('timer-ov').textContent = m + ':' + s;
+    }, 1000);
+    
+    document.getElementById('rec-overlay').style.display = 'flex';
+    document.getElementById('timer-ov').style.display = 'block';
+    
+    const btnRec = document.getElementById('btn-rec');
+    btnRec.innerHTML = '<div class="rec-dot"></div> Gravando';
+    btnRec.onclick = () => {};
+    btnRec.style.cursor = 'default';
+    
+    document.getElementById('btn-pause').disabled = false;
+    document.getElementById('btn-stop-rec').disabled = false;
+    showSt('status-rec', 's-warn', '<div class="rec-dot"></div> Oitiva em andamento. Gravação iniciada.');
+}
+
+function pauseRec() {
+    if (!mediaRec) return;
+    if (mediaRec.state === 'recording') {
+        mediaRec.pause();
+        clearInterval(recTimer);
+        isRecordingState = false;
+        if (recognition) recognition.stop(); // Pausa degravação
+        
+        document.getElementById('btn-pause').innerHTML = '<i class="ti ti-player-play-filled"></i> Retomar';
+        document.getElementById('rec-label').textContent = 'PAUSADO';
+        document.getElementById('rec-overlay').querySelector('.rec-dot').style.animation = 'none';
+        showSt('status-rec', 's-info', '<i class="ti ti-player-pause"></i> Gravação em pausa temporária.');
+    } else if (mediaRec.state === 'paused') {
+        mediaRec.resume();
+        
+        isRecordingState = true;
+        if (recognition) { try { recognition.start(); } catch(e) {} } // Retoma degravação
+
+        recTimer = setInterval(() => {
+            recSecs++;
+            const m = String(Math.floor(recSecs / 60)).padStart(2, '0');
+            const s = String(recSecs % 60).padStart(2, '0');
+            document.getElementById('timer-ov').textContent = m + ':' + s;
+        }, 1000);
+        document.getElementById('btn-pause').innerHTML = '<i class="ti ti-player-pause-filled"></i> Pausar';
+        document.getElementById('rec-label').textContent = 'GRAVANDO';
+        document.getElementById('rec-overlay').querySelector('.rec-dot').style.animation = 'blink 1.2s ease-in-out infinite';
+        showSt('status-rec', 's-warn', '<div class="rec-dot"></div> Gravação retomada.');
+    }
+}
+
+function stopRec() {
+    if (mediaRec && mediaRec.state !== 'inactive') mediaRec.stop();
+    clearInterval(recTimer);
+    
+    isRecordingState = false;
+    if (recognition) recognition.stop(); // Para a degravação
+    
+    const btnRec = document.getElementById('btn-rec');
+    btnRec.innerHTML = '<i class="ti ti-player-record-filled"></i> Iniciar Nova Gravação';
+    btnRec.onclick = startRec;
+    btnRec.style.cursor = 'pointer';
+    
+    document.getElementById('btn-pause').disabled = true;
+    document.getElementById('btn-stop-rec').disabled = true;
+    document.getElementById('rec-overlay').style.display = 'none';
+    
+    const m = String(Math.floor(recSecs / 60)).padStart(2, '0');
+    const s = String(recSecs % 60).padStart(2, '0');
+    showSt('status-rec', 's-ok', '<i class="ti ti-device-floppy"></i> Mídia de gravação finalizada com sucesso (' + m + ':' + s + ').');
+}
+
+// Lógica de Notas do Escrivão
+function salvarNota() {
+    const inp = document.getElementById('nota-inp');
+    const txt = inp.value.trim();
+    if (!txt) return;
+    notas.push({
+        perg: pergIdx + 1,
+        texto: txt,
+        hora: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})
+    });
+    inp.value = '';
+    renderNotas();
+}
+
+function renderNotas() {
+    const log = document.getElementById('notas-log');
+    log.innerHTML = notas.map(n => `
+        <div class="nota-item">
+            <div class="nota-label">Ref: Pergunta ${n.perg} · Registrado às ${n.hora}</div>
+            ${n.texto}
+        </div>
+    `).join('');
+    log.scrollTop = log.scrollHeight;
+}
+
+// Finalização
+function encerrar() {
+    if (!confirm('Tem certeza de que deseja encerrar esta oitiva e prosseguir para a confecção do termo?')) return;
+    
+    if (mediaRec && mediaRec.state !== 'inactive') stopRec();
+    if (liveStream) liveStream.getTracks().forEach(t => t.stop());
+    
+    document.getElementById('tela-oitiva').classList.add('hidden');
+    document.getElementById('tela-fim').classList.remove('hidden');
+    window.scrollTo(0,0);
+    
+    buildResumo();
+    
+    if (videoBlob) {
+        document.getElementById('pb-vid').src = URL.createObjectURL(videoBlob);
+        document.getElementById('card-pb').style.display = 'block';
+    }
+    
+    // Preenche a caixa de degravação
+    const boxTranscricao = document.getElementById('box-transcricao');
+    if (!recognition) {
+        boxTranscricao.value = "⚠️ Transcrição de áudio não suportada neste navegador (recomenda-se Google Chrome ou Edge). Clique em 'Degravar com IA Avançada' para forçar transcrição.";
+    } else {
+        boxTranscricao.value = transcricaoCompleta.trim() || "(Nenhuma fala foi captada e degravada com sucesso durante a gravação). Clique em 'Degravar com IA Avançada' se quiser forçar o reconhecimento.";
+    }
+    
+    const nf = document.getElementById('notas-fim');
+    nf.innerHTML = notas.length ? notas.map(n => `
+        <div class="nota-item">
+            <div class="nota-label">Ref: Pergunta ${n.perg} · ${n.hora}</div>
+            ${n.texto}
+        </div>`).join('') : '<div style="font-size:14px;color:var(--color-text-secondary);font-style:italic;padding:10px;">Nenhuma anotação manual foi registrada durante o ato.</div>';
+}
+
+// Funções de Extração de Dados do Resumo
+function getDadosOitivaArray() {
+    const g = id => document.getElementById(id)?.value || 'Não informado';
+    return [
+        ['Natureza da Oitiva', tipoLabels[tipo]],
+        ['Nome do Depoente', g('s-nome')],
+        tipo !== 'condutor' ? ['CPF', g('s-cpf')] : null,
+        tipo === 'condutor' ? ['Matrícula', g('s-matricula')] : null,
+        ['Profissão / Cargo', g('s-prof')],
+        tipo === 'condutor' ? ['Unidade', g('s-unidade')] : null,
+        tipo !== 'condutor' ? ['Endereço Fornecido', g('s-end')] : null,
+        (tipo === 'vitima' || tipo === 'investigado') && g('s-adv-nome') ? ['Advogado(a)', `${g('s-adv-nome')} (OAB: ${g('s-adv-oab')})`] : null,
+        ['Número IP / BO', g('s-ip')],
+        ['Data/Hora do Sistema', new Date(document.getElementById('s-data').value).toLocaleString('pt-BR')],
+        ['Escrivão Condutor', g('s-escrivao')],
+        ['Matrícula Escrivão', g('s-mat')],
+        ['Advertência Legal Lida', document.getElementById('adv-ok').checked ? 'Confirmada e Assinalada' : 'Não confirmada no sistema']
+    ].filter(Boolean);
+}
+
+function getDadosOitivaText() {
+    return getDadosOitivaArray().map(([k, v]) => `${k}: ${v}`).join('\n');
+}
+
+function buildResumo() {
+    const dur = Math.floor(recSecs / 60) + 'm ' + String(recSecs % 60).padStart(2, '0') + 's';
+    
+    document.getElementById('fim-sub').textContent = 'Tempo total de gravação: ' + dur + ' · Anotações cadastradas: ' + notas.length;
+    
+    const rows = getDadosOitivaArray();
+    
+    document.getElementById('resumo-content').innerHTML = rows.map(([k, v]) => `
+        <div class="ri">
+            <span class="rk">${k}</span>
+            <span class="rv">${v}</span>
+        </div>
+    `).join('');
+}
+
+// Funções de Exportação (Vídeo e Termo) e IA
+function baixarVideo() {
+    if (!videoBlob) return;
+    const url = URL.createObjectURL(videoBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    const nome = document.getElementById('s-nome').value.trim().replace(/\s+/g, '_') || 'depoimento';
+    const data = new Date().toISOString().slice(0,10);
+    a.download = `Oitiva_${nome}_${data}.webm`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// NOVO: Função para forçar a degravação lendo o áudio gravado e enviando para a IA
+async function degravarAgora() {
+    if (!videoBlob) {
+        alert('Nenhuma gravação de vídeo/áudio encontrada para transcrever.');
+        return;
+    }
+
+    const box = document.getElementById('box-transcricao');
+    const btn = document.getElementById('btn-degravar');
+    const originalText = btn.innerHTML;
+    
+    box.value = '⏳ Extraindo áudio e enviando para o motor de Inteligência Artificial... Por favor, aguarde.';
+    btn.innerHTML = '<div class="ldots" style="color:#fff"><span></span><span></span><span></span></div> Processando Mídia...';
+    btn.disabled = true;
+
+    try {
+        const reader = new FileReader();
+        reader.readAsDataURL(videoBlob);
+        reader.onloadend = async () => {
+            try {
+                // Remove o prefixo "data:video/webm;base64,"
+                const base64data = reader.result.split(',')[1];
+                const apiKey = ""; // Será preenchido pelo Canvas em runtime
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                
+                const payload = {
+                    contents: [{
+                        parts: [
+                            { text: "Atue como um transcritor profissional e juramentado. Transcreva com fidelidade o áudio anexado. Formate em parágrafos para facilitar a leitura. Não adicione observações, apenas retorne a degravação literal de tudo o que foi falado pelas partes presentes no áudio." },
+                            { inlineData: { mimeType: "video/webm", data: base64data } }
+                        ]
+                    }]
+                };
+
+                // Backoff exponencial para a chamada da API
+                const fetchWithRetry = async (url, options, retries = 3) => {
+                    const delays = [1000, 2000, 4000];
+                    for (let i = 0; i < retries; i++) {
+                        try {
+                            const response = await fetch(url, options);
+                            if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                            return await response.json();
+                        } catch (error) {
+                            if (i === retries - 1) throw error;
+                            await new Promise(r => setTimeout(r, delays[i]));
+                        }
+                    }
+                };
+
+                const result = await fetchWithRetry(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const textoTranscrito = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (textoTranscrito) {
+                    box.value = textoTranscrito;
+                    transcricaoCompleta = textoTranscrito; // Salva para quando for gerar o Termo Oficial
+                    btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Concluído!';
+                    setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
+                } else {
+                    box.value = "Não foi possível transcrever o áudio gravado. A IA não retornou texto detectado.";
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                box.value = "Erro na conexão com a Inteligência Artificial: " + e.message;
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
+    } catch (e) {
+        box.value = "Falha ao processar o arquivo de vídeo no navegador: " + e.message;
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+function copiarDegravacao() {
+    const text = document.getElementById('box-transcricao').value;
+    if(!text) return;
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    textArea.remove();
+    
+    const btn = document.querySelector('button[onclick="copiarDegravacao()"]');
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Copiado!';
+    btn.style.borderColor = "var(--color-success)";
+    btn.style.color = "var(--color-success)";
+    setTimeout(() => {
+        btn.innerHTML = originalHtml;
+        btn.style.borderColor = "var(--color-border-light)";
+        btn.style.color = "var(--color-text-primary)";
+    }, 2000);
+}
+
+function copiarTermo() {
+    const text = document.getElementById('termo-box').innerText;
+    if(!text) return;
+    // Fallback robusto para cópia de texto (funciona dentro de iframes)
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    textArea.remove();
+    
+    // Feedback visual no botão
+    const btn = document.querySelector('button[onclick="copiarTermo()"]');
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="ti ti-check" aria-hidden="true"></i> Copiado!';
+    btn.style.borderColor = "var(--color-success)";
+    btn.style.color = "var(--color-success)";
+    setTimeout(() => {
+        btn.innerHTML = originalHtml;
+        btn.style.borderColor = "var(--color-border-light)";
+        btn.style.color = "var(--color-text-primary)";
+    }, 2000);
+}
+
+function baixarTermo() {
+    const text = document.getElementById('termo-box').innerText;
+    if(!text) return;
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const nome = document.getElementById('s-nome').value.trim().replace(/\s+/g, '_') || 'depoimento';
+    a.download = `Termo_${nome}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Integração com IA (Google Gemini API - Adaptado conforme instruções do sistema Canvas)
+async function gerarTermo() {
+    const g = id => document.getElementById(id)?.value || '';
+    const tipoLabel = {testemunha:'TESTEMUNHA', vitima:'VÍTIMA', investigado:'INVESTIGADO', condutor:'CONDUTOR DA OCORRência'}[tipo];
+    const nomeDepoente = g('s-nome') || 'o depoente';
+    
+    // Preparar as notas para o corpo do depoimento com o padrão exigido
+    const notasTxt = notas.map(n => {
+        const qText = perguntas[tipo][n.perg - 1].q.trim().replace(/\?+$/, '') + '?';
+        if (n.perg === 1) {
+            return `Quando perguntado ${qText}\n[DADOS DA OITIVA]:\n${getDadosOitivaText()}\n[Anotação do Escrivão]: ${n.texto}`;
+        }
+        return `Quando perguntado ${qText}, ${nomeDepoente} respondeu que ${n.texto}`;
+    }).join('\n\n');
+    
+    // Pega a degravação gerada para contextualizar a IA
+    const degravacaoTexto = document.getElementById('box-transcricao').value;
+    
+    // Formatar a data para o sistema (se existir)
+    const dataOitivaRaw = g('s-data');
+    const dataFormatada = dataOitivaRaw ? new Date(dataOitivaRaw).toLocaleString('pt-BR') : '[Data/Hora da Oitiva]';
+    
+    const promptUser = `
+Você é um escrivão/secretário experiente redigindo um termo oficial.
+Sua tarefa é redigir o documento final utilizando ESTRITAMENTE a estrutura abaixo. Você deve substituir os valores informados nos "DADOS FORNECIDOS" nos locais adequados. Para dados que não foram fornecidos, mantenha os colchetes com instruções (ex: "[Nacionalidade]").
+
+DADOS FORNECIDOS NESTA OITIVA:
+- Condição: ${tipoLabel}
+- Nome do Depoente: ${g('s-nome')}
+- CPF: ${g('s-cpf')}
+- Matrícula: ${g('s-matricula')}
+- Profissão/Posto: ${g('s-prof')}
+- Unidade/Lotação: ${g('s-unidade')}
+- Endereço: ${g('s-end')}
+- Processo/IP/BO: ${g('s-ip')}
+- Data e Hora do Sistema: ${dataFormatada}
+- Escrivão/Autoridade: ${g('s-escrivao')}
+- Matrícula da Autoridade: ${g('s-mat')}
+${(tipo === 'vitima' || tipo === 'investigado') && g('s-adv-nome') ? `- Advogado(a) Presente: ${g('s-adv-nome')} (OAB: ${g('s-adv-oab')})` : ''}
+
+NOTAS DO ESCRIVÃO (Anotações chave registradas manualmente durante a oitiva):
+${notasTxt || '(Nenhuma anotação manual registrada.)'}
+
+DEGRAVAÇÃO DO ÁUDIO (Transcrição direta do que foi falado no vídeo/áudio):
+"${degravacaoTexto || '(Não há degravação disponível.)'}"
+
+INSTRUÇÃO VITAL PARA O CORPO DO DEPOIMENTO: Use EXCLUSIVAMENTE a "DEGRAVAÇÃO DO ÁUDIO" e as "NOTAS DO ESCRIVÃO" para redigir o item "4. Corpo do Depoimento". Transforme o áudio degravado bruto em um relato fluido, corrigindo vícios de linguagem, mas mantendo a essência e detalhes dos fatos.
+REGRA DE FORMATAÇÃO OBRIGATÓRIA: 
+1. Para a PRIMEIRA pergunta, você NÃO deve colocar a resposta do depoente nem a expressão ", respondeu que". Em vez disso, escreva "Quando perguntado [pergunta]?" e insira logo abaixo os DADOS DA OITIVA (Nome, CPF, etc).
+2. A partir da SEGUNDA pergunta em diante, você DEVE escrever a expressão "Quando perguntado ", colocar a respectiva pergunta seguida de um ponto de interrogação "?", e OBRIGATORIAMENTE adicionar o nome do depoente ("${nomeDepoente}") seguido da expressão " respondeu que " antes de escrever o conteúdo da resposta. 
+EXEMPLO OBRIGATÓRIO (para 2ª pergunta em diante): "Quando perguntado qual o motivo do fato?, ${nomeDepoente} respondeu que não sabia de nada."
+
+==== ESTRUTURA OBRIGATÓRIA DO TERMO ====
+
+TERMO DE OITIVA DE ${tipoLabel}
+PROCESSO / SINDICÂNCIA / IP Nº: ${g('s-ip') || '[Inserir Número]'}
+ASSUNTO: [Breve descrição do objeto da apuração]
+
+1. Preâmbulo (Data, Hora, Local e Autoridades)
+Aos [Dia] dias do mês de [Mês] do ano de [Ano], às [Hora] horas, na sala de oitivas da [Nome da Instituição/Departamento], situada no endereço [Endereço completo], onde se achava presente o(a) Escrivão/Presidente ${g('s-escrivao') || '[Nome da Autoridade]'} (Matrícula: ${g('s-mat') || '[Número]'}), designados pela Portaria nº [Número da Portaria], publicada no [Meio de publicação] em [Data de publicação], compareceu a pessoa abaixo qualificada para prestar declarações nos autos do processo em epígrafe.
+
+2. Qualificação do Depoente
+Nome: ${g('s-nome') || '[Nome completo]'}
+Nacionalidade: [Nacionalidade]
+Estado Civil: [Estado civil]
+Profissão / Cargo: ${g('s-prof') || '[Cargo ou Profissão]'}
+Matrícula (se servidor): ${g('s-matricula') || '[Número da Matrícula]'}
+Unidade / Lotação: ${g('s-unidade') || '[Unidade ou Lotação]'}
+CPF: ${g('s-cpf') || '[Número do CPF]'}
+Endereço Residencial: ${g('s-end') || '[Logradouro, Número, Bairro, Cidade, Estado, CEP]'}
+Telefone de Contato / E-mail: [Telefone e e-mail]
+${(tipo === 'vitima' || tipo === 'investigado') && g('s-adv-nome') ? `Acompanhado(a) de seu(sua) advogado(a), o(a) Sr(a). ${g('s-adv-nome')}, inscrito(a) na OAB sob o nº ${g('s-adv-oab')}.` : '(Depoente não estava acompanhado de advogado constituído)'}
+
+3. Advertências Legais
+(Redija este parágrafo de acordo com a condição de ${tipoLabel}. Se for TESTEMUNHA, cite o compromisso da verdade e o crime de falso testemunho - art. 342 do CP, e inclua "Aos costumes disse: nada / ser parente / ser amigo / inimigo". Se for INVESTIGADO, cite o direito constitucional ao silêncio - Art. 5º, LXIII da CF, sem que importe presunção de culpa. Se VÍTIMA ou CONDUTOR, adapte de forma formal).
+
+4. Corpo do Depoimento (Oitiva)
+Iniciada a oitiva, dada a palavra ao(à) depoente, PASSOU A RELATAR QUE:
+[Gere a narrativa baseada na DEGRAVAÇÃO DO ÁUDIO e nas NOTAS DO ESCRIVÃO. Transcreva com fidelidade, usando a 1ª ou 3ª pessoa de forma padronizada, dividindo em parágrafos se for longo].
+
+5. Encerramento
+E, como nada mais disse nem lhe foi perguntado, a autoridade deu por encerrada a presente oitiva. O presente termo foi lido em voz alta e, achado conforme, segue assinado pelo(a) depoente e pela Autoridade responsável (e pelo advogado, se presente).
+[Cidade - Estado], [Dia] de [Mês] de [Ano].
+
+6. Assinaturas
+
+_____________________________________________________
+${g('s-escrivao') || '[NOME DA AUTORIDADE/ESCRIVÃO]'}
+Presidente / Autoridade Condutora
+
+_____________________________________________________
+${g('s-nome') || '[NOME DO DEPOENTE]'}
+${tipoLabel}
+
+${(tipo === 'vitima' || tipo === 'investigado') && g('s-adv-nome') ? `_____________________________________________________\n${g('s-adv-nome')}\nAdvogado(a) - OAB ${g('s-adv-oab')}` : ''}
+`;
+
+    const container = document.getElementById('termo-box-container');
+    const box = document.getElementById('termo-box');
+    container.style.display = 'block';
+    box.innerHTML = '<div class="ldots" style="color:var(--color-primary)"><span></span><span></span><span></span></div> Redigindo termo com linguagem jurídica...';
+
+    const apiKey = ""; // Definido automaticamente pelo ambiente Canvas
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    
+    const systemInstruction = "Você é um escrivão da Polícia Civil do Brasil extremamente experiente. Sua função é redigir termos de depoimento precisos, usando terminologia jurídico-policial impecável e formatação clássica de inquérito.";
+
+    const payload = {
+        contents: [{ parts: [{ text: promptUser }] }],
+        systemInstruction: { parts: [{ text: systemInstruction }] }
+    };
+
+    // Backoff exponencial exigido
+    const fetchWithRetry = async (url, options, retries = 5) => {
+        const delays = [1000, 2000, 4000, 8000, 16000];
+        for (let i = 0; i < retries; i++) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                if (i === retries - 1) throw error;
+                await new Promise(r => setTimeout(r, delays[i]));
+            }
+        }
+    };
+
+    try {
+        const result = await fetchWithRetry(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        box.textContent = text || 'Erro de formatação na resposta da IA. Tente novamente.';
+    } catch (e) {
+        box.innerHTML = '<span style="color:var(--color-danger)"><i class="ti ti-alert-triangle"></i> Falha ao contatar a API. Verifique a conexão do sistema de IA.</span>';
+        console.error(e);
+    }
+}
+
+function nova() {
+    if (!confirm('Deseja iniciar um novo procedimento? Todos os dados não salvos externamente serão apagados da memória.')) return;
+    
+    document.querySelectorAll('input[type=text], input[type=datetime-local], textarea').forEach(el => el.value = '');
+    document.getElementById('adv-ok').checked = false;
+    
+    ['notas-log', 'notas-fim', 'resumo-content'].forEach(id => document.getElementById(id).innerHTML = '');
+    
+    document.getElementById('termo-box-container').style.display = 'none';
+    document.getElementById('card-pb').style.display = 'none';
+    document.getElementById('cam-test').style.display = 'none';
+    document.getElementById('cam-ph').style.display = 'flex';
+    document.getElementById('box-transcricao').value = '';
+    
+    notas = []; chunks = []; videoBlob = null; recSecs = 0; mediaRec = null; liveStream = null;
+    transcricaoCompleta = ''; isRecordingState = false;
+    
+    setTipo('testemunha');
+    
+    document.getElementById('tela-fim').classList.add('hidden');
+    document.getElementById('tela-config').classList.remove('hidden');
+    
+    // Atualiza a data e hora para o fuso local ao criar nova oitiva
+    const novaData = new Date();
+    novaData.setMinutes(novaData.getMinutes() - novaData.getTimezoneOffset());
+    document.getElementById('s-data').value = novaData.toISOString().slice(0, 16);
+    
+    document.getElementById('status-config').innerHTML = '';
+}
+</script>
+
+</body>
+</html>

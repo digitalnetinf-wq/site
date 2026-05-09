@@ -13,6 +13,30 @@
         *{margin:0;padding:0;box-sizing:border-box;}
         body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
         body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 20%,rgba(230,57,70,.05) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(59,130,246,.04) 0%,transparent 60%);pointer-events:none;z-index:0;}
+        
+        /* TELA DE BLOQUEIO */
+        #lock-screen {
+            position: fixed; inset: 0; z-index: 10000; background: var(--bg);
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+        }
+        .lock-box {
+            background: var(--panel); padding: 40px; border-radius: 12px; border: 1px solid var(--border);
+            text-align: center; width: 100%; max-width: 360px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .lock-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 3px; color: var(--text); margin-bottom: 24px; }
+        .lock-input {
+            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--panel2); color: var(--text); outline: none; text-align: center;
+            font-family: 'JetBrains Mono', monospace; font-size: 16px; letter-spacing: 2px; margin-bottom: 16px;
+        }
+        .lock-input:focus { border-color: var(--accent); }
+        .lock-btn {
+            width: 100%; padding: 14px; background: var(--accent); color: #fff; border: none;
+            border-radius: 8px; cursor: pointer; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; transition: background 0.2s;
+        }
+        .lock-btn:hover { background: #d92d3b; }
+        .lock-err { color: var(--accent2); font-size: 12px; font-weight: 500; margin-top: 12px; display: none; }
+
         .header{position:sticky;top:0;z-index:200;background:rgba(10,12,16,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:60px;}
         .hlogo{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:19px;color:#fff;flex-shrink:0;}
         .hleft{display:flex;align-items:center;gap:14px;}
@@ -23,7 +47,6 @@
         .live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;}
         @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
         .hdate{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
-        /* SHEETS STATUS BADGE */
         .sheets-badge{display:flex;align-items:center;gap:6px;font-size:10px;font-family:'JetBrains Mono',monospace;border-radius:20px;padding:4px 10px;border:1px solid;cursor:pointer;transition:all .2s;}
         .sheets-badge.loading{color:var(--accent3);background:rgba(255,214,10,.08);border-color:rgba(255,214,10,.2);}
         .sheets-badge.ok{color:var(--green);background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2);}
@@ -32,7 +55,6 @@
         .sheets-badge.loading .sheets-dot{background:var(--accent3);animation:pulse 1s infinite;}
         .sheets-badge.ok .sheets-dot{background:var(--green);}
         .sheets-badge.err .sheets-dot{background:var(--accent2);}
-        /* TOAST */
         .toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:12px;font-family:'JetBrains Mono',monospace;max-width:320px;display:none;animation:slideUp .3s ease;}
         .toast.show{display:flex;align-items:center;gap:10px;}
         @keyframes slideUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
@@ -140,7 +162,6 @@
         .excel-table .subtotal-row td{background:rgba(230,57,70,0.1);color:var(--accent);font-weight:600;}
         .excel-table .semestre-row td{background:rgba(34,197,94,0.08);color:var(--green);font-style:italic;}
         .excel-table td.cell-zero{color:var(--dim);}
-        /* LEAFLET CUSTOM DARK THEME */
         .leaflet-container { background: #0a0c10 !important; font-family: 'DM Sans', sans-serif; z-index: 1; }
         .leaflet-popup-content-wrapper { background: #161922; color: #e8eaf0; border: 1px solid #1e2330; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .leaflet-popup-tip { background: #161922; border: 1px solid #1e2330; border-top: none; border-left: none; }
@@ -149,304 +170,353 @@
     </style>
 </head>
 <body>
-<header class="header">
-    <div class="hleft">
-        <div class="hlogo">CV</div>
-        <div>
-            <div class="htitle">Painel Análise CVLI</div>
-            <div class="hsub" id="hsub-txt">Crimes Violentos Letais Intencionais · Feira de Santana / COORPIN · Carregando dados...</div>
-        </div>
-    </div>
-    <div class="hright">
-        <div class="hdate" id="hdate"></div>
-        <div class="sheets-badge loading" id="sheets-badge" onclick="reloadSheets()" title="Clique para recarregar dados da planilha">
-            <div class="sheets-dot"></div>
-            <span id="sheets-status">CARREGANDO PLANILHA...</span>
-        </div>
-        <div class="live-badge"><div class="live-dot"></div>DADOS REAIS</div>
-    </div>
-</header>
 
-<nav class="tabs-nav">
-    <button class="tab-btn active" onclick="showTab('visao-geral',this)">📊 Visão Geral</button>
-    <button class="tab-btn" onclick="showTab('evolucao',this)">📈 Evolução Temporal</button>
-    <button class="tab-btn" onclick="showTab('geografico',this)">📍 Geográfico (2026)</button>
-    <button class="tab-btn" onclick="showTab('mancha',this)">🗺️ Mancha Criminal</button>
-    <button class="tab-btn" onclick="showTab('vitimas',this)">👤 Perfil das Vítimas (2026)</button>
-    <button class="tab-btn" onclick="showTab('modalidade',this)">🔍 Modalidade (2026)</button>
-    <button class="tab-btn" onclick="showTab('coorpin',this)">🗺️ COORPIN (25 vs 26)</button>
-    <button class="tab-btn" onclick="showTab('registros',this)">📋 Banco de Dados CVLIs</button>
-</nav>
-
-<!-- ABA 1 -->
-<div class="tab-page active" id="tab-visao-geral">
-    <div class="container">
-        <div class="kpi-grid cols-4">
-            <div class="kpi-card red"><div class="kpi-lbl">Total CVLI 2026 — Feira</div><div class="kpi-val red" id="vg-t">—</div><div class="kpi-sub">registros em Feira de Santana</div></div>
-            <div class="kpi-card blue"><div class="kpi-lbl">COORPIN Total 2026</div><div class="kpi-val blue" id="vg-26">—</div><div class="kpi-sub">todos os municípios</div></div>
-            <div class="kpi-card green"><div class="kpi-lbl">Média Etária 2026</div><div class="kpi-val green" id="vg-idade">—</div><div class="kpi-sub">anos das vítimas</div></div>
-            <div class="kpi-card purple"><div class="kpi-lbl">Autoria Identificada 2026</div><div class="kpi-val" id="vg-aut">—</div><div class="kpi-sub" id="vg-aut-sub">casos</div></div>
-        </div>
-        <div class="sec-label">Panorama Geral</div>
-        <div class="gbig">
-            <div class="card"><div class="card-hd"><span class="card-title">Evolução Mensal — Feira de Santana</span><span class="card-tag">2025 vs 2026</span></div><div class="card-body"><canvas id="vg-mensal"></canvas></div></div>
-            <div class="card"><div class="card-hd"><span class="card-title">Meio Empregado</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vg-meio"></canvas></div></div>
-        </div>
-        <div class="g3">
-            <div class="card"><div class="card-hd"><span class="card-title">Tipificação</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vg-tipo"></canvas></div></div>
-            <div class="card"><div class="card-hd"><span class="card-title">Faixa Etária</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vg-faixa"></canvas></div></div>
-            <div class="card"><div class="card-hd"><span class="card-title">Autoria</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vg-autd"></canvas></div></div>
-        </div>
-        <div class="sec-label">Comparativo Mês a Mês</div>
-        <div class="g2">
-            <div class="card"><div class="card-hd"><span class="card-title">Variação Mensal 2025 vs 2026</span><span class="card-tag blue">COORPIN TOTAL</span></div><div class="card-body" id="vg-comp" style="max-height:250px;overflow-y:auto;"></div></div>
-            <div class="card"><div class="card-hd"><span class="card-title">Ranking Bairros — Feira</span><span class="card-tag">TODOS</span></div><div class="card-body" style="max-height:250px;overflow-y:auto;"><div class="bar-list" id="vg-bairros"></div></div></div>
-        </div>
+<!-- TELA DE PROTEÇÃO (SENHA) -->
+<div id="lock-screen">
+    <div class="lock-box">
+        <h2 class="lock-title">ACESSO RESTRITO</h2>
+        <input type="password" id="pwd-input" class="lock-input" placeholder="Digite a senha">
+        <button class="lock-btn" onclick="checkUnlock()">DESBLOQUEAR PAINEL</button>
+        <div id="pwd-err" class="lock-err">Senha incorreta. Tente novamente.</div>
     </div>
 </div>
 
-<!-- ABA 2 -->
-<div class="tab-page" id="tab-evolucao">
-    <div class="container">
-        <div class="kpi-grid cols-4">
-            <div class="kpi-card red"><div class="kpi-lbl">Total Acumulado 2025</div><div class="kpi-val red" id="ev-tot25">—</div><div class="kpi-sub" id="ev-tot25-sub">COORPIN (Jan–mês atual)</div></div>
-            <div class="kpi-card blue"><div class="kpi-lbl">Total Acumulado 2026</div><div class="kpi-val blue" id="ev-tot26">—</div><div class="kpi-sub" id="ev-tot26-sub">COORPIN (Jan–mês atual)</div></div>
-            <div class="kpi-card orange"><div class="kpi-lbl">Pico Mensal 2025</div><div class="kpi-val" id="ev-pico25" style="font-size:28px">—</div><div class="kpi-sub">ocorrências</div></div>
-            <div class="kpi-card green"><div class="kpi-lbl">Pico Mensal 2026</div><div class="kpi-val green" id="ev-pico26" style="font-size:28px">—</div><div class="kpi-sub">ocorrências</div></div>
+<!-- CONTEÚDO PRINCIPAL (OCULTO ATÉ O DESBLOQUEIO) -->
+<div id="app-content" style="display: none;">
+    <header class="header">
+        <div class="hleft">
+            <div class="hlogo">CV</div>
+            <div>
+                <div class="htitle">Painel Análise CVLI</div>
+                <div class="hsub" id="hsub-txt">Crimes Violentos Letais Intencionais · Feira de Santana / COORPIN · Carregando dados...</div>
+            </div>
         </div>
-        <div class="sec-label">Série Histórica e Comparativos (2025 vs 2026)</div>
-        <div class="card mb16"><div class="card-hd"><span class="card-title">CVLI por Mês — Feira de Santana vs COORPIN</span><div style="display:flex;gap:8px;"><span class="card-tag">2025</span><span class="card-tag blue">2026</span></div></div><div class="card-body"><canvas id="ev-full" style="max-height:320px;"></canvas></div></div>
-        <div class="g2">
-            <div class="card"><div class="card-hd"><span class="card-title">Curva de Acumulado 2025 vs 2026</span><span class="card-tag">COORPIN TOTAL</span></div><div class="card-body"><canvas id="ev-acum"></canvas></div></div>
-            <div class="card"><div class="card-hd"><span class="card-title">Comparativo Trimestral</span><span class="card-tag">2025 vs 2026</span></div><div class="card-body"><canvas id="ev-trim" style="max-height:220px;"></canvas></div></div>
+        <div class="hright">
+            <div class="hdate" id="hdate"></div>
+            <div class="sheets-badge loading" id="sheets-badge" onclick="reloadSheets()" title="Clique para recarregar dados da planilha">
+                <div class="sheets-dot"></div>
+                <span id="sheets-status">CARREGANDO PLANILHA...</span>
+            </div>
+            <div class="live-badge"><div class="live-dot"></div>DADOS REAIS</div>
         </div>
-        <div class="sec-label">Mês a Mês — Dados Consolidados</div>
-        <div class="card mb16"><div class="card-hd"><span class="card-title">Tabela Comparativa Mês a Mês</span><span class="card-tag">2025 vs 2026</span></div><div class="card-body tbl-wrap" id="ev-tabela-mes"></div></div>
-        <div class="card mb16"><div class="card-hd"><span class="card-title">Heatmap de Intensidade — Feira de Santana</span><span class="card-tag">COMPARATIVO</span></div><div class="card-body"><div style="overflow-x:auto;"><div class="heatmap" id="ev-heatmap"></div></div><div style="display:flex;gap:8px;align-items:center;margin-top:12px;"><span style="font-size:10px;color:var(--muted);">Intensidade:</span><div style="width:14px;height:14px;border-radius:3px;background:rgba(230,57,70,.12)"></div><span style="font-size:10px;color:var(--muted);">Baixo</span><div style="width:14px;height:14px;border-radius:3px;background:rgba(230,57,70,.45);margin-left:6px;"></div><span style="font-size:10px;color:var(--muted);">Médio</span><div style="width:14px;height:14px;border-radius:3px;background:rgba(230,57,70,.85);margin-left:6px;"></div><span style="font-size:10px;color:var(--muted);">Alto</span></div></div></div>
-    </div>
-</div>
+    </header>
 
-<!-- ABA 3 -->
-<div class="tab-page" id="tab-geografico">
-    <div class="container">
-        <div class="kpi-grid cols-4">
-            <div class="kpi-card red"><div class="kpi-lbl">Cidade + Violenta (2026)</div><div class="kpi-val red" id="geo-pior" style="font-size:22px;">—</div><div class="kpi-sub" id="geo-pior-sub">—</div></div>
-            <div class="kpi-card orange"><div class="kpi-lbl">Municípios Afetados (2026)</div><div class="kpi-val" id="geo-afetados">—</div><div class="kpi-sub">municípios com CVLI</div></div>
-            <div class="kpi-card blue"><div class="kpi-lbl">Total 2026 em Feira</div><div class="kpi-val blue" id="geo-tot-feira">—</div><div class="kpi-sub">ocorrências</div></div>
-            <div class="kpi-card green"><div class="kpi-lbl">Total 2026 Outros Mun.</div><div class="kpi-val green" id="geo-tot-outros">—</div><div class="kpi-sub">ocorrências</div></div>
-        </div>
-        <div class="sec-label">Distribuição Geográfica (2026)</div>
-        <div class="gbig">
-            <div class="card"><div class="card-hd"><span class="card-title">Todas as Cidades — 2026</span><span class="card-tag">HORIZONTAL</span></div><div class="card-body"><canvas id="geo-horiz" style="max-height:360px;"></canvas></div></div>
-            <div class="card"><div class="card-hd"><span class="card-title">Ranking Bairros — Feira</span><span class="card-tag">TODOS</span></div><div class="card-body" style="max-height:360px;overflow-y:auto;"><div class="bar-list" id="geo-barlist"></div></div></div>
-        </div>
-        <div class="g2">
-            <div class="card"><div class="card-hd"><span class="card-title">Agrupamento por Zona (Feira)</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="geo-zona"></canvas></div></div>
-            <div class="card"><div class="card-hd"><span class="card-title">% do Total — Todas as Cidades</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="geo-pizza"></canvas></div></div>
+    <nav class="tabs-nav">
+        <button class="tab-btn active" onclick="showTab('visao-geral',this)">📊 Visão Geral</button>
+        <button class="tab-btn" onclick="showTab('evolucao',this)">📈 Evolução Temporal</button>
+        <button class="tab-btn" onclick="showTab('geografico',this)">📍 Geográfico (2026)</button>
+        <button class="tab-btn" onclick="showTab('mancha',this)">🗺️ Mancha Criminal</button>
+        <button class="tab-btn" onclick="showTab('vitimas',this)">👤 Perfil das Vítimas (2026)</button>
+        <button class="tab-btn" onclick="showTab('modalidade',this)">🔍 Modalidade (2026)</button>
+        <button class="tab-btn" onclick="showTab('coorpin',this)">🗺️ COORPIN (25 vs 26)</button>
+        <button class="tab-btn" onclick="showTab('registros',this)">📋 Banco de Dados CVLIs</button>
+    </nav>
+
+    <!-- ABA 1 -->
+    <div class="tab-page active" id="tab-visao-geral">
+        <div class="container">
+            <div class="kpi-grid cols-4">
+                <div class="kpi-card red"><div class="kpi-lbl">Total CVLI 2026 — Feira</div><div class="kpi-val red" id="vg-t">—</div><div class="kpi-sub">registros em Feira de Santana</div></div>
+                <div class="kpi-card blue"><div class="kpi-lbl">COORPIN Total 2026</div><div class="kpi-val blue" id="vg-26">—</div><div class="kpi-sub">todos os municípios</div></div>
+                <div class="kpi-card green"><div class="kpi-lbl">Média Etária 2026</div><div class="kpi-val green" id="vg-idade">—</div><div class="kpi-sub">anos das vítimas</div></div>
+                <div class="kpi-card purple"><div class="kpi-lbl">Autoria Identificada 2026</div><div class="kpi-val" id="vg-aut">—</div><div class="kpi-sub" id="vg-aut-sub">casos</div></div>
+            </div>
+            <div class="sec-label">Panorama Geral</div>
+            <div class="gbig">
+                <div class="card"><div class="card-hd"><span class="card-title">Evolução Mensal — Feira de Santana</span><span class="card-tag">2025 vs 2026</span></div><div class="card-body"><canvas id="vg-mensal"></canvas></div></div>
+                <div class="card"><div class="card-hd"><span class="card-title">Meio Empregado</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vg-meio"></canvas></div></div>
+            </div>
+            <div class="g3">
+                <div class="card"><div class="card-hd"><span class="card-title">Tipificação</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vg-tipo"></canvas></div></div>
+                <div class="card"><div class="card-hd"><span class="card-title">Faixa Etária</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vg-faixa"></canvas></div></div>
+                <div class="card"><div class="card-hd"><span class="card-title">Autoria</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vg-autd"></canvas></div></div>
+            </div>
+            <div class="sec-label">Comparativo Mês a Mês</div>
+            <div class="g2">
+                <div class="card"><div class="card-hd"><span class="card-title">Variação Mensal 2025 vs 2026</span><span class="card-tag blue">COORPIN TOTAL</span></div><div class="card-body" id="vg-comp" style="max-height:250px;overflow-y:auto;"></div></div>
+                <div class="card"><div class="card-hd"><span class="card-title">Ranking Bairros — Feira</span><span class="card-tag">TODOS</span></div><div class="card-body" style="max-height:250px;overflow-y:auto;"><div class="bar-list" id="vg-bairros"></div></div></div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- ABA MANCHA CRIMINAL -->
-<div class="tab-page" id="tab-mancha">
-    <div class="container">
-        <div class="kpi-grid cols-4">
-            <div class="kpi-card blue"><div class="kpi-lbl">Vítimas Mapeadas</div><div class="kpi-val blue" id="mancha-tot">—</div><div class="kpi-sub">com coordenadas válidas</div></div>
-            <div class="kpi-card" style="border-top-color: #ec4899;"><div class="kpi-lbl">Feminicídio</div><div class="kpi-val" style="color:#ec4899;" id="mancha-feminicidio">—</div><div class="kpi-sub">no mapa (rosa)</div></div>
-            <div class="kpi-card yellow"><div class="kpi-lbl">Menores de 18</div><div class="kpi-val yellow" id="mancha-menores">—</div><div class="kpi-sub">azul (<18) e amarelo (<12)</div></div>
-            <div class="kpi-card red"><div class="kpi-lbl">Adultos / Outros</div><div class="kpi-val red" id="mancha-adultos">—</div><div class="kpi-sub">no mapa (vermelho)</div></div>
+    <!-- ABA 2 -->
+    <div class="tab-page" id="tab-evolucao">
+        <div class="container">
+            <div class="kpi-grid cols-4">
+                <div class="kpi-card red"><div class="kpi-lbl">Total Acumulado 2025</div><div class="kpi-val red" id="ev-tot25">—</div><div class="kpi-sub" id="ev-tot25-sub">COORPIN (Jan–mês atual)</div></div>
+                <div class="kpi-card blue"><div class="kpi-lbl">Total Acumulado 2026</div><div class="kpi-val blue" id="ev-tot26">—</div><div class="kpi-sub" id="ev-tot26-sub">COORPIN (Jan–mês atual)</div></div>
+                <div class="kpi-card orange"><div class="kpi-lbl">Pico Mensal 2025</div><div class="kpi-val" id="ev-pico25" style="font-size:28px">—</div><div class="kpi-sub">ocorrências</div></div>
+                <div class="kpi-card green"><div class="kpi-lbl">Pico Mensal 2026</div><div class="kpi-val green" id="ev-pico26" style="font-size:28px">—</div><div class="kpi-sub">ocorrências</div></div>
+            </div>
+            <div class="sec-label">Série Histórica e Comparativos (2025 vs 2026)</div>
+            <div class="card mb16"><div class="card-hd"><span class="card-title">CVLI por Mês — Feira de Santana vs COORPIN</span><div style="display:flex;gap:8px;"><span class="card-tag">2025</span><span class="card-tag blue">2026</span></div></div><div class="card-body"><canvas id="ev-full" style="max-height:320px;"></canvas></div></div>
+            <div class="g2">
+                <div class="card"><div class="card-hd"><span class="card-title">Curva de Acumulado 2025 vs 2026</span><span class="card-tag">COORPIN TOTAL</span></div><div class="card-body"><canvas id="ev-acum"></canvas></div></div>
+                <div class="card"><div class="card-hd"><span class="card-title">Comparativo Trimestral</span><span class="card-tag">2025 vs 2026</span></div><div class="card-body"><canvas id="ev-trim" style="max-height:220px;"></canvas></div></div>
+            </div>
+            <div class="sec-label">Mês a Mês — Dados Consolidados</div>
+            <div class="card mb16"><div class="card-hd"><span class="card-title">Tabela Comparativa Mês a Mês</span><span class="card-tag">2025 vs 2026</span></div><div class="card-body tbl-wrap" id="ev-tabela-mes"></div></div>
+            <div class="card mb16"><div class="card-hd"><span class="card-title">Heatmap de Intensidade — Feira de Santana</span><span class="card-tag">COMPARATIVO</span></div><div class="card-body"><div style="overflow-x:auto;"><div class="heatmap" id="ev-heatmap"></div></div><div style="display:flex;gap:8px;align-items:center;margin-top:12px;"><span style="font-size:10px;color:var(--muted);">Intensidade:</span><div style="width:14px;height:14px;border-radius:3px;background:rgba(230,57,70,.12)"></div><span style="font-size:10px;color:var(--muted);">Baixo</span><div style="width:14px;height:14px;border-radius:3px;background:rgba(230,57,70,.45);margin-left:6px;"></div><span style="font-size:10px;color:var(--muted);">Médio</span><div style="width:14px;height:14px;border-radius:3px;background:rgba(230,57,70,.85);margin-left:6px;"></div><span style="font-size:10px;color:var(--muted);">Alto</span></div></div></div>
         </div>
-        <div class="sec-label">Distribuição Espacial — CVLI</div>
-        <div class="card mb16">
-            <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
-                <div><span class="card-title">Mapa de Ocorrências</span><span class="card-tag">COORDENADAS</span></div>
-                <div style="display:flex; gap:14px; font-size:11px; font-family:'JetBrains Mono',monospace; flex-wrap: wrap;">
-                    <span style="display:flex; align-items:center; gap:6px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512" fill="#ec4899" style="width:12px;height:12px;"><path d="M128 0c35.346 0 64 28.654 64 64s-28.654 64-64 64c-35.346 0-64-28.654-64-64S92.654 0 128 0m119.283 354.179l-48-192A24 24 0 0 0 176 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H80a24 24 0 0 0-23.283 18.179l-48 192C4.935 369.305 16.383 384 32 384h56v104c0 13.255 10.745 24 24 24h32c13.255 0 24-10.745 24-24V384h56c15.591 0 27.071-14.671 23.283-29.821z"/></svg>
-                        Feminicídio
-                    </span>
-                    <span style="display:flex; align-items:center; gap:6px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512" fill="#ffd60a" style="width:12px;height:12px;"><path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z"/></svg>
-                        < 12 anos
-                    </span>
-                    <span style="display:flex; align-items:center; gap:6px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512" fill="#3b82f6" style="width:12px;height:12px;"><path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z"/></svg>
-                        12 a 17 anos
-                    </span>
-                    <span style="display:flex; align-items:center; gap:6px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512" fill="#e63946" style="width:12px;height:12px;"><path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z"/></svg>
-                        Adultos (Outros)
-                    </span>
+    </div>
+
+    <!-- ABA 3 -->
+    <div class="tab-page" id="tab-geografico">
+        <div class="container">
+            <div class="kpi-grid cols-4">
+                <div class="kpi-card red"><div class="kpi-lbl">Cidade + Violenta (2026)</div><div class="kpi-val red" id="geo-pior" style="font-size:22px;">—</div><div class="kpi-sub" id="geo-pior-sub">—</div></div>
+                <div class="kpi-card orange"><div class="kpi-lbl">Municípios Afetados (2026)</div><div class="kpi-val" id="geo-afetados">—</div><div class="kpi-sub">municípios com CVLI</div></div>
+                <div class="kpi-card blue"><div class="kpi-lbl">Total 2026 em Feira</div><div class="kpi-val blue" id="geo-tot-feira">—</div><div class="kpi-sub">ocorrências</div></div>
+                <div class="kpi-card green"><div class="kpi-lbl">Total 2026 Outros Mun.</div><div class="kpi-val green" id="geo-tot-outros">—</div><div class="kpi-sub">ocorrências</div></div>
+            </div>
+            <div class="sec-label">Distribuição Geográfica (2026)</div>
+            <div class="gbig">
+                <div class="card"><div class="card-hd"><span class="card-title">Todas as Cidades — 2026</span><span class="card-tag">HORIZONTAL</span></div><div class="card-body"><canvas id="geo-horiz" style="max-height:360px;"></canvas></div></div>
+                <div class="card"><div class="card-hd"><span class="card-title">Ranking Bairros — Feira</span><span class="card-tag">TODOS</span></div><div class="card-body" style="max-height:360px;overflow-y:auto;"><div class="bar-list" id="geo-barlist"></div></div></div>
+            </div>
+            <div class="g2">
+                <div class="card"><div class="card-hd"><span class="card-title">Agrupamento por Zona (Feira)</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="geo-zona"></canvas></div></div>
+                <div class="card"><div class="card-hd"><span class="card-title">% do Total — Todas as Cidades</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="geo-pizza"></canvas></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABA MANCHA CRIMINAL -->
+    <div class="tab-page" id="tab-mancha">
+        <div class="container">
+            <div class="kpi-grid cols-4">
+                <div class="kpi-card blue"><div class="kpi-lbl">Vítimas Mapeadas</div><div class="kpi-val blue" id="mancha-tot">—</div><div class="kpi-sub">com coordenadas válidas</div></div>
+                <div class="kpi-card" style="border-top-color: #ec4899;"><div class="kpi-lbl">Feminicídio</div><div class="kpi-val" style="color:#ec4899;" id="mancha-feminicidio">—</div><div class="kpi-sub">no mapa (rosa)</div></div>
+                <div class="kpi-card yellow"><div class="kpi-lbl">Menores de 18</div><div class="kpi-val yellow" id="mancha-menores">—</div><div class="kpi-sub">azul (<18) e amarelo (<12)</div></div>
+                <div class="kpi-card red"><div class="kpi-lbl">Adultos / Outros</div><div class="kpi-val red" id="mancha-adultos">—</div><div class="kpi-sub">no mapa (vermelho)</div></div>
+            </div>
+            <div class="sec-label">Distribuição Espacial — CVLI</div>
+            <div class="card mb16">
+                <div class="card-hd" style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
+                    <div><span class="card-title">Mapa de Ocorrências</span><span class="card-tag">COORDENADAS</span></div>
+                    <div style="display:flex; gap:14px; font-size:11px; font-family:'JetBrains Mono',monospace; flex-wrap: wrap;">
+                        <span style="display:flex; align-items:center; gap:6px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512" fill="#ec4899" style="width:12px;height:12px;"><path d="M128 0c35.346 0 64 28.654 64 64s-28.654 64-64 64c-35.346 0-64-28.654-64-64S92.654 0 128 0m119.283 354.179l-48-192A24 24 0 0 0 176 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H80a24 24 0 0 0-23.283 18.179l-48 192C4.935 369.305 16.383 384 32 384h56v104c0 13.255 10.745 24 24 24h32c13.255 0 24-10.745 24-24V384h56c15.591 0 27.071-14.671 23.283-29.821z"/></svg>
+                            Feminicídio
+                        </span>
+                        <span style="display:flex; align-items:center; gap:6px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512" fill="#ffd60a" style="width:12px;height:12px;"><path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z"/></svg>
+                            < 12 anos
+                        </span>
+                        <span style="display:flex; align-items:center; gap:6px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512" fill="#3b82f6" style="width:12px;height:12px;"><path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z"/></svg>
+                            12 a 17 anos
+                        </span>
+                        <span style="display:flex; align-items:center; gap:6px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512" fill="#e63946" style="width:12px;height:12px;"><path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z"/></svg>
+                            Adultos (Outros)
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body" style="padding:0;">
+                    <div id="map" style="width:100%; height:600px; border-radius:0 0 12px 12px;"></div>
                 </div>
             </div>
-            <div class="card-body" style="padding:0;">
-                <div id="map" style="width:100%; height:600px; border-radius:0 0 12px 12px;"></div>
+        </div>
+    </div>
+
+    <!-- ABA 4 -->
+    <div class="tab-page" id="tab-vitimas">
+        <div class="container">
+            <div class="kpi-grid cols-5">
+                <div class="kpi-card red"><div class="kpi-lbl">Total Vítimas 2026</div><div class="kpi-val red" id="vit-tot">—</div><div class="kpi-sub">registros no ano</div></div>
+                <div class="kpi-card orange"><div class="kpi-lbl">Menores de 18 (2026)</div><div class="kpi-val" id="vit-menor">—</div><div class="kpi-sub">vítimas</div></div>
+                <div class="kpi-card yellow"><div class="kpi-lbl">18 a 24 anos (2026)</div><div class="kpi-val" id="vit-1824">—</div><div class="kpi-sub">vítimas</div></div>
+                <div class="kpi-card blue"><div class="kpi-lbl">Média de Idade 2026</div><div class="kpi-val blue" id="vit-media">—</div><div class="kpi-sub">anos</div></div>
+                <div class="kpi-card green"><div class="kpi-lbl">Idade Máxima 2026</div><div class="kpi-val green" id="vit-max">—</div><div class="kpi-sub">anos</div></div>
+            </div>
+            <div class="sec-label">Análise Demográfica (2026)</div>
+            <div class="g2">
+                <div class="card"><div class="card-hd"><span class="card-title">Distribuição por Faixa Etária</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vit-faixa"></canvas></div></div>
+                <div class="card"><div class="card-hd"><span class="card-title">Pirâmide Etária</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vit-piramide" style="max-height:280px;"></canvas></div></div>
+            </div>
+            <div class="g3">
+                <div class="card"><div class="card-hd"><span class="card-title">Autoria Identificada</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vit-aut"></canvas><div id="vit-aut-lbl" style="margin-top:10px;display:flex;flex-direction:column;gap:7px;"></div></div></div>
+                <div class="card"><div class="card-hd"><span class="card-title">Motivos Identificados</span><span class="card-tag">TODOS</span></div><div class="card-body"><canvas id="vit-motivo"></canvas></div></div>
+                <div class="card"><div class="card-hd"><span class="card-title">Idade Média por Meio</span><span class="card-tag">TODOS</span></div><div class="card-body"><canvas id="vit-meio-idade"></canvas></div></div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- ABA 4 -->
-<div class="tab-page" id="tab-vitimas">
-    <div class="container">
-        <div class="kpi-grid cols-5">
-            <div class="kpi-card red"><div class="kpi-lbl">Total Vítimas 2026</div><div class="kpi-val red" id="vit-tot">—</div><div class="kpi-sub">registros no ano</div></div>
-            <div class="kpi-card orange"><div class="kpi-lbl">Menores de 18 (2026)</div><div class="kpi-val" id="vit-menor">—</div><div class="kpi-sub">vítimas</div></div>
-            <div class="kpi-card yellow"><div class="kpi-lbl">18 a 24 anos (2026)</div><div class="kpi-val" id="vit-1824">—</div><div class="kpi-sub">vítimas</div></div>
-            <div class="kpi-card blue"><div class="kpi-lbl">Média de Idade 2026</div><div class="kpi-val blue" id="vit-media">—</div><div class="kpi-sub">anos</div></div>
-            <div class="kpi-card green"><div class="kpi-lbl">Idade Máxima 2026</div><div class="kpi-val green" id="vit-max">—</div><div class="kpi-sub">anos</div></div>
-        </div>
-        <div class="sec-label">Análise Demográfica (2026)</div>
-        <div class="g2">
-            <div class="card"><div class="card-hd"><span class="card-title">Distribuição por Faixa Etária</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vit-faixa"></canvas></div></div>
-            <div class="card"><div class="card-hd"><span class="card-title">Pirâmide Etária</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vit-piramide" style="max-height:280px;"></canvas></div></div>
-        </div>
-        <div class="g3">
-            <div class="card"><div class="card-hd"><span class="card-title">Autoria Identificada</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vit-aut"></canvas><div id="vit-aut-lbl" style="margin-top:10px;display:flex;flex-direction:column;gap:7px;"></div></div></div>
-            <div class="card"><div class="card-hd"><span class="card-title">Motivos Identificados</span><span class="card-tag">TODOS</span></div><div class="card-body"><canvas id="vit-motivo"></canvas></div></div>
-            <div class="card"><div class="card-hd"><span class="card-title">Idade Média por Meio</span><span class="card-tag">TODOS</span></div><div class="card-body"><canvas id="vit-meio-idade"></canvas></div></div>
+    <!-- ABA 5 -->
+    <div class="tab-page" id="tab-modalidade">
+        <div class="container">
+            <div class="kpi-grid cols-4">
+                <div class="kpi-card red"><div class="kpi-lbl">Arma de Fogo (2026)</div><div class="kpi-val red" id="mod-fogo">—</div><div class="kpi-sub" id="mod-fogo-sub">% dos casos</div></div>
+                <div class="kpi-card orange"><div class="kpi-lbl">Arma Branca (2026)</div><div class="kpi-val" id="mod-branca">—</div><div class="kpi-sub" id="mod-branca-sub">% dos casos</div></div>
+                <div class="kpi-card blue"><div class="kpi-lbl">Outros Meios (2026)</div><div class="kpi-val blue" id="mod-lesao">—</div><div class="kpi-sub" id="mod-lesao-sub">% dos casos</div></div>
+                <div class="kpi-card yellow"><div class="kpi-lbl">Tipificações (2026)</div><div class="kpi-val" id="mod-outros">—</div><div class="kpi-sub" id="mod-outros-sub">tipos distintos</div></div>
+            </div>
+            <div class="sec-label">Análise por Modalidade (2026)</div>
+            <div class="g2">
+                <div class="card"><div class="card-hd"><span class="card-title">Meio Empregado — Detalhado</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="mod-meio"></canvas></div></div>
+                <div class="card"><div class="card-hd"><span class="card-title">Proporção por Meio</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="mod-pizza"></canvas></div></div>
+            </div>
+            <div class="g2">
+                <div class="card"><div class="card-hd"><span class="card-title">Tipificação dos Crimes</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="mod-tipo"></canvas></div></div>
+                <div class="card"><div class="card-hd"><span class="card-title">Motivos Identificados</span><span class="card-tag">TODOS</span></div><div class="card-body"><canvas id="mod-motivo"></canvas></div></div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- ABA 5 -->
-<div class="tab-page" id="tab-modalidade">
-    <div class="container">
-        <div class="kpi-grid cols-4">
-            <div class="kpi-card red"><div class="kpi-lbl">Arma de Fogo (2026)</div><div class="kpi-val red" id="mod-fogo">—</div><div class="kpi-sub" id="mod-fogo-sub">% dos casos</div></div>
-            <div class="kpi-card orange"><div class="kpi-lbl">Arma Branca (2026)</div><div class="kpi-val" id="mod-branca">—</div><div class="kpi-sub" id="mod-branca-sub">% dos casos</div></div>
-            <div class="kpi-card blue"><div class="kpi-lbl">Outros Meios (2026)</div><div class="kpi-val blue" id="mod-lesao">—</div><div class="kpi-sub" id="mod-lesao-sub">% dos casos</div></div>
-            <div class="kpi-card yellow"><div class="kpi-lbl">Tipificações (2026)</div><div class="kpi-val" id="mod-outros">—</div><div class="kpi-sub" id="mod-outros-sub">tipos distintos</div></div>
-        </div>
-        <div class="sec-label">Análise por Modalidade (2026)</div>
-        <div class="g2">
-            <div class="card"><div class="card-hd"><span class="card-title">Meio Empregado — Detalhado</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="mod-meio"></canvas></div></div>
-            <div class="card"><div class="card-hd"><span class="card-title">Proporção por Meio</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="mod-pizza"></canvas></div></div>
-        </div>
-        <div class="g2">
-            <div class="card"><div class="card-hd"><span class="card-title">Tipificação dos Crimes</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="mod-tipo"></canvas></div></div>
-            <div class="card"><div class="card-hd"><span class="card-title">Motivos Identificados</span><span class="card-tag">TODOS</span></div><div class="card-body"><canvas id="mod-motivo"></canvas></div></div>
-        </div>
-    </div>
-</div>
-
-<!-- ABA 6 -->
-<div class="tab-page" id="tab-coorpin">
-    <div class="container">
-        <div class="kpi-grid cols-4">
-            <div class="kpi-card red"><div class="kpi-lbl">COORPIN Acumulado 2025</div><div class="kpi-val red" id="co-t25">—</div><div class="kpi-sub" id="co-t25-sub">Jan–mês atual</div></div>
-            <div class="kpi-card blue"><div class="kpi-lbl">COORPIN Acumulado 2026</div><div class="kpi-val blue" id="co-t26">—</div><div class="kpi-sub" id="co-t26-sub">Jan–mês atual</div></div>
-            <div class="kpi-card orange"><div class="kpi-lbl">Municípios Afetados</div><div class="kpi-val" id="co-mun">—</div><div class="kpi-sub">na área da COORPIN</div></div>
-            <div class="kpi-card green"><div class="kpi-lbl">Variação Global (Acumulado)</div><div class="kpi-val green" id="co-var">—</div><div class="kpi-sub" id="co-var-sub">Jan-atual 25 vs 26</div></div>
-        </div>
-        <div class="sec-label">Comparativo de Municípios (2025 vs 2026)</div>
-        <div class="card mb16">
-            <div class="card-hd"><span class="card-title">CVLI por Município — 2025 vs 2026</span><span class="card-tag">COORPIN</span></div>
-            <div class="card-body"><canvas id="co-mun-comp" style="max-height:360px;"></canvas></div>
-        </div>
-        <div class="card mb16">
-            <div class="card-hd"><span class="card-title">Evolução Mensal (todos os Municípios)</span><span class="card-tag">SÉRIE 25/26</span></div>
-            <div class="card-body"><canvas id="co-evolucao" style="max-height:360px;"></canvas></div>
-        </div>
-        <div class="card mb16"><div class="card-hd"><span class="card-title">Tabela Comparativa — COORPIN 2025 vs 2026</span><span class="card-tag">DETALHADO</span></div><div class="card-body tbl-wrap" id="co-tabela"></div></div>
-        
-        <!-- CONTEÚDO MOVIDO DAS TABELAS RESUMO -->
-        <div class="sec-label" style="margin-top:30px;">Comparativo Acumulado — 2025 vs 2026</div>
-        <div class="g2">
+    <!-- ABA 6 -->
+    <div class="tab-page" id="tab-coorpin">
+        <div class="container">
+            <div class="kpi-grid cols-4">
+                <div class="kpi-card red"><div class="kpi-lbl">COORPIN Acumulado 2025</div><div class="kpi-val red" id="co-t25">—</div><div class="kpi-sub" id="co-t25-sub">Jan–mês atual</div></div>
+                <div class="kpi-card blue"><div class="kpi-lbl">COORPIN Acumulado 2026</div><div class="kpi-val blue" id="co-t26">—</div><div class="kpi-sub" id="co-t26-sub">Jan–mês atual</div></div>
+                <div class="kpi-card orange"><div class="kpi-lbl">Municípios Afetados</div><div class="kpi-val" id="co-mun">—</div><div class="kpi-sub">na área da COORPIN</div></div>
+                <div class="kpi-card green"><div class="kpi-lbl">Variação Global (Acumulado)</div><div class="kpi-val green" id="co-var">—</div><div class="kpi-sub" id="co-var-sub">Jan-atual 25 vs 26</div></div>
+            </div>
+            <div class="sec-label">Comparativo de Municípios (2025 vs 2026)</div>
             <div class="card mb16">
-                <div class="card-hd"><span class="card-title">Por Tipificação</span><span class="card-tag">VAR %</span></div>
-                <div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-comp-tip"></table></div>
+                <div class="card-hd"><span class="card-title">CVLI por Município — 2025 vs 2026</span><span class="card-tag">COORPIN</span></div>
+                <div class="card-body"><canvas id="co-mun-comp" style="max-height:360px;"></canvas></div>
             </div>
             <div class="card mb16">
-                <div class="card-hd"><span class="card-title">Por Município</span><span class="card-tag">VAR %</span></div>
-                <div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-comp-mun"></table></div>
+                <div class="card-hd"><span class="card-title">Evolução Mensal (todos os Municípios)</span><span class="card-tag">SÉRIE 25/26</span></div>
+                <div class="card-body"><canvas id="co-evolucao" style="max-height:360px;"></canvas></div>
             </div>
-        </div>
-        <div class="sec-label" style="margin-top:20px;">Tabelas de Produtividade Mensal — Por Tipificação</div>
-        <div class="card mb16"><div class="card-hd"><span class="card-title">ANO 2025</span><span class="card-tag">COORPIN</span></div><div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-tip-2025"></table></div></div>
-        <div class="card mb16"><div class="card-hd"><span class="card-title">ANO 2026</span><span class="card-tag blue">COORPIN</span></div><div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-tip-2026"></table></div></div>
-        <div class="sec-label" style="margin-top:30px;">Tabelas de Produtividade — Por Município</div>
-        <div class="card mb16"><div class="card-hd"><span class="card-title">CVLI - MUNICÍPIOS 2025</span><span class="card-tag">COORPIN</span></div><div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-mun-2025"></table></div></div>
-        <div class="card mb16"><div class="card-hd"><span class="card-title">CVLI - MUNICÍPIOS 2026</span><span class="card-tag blue">COORPIN</span></div><div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-mun-2026"></table></div></div>
-    </div>
-</div>
-
-<!-- ABA 7 - REGISTROS -->
-<div class="tab-page" id="tab-registros">
-    <div class="container">
-        <div class="kpi-grid cols-3">
-            <div class="kpi-card red"><div class="kpi-lbl">Total Registros</div><div class="kpi-val red" id="reg-tot-kpi">—</div><div class="kpi-sub">no banco de dados</div></div>
-            <div class="kpi-card blue"><div class="kpi-lbl">Filtrados</div><div class="kpi-val blue" id="reg-filt-kpi">—</div><div class="kpi-sub">após filtros aplicados</div></div>
-            <div class="kpi-card green"><div class="kpi-lbl">Página</div><div class="kpi-val green" id="reg-pg-kpi">—</div><div class="kpi-sub">de páginas</div></div>
-        </div>
-        <div class="filter-bar" style="justify-content:space-between;">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                <span class="f-lbl">Ano:</span>
-                <button class="f-btn active" data-group="ano" data-val="todos" onclick="setRegF('ano','todos',this)">TODOS</button>
-                <button class="f-btn" data-group="ano" data-val="2025" onclick="setRegF('ano','2025',this)">2025</button>
-                <button class="f-btn" data-group="ano" data-val="2026" onclick="setRegF('ano','2026',this)">2026</button>
-                <span class="f-lbl" style="margin-left:10px;">Mês:</span>
-                <select class="f-btn" data-group="mes" onchange="setRegF('mes',this.value,this)" style="background:var(--panel);padding-right:10px;outline:none;">
-                    <option value="todos">TODOS</option>
-                    <option value="1">JANEIRO</option><option value="2">FEVEREIRO</option><option value="3">MARÇO</option>
-                    <option value="4">ABRIL</option><option value="5">MAIO</option><option value="6">JUNHO</option>
-                    <option value="7">JULHO</option><option value="8">AGOSTO</option><option value="9">SETEMBRO</option>
-                    <option value="10">OUTUBRO</option><option value="11">NOVEMBRO</option><option value="12">DEZEMBRO</option>
-                </select>
-                <span class="f-lbl" style="margin-left:10px;">Meio:</span>
-                <button class="f-btn active" data-group="meio" data-val="todos" onclick="setRegF('meio','todos',this)">TODOS</button>
-                <button class="f-btn" data-group="meio" data-val="ARMA DE FOGO" onclick="setRegF('meio','ARMA DE FOGO',this)">ARMA DE FOGO</button>
-                <button class="f-btn" data-group="meio" data-val="ARMA BRANCA" onclick="setRegF('meio','ARMA BRANCA',this)">ARMA BRANCA</button>
-                <button class="f-btn" data-group="meio" data-val="outros" onclick="setRegF('meio','outros',this)">OUTROS</button>
+            <div class="card mb16"><div class="card-hd"><span class="card-title">Tabela Comparativa — COORPIN 2025 vs 2026</span><span class="card-tag">DETALHADO</span></div><div class="card-body tbl-wrap" id="co-tabela"></div></div>
+            
+            <div class="sec-label" style="margin-top:30px;">Comparativo Acumulado — 2025 vs 2026</div>
+            <div class="g2">
+                <div class="card mb16">
+                    <div class="card-hd"><span class="card-title">Por Tipificação</span><span class="card-tag">VAR %</span></div>
+                    <div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-comp-tip"></table></div>
+                </div>
+                <div class="card mb16">
+                    <div class="card-hd"><span class="card-title">Por Município</span><span class="card-tag">VAR %</span></div>
+                    <div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-comp-mun"></table></div>
+                </div>
             </div>
-            <button class="f-btn" onclick="reloadSheets()" style="border-color:var(--blue);color:var(--blue);" title="Sincronizar dados da planilha">↻ Sincronizar</button>
-        </div>
-        <div class="search-box">
-            <span style="color:var(--muted);">🔍</span>
-            <input type="text" id="reg-search" placeholder="Buscar por vítima, bairro, ocorrência ou cidade..." style="width:100%;" oninput="applyFilters()">
-        </div>
-        <div class="card mb16">
-            <div class="card-hd"><span class="card-title">Base de Dados CVLI — Íntegra</span><span class="card-tag" id="reg-tag">— registros</span></div>
-            <div class="card-body tbl-wrap" style="padding:0;">
-                <table style="width:100%;min-width:1600px;">
-                    <thead><tr>
-                        <th>Nº</th><th>Vítima</th><th>Idade</th><th>Ocorrência</th><th>Data</th><th>Hora</th><th>Autoria</th><th>Motivo</th><th>Meio Empregado</th><th>Tipificação</th><th>Bairro</th><th>Logradouro</th><th>Cidade</th><th>Georeferência</th><th>Obs</th>
-                    </tr></thead>
-                    <tbody id="reg-tbody"></tbody>
-                </table>
-            </div>
-            <div style="padding:10px 18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-                <div class="pg-info" id="reg-pg-info">—</div>
-                <div class="pagination" id="reg-pg"></div>
-            </div>
+            <div class="sec-label" style="margin-top:20px;">Tabelas de Produtividade Mensal — Por Tipificação</div>
+            <div class="card mb16"><div class="card-hd"><span class="card-title">ANO 2025</span><span class="card-tag">COORPIN</span></div><div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-tip-2025"></table></div></div>
+            <div class="card mb16"><div class="card-hd"><span class="card-title">ANO 2026</span><span class="card-tag blue">COORPIN</span></div><div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-tip-2026"></table></div></div>
+            <div class="sec-label" style="margin-top:30px;">Tabelas de Produtividade — Por Município</div>
+            <div class="card mb16"><div class="card-hd"><span class="card-title">CVLI - MUNICÍPIOS 2025</span><span class="card-tag">COORPIN</span></div><div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-mun-2025"></table></div></div>
+            <div class="card mb16"><div class="card-hd"><span class="card-title">CVLI - MUNICÍPIOS 2026</span><span class="card-tag blue">COORPIN</span></div><div class="card-body tbl-wrap" style="padding:0;"><table class="excel-table" id="tabela-mun-2026"></table></div></div>
         </div>
     </div>
-</div>
 
-<div class="footer" id="footer-txt">PAINEL ANÁLISE CVLI · FEIRA DE SANTANA / COORPIN · 2025–2026 · AGUARDANDO DADOS</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
-<!-- DIAGNÓSTICO MODAL -->
-<div id="diag-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
-    <div style="background:#111318;border:1px solid #1e2330;border-radius:16px;padding:28px;max-width:520px;width:90%;position:relative;">
-        <div style="font-family:Bebas Neue,sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:4px;color:#e8eaf0;">FALHA NA SINCRONIZAÇÃO</div>
-        <div style="font-size:11px;color:#6b7280;margin-bottom:12px;font-family:JetBrains Mono,monospace;">Não foi possível aceder à folha de cálculo automaticamente.</div>
-        <div id="diag-error-detail" style="font-size:11px;color:#ff6b35;margin-bottom:18px;font-family:JetBrains Mono,monospace;word-break:break-all;"></div>
-        <div style="font-size:12px;color:#e8eaf0;margin-bottom:16px;line-height:1.8;">
-            <strong>Possíveis causas:</strong><br>
-            <span style="color:#ff6b35">•</span> <strong>Bloqueio do Navegador (CORS):</strong> Abrir o ficheiro diretamente no PC (com <code>file:///</code>) bloqueia ligações a sites externos por segurança. Para resolver, hospede o ficheiro ou use uma extensão como o <em>Live Server</em> no VS Code.<br>
-            <span style="color:#ff6b35">•</span> <strong>Folha de Cálculo Privada:</strong> Verifique se gerou o link corretamente através do menu "Ficheiro > Partilhar > Publicar na Web" (escolhendo o formato CSV).
+    <!-- ABA 7 - REGISTROS -->
+    <div class="tab-page" id="tab-registros">
+        <div class="container">
+            <div class="kpi-grid cols-3">
+                <div class="kpi-card red"><div class="kpi-lbl">Total Registros</div><div class="kpi-val red" id="reg-tot-kpi">—</div><div class="kpi-sub">no banco de dados</div></div>
+                <div class="kpi-card blue"><div class="kpi-lbl">Filtrados</div><div class="kpi-val blue" id="reg-filt-kpi">—</div><div class="kpi-sub">após filtros aplicados</div></div>
+                <div class="kpi-card green"><div class="kpi-lbl">Página</div><div class="kpi-val green" id="reg-pg-kpi">—</div><div class="kpi-sub">de páginas</div></div>
+            </div>
+            <div class="filter-bar" style="justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span class="f-lbl">Ano:</span>
+                    <button class="f-btn active" data-group="ano" data-val="todos" onclick="setRegF('ano','todos',this)">TODOS</button>
+                    <button class="f-btn" data-group="ano" data-val="2025" onclick="setRegF('ano','2025',this)">2025</button>
+                    <button class="f-btn" data-group="ano" data-val="2026" onclick="setRegF('ano','2026',this)">2026</button>
+                    <span class="f-lbl" style="margin-left:10px;">Mês:</span>
+                    <select class="f-btn" data-group="mes" onchange="setRegF('mes',this.value,this)" style="background:var(--panel);padding-right:10px;outline:none;">
+                        <option value="todos">TODOS</option>
+                        <option value="1">JANEIRO</option><option value="2">FEVEREIRO</option><option value="3">MARÇO</option>
+                        <option value="4">ABRIL</option><option value="5">MAIO</option><option value="6">JUNHO</option>
+                        <option value="7">JULHO</option><option value="8">AGOSTO</option><option value="9">SETEMBRO</option>
+                        <option value="10">OUTUBRO</option><option value="11">NOVEMBRO</option><option value="12">DEZEMBRO</option>
+                    </select>
+                    <span class="f-lbl" style="margin-left:10px;">Meio:</span>
+                    <button class="f-btn active" data-group="meio" data-val="todos" onclick="setRegF('meio','todos',this)">TODOS</button>
+                    <button class="f-btn" data-group="meio" data-val="ARMA DE FOGO" onclick="setRegF('meio','ARMA DE FOGO',this)">ARMA DE FOGO</button>
+                    <button class="f-btn" data-group="meio" data-val="ARMA BRANCA" onclick="setRegF('meio','ARMA BRANCA',this)">ARMA BRANCA</button>
+                    <button class="f-btn" data-group="meio" data-val="outros" onclick="setRegF('meio','outros',this)">OUTROS</button>
+                </div>
+                <button class="f-btn" onclick="reloadSheets()" style="border-color:var(--blue);color:var(--blue);" title="Sincronizar dados da planilha">↻ Sincronizar</button>
+            </div>
+            <div class="search-box">
+                <span style="color:var(--muted);">🔍</span>
+                <input type="text" id="reg-search" placeholder="Buscar por vítima, bairro, ocorrência ou cidade..." style="width:100%;" oninput="applyFilters()">
+            </div>
+            <div class="card mb16">
+                <div class="card-hd"><span class="card-title">Base de Dados CVLI — Íntegra</span><span class="card-tag" id="reg-tag">— registros</span></div>
+                <div class="card-body tbl-wrap" style="padding:0;">
+                    <table style="width:100%;min-width:1600px;">
+                        <thead><tr>
+                            <th>Nº</th><th>Vítima</th><th>Idade</th><th>Ocorrência</th><th>Data</th><th>Hora</th><th>Autoria</th><th>Motivo</th><th>Meio Empregado</th><th>Tipificação</th><th>Bairro</th><th>Logradouro</th><th>Cidade</th><th>Georeferência</th><th>Obs</th>
+                        </tr></thead>
+                        <tbody id="reg-tbody"></tbody>
+                    </table>
+                </div>
+                <div style="padding:10px 18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+                    <div class="pg-info" id="reg-pg-info">—</div>
+                    <div class="pagination" id="reg-pg"></div>
+                </div>
+            </div>
         </div>
-        <div style="display:flex;gap:10px;">
-            <button onclick="document.getElementById('diag-modal').style.display='none';reloadSheets();" style="flex:1;padding:10px;background:#e63946;border:none;border-radius:8px;color:#fff;font-family:Bebas Neue,sans-serif;font-size:16px;cursor:pointer;">TENTAR NOVAMENTE</button>
-            <button onclick="document.getElementById('diag-modal').style.display='none';" style="padding:10px 18px;background:#161922;border:1px solid #1e2330;border-radius:8px;color:#6b7280;cursor:pointer;">FECHAR</button>
+    </div>
+
+    <div class="footer" id="footer-txt">PAINEL ANÁLISE CVLI · FEIRA DE SANTANA / COORPIN · 2025–2026 · AGUARDANDO DADOS</div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <!-- DIAGNÓSTICO MODAL -->
+    <div id="diag-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+        <div style="background:#111318;border:1px solid #1e2330;border-radius:16px;padding:28px;max-width:520px;width:90%;position:relative;">
+            <div style="font-family:Bebas Neue,sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:4px;color:#e8eaf0;">FALHA NA SINCRONIZAÇÃO</div>
+            <div style="font-size:11px;color:#6b7280;margin-bottom:12px;font-family:JetBrains Mono,monospace;">Não foi possível aceder à folha de cálculo automaticamente.</div>
+            <div id="diag-error-detail" style="font-size:11px;color:#ff6b35;margin-bottom:18px;font-family:JetBrains Mono,monospace;word-break:break-all;"></div>
+            <div style="font-size:12px;color:#e8eaf0;margin-bottom:16px;line-height:1.8;">
+                <strong>Possíveis causas:</strong><br>
+                <span style="color:#ff6b35">•</span> <strong>Bloqueio do Navegador (CORS):</strong> Abrir o ficheiro diretamente no PC (com <code>file:///</code>) bloqueia ligações a sites externos por segurança. Para resolver, hospede o ficheiro ou use uma extensão como o <em>Live Server</em> no VS Code.<br>
+                <span style="color:#ff6b35">•</span> <strong>Folha de Cálculo Privada:</strong> Verifique se gerou o link corretamente através do menu "Ficheiro > Partilhar > Publicar na Web" (escolhendo o formato CSV).
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button onclick="document.getElementById('diag-modal').style.display='none';reloadSheets();" style="flex:1;padding:10px;background:#e63946;border:none;border-radius:8px;color:#fff;font-family:Bebas Neue,sans-serif;font-size:16px;cursor:pointer;">TENTAR NOVAMENTE</button>
+                <button onclick="document.getElementById('diag-modal').style.display='none';" style="padding:10px 18px;background:#161922;border:1px solid #1e2330;border-radius:8px;color:#6b7280;cursor:pointer;">FECHAR</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
+// ══════════════════════════════════════════════════════
+// CONTROLE DE ACESSO (SENHA CRIPTOGRAFADA / OFUSCADA)
+// ══════════════════════════════════════════════════════
+function checkUnlock() {
+    const input = document.getElementById('pwd-input').value;
+    let enc = "";
+    // Deslocamento ASCII (+5) para ofuscar o texto no arquivo fonte
+    // "12643151" gerará a string "67;986:6"
+    for(let i=0; i<input.length; i++) {
+        enc += String.fromCharCode(input.charCodeAt(i) + 5);
+    }
+    
+    if(enc === "67;986:6") {
+        document.getElementById('lock-screen').style.display = 'none';
+        document.getElementById('app-content').style.display = 'block';
+        
+        // Inicia o processamento dos dados APENAS após a senha correta
+        initData();
+        buildVG();
+        reloadSheets();
+        
+        // Correção de mapa que pode bugar se inicializado invisível
+        if(mapInstance) mapInstance.invalidateSize();
+    } else {
+        const err = document.getElementById('pwd-err');
+        err.style.display = 'block';
+        document.getElementById('pwd-input').value = '';
+        document.getElementById('pwd-input').focus();
+    }
+}
+
+// Permitir Enter no campo de senha
+document.getElementById('pwd-input').addEventListener('keypress', function(e) {
+    if(e.key === 'Enter') checkUnlock();
+});
+
 // ══════════════════════════════════════════════════════
 // DADOS ESTÁTICOS (Totalmente limpo)
 // ══════════════════════════════════════════════════════
@@ -583,7 +653,6 @@ function parseCSV(text) {
                 let rawDate = dataStr.trim().split(/[ T]/)[0].replace(/[^\d\/\-]/g, '');
                 const mDMY = rawDate.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
                 const mYMD = rawDate.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
-                const mesesAbv = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
                 if (mDMY) { 
                     let p1 = parseInt(mDMY[1], 10);
@@ -609,9 +678,8 @@ function parseCSV(text) {
                 }
 
                 if (!isNaN(mesNum) && mesNum >= 1 && mesNum <= 12 && !isNaN(dia) && anoStr) {
-                        let mesStr = mesesAbv[mesNum - 1];
-                        // Exibição visual corrigida para: DD/MMM/AAAA (Ex: 01/Abr/2026)
-                        dataStr = String(dia).padStart(2, '0') + '/' + mesStr + '/' + anoStr;
+                        // Formato de dados ajustado: DD/MM/YYYY em toda a coluna.
+                        dataStr = String(dia).padStart(2, '0') + '/' + String(mesNum).padStart(2, '0') + '/' + anoStr;
                 } else {
                         mesNum = NaN; 
                  }
@@ -762,7 +830,10 @@ function processSheetRows(rows) {
 }
 
 setInterval(() => {
-    if (document.visibilityState === 'visible') reloadSheets();
+    // Apenas sincroniza automaticamente se a tela principal estiver liberada (display block)
+    if (document.visibilityState === 'visible' && document.getElementById('app-content').style.display === 'block') {
+        reloadSheets();
+    }
 }, 5 * 60 * 1000);
 
 // ══════════════════════════════════════════════════════
@@ -807,7 +878,7 @@ function recalcStats(){
     DB.t25_coorpin=0; DB.t26_coorpin=0;
     
     let maxM26 = -1;
-    const currentRealMonth = new Date().getMonth(); // 0 a 11 (Mês exato do mundo real)
+    const currentRealMonth = new Date().getMonth();
 
     DB.registros.forEach(r=>{
         const is25=String(r.ano)==='2025', is26=String(r.ano)==='2026';
@@ -852,14 +923,13 @@ function recalcStats(){
     
     if (maxM26 === -1) maxM26 = currentRealMonth;
     DB.maxM26 = maxM26;
-    DB.limitMonth = currentRealMonth; // Limita os cálculos de acumulado estritamente até o mês atual
+    DB.limitMonth = currentRealMonth;
 
     DB.t25_ytd = 0;
     DB.t26_ytd = 0;
     DB.coorpin25_ytd = {};
     DB.coorpin26_ytd = {};
     
-    // Cálculo exato de Janeiro até o Mês Atual
     for (let i = 0; i <= DB.limitMonth; i++) {
         DB.t25_ytd += DB.coorpin_25[i] || 0;
         DB.t26_ytd += DB.coorpin_26[i] || 0;
@@ -1079,7 +1149,7 @@ function buildGEO(){
 
 function buildMANCHA() {
     const mapEl = document.getElementById('map');
-    if (!mapEl || mapEl.clientWidth === 0) return; // Evita construir o mapa se a aba estiver oculta
+    if (!mapEl || mapEl.clientWidth === 0) return; 
 
     const regsComCoords = DB.registros.filter(r => isCVLI(r.tipificacao) && r.lat !== null && r.lng !== null);
     
@@ -1093,19 +1163,17 @@ function buildMANCHA() {
         }).addTo(mapInstance);
     }
 
-    mapInstance.invalidateSize(); // Atualiza dimensões ANTES do mapa
+    mapInstance.invalidateSize(); 
     
     if (markerLayer) mapInstance.removeLayer(markerLayer);
 
     markerLayer = L.layerGroup().addTo(mapInstance);
 
-    // Agrupar registros por Coordenada + Ocorrência
     const markersMap = {};
     regsComCoords.forEach(r => {
         const coordKey = r.lat.toFixed(5) + ',' + r.lng.toFixed(5);
         const ocKey = String(r.ocorrencia || '').trim().toUpperCase();
         
-        // Forçar chave única se ocorrência não foi informada
         let groupKey = coordKey + '||' + ocKey;
         if (!ocKey || ocKey === 'NÃO INFORMADA' || ocKey === 'NAO INFORMADA') {
             groupKey = coordKey + '||' + r.n; 
@@ -1128,10 +1196,9 @@ function buildMANCHA() {
             usedCoords[m.coordKey] = 0;
         } else {
             usedCoords[m.coordKey]++;
-            // Espalhar marcadores de ocorrências diferentes no mesmo ponto exato
             const count = usedCoords[m.coordKey];
-            const angle = count * (Math.PI * 2 / 6); // distribui em círculo
-            const distance = 0.00025 * Math.ceil(count / 6); // afasta milimetricamente
+            const angle = count * (Math.PI * 2 / 6); 
+            const distance = 0.00025 * Math.ceil(count / 6); 
             m.lat += Math.cos(angle) * distance;
             m.lng += Math.sin(angle) * distance;
         }
@@ -1145,18 +1212,15 @@ function buildMANCHA() {
             let isMenor12 = !isNaN(idade) && idade < 12;
             let isMenor18 = !isNaN(idade) && idade >= 12 && idade < 18;
             
-            let color = '#e63946'; // Adulto Padrão (Vermelho)
+            let color = '#e63946'; 
             if (isFeminicidio) { color = '#ec4899'; qtdFeminicidio += 1; }
             else if (isMenor12) { color = '#ffd60a'; qtdMenores += 1; }
             else if (isMenor18) { color = '#3b82f6'; qtdMenores += 1; }
             else { qtdAdultos += 1; }
             
             totalVitimasMap += 1;
-
-            // Adiciona a cor deste boneco à lista desta ocorrência
             bonecos.push(color);
 
-            // Adicionar ao popup agrupado
             if (idx > 0) combinedPopup += `<hr style="border:0; border-top:1px dashed var(--border); margin:12px 0;">`;
             
             combinedPopup += `
@@ -1175,8 +1239,6 @@ function buildMANCHA() {
         combinedPopup += `</div>`;
 
         let groupNumBonecos = bonecos.length;
-        
-        // Define o offset (sobreposição) para desenhá-los colados num ÚNICO SVG vetorial
         let overlapOffset = 110; 
         let viewBoxWidth = 192 + (groupNumBonecos - 1) * overlapOffset;
         let svgWidth = Math.min(16 + (groupNumBonecos - 1) * 10, 150); 
@@ -1184,7 +1246,6 @@ function buildMANCHA() {
         let combinedSvg = `<div style="display:flex; justify-content:center; align-items:flex-end;">`;
         combinedSvg += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${viewBoxWidth} 512" style="width:${svgWidth}px; height:24px; filter:drop-shadow(0px 2px 4px rgba(0,0,0,0.8));">`;
         
-        // Desenha os bonecos dentro da mesma imagem SVG sobrepostos
         bonecos.forEach((color, i) => {
             let translateX = i * overlapOffset;
             combinedSvg += `<path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z" fill="${color}" stroke="#111318" stroke-width="16" stroke-linejoin="round" transform="translate(${translateX}, 0)" />`;
@@ -1194,9 +1255,9 @@ function buildMANCHA() {
 
         let customMarker = L.divIcon({
             html: combinedSvg,
-            className: '', // Remove fundos brancos nativos do Leaflet
+            className: '', 
             iconSize: [svgWidth, 24],
-            iconAnchor: [svgWidth / 2, 24], // Base do ícone fica na coordenada
+            iconAnchor: [svgWidth / 2, 24], 
             popupAnchor: [0, -20]
         });
 
@@ -1607,15 +1668,11 @@ function renderRegTable(tot, pgs) {
 function goPg(p) { rPage = p; applyFilters(); }
 
 // ══════════════════════════════════════════════════════
-// INIT
+// INIT DE SETUP (AGUARDANDO DESBLOQUEIO)
 // ══════════════════════════════════════════════════════
 document.getElementById('hdate').textContent = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
+// A inicialização e requisição só ocorrem quando a senha for inserida para maior segurança e bloqueio no Network Tab
 
-initData();
-buildVG();
-
-// Carrega planilha automaticamente
-reloadSheets();
 </script>
 </body>
 </html>

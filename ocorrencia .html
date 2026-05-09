@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocorrência Pro | Inteligência Artificial Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #020617;
+        }
+
+        .premium-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .input-premium {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(71, 85, 105, 0.4);
+            color: #f1f5f9;
+            transition: all 0.3s ease;
+        }
+
+        .input-premium:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        .glow-button {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 0px rgba(59, 130, 246, 0);
+        }
+
+        .glow-button:hover:not(:disabled) {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-200 flex items-center justify-center p-4 md:p-8">
+
+    <!-- Fundo decorativo -->
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-blue-900/20 blur-[120px] rounded-full"></div>
+        <div class="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-indigo-900/20 blur-[120px] rounded-full"></div>
+    </div>
+
+    <div class="premium-card w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden z-10">
+        
+        <!-- Header Premium -->
+        <header class="p-8 md:p-12 text-center border-b border-slate-800/50 relative">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tighter">
+                Ocorrência<span class="text-blue-500">Pro</span>
+            </h1>
+            <p class="text-slate-400 mt-3 text-sm md:text-lg font-light max-w-2xl mx-auto">
+                Refinamento jurídico e análise criminal de alta precisão em ambiente seguro e profissional.
+            </p>
+        </header>
+
+        <main class="p-6 md:p-10 space-y-8">
+            
+            <div class="grid grid-cols-1 gap-6">
+                <!-- Local -->
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Unidade de Registo (Local)</label>
+                    <input type="text" id="localRegistro" 
+                        class="input-premium w-full p-4 rounded-2xl outline-none font-medium" 
+                        placeholder="Ex: 1ª Delegacia Territorial de Feira de Santana">
+                </div>
+
+                <!-- Entrada de Dados -->
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Relato Informal do Declarante</label>
+                    <textarea id="textoOriginal" rows="5" 
+                        class="input-premium w-full p-5 rounded-2xl resize-none font-medium" 
+                        placeholder="Insira os factos brutos para formalização técnica..."></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <button id="btnProcessar" onclick="processarOcorrencia()" 
+                    class="glow-button bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-12 rounded-2xl flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="btnText" class="tracking-wide">ANALISAR E FORMALIZAR</span>
+                    <svg id="btnSpinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Grid de Resultados -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
+                
+                <!-- Relatório Formal -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center px-1">
+                        <h3 class="text-xs font-bold text-blue-400 uppercase tracking-widest">Relatório Formalizado</h3>
+                        <button onclick="copiar('textoMelhorado')" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1 rounded-lg border border-slate-700 transition-colors">COPIAR</button>
+                    </div>
+                    <div class="input-premium rounded-2xl p-6 h-80 overflow-hidden relative group">
+                        <textarea id="textoMelhorado" readonly 
+                            class="w-full h-full bg-transparent border-none focus:ring-0 p-0 text-slate-300 resize-none font-normal text-sm leading-relaxed outline-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- Análise Criminal -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center px-1">
+                        <h3 class="text-xs font-bold text-amber-500 uppercase tracking-widest">Capitulação em Tese</h3>
+                        <div class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+                    </div>
+                    <div class="input-premium rounded-2xl p-6 h-80 overflow-y-auto custom-scroll border-amber-900/20">
+                        <div id="analiseCrimes" class="text-slate-300 text-sm leading-relaxed space-y-4">
+                            <p class="text-slate-600 italic text-center py-24">Aguardando dados para análise criminal...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="p-6 text-center border-t border-slate-800/30 text-slate-600 text-[10px] tracking-widest uppercase">
+            Sistema de Apoio à Redacção Policial • Uso Profissional
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-8 right-8 transform translate-y-24 opacity-0 transition-all duration-500 bg-blue-600 text-white px-8 py-4 rounded-2xl shadow-2xl z-50 flex items-center space-x-3">
+        <span id="toastMessage" class="text-sm font-bold tracking-wide"></span>
+    </div>
+
+    <script>
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+        async function processarOcorrencia() {
+            const rascunho = document.getElementById('textoOriginal').value.trim();
+            const local = document.getElementById('localRegistro').value.trim() || "Unidade Não Especificada";
+            const btn = document.getElementById('btnProcessar');
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+
+            if (!rascunho) {
+                showToast("⚠️ O campo de relato está vazio.", true);
+                return;
+            }
+
+            btn.disabled = true;
+            btnSpinner.classList.remove('hidden');
+            btnText.textContent = "PROCESSANDO...";
+
+            const systemPrompt = `Você é um perito em redação policial e legislação brasileira (Código Penal).
+            Gere uma resposta JSON estruturada:
+            1. "relatorio": Texto formalizado. Inicie com: "Compareceu a esta unidade policial (${local}), a senhora ou o senhor [NOME EXTRAÍDO], devidamente qualificada(o), informando que..." e termine com "foi o registro.". Use tom impessoal e jurídico.
+            2. "analise": Análise técnica dos crimes. Inicie com: "Aqui estão os crimes que, em tese, foram cometidos de acordo com esse histórico:". Use HTML para formatação básica (<b>, <ul>, <li>).
+
+            Retorne APENAS o JSON.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: `Local: ${local}\nRelato: ${rascunho}` }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { responseMimeType: "application/json" }
+            };
+
+            let attempts = 0;
+            async function makeRequest() {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) throw new Error();
+                    
+                    const data = await response.json();
+                    const result = JSON.parse(data.candidates[0].content.parts[0].text);
+                    
+                    document.getElementById('textoMelhorado').value = result.relatorio;
+                    document.getElementById('analiseCrimes').innerHTML = result.analise;
+                    
+                    showToast("✅ RELATÓRIO PROCESSADO COM SUCESSO");
+                } catch (error) {
+                    if (attempts < 3) {
+                        attempts++;
+                        setTimeout(makeRequest, 2000);
+                    } else {
+                        showToast("❌ ERRO NO SERVIDOR. TENTE NOVAMENTE.", true);
+                    }
+                } finally {
+                    btn.disabled = false;
+                    btnSpinner.classList.add('hidden');
+                    btnText.textContent = "ANALISAR E FORMALIZAR";
+                }
+            }
+            makeRequest();
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toastMessage');
+            msg.textContent = message;
+            toast.className = `fixed bottom-8 right-8 transform transition-all duration-500 ${isError ? 'bg-red-900/90 border border-red-500/50' : 'bg-blue-900/90 border border-blue-500/50'} text-white px-8 py-4 rounded-2xl shadow-2xl z-50`;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => { toast.classList.add('translate-y-24', 'opacity-0'); }, 4000);
+        }
+
+        function copiar(id) {
+            const el = document.getElementById(id);
+            if(!el.value) return;
+            el.select();
+            document.execCommand('copy');
+            showToast("📋 TEXTO COPIADO");
+        }
+    </script>
+</body>
+</html>
