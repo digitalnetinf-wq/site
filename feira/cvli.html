@@ -14,7 +14,6 @@
         body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
         body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 20%,rgba(230,57,70,.05) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(59,130,246,.04) 0%,transparent 60%);pointer-events:none;z-index:0;}
         
-        /* TELA DE BLOQUEIO */
         #lock-screen {
             position: fixed; inset: 0; z-index: 10000; background: var(--bg);
             display: flex; align-items: center; justify-content: center; flex-direction: column;
@@ -47,6 +46,7 @@
         .live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;}
         @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
         .hdate{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+        
         .sheets-badge{display:flex;align-items:center;gap:6px;font-size:10px;font-family:'JetBrains Mono',monospace;border-radius:20px;padding:4px 10px;border:1px solid;cursor:pointer;transition:all .2s;}
         .sheets-badge.loading{color:var(--accent3);background:rgba(255,214,10,.08);border-color:rgba(255,214,10,.2);}
         .sheets-badge.ok{color:var(--green);background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2);}
@@ -58,6 +58,7 @@
         .toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:12px;font-family:'JetBrains Mono',monospace;max-width:320px;display:none;animation:slideUp .3s ease;}
         .toast.show{display:flex;align-items:center;gap:10px;}
         @keyframes slideUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+        
         .tabs-nav{position:sticky;top:60px;z-index:190;background:rgba(10,12,16,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 24px;gap:2px;}
         .tabs-nav::-webkit-scrollbar{height:0;}
         .tab-btn{display:flex;align-items:center;gap:7px;padding:14px 18px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s;position:relative;top:1px;}
@@ -68,6 +69,7 @@
         .container{max-width:1600px;margin:0 auto;padding:24px;}
         .sec-label{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:3px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:10px;}
         .sec-label::after{content:'';flex:1;height:1px;background:var(--border);}
+        
         .kpi-grid{display:grid;gap:12px;margin-bottom:20px;}
         .cols-5{grid-template-columns:repeat(5,1fr);}
         .cols-4{grid-template-columns:repeat(4,1fr);}
@@ -88,6 +90,7 @@
         .kpi-val.green{color:var(--green);}
         .kpi-val.orange{color:var(--accent2);}
         .kpi-sub{font-size:10px;color:var(--muted);margin-top:5px;font-family:'JetBrains Mono',monospace;}
+        
         .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;animation:fadeUp .6s ease both;}
         .card-hd{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
         .card-title{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;color:var(--muted);}
@@ -100,6 +103,7 @@
         .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
         .gbig{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
         .mb16{margin-bottom:16px;}
+        
         .bar-list{display:flex;flex-direction:column;gap:9px;}
         .bar-item{display:flex;flex-direction:column;gap:3px;}
         .bar-row{display:flex;justify-content:space-between;align-items:center;}
@@ -107,6 +111,7 @@
         .bar-val{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
         .bar-track{height:4px;background:var(--dim);border-radius:2px;overflow:hidden;}
         .bar-fill{height:100%;border-radius:2px;transition:width 1s cubic-bezier(.4,0,.2,1);}
+        
         .tbl-wrap{overflow-x:auto;}
         table{width:100%;border-collapse:collapse;font-size:11px;}
         thead th{text-align:left;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600;white-space:nowrap;background:var(--panel2);}
@@ -122,6 +127,7 @@
         .b-muted{background:rgba(107,114,128,.15);color:var(--muted);}
         .b-purple{background:rgba(168,85,247,.15);color:var(--purple);}
         .mono{font-family:'JetBrains Mono',monospace;}
+        
         .heatmap{display:grid;grid-template-columns:90px repeat(12,1fr);gap:3px;min-width:750px;}
         .hm-cell{height:48px;display:flex;align-items:center;justify-content:center;border-radius:4px;font-size:11px;font-family:'JetBrains Mono',monospace;}
         .hm-lbl{font-size:10px;color:var(--muted);justify-content:flex-start;padding-left:4px;background:transparent!important;}
@@ -130,6 +136,7 @@
         .prog-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;}
         .prog-track{height:20px;background:var(--dim);border-radius:4px;overflow:hidden;display:flex;}
         .prog-a{height:100%;display:flex;align-items:center;justify-content:center;font-size:10px;font-family:'JetBrains Mono',monospace;color:#fff;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+        
         .filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
         .f-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
         .f-btn{padding:5px 13px;font-size:11px;font-family:'JetBrains Mono',monospace;border:1px solid var(--border);background:var(--panel);color:var(--muted);border-radius:6px;cursor:pointer;transition:all .2s;}
@@ -143,6 +150,7 @@
         .pg-btn:hover,.pg-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
         .pg-info{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
         .footer{text-align:center;padding:28px 24px;font-size:10px;color:var(--muted);border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;margin-top:8px;}
+        
         @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
         ::-webkit-scrollbar{width:5px;height:5px;}
         ::-webkit-scrollbar-track{background:var(--bg);}
@@ -232,8 +240,9 @@
                 <div class="card"><div class="card-hd"><span class="card-title">Autoria</span><span class="card-tag">2026</span></div><div class="card-body"><canvas id="vg-autd"></canvas></div></div>
             </div>
             <div class="sec-label">Comparativo Mês a Mês</div>
-            <div class="g2">
-                <div class="card"><div class="card-hd"><span class="card-title">Variação Mensal 2025 vs 2026</span><span class="card-tag blue">COORPIN TOTAL</span></div><div class="card-body" id="vg-comp" style="max-height:250px;overflow-y:auto;"></div></div>
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px;">
+                <div class="card"><div class="card-hd"><span class="card-title">Variação Mensal 2025 vs 2026</span><span class="card-tag">COORPIN TOTAL</span></div><div class="card-body" id="vg-comp-coorpin" style="max-height:250px;overflow-y:auto;"></div></div>
+                <div class="card"><div class="card-hd"><span class="card-title">Variação Mensal 2025 vs 2026</span><span class="card-tag blue">FEIRA TOTAL</span></div><div class="card-body" id="vg-comp" style="max-height:250px;overflow-y:auto;"></div></div>
                 <div class="card"><div class="card-hd"><span class="card-title">Ranking Bairros — Feira</span><span class="card-tag">TODOS</span></div><div class="card-body" style="max-height:250px;overflow-y:auto;"><div class="bar-list" id="vg-bairros"></div></div></div>
             </div>
         </div>
@@ -250,13 +259,14 @@
             </div>
             <div class="sec-label">Série Histórica e Comparativos (2025 vs 2026)</div>
             <div class="card mb16"><div class="card-hd"><span class="card-title">CVLI por Mês — Feira de Santana vs COORPIN</span><div style="display:flex;gap:8px;"><span class="card-tag">2025</span><span class="card-tag blue">2026</span></div></div><div class="card-body"><canvas id="ev-full" style="max-height:320px;"></canvas></div></div>
+            <div class="card mb16"><div class="card-hd"><span class="card-title">Curva de Acumulado 2025 vs 2026</span><span class="card-tag">COORPIN TOTAL</span></div><div class="card-body"><canvas id="ev-acum" style="max-height:280px;"></canvas></div></div>
             <div class="g2">
-                <div class="card"><div class="card-hd"><span class="card-title">Curva de Acumulado 2025 vs 2026</span><span class="card-tag">COORPIN TOTAL</span></div><div class="card-body"><canvas id="ev-acum"></canvas></div></div>
                 <div class="card"><div class="card-hd"><span class="card-title">Comparativo Trimestral</span><span class="card-tag">2025 vs 2026</span></div><div class="card-body"><canvas id="ev-trim" style="max-height:220px;"></canvas></div></div>
+                <div class="card"><div class="card-hd"><span class="card-title">Comparativo Semestral</span><span class="card-tag">2025 vs 2026</span></div><div class="card-body"><canvas id="ev-sem" style="max-height:220px;"></canvas></div></div>
             </div>
             <div class="sec-label">Mês a Mês — Dados Consolidados</div>
             <div class="card mb16"><div class="card-hd"><span class="card-title">Tabela Comparativa Mês a Mês</span><span class="card-tag">2025 vs 2026</span></div><div class="card-body tbl-wrap" id="ev-tabela-mes"></div></div>
-            <div class="card mb16"><div class="card-hd"><span class="card-title">Heatmap de Intensidade — Feira de Santana</span><span class="card-tag">COMPARATIVO</span></div><div class="card-body"><div style="overflow-x:auto;"><div class="heatmap" id="ev-heatmap"></div></div><div style="display:flex;gap:8px;align-items:center;margin-top:12px;"><span style="font-size:10px;color:var(--muted);">Intensidade:</span><div style="width:14px;height:14px;border-radius:3px;background:rgba(230,57,70,.12)"></div><span style="font-size:10px;color:var(--muted);">Baixo</span><div style="width:14px;height:14px;border-radius:3px;background:rgba(230,57,70,.45);margin-left:6px;"></div><span style="font-size:10px;color:var(--muted);">Médio</span><div style="width:14px;height:14px;border-radius:3px;background:rgba(230,57,70,.85);margin-left:6px;"></div><span style="font-size:10px;color:var(--muted);">Alto</span></div></div></div>
+            <div class="card mb16"><div class="card-hd"><span class="card-title">Heatmap de Intensidade — Feira de Santana</span><span class="card-tag">COMPARATIVO</span></div><div class="card-body"><div style="overflow-x:auto;"><div class="heatmap" id="ev-heatmap"></div></div><div style="display:flex;gap:8px;align-items:center;margin-top:12px;"><span style="font-size:10px;color:var(--muted);">Intensidade:</span><div style="width:14px;height:14px;border-radius:3px;background:rgba(34,197,94,.8)"></div><span style="font-size:10px;color:var(--muted);">Baixo</span><div style="width:14px;height:14px;border-radius:3px;background:rgba(255,214,10,.8);margin-left:6px;"></div><span style="font-size:10px;color:var(--muted);">Médio</span><div style="width:14px;height:14px;border-radius:3px;background:rgba(230,57,70,.8);margin-left:6px;"></div><span style="font-size:10px;color:var(--muted);">Alto</span></div></div></div>
         </div>
     </div>
 
@@ -456,7 +466,7 @@
         </div>
     </div>
 
-    <div class="footer" id="footer-txt">PAINEL ANÁLISE CVLI · FEIRA DE SANTANA / COORPIN · 2025–2026 · AGUARDANDO DADOS</div>
+    <div class="footer" id="footer-txt">PAINEL ANÁLISE CVLI · FEIRA DE SANTANA / COORPIN · 2025–2026 · AGUARDANDO DADOS · DESENVOLVIDO POR IPC FÉLIX RILTON</div>
 
     <!-- TOAST -->
     <div class="toast" id="toast"></div>
@@ -517,9 +527,7 @@ document.getElementById('pwd-input').addEventListener('keypress', function(e) {
     if(e.key === 'Enter') checkUnlock();
 });
 
-// ══════════════════════════════════════════════════════
 // DADOS ESTÁTICOS (Totalmente limpo)
-// ══════════════════════════════════════════════════════
 const DADOS_FALLBACK = [];
 
 // ══════════════════════════════════════════════════════
@@ -799,7 +807,7 @@ async function reloadSheets() {
 }
 
 function processSheetRows(rows) {
-    try {
+        try {
             sheetsRowCount = rows.length;
             sheetsLoadedAt = new Date();
             usingSheets = true;
@@ -815,7 +823,7 @@ function processSheetRows(rows) {
             if(hsub) hsub.textContent = `Crimes Violentos Letais Intencionais · Feira de Santana / COORPIN · ${DB.registros.length} Registros`;
             
             const footer = document.getElementById('footer-txt');
-            if(footer) footer.textContent = `PAINEL ANÁLISE CVLI · FEIRA DE SANTANA / COORPIN · 2025–2026 · ${DB.registros.length} REGISTROS · SYNC ${timeStr}`;
+            if(footer) footer.textContent = `PAINEL ANÁLISE CVLI · FEIRA DE SANTANA / COORPIN · 2025–2026 · ${DB.registros.length} REGISTROS · SYNC ${timeStr} · DESENVOLVIDO POR IPC FÉLIX RILTON`;
             
             const tabId = document.querySelector('.tab-page.active')?.id?.replace('tab-','');
             if (tabId) {
@@ -1024,12 +1032,25 @@ function buildVG(){
     idades26.forEach(id=>{if(id<18)faixas['<18']++;else if(id<=24)faixas['18–24']++;else if(id<=29)faixas['25–29']++;else if(id<=39)faixas['30–39']++;else if(id<=49)faixas['40–49']++;else faixas['50+']++;});
     mkC('vg-faixa',{type:'bar',data:{labels:Object.keys(faixas),datasets:[{data:Object.values(faixas),backgroundColor:P,borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
 
-    mkC('vg-autd',{type:'doughnut',data:{labels:['Com Autoria','Sem Autoria'],datasets:[{data:[autoriaSim26,regs26.length-autoriaSim26],backgroundColor:['#e63946','#1e2330'],borderWidth:0,hoverOffset:5}]},options:{responsive:true,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:'#9ca3af',font:{size:10},boxWidth:10,padding:8}},tooltip:TT}}});
+    mkC('vg-autd',{type:'doughnut',data:{labels:['Com Autoria','Sem Autoria'],datasets:[{data:[autoriaSim26,regs26.length-autoriaSim26],backgroundColor:['#22c55e','#e63946'],borderWidth:0,hoverOffset:5}]},options:{responsive:true,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:'#9ca3af',font:{size:10},boxWidth:10,padding:8}},tooltip:TT}}});
 
+    const f25=DB.feira_25,f26=DB.feira_26;
     const c25=DB.coorpin_25,c26=DB.coorpin_26;
+    
     const compContainer = document.getElementById('vg-comp');
     if(compContainer){
             compContainer.innerHTML=M.map((m,i)=>{
+                if(f25[i]===0&&f26[i]===0)return'';
+                const v25=f25[i],v26=f26[i],tot=v25+v26||1,p25=Math.round(v25/tot*100),p26=100-p25;
+                const d=v26-v25,col=d>0?'var(--red)':d<0?'var(--green)':'var(--muted)';
+                const icon=d>0?'▲':d<0?'▼':'=';
+                return`<div class="prog-item"><div class="prog-row"><span>${m}</span><span class="mono" style="font-size:11px;">2025:<b style="color:#e8eaf0"> ${v25}</b> · 2026:<b style="color:#3b82f6"> ${v26}</b> <span style="color:${col};margin-left:6px;font-weight:600;">${icon} ${Math.abs(d)}</span></span></div><div class="prog-track"><div class="prog-a" style="width:${p25}%;background:var(--accent);">${p25>14?'25':''}</div><div class="prog-a" style="width:${p26}%;background:var(--blue);">${p26>14?'26':''}</div></div></div>`;
+            }).join('');
+    }
+
+    const compCoorpin = document.getElementById('vg-comp-coorpin');
+    if(compCoorpin){
+            compCoorpin.innerHTML=M.map((m,i)=>{
                 if(c25[i]===0&&c26[i]===0)return'';
                 const v25=c25[i],v26=c26[i],tot=v25+v26||1,p25=Math.round(v25/tot*100),p26=100-p25;
                 const d=v26-v25,col=d>0?'var(--red)':d<0?'var(--green)':'var(--muted)';
@@ -1085,15 +1106,35 @@ function buildEV(){
     let h='<div class="hm-cell hm-hdr"></div>';
     M.forEach(m=>h+=`<div class="hm-cell hm-hdr">${m}</div>`);
     [{lbl:'Feira 2025',data:DB.feira_25},{lbl:'Feira 2026',data:DB.feira_26}].forEach(({lbl,data})=>{
-        const totalRow=data.reduce((a,b)=>a+(b||0),0);
         h+=`<div class="hm-cell hm-lbl">${lbl}</div>`;
-        data.forEach(v=>{
+        data.forEach((v, i)=>{
             v = v || 0;
-            const a=v>0?(0.12+0.72*(v/maxV)).toFixed(2):.04;
-            const tc=v/maxV>.5?'#fff':'#c8cad4';
-            const pct=totalRow>0?((v/totalRow)*100).toFixed(1):0;
-            const content=v>0?`${v}<br><small style="opacity:0.8;font-size:9px;font-weight:400;">${pct}%</small>`:'—';
-            h+=`<div class="hm-cell" style="background:rgba(230,57,70,${a});color:${tc};flex-direction:column;line-height:1.1;">${content}</div>`;
+            let bg = 'rgba(255,255,255,0.04)';
+            let tc = '#c8cad4';
+            let ratio = 0;
+            if(v > 0) {
+                ratio = v / maxV;
+                if (ratio <= 0.33) { bg = 'rgba(34, 197, 94, 0.8)'; tc = '#fff'; }
+                else if (ratio <= 0.66) { bg = 'rgba(255, 214, 10, 0.8)'; tc = '#111318'; }
+                else { bg = 'rgba(230, 57, 70, 0.8)'; tc = '#fff'; }
+            }
+            let content='—';
+            if(v>0){
+                if(lbl==='Feira 2025'){
+                    content=`${v}`;
+                }else{
+                    const v25 = DB.feira_25[i] || 0;
+                    let varPct = '';
+                    if(v25===0){
+                        varPct = '+100.0%';
+                    }else{
+                        const p = ((v - v25)/v25)*100;
+                        varPct = (p>0?'+':'') + p.toFixed(1) + '%';
+                    }
+                    content=`${v}<br><small style="opacity:0.8;font-size:9px;font-weight:${ratio>0.33 && ratio<=0.66 ? '600' : '400'};">${varPct}</small>`;
+                }
+            }
+            h+=`<div class="hm-cell" style="background:${bg};color:${tc};flex-direction:column;line-height:1.1;">${content}</div>`;
         });
     });
     const evHeatmap = document.getElementById('ev-heatmap');
@@ -1102,6 +1143,10 @@ function buildEV(){
     const trim25=[DB.coorpin_25[0]+DB.coorpin_25[1]+DB.coorpin_25[2],DB.coorpin_25[3]+DB.coorpin_25[4]+DB.coorpin_25[5],DB.coorpin_25[6]+DB.coorpin_25[7]+DB.coorpin_25[8],DB.coorpin_25[9]+DB.coorpin_25[10]+DB.coorpin_25[11]];
     const trim26=[DB.coorpin_26[0]+DB.coorpin_26[1]+DB.coorpin_26[2],DB.coorpin_26[3]+DB.coorpin_26[4]+DB.coorpin_26[5],DB.coorpin_26[6]+DB.coorpin_26[7]+DB.coorpin_26[8],DB.coorpin_26[9]+DB.coorpin_26[10]+DB.coorpin_26[11]];
     mkC('ev-trim',{type:'bar',data:{labels:['1º Trim','2º Trim','3º Trim','4º Trim'],datasets:[{label:'2025',data:trim25,backgroundColor:'rgba(230,57,70,.8)',borderRadius:4},{label:'2026',data:trim26,backgroundColor:'rgba(59,130,246,.8)',borderRadius:4}]},options:{responsive:true,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#9ca3af',font:{size:10},boxWidth:12}},tooltip:TT},scales:{x:{grid:{display:false}},y:{grid:{color:'#1e2330'},beginAtZero:true}}}});
+
+    const sem25=[DB.coorpin_25.slice(0,6).reduce((a,b)=>a+b,0),DB.coorpin_25.slice(6,12).reduce((a,b)=>a+b,0)];
+    const sem26=[DB.coorpin_26.slice(0,6).reduce((a,b)=>a+b,0),DB.coorpin_26.slice(6,12).reduce((a,b)=>a+b,0)];
+    mkC('ev-sem',{type:'bar',data:{labels:['1º Semestre','2º Semestre'],datasets:[{label:'2025',data:sem25,backgroundColor:'rgba(230,57,70,.8)',borderRadius:4},{label:'2026',data:sem26,backgroundColor:'rgba(59,130,246,.8)',borderRadius:4}]},options:{responsive:true,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#9ca3af',font:{size:10},boxWidth:12}},tooltip:TT},scales:{x:{grid:{display:false}},y:{grid:{color:'#1e2330'},beginAtZero:true}}}});
 
     let htmlTab='<table><thead><tr><th>Mês</th><th>Feira 2025</th><th>Feira 2026</th><th>Var. Feira</th><th>COORPIN 2025</th><th>COORPIN 2026</th><th>Var. COORPIN</th></tr></thead><tbody>';
     M.forEach((m,i)=>{
@@ -1315,12 +1360,12 @@ function buildVIT(){
     const feLabels=Object.keys(faixas);
     mkC('vit-faixa',{type:'bar',data:{labels:feLabels,datasets:[{data:feLabels.map(k=>faixas[k]),backgroundColor:P,borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true}}}});
     mkC('vit-piramide',{type:'bar',data:{labels:feLabels,datasets:[{data:feLabels.map(k=>faixas[k]),backgroundColor:feLabels.map((_,i)=>P[i]),borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:'#1e2330'},ticks:{font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
-    mkC('vit-aut',{type:'doughnut',data:{labels:['Com Autoria','Sem Autoria'],datasets:[{data:[autoriaCount.sim,autoriaCount.nao],backgroundColor:['#e63946','#1e2330'],borderWidth:0,hoverOffset:5}]},options:{responsive:true,cutout:'65%',plugins:{legend:{display:false},tooltip:TT}}});
+    mkC('vit-aut',{type:'doughnut',data:{labels:['Com Autoria','Sem Autoria'],datasets:[{data:[autoriaCount.sim,autoriaCount.nao],backgroundColor:['#22c55e','#e63946'],borderWidth:0,hoverOffset:5}]},options:{responsive:true,cutout:'65%',plugins:{legend:{display:false},tooltip:TT}}});
 
     const pctSim=regs26.length?Math.round((autoriaCount.sim/regs26.length)*100):0;
     const autLbl = document.getElementById('vit-aut-lbl');
     if(autLbl){
-            autLbl.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--muted)">Com autoria</span><span class="mono" style="color:var(--accent)">${autoriaCount.sim} (${pctSim}%)</span></div><div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--muted)">Sem autoria</span><span class="mono">${autoriaCount.nao} (${100-pctSim}%)</span></div>`;
+            autLbl.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--muted)">Com autoria</span><span class="mono" style="color:var(--green)">${autoriaCount.sim} (${pctSim}%)</span></div><div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--muted)">Sem autoria</span><span class="mono" style="color:var(--accent)">${autoriaCount.nao} (${100-pctSim}%)</span></div>`;
     }
 
     const sortedMotivos=Object.entries(motivos).sort((a,b)=>b[1]-a[1]);
