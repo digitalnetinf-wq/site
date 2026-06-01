@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detector Forense de Matrículas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .progress-bar-transition { transition: width 0.3s ease; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen font-sans">
+
+    <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <!-- Cabeçalho -->
+        <header class="mb-8 text-center sm:text-left border-b border-gray-700 pb-6">
+            <h2 class="text-sm font-bold text-red-500 tracking-wider uppercase mb-1">🔍 ANÁLISE FORENSE</h2>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white">Detector de Matrículas - IA</h1>
+            <p class="text-gray-400 mt-2">Ferramentas avançadas para veículos em alta velocidade</p>
+        </header>
+
+        <!-- Formulário de Entrada -->
+        <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-6 mb-8">
+            <div class="space-y-6">
+                <!-- Upload de Vídeo -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Carregar Vídeo (mp4, mov, webm):</label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-lg hover:border-red-500 transition relative bg-gray-900/50" id="dropZone">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-gray-400 justify-center">
+                                <label for="videoInput" class="relative cursor-pointer rounded-md font-medium text-red-500 hover:text-red-400 focus-within:outline-none px-1">
+                                    <span>Selecione um ficheiro</span>
+                                    <input id="videoInput" name="videoInput" type="file" class="sr-only" accept="video/mp4,video/quicktime,video/webm,video/x-msvideo">
+                                </label>
+                                <p class="pl-1">ou arraste e solte</p>
+                            </div>
+                            <p class="text-xs text-gray-500" id="fileNameDisplay">Nenhum vídeo selecionado</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview de Vídeo e Controle Manual -->
+                <div id="videoPreviewContainer" class="hidden space-y-3 border border-gray-700 p-3 rounded-lg bg-gray-900">
+                    <label class="block text-sm font-semibold text-gray-300">Controlo de Vídeo (Ferramenta Manual):</label>
+                    <video id="videoPreview" controls class="w-full rounded-lg bg-black max-h-[400px] shadow-sm"></video>
+                    
+                    <div class="flex flex-col sm:flex-row gap-2 mt-2">
+                        <button id="btnAnalyzeManual" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold py-2 px-4 rounded shadow transition flex items-center justify-center gap-2 border border-gray-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                            Analisar Frame Pausado (Exato)
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400 text-center">Dica: Pause o vídeo quando a mota estiver mais nítida e clique no botão acima para focar apenas nessa imagem.</p>
+                </div>
+
+                <!-- Opções Avançadas de Aprimoramento -->
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-gray-300 border-b border-gray-700 pb-1">⚙️ Filtros Forenses (Aplicados na análise)</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="flex items-start bg-blue-900/20 p-3 rounded-lg border border-blue-800/50">
+                            <input type="checkbox" id="zoomCenter" class="mt-1 w-4 h-4 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-offset-gray-800 cursor-pointer">
+                            <div class="ml-2">
+                                <label for="zoomCenter" class="text-sm font-semibold text-blue-300 cursor-pointer">Foco/Zoom no Centro 🔍</label>
+                                <p class="text-xs text-blue-400/80">Corta as bordas e aumenta o centro da rua. Ideal para placas distantes.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start bg-purple-900/20 p-3 rounded-lg border border-purple-800/50">
+                            <input type="checkbox" id="bwFilter" class="mt-1 w-4 h-4 text-purple-500 bg-gray-700 border-gray-600 rounded focus:ring-purple-500 focus:ring-offset-gray-800 cursor-pointer">
+                            <div class="ml-2">
+                                <label for="bwFilter" class="text-sm font-semibold text-purple-300 cursor-pointer">P&B Alto Contraste ⚫⚪</label>
+                                <p class="text-xs text-purple-400/80">Remove cores e realça bordas. Ideal para objetos rápidos.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start bg-green-900/20 p-3 rounded-lg border border-green-800/50 md:col-span-2">
+                            <input type="checkbox" id="enhanceImage" class="mt-1 w-4 h-4 text-green-500 bg-gray-700 border-gray-600 rounded focus:ring-green-500 focus:ring-offset-gray-800 cursor-pointer" checked>
+                            <div class="ml-2">
+                                <label for="enhanceImage" class="text-sm font-semibold text-green-300 cursor-pointer">Aprimoramento Básico ✨</label>
+                                <p class="text-xs text-green-400/80">Aumenta brilho, contraste e qualidade de exportação (Ativado por padrão).</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center bg-gray-900 p-3 rounded-lg border border-gray-700 mt-4">
+                        <label for="frameInterval" class="text-sm font-semibold text-gray-300 mr-3">Análise Automática:</label>
+                        <select id="frameInterval" class="bg-gray-800 border border-gray-600 text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block p-2 w-full">
+                            <option value="0.1">10 frames por segundo (Ultra-Rápido - Para motas)</option>
+                            <option value="0.2">5 frames por segundo (Intensivo)</option>
+                            <option value="0.5">2 frames por segundo (Rápido)</option>
+                            <option value="1" selected>1 frame por segundo (Padrão)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Botão de Ação -->
+                <button id="btnAnalyze" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    Iniciar Análise Automática do Vídeo
+                </button>
+            </div>
+        </div>
+
+        <!-- Área de Progresso -->
+        <div id="progressSection" class="hidden bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-6 mb-8">
+            <h3 class="text-lg font-semibold text-white mb-2" id="progressTitle">A processar...</h3>
+            <p class="text-sm text-gray-400 mb-4" id="progressText">Aguarde um momento...</p>
+            <div class="w-full bg-gray-700 rounded-full h-2.5">
+                <div id="progressBar" class="bg-red-500 h-2.5 rounded-full progress-bar-transition" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Mensagens de Erro/Aviso -->
+        <div id="alertBox" class="hidden mb-8 p-4 rounded-lg border"></div>
+
+        <!-- Resultados -->
+        <div id="resultsSection" class="hidden">
+            <div class="flex items-center justify-between mb-4 border-b border-gray-700 pb-2">
+                <h3 class="text-xl font-bold text-white">Resultados da Análise</h3>
+                <span id="resultsCount" class="bg-red-900/50 text-red-400 border border-red-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">0 Encontradas</span>
+            </div>
+            
+            <div id="resultsGrid" class="grid grid-cols-1 gap-6">
+                <!-- Os cards de resultado serão inseridos aqui -->
+            </div>
+        </div>
+
+    </div>
+
+    <canvas id="frameCanvas" class="hidden"></canvas>
+
+    <script>
+        // --- Elementos do DOM ---
+        const videoInput = document.getElementById('videoInput');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const videoPreviewContainer = document.getElementById('videoPreviewContainer');
+        const videoPreview = document.getElementById('videoPreview');
+        const btnAnalyze = document.getElementById('btnAnalyze');
+        const btnAnalyzeManual = document.getElementById('btnAnalyzeManual');
+        const progressSection = document.getElementById('progressSection');
+        const progressTitle = document.getElementById('progressTitle');
+        const progressText = document.getElementById('progressText');
+        const progressBar = document.getElementById('progressBar');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsGrid = document.getElementById('resultsGrid');
+        const resultsCount = document.getElementById('resultsCount');
+        const alertBox = document.getElementById('alertBox');
+        const frameCanvas = document.getElementById('frameCanvas');
+        const ctx = frameCanvas.getContext('2d', { willReadFrequently: true });
+        
+        // Checkboxes de Ferramentas
+        const enhanceImageCheckbox = document.getElementById('enhanceImage');
+        const zoomCenterCheckbox = document.getElementById('zoomCenter');
+        const bwFilterCheckbox = document.getElementById('bwFilter');
+        const frameIntervalSelect = document.getElementById('frameInterval');
+
+        // --- Estado da Aplicação ---
+        const apiKey = ""; 
+        let currentVideoFile = null;
+        let foundPlates = new Set();
+        let isAnalyzing = false;
+
+        // --- Eventos de UI ---
+        videoInput.addEventListener('change', handleFileSelect);
+
+        btnAnalyze.addEventListener('click', () => {
+            if (!currentVideoFile) { showAlert("Selecione um vídeo primeiro.", "warning"); return; }
+            startAutomaticAnalysis();
+        });
+
+        btnAnalyzeManual.addEventListener('click', () => {
+            if (!currentVideoFile) return;
+            analyzeManualFrame();
+        });
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            currentVideoFile = file;
+            fileNameDisplay.textContent = file.name;
+            videoPreview.src = URL.createObjectURL(file);
+            videoPreviewContainer.classList.remove('hidden');
+            
+            hideAlert();
+            resultsSection.classList.add('hidden');
+            resultsGrid.innerHTML = '';
+            foundPlates.clear();
+        }
+
+        function showAlert(message, type = "error") {
+            alertBox.className = `mb-8 p-4 rounded-lg border text-sm font-medium ${
+                type === 'error' ? 'bg-red-900/30 border-red-800 text-red-300' : 
+                type === 'warning' ? 'bg-yellow-900/30 border-yellow-800 text-yellow-300' : 
+                'bg-green-900/30 border-green-800 text-green-300'
+            }`;
+            alertBox.innerHTML = message;
+            alertBox.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function hideAlert() { alertBox.classList.add('hidden'); }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            const ms = Math.floor((seconds % 1) * 100);
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
+        }
+
+        function seekVideoAsync(video, time) {
+            return new Promise((resolve) => {
+                const onSeeked = () => { video.removeEventListener('seeked', onSeeked); resolve(); };
+                video.addEventListener('seeked', onSeeked);
+                video.currentTime = time;
+            });
+        }
+
+        // --- Lógica de Captura (Partilhada entre Manual e Automático) ---
+        async function captureAndProcessFrame(time, isManual = false) {
+            const MAX_WIDTH = 1280;
+            let videoW = videoPreview.videoWidth;
+            let videoH = videoPreview.videoHeight;
+            
+            // Configurar Canvas Base
+            let finalW = videoW > MAX_WIDTH ? MAX_WIDTH : videoW;
+            let finalH = Math.floor(videoH * (finalW / videoW));
+            
+            frameCanvas.width = finalW;
+            frameCanvas.height = finalH;
+
+            // Determinar área de origem (Crop/Zoom)
+            let sX = 0, sY = 0, sW = videoW, sH = videoH;
+            
+            if (zoomCenterCheckbox.checked) {
+                // Fazer Crop de 50% no centro da imagem (onde a rua costuma estar)
+                sW = videoW * 0.5;
+                sH = videoH * 0.5;
+                sX = videoW * 0.25;
+                sY = videoH * 0.25;
+            }
+
+            // Construir Filtros CSS
+            let filters = [];
+            if (enhanceImageCheckbox.checked) {
+                filters.push('contrast(130%)', 'brightness(115%)', 'saturate(120%)');
+            }
+            if (bwFilterCheckbox.checked) {
+                filters.push('grayscale(100%)', 'contrast(180%)'); // Extra contraste para P&B
+            }
+            
+            ctx.filter = filters.length > 0 ? filters.join(' ') : 'none';
+
+            // Desenhar no Canvas com Crop e Filtros aplicados
+            ctx.drawImage(videoPreview, sX, sY, sW, sH, 0, 0, finalW, finalH);
+            ctx.filter = 'none'; // Reset
+            
+            // Qualidade superior se aprimoramento ativo
+            const quality = enhanceImageCheckbox.checked ? 0.95 : 0.85;
+            const dataUrl = frameCanvas.toDataURL('image/jpeg', quality);
+            const base64Data = dataUrl.split(',')[1]; 
+
+            const result = await analyzeFrameWithGemini(base64Data, isManual);
+
+            if (result && (result.found || isManual)) {
+                // Se for manual, mostra o resultado mesmo se não encontrar placa com muita certeza
+                const plateKey = result.plate ? String(result.plate).replace(/\s/g, '').toUpperCase() : `UNKNOWN_${Date.now()}`;
+                
+                if (isManual || (plateKey && !foundPlates.has(plateKey))) {
+                    if(!isManual) foundPlates.add(plateKey);
+                    result.time = time;
+                    result.imageSrc = dataUrl;
+                    result.isManual = isManual;
+                    renderResultCard(result);
+                    resultsCount.textContent = `${document.getElementById('resultsGrid').children.length} Análises`;
+                    resultsSection.classList.remove('hidden');
+                }
+            }
+            return result;
+        }
+
+        // --- Análise Manual (1 Frame) ---
+        async function analyzeManualFrame() {
+            if (isAnalyzing) return;
+            isAnalyzing = true;
+            btnAnalyzeManual.disabled = true;
+            btnAnalyzeManual.innerHTML = 'A processar frame exato...';
+            hideAlert();
+
+            try {
+                const currentTime = videoPreview.currentTime;
+                await captureAndProcessFrame(currentTime, true);
+                showAlert(`Análise manual do tempo ${formatTime(currentTime)} concluída. Verifique os resultados em baixo.`, "success");
+            } catch (error) {
+                showAlert(`Erro na análise manual: ${error.message}`);
+            } finally {
+                isAnalyzing = false;
+                btnAnalyzeManual.disabled = false;
+                btnAnalyzeManual.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg> Analisar Novo Frame Pausado`;
+            }
+        }
+
+        // --- Análise Automática ---
+        async function startAutomaticAnalysis() {
+            if (isAnalyzing) return;
+            isAnalyzing = true;
+            
+            btnAnalyze.disabled = true;
+            btnAnalyze.textContent = 'A processar vídeo completo...';
+            hideAlert();
+            progressSection.classList.remove('hidden');
+            resultsSection.classList.remove('hidden');
+            resultsGrid.innerHTML = '';
+            foundPlates.clear();
+            resultsCount.textContent = "0 Encontradas";
+            
+            try {
+                if (isNaN(videoPreview.duration)) {
+                    await new Promise(resolve => videoPreview.addEventListener('loadedmetadata', resolve, { once: true }));
+                }
+
+                const duration = videoPreview.duration;
+                const intervalSeconds = parseFloat(frameIntervalSelect.value);
+                const totalFrames = Math.floor(duration / intervalSeconds) + 1;
+                let currentFrameCount = 0;
+
+                progressTitle.textContent = "A extrair e analisar frames";
+
+                for (let time = 0; time <= duration; time += intervalSeconds) {
+                    currentFrameCount++;
+                    progressBar.style.width = `${Math.round((currentFrameCount / totalFrames) * 100)}%`;
+                    progressText.textContent = `A analisar frame ${currentFrameCount} de ${totalFrames} (Tempo: ${formatTime(time)})...`;
+
+                    await seekVideoAsync(videoPreview, time);
+                    await captureAndProcessFrame(time, false);
+                }
+
+                if (foundPlates.size === 0) {
+                    showAlert("A análise automática não detectou matrículas claras. Tente pausar o vídeo exatamente onde a mota passa e use o botão 'Analisar Frame Pausado'.", "warning");
+                } else {
+                    showAlert(`Análise automática concluída!`, "success");
+                }
+
+            } catch (error) {
+                showAlert(`Erro: ${error.message}`);
+            } finally {
+                isAnalyzing = false;
+                btnAnalyze.disabled = false;
+                btnAnalyze.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Reiniciar Análise Automática`;
+                progressSection.classList.add('hidden');
+            }
+        }
+
+        // --- Integração Gemini ---
+        async function fetchWithRetry(url, options, retries = 5) {
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(res => setTimeout(res, delays[i]));
+                }
+            }
+        }
+
+        async function analyzeFrameWithGemini(b64Image, isManual) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            // Prompt forense mais agressivo para tentar ler letras borradas
+            let systemPrompt = `És um especialista forense em análise de imagens e reconstrução de matrículas de veículos em movimento.
+Analisa a imagem e identifica a matrícula. Há desfoque de movimento (motion blur), por isso tenta deduzir os caracteres mais prováveis se estiverem distorcidos. Fornece a tua melhor tentativa no campo 'plate'.`;
+
+            const payload = {
+                contents: [{
+                    role: "user",
+                    parts: [
+                        { text: systemPrompt },
+                        { inlineData: { mimeType: "image/jpeg", data: b64Image } }
+                    ]
+                }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            found: { type: "BOOLEAN", description: "Verdadeiro se existir um veículo/matrícula" },
+                            plate: { type: "STRING", description: "Matrícula identificada (faz a tua melhor aproximação forense), ou string vazia" },
+                            confidence: { type: "INTEGER", description: "Nível de confiança de 0 a 100" },
+                            vehicle_type: { type: "STRING", description: "Tipo (e.g., carro, moto), cor ou detalhes do veículo" },
+                            observations: { type: "STRING", description: "Observações sobre o desfoque, dificuldade de leitura ou letras duvidosas" }
+                        }
+                    }
+                }
+            };
+
+            try {
+                const data = await fetchWithRetry(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                return textResponse ? JSON.parse(textResponse) : null;
+            } catch (error) {
+                console.error("Erro na API:", error);
+                return null;
+            }
+        }
+
+        // --- Renderização de Resultados ---
+        function renderResultCard(result) {
+            const card = document.createElement('div');
+            card.className = `bg-gray-800 border ${result.isManual ? 'border-indigo-500 shadow-indigo-900/20' : 'border-gray-700'} rounded-xl overflow-hidden flex flex-col md:flex-row shadow-lg transition`;
+
+            const conf = result.confidence || 0;
+            let confColor = "text-red-400 bg-red-900/30 border border-red-800/50";
+            if (conf >= 70) confColor = "text-green-400 bg-green-900/30 border border-green-800/50";
+            else if (conf >= 40) confColor = "text-yellow-400 bg-yellow-900/30 border border-yellow-800/50";
+
+            const tags = [];
+            if (result.vehicle_type) tags.push(`🚙 ${result.vehicle_type}`);
+            if (result.isManual) tags.push(`🎯 Captura Manual`);
+            
+            const tagsHtml = tags.length > 0 ? `<div class="flex flex-wrap gap-2 mb-3">${tags.map(tag => `<span class="px-2.5 py-1 bg-gray-700 text-gray-300 border border-gray-600 text-xs font-medium rounded">${tag}</span>`).join('')}</div>` : '';
+            const obsHtml = result.observations ? `<div class="mt-4 p-3 bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-lg"><span class="font-semibold text-white">Nota Forense:</span> ${result.observations}</div>` : '';
+
+            card.innerHTML = `
+                <div class="md:w-1/2 bg-black relative flex items-center justify-center border-b md:border-b-0 md:border-r border-gray-700">
+                    <img src="${result.imageSrc}" alt="Frame" class="max-w-full max-h-[250px] object-contain">
+                    <div class="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded shadow backdrop-blur-sm border border-gray-700">
+                        ⏱️ ${formatTime(result.time)}
+                    </div>
+                </div>
+                <div class="p-5 md:w-1/2 flex flex-col justify-center">
+                    <div class="flex items-start justify-between mb-3 gap-2">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Leitura da Matrícula</p>
+                            <h4 class="text-2xl font-black text-white font-mono tracking-widest border border-gray-600 inline-block px-3 py-1 rounded shadow-sm bg-gray-900">${result.plate || 'INCONCLUSIVO'}</h4>
+                        </div>
+                        <span class="px-3 py-1 text-xs font-bold rounded-full ${confColor} whitespace-nowrap">Confiança: ${conf}%</span>
+                    </div>
+                    ${tagsHtml}
+                    ${obsHtml}
+                </div>
+            `;
+            // Adicionar ao topo da lista para resultados mais recentes
+            resultsGrid.insertBefore(card, resultsGrid.firstChild);
+        }
+
+        // --- Drag & Drop ---
+        const dropZone = document.getElementById('dropZone');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => dropZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false));
+        ['dragenter', 'dragover'].forEach(eventName => dropZone.addEventListener(eventName, () => dropZone.classList.add('border-red-500', 'bg-gray-800/80'), false));
+        ['dragleave', 'drop'].forEach(eventName => dropZone.addEventListener(eventName, () => dropZone.classList.remove('border-red-500', 'bg-gray-800/80'), false));
+        dropZone.addEventListener('drop', e => { videoInput.files = e.dataTransfer.files; videoInput.dispatchEvent(new Event('change')); });
+    </script>
+</body>
+</html>
