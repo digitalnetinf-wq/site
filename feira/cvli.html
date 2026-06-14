@@ -1554,7 +1554,7 @@
                 <div class="card">
                     <div class="card-hd">
                         <span class="card-title">Desempenho por Enquadramento Legal</span>
-                        <span class="card-tag">Tipificação</span>
+                        <span class="card-tag green" id="tag-tip-live">⬤ TEMPO REAL</span>
                     </div>
                     <div class="card-body tbl-wrap" style="padding: 0;">
                         <table class="excel-table" id="tabela-comp-tip"></table>
@@ -1563,7 +1563,7 @@
                 <div class="card">
                     <div class="card-hd">
                         <span class="card-title">Variação Geográfica Territorial</span>
-                        <span class="card-tag">Município</span>
+                        <span class="card-tag green" id="tag-mun-live">⬤ TEMPO REAL</span>
                     </div>
                     <div class="card-body tbl-wrap" style="padding: 0;">
                         <table class="excel-table" id="tabela-comp-mun"></table>
@@ -1584,7 +1584,7 @@
             <div class="card mb20">
                 <div class="card-hd">
                     <span class="card-title">Tabela de Produtividade Criminal 2026 (Por Enquadramento)</span>
-                    <span class="card-tag blue">Corrente</span>
+                    <span class="card-tag green" id="tag-tip26-live">⬤ TEMPO REAL</span>
                 </div>
                 <div class="card-body tbl-wrap" style="padding: 0;">
                     <table class="excel-table" id="tabela-tip-2026"></table>
@@ -1603,7 +1603,7 @@
             <div class="card mb20">
                 <div class="card-hd">
                     <span class="card-title">Histórico de Ocorrências por Município 2026</span>
-                    <span class="card-tag blue">Corrente</span>
+                    <span class="card-tag green" id="tag-mun26-live">⬤ TEMPO REAL</span>
                 </div>
                 <div class="card-body tbl-wrap" style="padding: 0;">
                     <table class="excel-table" id="tabela-mun-2026"></table>
@@ -2124,7 +2124,11 @@ function recalcStats(){
     DB.t25_coorpin=0; DB.t26_coorpin=0;
     
     let maxM26 = -1;
-    const currentRealMonth = 4; // Maio de 2026
+    // Mês atual em tempo real (0=Jan ... 11=Dez) — atualiza sem esperar o mês fechar
+    const _today = new Date();
+    const currentRealMonth = (_today.getFullYear() >= 2026)
+        ? (_today.getFullYear() === 2026 ? _today.getMonth() : 11)
+        : 11;
 
     DB.registros.forEach(function(r) {
         const is25=String(r.ano)==='2025', is26=String(r.ano)==='2026';
@@ -2723,8 +2727,12 @@ function buildCO(){
 }
 
 function buildTABELAS() {
-    const limitMonth = DB.limitMonth !== undefined ? DB.limitMonth : 4;
+    const limitMonth = DB.limitMonth !== undefined ? DB.limitMonth : new Date().getMonth();
     const mName = M[limitMonth] || 'Atual';
+    // Indicador de tempo real: mostra dia/hora da última atualização
+    const _now = new Date();
+    const _liveLabel = _now.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).toUpperCase()
+        + ' ' + _now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     var mesesHeaderAbsolute = '<thead><tr><th>Fator Indicador (Meses)</th>' + M.map(function(m) { return '<th>' + m.toUpperCase() + '</th>'; }).join('') + '<th>TOTAL ACUMULADO</th></tr></thead>';
 
     function calcVar(v25, v26) {
@@ -2738,7 +2746,7 @@ function buildTABELAS() {
         return '<span style="color:' + color + ';font-weight:700;">' + sign + pct.toFixed(1) + '%</span>';
     }
 
-    var periodoLabel = 'JAN–' + mName.toUpperCase();
+    var periodoLabel = 'JAN–' + mName.toUpperCase() + ' ● LIVE';
     var tipHtml = '<thead><tr><th>TIPIFICAÇÃO DE DELITO</th><th>2025 (' + periodoLabel + ')</th><th>2026 (' + periodoLabel + ')</th><th>VARIAÇÃO PERCENTUAL</th></tr></thead><tbody>';
     var tips = ['HOMICÍDIO', 'FEMINICÍDIO', 'LESÃO C.SEG. MORTE', 'LATROCÍNIO'];
     var d25T = { 'HOMICÍDIO': 0, 'FEMINICÍDIO': 0, 'LESÃO C.SEG. MORTE': 0, 'LATROCÍNIO': 0 };
@@ -2766,6 +2774,13 @@ function buildTABELAS() {
     tipHtml += '<tr class="total-row"><td style="text-align:left; font-weight:700;">TOTAL DE CASOS CVLI</td><td>' + t25T + '</td><td>' + t26T + '</td><td>' + calcVar(t25T, t26T) + '</td></tr></tbody>';
     
     if(document.getElementById('tabela-comp-tip')) document.getElementById('tabela-comp-tip').innerHTML = tipHtml;
+
+    // Atualiza badges de tempo real com horário atual
+    var _liveTxt = '⬤ TEMPO REAL · ' + _liveLabel;
+    ['tag-tip-live','tag-mun-live','tag-tip26-live','tag-mun26-live'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = _liveTxt;
+    });
 
     var munHtml = '<thead><tr><th>MUNICÍPIO DA COORPIN</th><th>2025 (' + periodoLabel + ')</th><th>2026 (' + periodoLabel + ')</th><th>VARIAÇÃO %</th></tr></thead><tbody>';
     var allCids = Object.keys(Object.assign({}, d25M, d26M)).sort(function(a, b) {
