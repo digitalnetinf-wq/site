@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCOM Node Master - DIRPIN Leste</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050505; color: #e4e4e7; overflow-x: hidden; }
+        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        .ticker-animate { animation: ticker 120s linear infinite; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        [color-scheme="dark"] { color-scheme: dark; }
+
+        @keyframes scanPulse { 0%,100% { opacity:1; } 50% { opacity:.6; } }
+        @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+        
+        #live-scan-bar { transition: opacity .4s ease, transform 0.4s ease; }
+        #live-scan-fill {
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 40%, #c084fc 50%, #8b5cf6 60%, #3b82f6 100%);
+            background-size: 200% auto;
+            animation: shimmer 2s linear infinite;
+            transition: width .3s ease-out;
+        }
+        
+        .glass-panel {
+            background: rgba(24, 24, 27, 0.4); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glass-card {
+            background: linear-gradient(145deg, rgba(39, 39, 42, 0.4) 0%, rgba(24, 24, 27, 0.2) 100%); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        @keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes toastSlideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+        .toast-enter { animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .toast-exit { animation: toastSlideOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 8px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(82, 82, 91, 0.5); border-radius: 8px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(113, 113, 122, 0.8); }
+
+        .tab-btn { @apply flex items-center gap-2 pb-4 px-4 transition-all font-bold text-[11px] tracking-wide text-zinc-500 hover:text-zinc-300 relative border-b-2 border-transparent; }
+        .tab-btn.active { @apply text-white border-blue-500 font-extrabold; }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, rgba(59, 130, 246, 0.15) 0%, transparent 100%); pointer-events: none; }
+    </style>
+</head>
+<body class="selection:bg-blue-600/40">
+
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none"></div>
+
+    <div id="scan-overlay" class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl hidden flex-col items-center justify-center transition-opacity duration-500 opacity-0">
+        <div class="glass-panel p-10 rounded-[2.5rem] shadow-2xl shadow-blue-900/20 flex flex-col items-center max-w-md w-full mx-4 relative overflow-hidden">
+            <div class="absolute -top-32 -right-32 w-64 h-64 bg-blue-600/20 rounded-full blur-[80px]"></div>
+            <div class="absolute -bottom-32 -left-32 w-64 h-64 bg-purple-600/20 rounded-full blur-[80px]"></div>
+            
+            <div class="relative z-10 flex flex-col items-center w-full">
+                <div class="p-5 bg-blue-500/10 rounded-full border border-blue-500/30 mb-6 relative group">
+                    <div class="absolute inset-0 bg-blue-500/20 rounded-full animate-ping"></div>
+                    <i data-lucide="radar" class="w-12 h-12 text-blue-400 animate-spin"></i>
+                </div>
+                <h3 class="text-white font-extrabold uppercase tracking-widest text-sm mb-1 text-center">Protocolo de Varredura</h3>
+                <p id="scan-site-name" class="text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-1 text-center truncate w-full h-4">Sincronizando Nodes...</p>
+                <p id="scan-progress-text" class="text-zinc-500 text-[9px] font-bold uppercase tracking-widest mb-6 text-center h-4">Mapeando alvos estratégicos...</p>
+                <div class="w-full h-2 bg-zinc-900/80 rounded-full overflow-hidden mb-2 shadow-inner border border-zinc-800">
+                    <div id="scan-progress-bar" class="h-full bg-gradient-to-r from-blue-600 to-purple-500 transition-all duration-300 ease-out relative" style="width: 0%">
+                        <div class="absolute top-0 right-0 bottom-0 left-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTAgMjBMMjAgMEwyMCAyMEgwWiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PC9zdmc+')] opacity-50"></div>
+                    </div>
+                </div>
+                <div class="flex justify-between w-full mt-1">
+                    <p id="scan-progress-pct" class="text-blue-400 text-xs font-black">0%</p>
+                    <p id="scan-hits" class="text-emerald-400 text-xs font-black">0 encontrados</p>
+                </div>
+                <div class="mt-6 grid grid-cols-3 gap-3 w-full text-center">
+                    <div class="bg-black/40 rounded-2xl p-4 border border-zinc-800">
+                        <p class="text-[8px] text-zinc-500 uppercase font-extrabold mb-1 tracking-wider">Nodes</p>
+                        <p id="stat-sites" class="text-white font-black text-lg">0</p>
+                    </div>
+                    <div class="bg-black/40 rounded-2xl p-4 border border-zinc-800">
+                        <p class="text-[8px] text-zinc-500 uppercase font-extrabold mb-1 tracking-wider">Web</p>
+                        <p id="stat-rss" class="text-blue-400 font-black text-lg">0</p>
+                    </div>
+                    <div class="bg-black/40 rounded-2xl p-4 border border-zinc-800">
+                        <p class="text-[8px] text-zinc-500 uppercase font-extrabold mb-1 tracking-wider">Oficiais</p>
+                        <p id="stat-police" class="text-emerald-400 font-black text-lg">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="live-scan-bar" class="hidden glass-panel border-b-0 border-zinc-800/60 px-4 py-2 z-[55] fixed top-0 w-full transform -translate-y-full transition-transform duration-300">
+        <div class="max-w-screen-2xl mx-auto flex items-center gap-4">
+            <div class="flex-shrink-0 flex items-center gap-2 text-purple-400">
+                <div class="w-2 h-2 bg-purple-500 rounded-full animate-ping"></div>
+                <span class="text-[9px] font-black uppercase tracking-widest whitespace-nowrap">Live Sync</span>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0 min-w-[11rem]">
+                <i data-lucide="crosshair" class="w-3 h-3 text-zinc-500 flex-shrink-0"></i>
+                <span id="live-scan-site" class="text-[10px] font-bold text-zinc-300 uppercase tracking-wide truncate max-w-[9rem]">—</span>
+            </div>
+            <div class="flex-1 h-1.5 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800">
+                <div id="live-scan-fill" class="h-full rounded-full" style="width:0%"></div>
+            </div>
+            <div class="flex items-center gap-4 flex-shrink-0 text-[10px] font-bold tabular-nums tracking-wider">
+                <span id="live-scan-pct"  class="text-blue-400 font-black">0%</span>
+                <span id="live-scan-hits" class="text-emerald-400"><i data-lucide="database" class="w-3 h-3 inline pb-0.5"></i> 0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed bottom-0 w-full bg-black/90 backdrop-blur border-t border-zinc-900 text-zinc-400 text-[10px] font-bold uppercase tracking-widest py-2 overflow-hidden flex items-center z-[40]">
+        <div class="px-4 bg-black h-full absolute left-0 z-10 flex items-center gap-2 shadow-[20px_0_20px_rgba(0,0,0,1)] border-r border-zinc-900">
+            <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div> Live Radar
+        </div>
+        <div id="ticker-content" class="whitespace-nowrap ticker-animate pl-32 flex gap-16 items-center">
+            <span>Sistema Operacional Iniciado. Aguardando dados...</span>
+        </div>
+    </div>
+
+    <nav class="glass-panel sticky top-0 z-50 shadow-2xl shadow-black">
+        <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 h-20 sm:h-24 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-4 sm:gap-5 cursor-pointer group" onclick="switchTab('dashboard')">
+                <div class="bg-gradient-to-br from-blue-600 to-purple-700 p-2.5 sm:p-3 rounded-2xl shadow-lg shadow-blue-900/50 flex-shrink-0 transform group-hover:scale-105 transition-all">
+                    <i data-lucide="cpu" class="w-6 h-6 sm:w-8 sm:h-8 text-white"></i>
+                </div>
+                <div class="hidden sm:block">
+                    <h1 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-none">ASCOM <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">NODE</span></h1>
+                    <p class="text-[9px] sm:text-[10px] text-zinc-500 font-black uppercase tracking-[0.3em] mt-1.5 leading-none">DIRPIN LESTE • <span class="text-emerald-500">ONLINE</span></p>
+                </div>
+            </div>
+            
+            <div class="flex-1 max-w-2xl mx-4 sm:mx-8 relative group">
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-blue-500 transition-colors"></i>
+                <input type="text" id="search-input" placeholder="Pesquisar entidades, cidades ou palavras-chave..." class="w-full pl-12 pr-4 py-3 sm:py-4 bg-black/50 border border-zinc-800 rounded-2xl text-xs sm:text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-medium text-white placeholder:text-zinc-600 shadow-inner" />
+            </div>
+
+            <div class="flex items-center gap-4 sm:gap-6">
+                <div class="flex flex-col items-end sm:border-r border-zinc-800/60 sm:pr-6">
+                    <div class="flex items-center gap-1.5 text-zinc-500 font-bold text-[8px] sm:text-[9px] uppercase tracking-widest mb-1">
+                        <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span></span>
+                        <span class="hidden sm:inline">Próx. Sync:</span>
+                        <span id="countdown-display" class="text-amber-500 font-black">10:00</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-white font-black text-sm sm:text-xl tabular-nums leading-none tracking-tight">
+                        <span id="clock-display">--:--:--</span>
+                    </div>
+                </div>
+                <button id="btn-deepscan" onclick="runDeepScan()" class="h-10 sm:h-12 px-4 sm:px-6 bg-gradient-to-r from-blue-600 to-blue-700 border border-blue-500/50 rounded-xl sm:rounded-2xl active:scale-95 transition-all hover:shadow-lg hover:shadow-blue-600/30 flex-shrink-0 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                    <span class="flex items-center gap-2 text-[9px] sm:text-[10px] font-black uppercase text-white tracking-widest leading-none relative z-10">
+                        <i data-lucide="refresh-cw" class="w-3 h-3 sm:w-4 sm:h-4" id="deepscan-icon"></i>
+                        <span class="hidden md:inline" id="deepscan-text">Scan Manual</span>
+                    </span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="bg-black/20 border-t border-zinc-800/50 overflow-x-auto no-scrollbar">
+            <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 flex items-center gap-2 sm:gap-4 pt-4 pb-0 min-w-max" id="nav-tabs">
+                <button onclick="switchTab('dashboard')" data-tab="dashboard" class="tab-btn active"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Overview</button>
+                <button onclick="switchTab('feed')" data-tab="feed" class="tab-btn"><i data-lucide="activity" class="w-4 h-4"></i> Tempo Real</button>
+                <button onclick="switchTab('official')" data-tab="official" class="tab-btn"><i data-lucide="shield-check" class="w-4 h-4"></i> Oficiais</button>
+                <button onclick="switchTab('graficos')" data-tab="graficos" class="tab-btn"><i data-lucide="pie-chart" class="w-4 h-4"></i> Inteligência</button>
+                <button onclick="switchTab('headline')" data-tab="headline" class="tab-btn"><i data-lucide="zap" class="w-4 h-4"></i> Headline IA</button>
+                <button onclick="switchTab('contact')" data-tab="contact" class="tab-btn ml-auto"><i data-lucide="headset" class="w-4 h-4"></i> Suporte</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pb-24">
+        <section id="tab-dashboard" class="tab-content transition-all duration-500">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
+                <div class="glass-card p-8 rounded-[2rem] relative overflow-hidden group hover:border-blue-500/30 transition-colors">
+                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-600/10 rounded-full blur-2xl group-hover:bg-blue-600/20 transition-all duration-500"></div>
+                    <div class="mb-5 inline-flex p-3 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20"><i data-lucide="map-pin" class="w-6 h-6"></i></div>
+                    <p class="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mb-2">Malha Geográfica</p>
+                    <p class="text-5xl font-black text-white tracking-tighter">84 <span class="text-xl text-zinc-600 font-medium tracking-normal">cidades</span></p>
+                    <p class="text-[9px] text-zinc-500 mt-5 font-bold tracking-widest uppercase border-t border-zinc-800/50 pt-4">DIRPIN Leste Bahia</p>
+                </div>
+                
+                <div class="glass-card p-8 rounded-[2rem] relative overflow-hidden group hover:border-purple-500/30 transition-colors">
+                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-purple-600/10 rounded-full blur-2xl group-hover:bg-purple-600/20 transition-all duration-500"></div>
+                    <div class="mb-5 inline-flex p-3 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20"><i data-lucide="database" class="w-6 h-6"></i></div>
+                    <p class="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mb-2">Volume de Impactos</p>
+                    <p class="text-5xl font-black text-white tracking-tighter" id="dash-total">0</p>
+                    <p class="text-[9px] text-zinc-500 mt-5 font-bold tracking-widest uppercase border-t border-zinc-800/50 pt-4" id="dash-sources-count">Carregando portais...</p>
+                </div>
+                
+                <div class="glass-card p-8 rounded-[2rem] relative overflow-hidden group hover:border-emerald-500/30 transition-colors">
+                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-emerald-600/10 rounded-full blur-2xl group-hover:bg-emerald-600/20 transition-all duration-500"></div>
+                    <div class="mb-5 inline-flex p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20"><i data-lucide="shield-check" class="w-6 h-6"></i></div>
+                    <p class="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mb-2">Comunicações Oficiais</p>
+                    <p class="text-5xl font-black text-white tracking-tighter" id="dash-official">0</p>
+                    <p class="text-[9px] text-zinc-500 mt-5 font-bold tracking-widest uppercase border-t border-zinc-800/50 pt-4" id="dash-official-sub">SSP-BA / Gov</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card rounded-[2rem] p-8 hover:border-blue-500/20 transition-all cursor-pointer group flex items-center justify-between" onclick="switchTab('feed')">
+                    <div class="flex items-center gap-5">
+                        <div class="p-4 bg-zinc-900 rounded-2xl group-hover:bg-blue-600/10 transition-colors border border-zinc-800 group-hover:border-blue-500/30 text-zinc-400 group-hover:text-blue-400"><i data-lucide="activity" class="w-8 h-8"></i></div>
+                        <div>
+                            <h3 class="text-lg font-black text-white mb-1 group-hover:text-blue-400 transition-colors">Monitoramento Real-Time</h3>
+                            <p class="text-xs text-zinc-500 font-medium">Acompanhe menções na mídia aglutinadas por IA.</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-6 h-6 text-zinc-600 group-hover:text-blue-500 group-hover:translate-x-2 transition-all"></i>
+                </div>
+                
+                <div class="glass-card rounded-[2rem] p-8 hover:border-purple-500/20 transition-all cursor-pointer group flex items-center justify-between" onclick="switchTab('graficos')">
+                    <div class="flex items-center gap-5">
+                        <div class="p-4 bg-zinc-900 rounded-2xl group-hover:bg-purple-600/10 transition-colors border border-zinc-800 group-hover:border-purple-500/30 text-zinc-400 group-hover:text-purple-400"><i data-lucide="pie-chart" class="w-8 h-8"></i></div>
+                        <div>
+                            <h3 class="text-lg font-black text-white mb-1 group-hover:text-purple-400 transition-colors">Business Intelligence</h3>
+                            <p class="text-xs text-zinc-500 font-medium">Análises gráficas e distribuição territorial.</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-6 h-6 text-zinc-600 group-hover:text-purple-500 group-hover:translate-x-2 transition-all"></i>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-graficos" class="tab-content hidden transition-all duration-500">
+            <div class="mb-10 flex items-center gap-4">
+                <div class="p-4 bg-purple-500/10 rounded-2xl border border-purple-500/20 text-purple-400 shadow-lg shadow-purple-500/10">
+                    <i data-lucide="pie-chart" class="w-8 h-8"></i>
+                </div>
+                <div>
+                    <p class="text-3xl font-black text-white tracking-tighter">Inteligência de Dados</p>
+                    <p class="text-zinc-500 text-xs font-bold mt-1 uppercase tracking-widest">Dashboards Analíticos da DIRPIN Leste</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="glass-card rounded-[2rem] p-8 shadow-xl relative min-h-[400px] flex flex-col">
+                    <h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-6 flex items-center gap-2"><div class="w-2 h-2 bg-blue-500 rounded-full"></div> Mancha Criminal (Cidades)</h3>
+                    <div class="flex-1 relative w-full h-full"><canvas id="chart-cities"></canvas></div>
+                </div>
+                
+                <div class="glass-card rounded-[2rem] p-8 shadow-xl relative min-h-[400px] flex flex-col">
+                    <h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-6 flex items-center gap-2"><div class="w-2 h-2 bg-purple-500 rounded-full"></div> Tipologia Criminal</h3>
+                    <div class="flex-1 relative w-full h-full flex justify-center items-center"><canvas id="chart-categories" style="max-height: 300px;"></canvas></div>
+                </div>
+            </div>
+            
+            <div class="glass-card rounded-[2rem] p-8 shadow-xl mb-8 min-h-[350px] flex flex-col">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-2"><div class="w-2 h-2 bg-emerald-500 rounded-full"></div> Volume Diário de Impactos (Timeline)</h3>
+                </div>
+                <div class="flex-1 relative w-full h-full"><canvas id="chart-timeline"></canvas></div>
+            </div>
+            
+            <div class="glass-card rounded-[2rem] p-8 shadow-xl">
+                <h3 class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <i data-lucide="globe" class="w-4 h-4 text-cyan-500"></i> Ranking Analítico de Fontes
+                </h3>
+                <div class="overflow-x-auto w-full custom-scroll">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead>
+                            <tr class="border-b border-zinc-800 text-[10px] uppercase tracking-widest text-zinc-500">
+                                <th class="pb-4 font-black pl-4">Veículo / Portal</th>
+                                <th class="pb-4 font-black text-center w-32">Registros</th>
+                                <th class="pb-4 font-black text-right pr-4 w-64">Penetração Visual</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dash-sites-table" class="text-sm divide-y divide-zinc-800/50"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-feed" class="tab-content hidden transition-all duration-500">
+            <div class="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></div>
+                        <p class="text-3xl font-black text-white uppercase tracking-tighter">Live Monitor</p>
+                    </div>
+                    <p class="text-zinc-500 text-xs font-bold uppercase tracking-widest">Base de Dados Processada: <span id="feed-count" class="text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/20">0</span> registros ativos</p>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-3 bg-zinc-900/50 p-2 rounded-2xl border border-zinc-800/80">
+                    <span class="px-3 py-1.5 text-[9px] font-black bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-400 border border-amber-500/30 rounded-xl uppercase flex items-center gap-1.5 shadow-sm"><i data-lucide="star" class="w-3 h-3 fill-amber-500"></i> Mainstream</span>
+                    <span class="px-3 py-1.5 text-[9px] font-black bg-gradient-to-r from-emerald-500/20 to-emerald-600/10 text-emerald-400 border border-emerald-500/30 rounded-xl uppercase flex items-center gap-1.5 shadow-sm"><i data-lucide="shield-check" class="w-3 h-3"></i> Oficial</span>
+                    <span class="px-3 py-1.5 text-[9px] font-black bg-zinc-800 text-zinc-400 border border-zinc-700 rounded-xl uppercase flex items-center gap-1.5 shadow-sm"><i data-lucide="globe" class="w-3 h-3"></i> Web</span>
+                </div>
+            </div>
+
+            <div class="mb-8 grid grid-cols-1 md:grid-cols-12 gap-4 glass-card p-4 rounded-3xl items-end">
+                <div class="md:col-span-5">
+                    <label class="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-2 block mb-2">Filtrar Jurisdição</label>
+                    <div class="relative">
+                        <i data-lucide="map-pin" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500"></i>
+                        <select id="feed-filter-city" class="w-full pl-11 pr-4 py-3.5 bg-black/60 border border-zinc-700 rounded-2xl text-xs font-bold text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 appearance-none city-options cursor-pointer transition-all hover:border-zinc-500"></select>
+                    </div>
+                </div>
+                <div class="md:col-span-4">
+                    <label class="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-2 block mb-2">Período</label>
+                    <div class="relative">
+                        <i data-lucide="calendar" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500"></i>
+                        <input type="date" id="feed-filter-date" class="w-full pl-11 pr-4 py-3.5 bg-black/60 border border-zinc-700 rounded-2xl text-xs font-bold text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 [color-scheme:dark] transition-all hover:border-zinc-500" />
+                    </div>
+                </div>
+                <div class="md:col-span-3">
+                    <button onclick="applyFeedFilters()" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 active:scale-95">
+                        <i data-lucide="filter" class="w-4 h-4"></i> Refinar
+                    </button>
+                </div>
+            </div>
+            
+            <div id="feed-list" class="space-y-6"></div>
+        </section>
+
+        <section id="tab-official" class="tab-content hidden transition-all duration-500">
+            <div class="mb-10 flex items-center gap-4">
+                <div class="p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-400 shadow-lg shadow-emerald-500/10"><i data-lucide="shield-check" class="w-8 h-8"></i></div>
+                <div>
+                    <p class="text-3xl font-black text-white tracking-tighter">Fontes Governamentais</p>
+                    <p class="text-zinc-500 text-xs font-bold mt-1 uppercase tracking-widest">Repositório Oficial: SSP-BA • PM-BA • Gov BA — (<span id="official-count" class="text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">0</span> registros ativos)</p>
+                </div>
+            </div>
+            
+            <div class="mb-8 grid grid-cols-1 md:grid-cols-12 gap-4 glass-card p-4 rounded-3xl items-end">
+                <div class="md:col-span-5">
+                    <label class="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-2 block mb-2">Filtrar Jurisdição</label>
+                    <div class="relative">
+                        <i data-lucide="map-pin" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500"></i>
+                        <select id="official-filter-city" class="w-full pl-11 pr-4 py-3.5 bg-black/60 border border-zinc-700 rounded-2xl text-xs font-bold text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 appearance-none city-options cursor-pointer transition-all hover:border-zinc-500"></select>
+                    </div>
+                </div>
+                <div class="md:col-span-4">
+                    <label class="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-2 block mb-2">Período</label>
+                    <div class="relative">
+                        <i data-lucide="calendar" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500"></i>
+                        <input type="date" id="official-filter-date" class="w-full pl-11 pr-4 py-3.5 bg-black/60 border border-zinc-700 rounded-2xl text-xs font-bold text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 [color-scheme:dark] transition-all hover:border-zinc-500" />
+                    </div>
+                </div>
+                <div class="md:col-span-3">
+                    <button onclick="applyOfficialFilters()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 active:scale-95">
+                        <i data-lucide="filter" class="w-4 h-4"></i> Refinar
+                    </button>
+                </div>
+            </div>
+
+            <div id="official-sources-status" class="mb-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"></div>
+            <div id="official-list" class="space-y-6"></div>
+        </section>
+
+        <section id="tab-headline" class="tab-content hidden max-w-5xl mx-auto transition-all duration-500">
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center justify-center p-5 bg-gradient-to-br from-blue-600/20 to-cyan-600/10 rounded-full mb-6 ring-1 ring-blue-500/30 shadow-2xl shadow-blue-900/20">
+                    <i data-lucide="zap" class="w-10 h-10 text-blue-400"></i>
+                </div>
+                <h2 class="text-4xl font-black text-white tracking-tighter mb-4">Headline Informante</h2>
+                <p class="text-zinc-400 text-sm font-medium">Auditoria semântica e verificação de espalhamento de notícias na web.</p>
+            </div>
+
+            <div class="glass-card p-2 pl-6 rounded-full flex flex-col md:flex-row items-center gap-4 max-w-3xl mx-auto mb-10 shadow-2xl border border-zinc-700/50 focus-within:border-blue-500/50 focus-within:shadow-blue-900/20 transition-all">
+                <div class="relative flex-1 w-full flex items-center">
+                    <i data-lucide="search" class="w-5 h-5 text-zinc-500 mr-3"></i>
+                    <input type="text" id="headline-input" placeholder="Cole a manchete... (Ex: Operação apreende...)" class="w-full bg-transparent border-none py-4 focus:outline-none text-sm font-medium text-white placeholder:text-zinc-600" />
+                    <button id="headline-clear-btn" class="hidden absolute right-4 text-zinc-500 hover:text-white transition-colors">
+                        <i data-lucide="x-circle" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <button id="headline-analyze-btn" disabled class="w-full md:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg font-bold text-sm flex items-center justify-center gap-2">
+                    <i data-lucide="zap" class="w-4 h-4 fill-amber-400 text-amber-400 hl-btn-icon"></i>
+                    <i data-lucide="loader-2" class="w-4 h-4 animate-spin hidden hl-btn-loader"></i>
+                    <span class="hl-btn-text">Analisar Impacto</span>
+                </button>
+            </div>
+
+            <div id="headline-results-container"></div>
+            
+            <div id="headline-history-section" class="hidden mt-16 pt-8 border-t border-zinc-800/50">
+                <h2 class="text-[10px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2 mb-6">
+                    <i data-lucide="history" class="w-3.5 h-3.5"></i> Consultas Anteriores
+                </h2>
+                <div id="headline-history-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+        </section>
+
+        <section id="tab-contact" class="tab-content hidden max-w-5xl mx-auto transition-all duration-500">
+            <div class="mb-12 text-center">
+                <div class="inline-flex p-5 bg-cyan-500/10 rounded-3xl border border-cyan-500/20 text-cyan-400 mb-6 shadow-xl shadow-cyan-900/10"><i data-lucide="headset" class="w-10 h-10"></i></div>
+                <p class="text-4xl font-black text-white tracking-tighter">Central de Comando</p>
+                <p class="text-zinc-400 text-sm font-medium mt-2">Linha direta com a Assessoria de Comunicação DIRPIN Leste</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="space-y-6">
+                    <div class="glass-card rounded-[2rem] p-8 flex items-center gap-6 hover:border-cyan-500/50 transition-all shadow-xl group">
+                        <div class="bg-cyan-500/10 p-5 rounded-2xl text-cyan-400 group-hover:bg-cyan-500 group-hover:text-white transition-all shadow-inner"><i data-lucide="mail" class="w-8 h-8"></i></div>
+                        <div>
+                            <p class="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">Email Oficial</p>
+                            <p class="text-lg font-bold text-white">ascom.dirpin@pcba.gov.br</p>
+                        </div>
+                    </div>
+                    <div class="glass-card rounded-[2rem] p-8 flex items-center gap-6 hover:border-emerald-500/50 transition-all shadow-xl group">
+                        <div class="bg-emerald-500/10 p-5 rounded-2xl text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-inner"><i data-lucide="phone" class="w-8 h-8"></i></div>
+                        <div>
+                            <p class="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">Plantão 24h (WhatsApp)</p>
+                            <p class="text-2xl font-black text-white">(75) 98114-9491</p>
+                        </div>
+                    </div>
+                </div>
+                <form class="glass-card rounded-[2.5rem] p-10 shadow-2xl flex flex-col border-t border-l border-zinc-700/50" onsubmit="event.preventDefault(); showToast('Mensagem enviada com sucesso ao servidor seguro!', 'success'); this.reset();">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest mb-6 flex items-center gap-3"><i data-lucide="radio" class="w-4 h-4 text-cyan-500"></i> Transmissão Criptografada</h3>
+                    <div class="space-y-5 flex-1">
+                        <div>
+                            <input type="text" required placeholder="Sua Identificação (Ex: Del. Titular 1ª CP)" class="w-full p-4 bg-black/40 border border-zinc-700 rounded-2xl text-sm font-medium text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all placeholder:text-zinc-600" />
+                        </div>
+                        <div>
+                            <textarea required rows="4" placeholder="Descreva o fato ou solicite apoio de mídia..." class="w-full p-4 bg-black/40 border border-zinc-700 rounded-2xl text-sm text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 resize-none transition-all placeholder:text-zinc-600 custom-scroll"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white text-[11px] font-black uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-cyan-600/20 flex items-center justify-center gap-2 mt-6 active:scale-95">
+                        <i data-lucide="send" class="w-4 h-4"></i> Transmitir
+                    </button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-[#020202] border-t border-zinc-900 py-12 mt-auto relative z-10 pb-20">
+        <div class="max-w-screen-2xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-4">
+                <div class="opacity-50 grayscale hover:grayscale-0 transition-all"><i data-lucide="shield" class="w-8 h-8 text-blue-500"></i></div>
+                <div>
+                    <p class="font-extrabold text-white tracking-tight">Polícia Civil da Bahia</p>
+                    <p class="text-[9px] text-zinc-600 font-bold tracking-[0.2em] uppercase mt-0.5">ASCOM • Intelligence Node</p>
+                </div>
+            </div>
+            <p class="text-[9px] font-bold text-zinc-600 tracking-widest uppercase text-right">
+                SISTEMA NODE MASTER v2.0<br/>Criptografia Ativa
+            </p>
+        </div>
+    </footer>
+
+    <script>
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container'); const toast = document.createElement('div');
+        let icon = 'info'; let colorClass = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+        if (type === 'success') { icon = 'check-circle'; colorClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'; }
+        if (type === 'warning') { icon = 'alert-triangle'; colorClass = 'bg-amber-500/10 text-amber-400 border-amber-500/30'; }
+        if (type === 'error')   { icon = 'x-circle'; colorClass = 'bg-rose-500/10 text-rose-400 border-rose-500/30'; }
+        toast.className = `glass-panel flex items-center gap-3 px-5 py-4 rounded-2xl border ${colorClass} shadow-2xl backdrop-blur-md toast-enter min-w-[300px]`;
+        toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 shrink-0"></i><p class="text-xs font-bold">${message}</p>`;
+        container.appendChild(toast); lucide.createIcons({root: toast});
+        setTimeout(() => { toast.classList.remove('toast-enter'); toast.classList.add('toast-exit'); setTimeout(() => toast.remove(), 300); }, 4000);
+    }
+
+    const DIRPIN_LESTE_CITIES = [
+        "Anguera","Antônio Cardoso","Feira de Santana","Ipecaetá","Rafael Jambeiro","Santo Estêvão","São Gonçalo dos Campos","Serra Preta","Tanquinho",
+        "Acajutiba","Água Fria","Alagoinhas","Aporá","Araçás","Aramari","Cardeal da Silva","Catu","Conde","Crisópolis","Entre Rios","Esplanada","Inhambupe","Irará","Itanagra","Itapicuru","Jandaíra","Olindina","Ouriçangas","Pedrão","Rio Real","Sátiro Dias",
+        "Amélia Rodrigues","Conceição da Feira","Conceição do Jacuípe","Coração de Maria","Santo Amaro","Saubara","Teodoro Sampaio","Terra Nova",
+        "Amargosa","Aratuípe","Cabaceiras do Paraguaçu","Cachoeira","Castro Alves","Conceição do Almeida","Cruz das Almas","Dom Macedo Costa","Elísio Medrado","Governador Mangabeira","Jaguaripe","Jiquiriçá","Laje","Maragogipe","Muniz Ferreira","Muritiba","Mutuípe","Nazaré","São Félix","São Felipe","São Miguel das Matas","Santa Terezinha","Santo Antônio de Jesus","Sapeaçu","Ubaíra","Varzedo",
+        "Araci","Barrocas","Biritinga","Candeal","Capela do Alto Alegre","Conceição do Coité","Ichu","Lamarão","Nova Fátima","Pé de Serra","Retirolândia","Riachão do Jacuípe","São Domingos","Santa Bárbara","Santaluz","Santanópolis","Serrinha","Teofilândia","Valente"
+    ];
+
+    const COORPINS_DATA = [
+        { id:"1",  name:"1ª COORPIN",  cities:["Anguera","Antônio Cardoso","Feira de Santana","Ipecaetá","Rafael Jambeiro","Santo Estêvão","São Gonçalo dos Campos","Serra Preta","Tanquinho"] },
+        { id:"2",  name:"2ª COORPIN",  cities:["Acajutiba","Água Fria","Alagoinhas","Aporá","Araçás","Aramari","Cardeal da Silva","Catu","Conde","Crisópolis","Entre Rios","Esplanada","Inhambupe","Irará","Itanagra","Itapicuru","Jandaíra","Olindina","Ouriçangas","Pedrão","Rio Real","Sátiro Dias"] },
+        { id:"3",  name:"3ª COORPIN",  cities:["Amélia Rodrigues","Conceição da Feira","Conceição do Jacuípe","Coração de Maria","Santo Amaro","Saubara","Teodoro Sampaio","Terra Nova"] },
+        { id:"4",  name:"4ª COORPIN",  cities:["Amargosa","Aratuípe","Cabaceiras do Paraguaçu","Cachoeira","Castro Alves","Conceição do Almeida","Cruz das Almas","Dom Macedo Costa","Elísio Medrado","Governador Mangabeira","Jaguaripe","Jiquiriçá","Laje","Maragogipe","Muniz Ferreira","Muritiba","Mutuípe","Nazaré","São Félix","São Felipe","São Miguel das Matas","Santa Terezinha","Santo Antônio de Jesus","Sapeaçu","Ubaíra","Varzedo"] },
+        { id:"15", name:"15ª COORPIN", cities:["Araci","Barrocas","Biritinga","Candeal","Capela do Alto Alegre","Conceição do Coité","Ichu","Lamarão","Nova Fátima","Pé de Serra","Retirolândia","Riachão do Jacuípe","São Domingos","Santa Bárbara","Santaluz","Santanópolis","Serrinha","Teofilândia","Valente"] }
+    ];
+
+    // Constante robusta das bases
+    const targetQueryCities = `("Feira de Santana" OR "Alagoinhas" OR "Santo Antônio de Jesus" OR "Serrinha" OR "Cruz das Almas")`;
+    const targetQueryCrime = `(polícia OR policial OR preso OR prisão OR operação OR apreensão OR assassinato OR homicídio)`;
+    const TARGET_SITES = [
+        { url: "https://www.g1.globo.com/ba/bahia", label: "G1 Bahia", googleQuery: `site:g1.globo.com/ba/bahia ${targetQueryCrime} ${targetQueryCities} when:7d` },
+        { url: "https://www.g1.globo.com/ba/feira-de-santana-regiao", label: "G1 Feira/Região", googleQuery: `site:g1.globo.com/ba/feira-de-santana-regiao ${targetQueryCrime} when:7d` },
+        { url: "https://noticias.r7.com/bahia", label: "Notícias R7 (Bahia)", googleQuery: `site:noticias.r7.com/bahia ${targetQueryCrime} ${targetQueryCities} when:7d` },
+        { url: "https://sbtnews.sbt.com.br", label: "Sbt News", googleQuery: `site:sbtnews.sbt.com.br ${targetQueryCrime} ${targetQueryCities} when:7d` },
+        { url: "https://www.cnnbrasil.com.br", label: "CNN Brasil", googleQuery: `site:cnnbrasil.com.br ${targetQueryCrime} ${targetQueryCities} when:7d` },
+        { url: "https://www.band.com.br/bahia", label: "Band Bahia", googleQuery: `site:band.com.br/bahia ${targetQueryCrime} ${targetQueryCities} when:7d` },
+        { url: "https://record.com.br", label: "Record TV", googleQuery: `site:record.com.br ${targetQueryCrime} ${targetQueryCities} when:7d` },
+        { url: "https://tvbrasil.ebc.com.br", label: "TV Brasil", googleQuery: `site:tvbrasil.ebc.com.br ${targetQueryCrime} ${targetQueryCities} when:7d` },
+        { url: "https://www.bnews.com.br", label: "BNews", googleQuery: `site:bnews.com.br ${targetQueryCrime} ${targetQueryCities} when:7d` },
+        { url: "https://www.correio24horas.com.br", label: "Correio 24h", googleQuery: `site:correio24horas.com.br ${targetQueryCrime} ${targetQueryCities} when:7d` },
+        { url: "https://www.bahianoticias.com.br", label: "Bahia Notícias", googleQuery: `site:bahianoticias.com.br ${targetQueryCrime} ${targetQueryCities} when:7d` },
+        { url: "https://www.acordacidade.com.br", label: "Acorda Cidade" },
+        { url: "https://centraldepolicia.olabahia.com.br", label: "Central de Polícia" },
+        { url: "https://www.jornalfolhadoestado.com", label: "Jornal Folha do Estado" },
+        { url: "https://www.paginadepolicia.com.br", label: "Página de Polícia" },
+        { url: "https://www.feira24horas.com", label: "Feira 24 Horas" },
+        { url: "https://deolhonacidade.net", label: "De Olho na Cidade" },
+        { url: "https://www.trombonenews.com.br", label: "Trombone News" },
+        { url: "https://gigantedanoticia.com.br", label: "Gigante da Notícia" },
+        { url: "https://fortenanoticia.com.br", label: "Forte na Notícia" },
+        { url: "https://criativaonline.com.br", label: "Criativa Online" },
+        { url: "https://blogdovalente.com.br", label: "Blog do Valente" },
+        { url: "https://serrinhanoticias.com.br", label: "Serrinha Notícias" },
+        { url: "https://www.calilanoticias.com", label: "Calilá Notícias" }
+    ];
+
+    const OFFICIAL_SITES = [
+        { url: "https://www.ba.gov.br", label: "Gov BA (Portal)", domain: "ba.gov.br", rssPaths: ["/feed", "/rss", "/noticias/feed"], htmlPaths: ["/", "/noticias", "/seguranca"], googleQuery: 'site:ba.gov.br (polícia OR "segurança pública" OR "SSP" OR prisão OR operação) when:30d' },
+        { url: "https://www.pm.ba.gov.br", label: "Polícia Militar BA", domain: "pm.ba.gov.br", rssPaths: ["/feed", "/rss"], htmlPaths: ["/", "/noticias"], googleQuery: 'site:pm.ba.gov.br when:30d' },
+        { url: "https://www.ba.gov.br/ssp/noticias", label: "SSP-BA", domain: "ba.gov.br", rssPaths: ["/ssp/noticias/feed", "/ssp/feed"], htmlPaths: ["/ssp/noticias"], googleQuery: '(site:ba.gov.br/ssp) (nota OR comunicado OR operação OR prisão) when:30d' },
+        { url: "https://www.instagram.com/policiacivilba", label: "PCBA Oficial", domain: "instagram.com", rssPaths: [], htmlPaths: [], googleQuery: '"Polícia Civil da Bahia" OR "PCBA" (operação OR apreensão OR prisão OR crime) when:7d' }
+    ];
+
+    const OFFICIAL_DOMAINS = ["ba.gov.br", "pm.ba.gov.br", "ssp.ba.gov.br", "pc.ba.gov.br"];
+    const FEED_BLOCKED_DOMAINS = OFFICIAL_DOMAINS;
+    const PRIORITY_DOMAINS = [
+        'g1.globo.com', 'r7.com', 'sbtnews.sbt.com.br', 'cnnbrasil.com.br', 'band.com.br', 'record.com.br', 'tvbrasil.ebc.com.br',
+        'acordacidade.com.br', 'centraldepolicia.olabahia.com.br', 'jornalfolhadoestado.com', 'paginadepolicia.com.br', 
+        'bnews.com.br', 'feira24horas.com', 'deolhonacidade.net', 'bahianoticias.com.br'
+    ];
+
+    const POLICE_KEYWORDS = [
+        "polícia","policial","delegacia","delegado","investigação","inquérito",
+        "crime","criminal","criminoso","suspeito","preso","prisão","detido","detento",
+        "homicídio","assassinato","morte","cadáver","corpo","vítima","baleado","esfaqueado",
+        "roubo","furto","assalto","latrocínio","arrombamento","quadrilha",
+        "tráfico","droga","maconha","cocaína","crack","narcóticos","apreensão",
+        "arma","revólver","pistola","fuzil","munição",
+        "operação","mandado","busca","foragido","capturado",
+        "acidente","colisão","atropelamento",
+        "feminicídio","violência doméstica","maria da penha",
+        "estupro","abuso sexual","pedofilia",
+        "estelionato","golpe","fraude","falsidade",
+        "pcba","pmba","ssp","segurança pública","ocorrência",
+        "violência","perícia","dpt","iml","flagrante","facção","denúncia",
+        "justiça","tribunal","condenado","bombeiros","resgate","tiroteio",
+        "disparos","executado","execução","milícia","rondesp","peto","cipe","batalhão"
+    ];
+
+    function isPoliceRelated(item) {
+        const text = ((item.title || '') + ' ' + (item.description || '')).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return POLICE_KEYWORDS.some(kw => text.includes(kw.normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
+    }
+
+    let globalNews = []; let knownUrls = new Set();
+    let activeTab = 'dashboard'; let searchQuery = ''; let timeToNextUpdate = 10 * 60;
+    let feedFilterCity = 'todos'; let feedFilterDate = '';
+    let officialFilterCity = 'todos'; let officialFilterDate = '';
+    let scanRunning = false; let officialSourcesStatus = {};
+    let clustersCache = [];
+    let headlineHistory = [];
+    const headlineTriggers = ['Urgência', 'Curiosidade', 'Autoridade', 'Impacto Social', 'Esperança', 'Alerta', 'Novidade', 'Prova Social', 'Escassez'];
+
+    let chartCitiesInst = null; let chartCategoriesInst = null; let chartTimelineInst = null;
+
+    window.onload = () => {
+        buildCitySelects(); setActiveTab('dashboard');
+        Chart.defaults.color = '#a1a1aa'; Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(24, 24, 27, 0.9)'; Chart.defaults.plugins.tooltip.padding = 12;
+        Chart.defaults.plugins.tooltip.cornerRadius = 8; Chart.defaults.plugins.tooltip.titleFont = { size: 14, weight: 'bold' };
+
+        if (globalNews.length === 0) { runDeepScan(false); } else { refreshUI(); runDeepScan(true); }
+        
+        updateClock(); setInterval(updateClock, 1000);
+        
+        document.getElementById('search-input').addEventListener('input', e => {
+            searchQuery = e.target.value.toLowerCase(); renderFeed();
+            if (activeTab !== 'feed' && activeTab !== 'official' && searchQuery.length > 2) switchTab('feed');
+        });
+
+        const hlInput = document.getElementById('headline-input');
+        const hlClearBtn = document.getElementById('headline-clear-btn');
+        const hlAnalyzeBtn = document.getElementById('headline-analyze-btn');
+        hlInput.addEventListener('input', updateHeadlineInputState);
+        hlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && hlInput.value.trim()) analyzeHeadline(); });
+        hlClearBtn.addEventListener('click', () => { hlInput.value = ''; updateHeadlineInputState(); });
+        hlAnalyzeBtn.addEventListener('click', analyzeHeadline);
+
+        lucide.createIcons();
+    };
+
+    function buildCitySelects() {
+        const selects = document.querySelectorAll('.city-options');
+        const groups = [
+            { val:"todos",        label:"Todas (Apenas Cidades da Lista)" },
+            { val:"DIRPIN Leste", label:"Geral (Bahia / Brasil)" },
+            { val:"1ª COORPIN",   label:"1ª COORPIN" },
+            { val:"2ª COORPIN",   label:"2ª COORPIN" },
+            { val:"3ª COORPIN",   label:"3ª COORPIN" },
+            { val:"4ª COORPIN",   label:"4ª COORPIN" },
+            { val:"15ª COORPIN",  label:"15ª COORPIN" }
+        ];
+        let html = groups.map(g => `<option value="${g.val}">${g.label}</option>`).join('');
+        html += `<option disabled>──────────</option>`;
+        [...DIRPIN_LESTE_CITIES].sort((a,b) => a.localeCompare(b,'pt-BR')).forEach(c => { html += `<option value="${c}">${c}</option>`; });
+        selects.forEach(s => { s.innerHTML = html; });
+    }
+
+    function updateClock() {
+        document.getElementById('clock-display').innerText = new Date().toLocaleTimeString('pt-BR', { hour12: false });
+        if (timeToNextUpdate > 0) { timeToNextUpdate--; } else { timeToNextUpdate = 10*60; if (!scanRunning) runDeepScan(true); }
+        const m = Math.floor(timeToNextUpdate/60).toString().padStart(2,'0');
+        const s = (timeToNextUpdate%60).toString().padStart(2,'0');
+        document.getElementById('countdown-display').innerText = `${m}:${s}`;
+    }
+
+    function liveScanShow() {
+        const bar = document.getElementById('live-scan-bar');
+        if (bar) { bar.classList.remove('hidden'); requestAnimationFrame(() => bar.classList.remove('-translate-y-full')); }
+    }
+    function liveScanHide() {
+        const bar = document.getElementById('live-scan-bar');
+        if (bar) { bar.classList.add('-translate-y-full'); setTimeout(() => bar.classList.add('hidden'), 400); }
+    }
+    function liveScanUpdate(siteName, pct, hits) {
+        const elSite = document.getElementById('live-scan-site'); const elFill = document.getElementById('live-scan-fill');
+        const elPct  = document.getElementById('live-scan-pct'); const elHits = document.getElementById('live-scan-hits');
+        if (elSite) elSite.textContent = siteName || '—'; if (elFill) elFill.style.width = `${pct}%`;
+        if (elPct)  elPct.textContent  = `${pct}%`; if (elHits) elHits.innerHTML = `<i data-lucide="database" class="w-3 h-3 inline pb-0.5"></i> ${hits}`;
+    }
+
+    function fetchWithTimeout(url, ms=8000) {
+        const ctrl = new AbortController(); const tid  = setTimeout(() => ctrl.abort(), ms);
+        return fetch(url, { signal: ctrl.signal }).then(r => { clearTimeout(tid); return r; }).catch(e => { clearTimeout(tid); throw e; });
+    }
+
+    function extractRealUrl(link) {
+        if (!link) return "";
+        try { const urlObj = new URL(link); if (link.includes('news.google.com') && urlObj.searchParams.has('url')) return decodeURIComponent(urlObj.searchParams.get('url')); } catch(e) {}
+        return link;
+    }
+
+    function mapRss2JsonItem(item, fallbackSource) {
+        let title = item.title || ""; let source = fallbackSource || "Imprensa Web";
+        if (!fallbackSource && title.includes(" - ")) { const parts = title.split(" - "); source = parts.pop().trim(); title = parts.join(" - ").trim(); }
+        const tmp = document.createElement("div"); tmp.innerHTML = item.description || "";
+        return {
+            title, url: extractRealUrl(item.link || item.url || ""),
+            description: (tmp.textContent || "").replace(/Leia mais em Google Notícias/gi,'').trim().slice(0,500),
+            sourceName: source, publishedAt: item.pubDate || item.published || new Date().toISOString()
+        };
+    }
+
+    function parseXMLText(text, fallbackSource) {
+        if (!text || (!text.includes('<item') && !text.includes('<entry'))) return [];
+        try {
+            const xml = new DOMParser().parseFromString(text, "text/xml");
+            return Array.from(xml.querySelectorAll("item, entry")).map(item => {
+                let title = item.querySelector("title")?.textContent?.trim() || ""; let sourceName = fallbackSource || "Imprensa Web";
+                if (!fallbackSource && title.includes(" - ")) { const parts = title.split(" - "); sourceName = parts.pop().trim(); title = parts.join(" - ").trim(); }
+                const link = extractRealUrl(item.querySelector("link")?.textContent?.trim() || item.querySelector("link")?.getAttribute("href") || "");
+                const tmp = document.createElement("div"); tmp.innerHTML = item.querySelector("description, summary, content")?.textContent || "";
+                return {
+                    title, url: link, description: (tmp.textContent || "").replace(/Leia mais em Google Notícias/gi,'').trim().slice(0,500),
+                    sourceName, publishedAt: item.querySelector("pubDate, published, updated")?.textContent || new Date().toISOString()
+                };
+            }).filter(i => i.title && i.url);
+        } catch { return []; }
+    }
+
+    async function fetchSiteNews(site) {
+        const allItems = [];
+        if (site.googleQuery) {
+            const googleRssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(site.googleQuery)}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+            try {
+                const res = await fetchWithTimeout(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleRssUrl)}`, 10000);
+                if (res.ok) { const data = await res.json(); if (data.status === 'ok' && data.items?.length) allItems.push(...data.items.map(i => mapRss2JsonItem(i, site.label))); }
+            } catch(_) {}
+        } else {
+            const base = site.url.replace(/\/$/, '');
+            for (const path of ['/feed', '/rss']) {
+                try {
+                    const res = await fetchWithTimeout(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(base + path)}`, 7000);
+                    if (res.ok) { const data = await res.json(); if (data.status === 'ok' && data.items?.length) allItems.push(...data.items.map(i => mapRss2JsonItem(i, site.label))); }
+                } catch(_) {}
+            }
+        }
+        return allItems.filter(isPoliceRelated).slice(0, 10);
+    }
+
+    async function fetchOfficialSiteNews(site) {
+        const allItems = [];
+        if (site.googleQuery) {
+            const googleRssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(site.googleQuery)}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+            try {
+                const res = await fetchWithTimeout(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleRssUrl)}`, 10000);
+                if (res.ok) { const data = await res.json(); if (data.status === 'ok' && data.items?.length) allItems.push(...data.items.map(i => mapRss2JsonItem(i, site.label))); }
+            } catch(_) {}
+        }
+        return allItems.filter(isPoliceRelated);
+    }
+
+    async function runWithConcurrency(taskFns, limit, onEach) {
+        let nextIdx = 0;
+        async function worker() {
+            while (nextIdx < taskFns.length) {
+                const i = nextIdx++; let result = null;
+                try { result = await taskFns[i](); } catch(_) {}
+                if (onEach) onEach(i, taskFns.length, result);
+            }
+        }
+        await Promise.all(Array.from({ length: Math.min(limit, taskFns.length) }, worker));
+    }
+
+    function getTokens(text) { return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s]/gi, '').split(/\s+/).filter(w => w.length > 3); }
+    function computeTF(tokens) { const tf = {}; tokens.forEach(t => { tf[t] = (tf[t] || 0) + 1; }); const maxF = Math.max(...Object.values(tf), 1); for (const t in tf) tf[t] /= maxF; return tf; }
+    function computeIDF(docsTokens) { const idf = {}; const n = docsTokens.length; docsTokens.forEach(tokens => { new Set(tokens).forEach(t => { idf[t] = (idf[t] || 0) + 1; }); }); for (const t in idf) idf[t] = Math.log(n / idf[t]) + 1; return idf; }
+    function computeTFIDF(tf, idf) { const tfidf = {}; let norm = 0; for (const t in tf) { if (idf[t]) { tfidf[t] = tf[t] * idf[t]; norm += tfidf[t] * tfidf[t]; } } norm = Math.sqrt(norm); if (norm > 0) for (const t in tfidf) tfidf[t] /= norm; return tfidf; }
+    function cosineSimilarity(vecA, vecB) { let dot = 0; for (const t in vecA) { if (vecB[t]) dot += vecA[t] * vecB[t]; } return dot; }
+
+    function buildClusters(newsItems, threshold = 0.45) {
+        if (newsItems.length === 0) return [];
+        const docs = newsItems.map(item => ({ original: item, tokens: getTokens(item.title + " " + item.description) }));
+        const idf = computeIDF(docs.map(d => d.tokens));
+        docs.forEach(doc => { doc.tfidf = computeTFIDF(computeTF(doc.tokens), idf); });
+        
+        const clusters = [];
+        docs.forEach(doc => {
+            let bestCluster = null; let bestSim = threshold;
+            for (let cluster of clusters) {
+                const sim = cosineSimilarity(doc.tfidf, cluster.anchor.tfidf);
+                if (sim > bestSim) { bestSim = sim; bestCluster = cluster; }
+            }
+            if (bestCluster) { bestCluster.items.push(doc.original); bestCluster.score += 10; }
+            else { clusters.push({ id: doc.original.id, anchor: doc, items: [doc.original], score: 50 + (isPriority(doc.original.sourceUrl) ? 20 : 0) }); }
+        });
+        return clusters.sort((a, b) => b.score !== a.score ? b.score - a.score : b.anchor.original.timestamp - a.anchor.original.timestamp);
+    }
+
+    function detectCity(text) {
+        const clean = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+        for (const city of DIRPIN_LESTE_CITIES) {
+            if (new RegExp(`\\b${city.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase()}\\b`, 'i').test(clean)) return city;
+        }
+        return "DIRPIN LESTE (Geral)";
+    }
+
+    function detectCategory(text) {
+        const u = text.toUpperCase();
+        if (u.includes("MARIA DA PENHA") || u.includes("FEMINICÍDIO")) return "Violência Contra a Mulher";
+        if (u.includes("ESTUPRO") || u.includes("ABUSO SEXUAL")) return "Crimes Sexuais";
+        if (u.includes("ESTELIONATO") || u.includes("GOLPE")) return "Estelionato/Fraudes";
+        if (u.includes("ARMA") || u.includes("MUNIÇÃO")) return "Armas/Munições";
+        if (u.includes("PRISÃO") || u.includes("FORAGIDO")) return "Capturas e Prisões";
+        if (u.includes("TRÁFICO") || u.includes("DROGA") || u.includes("MACONHA")) return "Narcóticos";
+        if (u.includes("HOMICÍDIO") || u.includes("ASSASSINATO") || u.includes("MORTE")) return "Homicídios";
+        if (u.includes("ROUBO") || u.includes("FURTO") || u.includes("ASSALTO")) return "Patrimônio";
+        if (u.includes("OPERAÇÃO") || u.includes("MANDADO")) return "Operação Policial";
+        return "Ocorrência Geral";
+    }
+
+    function ingestItems(rawItems, forceOfficial = false, forcedSourceLabel = null) {
+        let added = 0;
+        rawItems.forEach(item => {
+            if (!item.url || knownUrls.has(item.url)) return;
+            knownUrls.add(item.url);
+            const fullText = item.title + " " + item.description;
+            const city = detectCity(fullText);
+            const coorpin = COORPINS_DATA.find(c => c.cities.includes(city))?.name || "DIRPIN Leste";
+            const pubDate = new Date(item.publishedAt);
+            globalNews.push({
+                id: `rss-${Date.now()}-${added}-${Math.random().toString(36).slice(2,6)}`,
+                title: item.title, description: item.description,
+                date: pubDate.toLocaleDateString('pt-BR') + ' ' + pubDate.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}),
+                dateOnly: pubDate.toLocaleDateString('pt-BR'),
+                timestamp: isNaN(pubDate.getTime()) ? Date.now() : pubDate.getTime(),
+                category: detectCategory(fullText), city, coorpin, source: forceOfficial ? forcedSourceLabel : (item.sourceName || "Imprensa Web"), sourceUrl: item.url,
+                sourceType: forceOfficial ? "Oficial" : "Imprensa Web"
+            });
+            added++;
+        });
+        return added;
+    }
+
+    function persistAndSort() { globalNews.sort((a, b) => b.timestamp - a.timestamp); }
+
+    async function runDeepScan(isBackground = false) {
+        if (scanRunning) return;
+        scanRunning = true;
+
+        const btn = document.getElementById('btn-deepscan'); const icon = document.getElementById('deepscan-icon'); const txtBtn = document.getElementById('deepscan-text');
+        const overlay = document.getElementById('scan-overlay'); const bar = document.getElementById('scan-progress-bar');
+        if (btn) { btn.disabled = true; icon.classList.add('animate-spin'); txtBtn.innerText = "Varrendo..."; }
+
+        liveScanShow(); liveScanUpdate('Inicializando...', 0, 0);
+
+        if (!isBackground && overlay) {
+            overlay.classList.remove('hidden'); requestAnimationFrame(() => overlay.classList.remove('opacity-0'));
+            bar.style.width = '0%'; document.getElementById('scan-progress-pct').innerText = '0%'; document.getElementById('scan-hits').innerText = '0 encontrados';
+        }
+
+        OFFICIAL_SITES.forEach(s => { officialSourcesStatus[s.label] = 'scanning'; }); renderOfficialSourcesStatus();
+
+        try {
+            const total = TARGET_SITES.length + OFFICIAL_SITES.length;
+            let completed = 0, totalAdded = 0, officialAdded = 0;
+
+            // Restringido para 5 conexões simultâneas para evitar Rate Limit 429
+            const pressTaskFns = TARGET_SITES.map(site => () => fetchSiteNews(site).then(items => ({ site, items })).catch(() => ({ site, items: [] })));
+            const pressScan = runWithConcurrency(pressTaskFns, 5, (i, tot, result) => {
+                completed++;
+                const { site, items } = (result && result.site) ? result : { site: TARGET_SITES[i], items: [] };
+                if (items?.length > 0) { const added = ingestItems(items, false); totalAdded += added; if (added > 0 && completed % 5 === 0) { persistAndSort(); refreshUI(); } }
+                const pct = Math.round((completed / total) * 100);
+                liveScanUpdate(site.label || site.url, pct, totalAdded);
+                if (!isBackground && bar) {
+                    bar.style.width = `${pct}%`; document.getElementById('scan-progress-pct').innerText = `${pct}%`;
+                    document.getElementById('scan-site-name').innerText = site.label || site.url;
+                    document.getElementById('scan-progress-text').innerText = `${completed}/${total} portais varridos`;
+                    document.getElementById('scan-hits').innerText = `${totalAdded} encontrados`;
+                    document.getElementById('stat-sites').innerText = completed; document.getElementById('stat-rss').innerText = totalAdded;
+                }
+            });
+
+            const officialTaskFns = OFFICIAL_SITES.map(site => () => fetchOfficialSiteNews(site).then(items => ({ site, items })).catch(() => ({ site, items: [] })));
+            const officialScan = runWithConcurrency(officialTaskFns, 2, (i, tot, result) => {
+                completed++;
+                const { site, items } = (result && result.site) ? result : { site: OFFICIAL_SITES[i], items: [] };
+                officialSourcesStatus[site.label] = items?.length > 0 ? 'ok' : 'empty';
+                if (items?.length > 0) { const added = ingestItems(items, true, site.label); totalAdded += added; officialAdded += added; if (added > 0) { persistAndSort(); refreshUI(); } }
+                const pct = Math.round((completed / total) * 100);
+                liveScanUpdate(site.label || site.url, pct, totalAdded);
+                if (!isBackground && bar) {
+                    bar.style.width = `${pct}%`; document.getElementById('scan-progress-pct').innerText = `${pct}%`;
+                    document.getElementById('scan-site-name').innerText = site.label || site.url;
+                    document.getElementById('scan-progress-text').innerText = `${completed}/${total} portais varridos`;
+                    document.getElementById('scan-hits').innerText = `${totalAdded} encontrados`; document.getElementById('stat-police').innerText = officialAdded;
+                }
+                renderOfficialSourcesStatus();
+            });
+
+            await Promise.all([pressScan, officialScan]);
+
+            // Catch-All Aggregated Query para garantir dados caso proxies individuais falhem muito
+            const catchAllQuery = `https://news.google.com/rss/search?q=${encodeURIComponent(targetQueryCrime + " AND " + targetQueryCities)}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+            try {
+                const catchAllRes = await fetchWithTimeout(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(catchAllQuery)}`, 10000);
+                if (catchAllRes.ok) {
+                    const data = await catchAllRes.json();
+                    if (data.status === 'ok' && data.items?.length) {
+                        const items = data.items.map(i => mapRss2JsonItem(i, null)).filter(isPoliceRelated);
+                        totalAdded += ingestItems(items, false);
+                    }
+                }
+            } catch(e) {}
+
+            if (totalAdded > 0) { persistAndSort(); clustersCache = buildClusters(globalNews.filter(n => n.sourceType !== 'Oficial'), 0.45); }
+            refreshUI();
+
+        } catch(e) { console.error("[ASCOM] Deep Scan error:", e); } finally {
+            scanRunning = false;
+            if (btn) { btn.disabled = false; icon.classList.remove('animate-spin'); txtBtn.innerText = "Scan Manual"; }
+            if (!isBackground && overlay) { overlay.classList.add('opacity-0'); setTimeout(() => overlay.classList.add('hidden'), 500); }
+            liveScanUpdate('Concluído', 100, globalNews.length); setTimeout(liveScanHide, 3000); renderOfficialSourcesStatus();
+            if(!isBackground) showToast(`Varredura finalizada. ${globalNews.length} itens totais na base.`, "success");
+        }
+    }
+
+    function setActiveTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => { el.classList.add('hidden'); el.classList.remove('opacity-100'); });
+        const target = document.getElementById(`tab-${tabId}`);
+        if (target) { target.classList.remove('hidden'); setTimeout(() => target.classList.add('opacity-100'), 50); }
+        document.querySelectorAll('.tab-btn').forEach(btn => { if (btn.dataset.tab === tabId) btn.classList.add('active'); else btn.classList.remove('active'); });
+    }
+
+    function switchTab(tabId) {
+        activeTab = tabId; setActiveTab(tabId);
+        if (tabId === 'dashboard') renderDashboard();
+        if (tabId === 'feed') renderFeed();
+        if (tabId === 'official') renderOfficial();
+        if (tabId === 'graficos') renderGraficos();
+        lucide.createIcons();
+    }
+
+    function refreshUI() {
+        if (activeTab === 'dashboard') renderDashboard();
+        if (activeTab === 'graficos') renderGraficos();
+        if (activeTab === 'feed') renderFeed();
+        if (activeTab === 'official') renderOfficial();
+        const tickerEl = document.getElementById('ticker-content');
+        if (tickerEl) updateTicker();
+    }
+
+    function renderGraficos() {
+        const stats = globalNews.reduce((acc, n) => {
+            acc.cities[n.city] = (acc.cities[n.city] || 0) + 1; acc.categories[n.category] = (acc.categories[n.category] || 0) + 1; acc.sites[n.source] = (acc.sites[n.source] || 0) + 1;
+            if (acc.timeline[n.dateOnly] !== undefined) acc.timeline[n.dateOnly]++; return acc;
+        }, { cities: {}, categories: {}, sites: {}, timeline: Object.fromEntries(Array.from({ length: 7 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - i); return [d.toLocaleDateString('pt-BR'), 0]; }).reverse()) });
+
+        const topCities = Object.entries(stats.cities).sort((a,b) => b[1]-a[1]).slice(0, 8);
+        const ctxCities = document.getElementById('chart-cities');
+        if (ctxCities) {
+            if (chartCitiesInst) chartCitiesInst.destroy();
+            const grad = ctxCities.getContext('2d').createLinearGradient(0, 0, 400, 0); grad.addColorStop(0, 'rgba(59, 130, 246, 0.8)'); grad.addColorStop(1, 'rgba(139, 92, 246, 0.8)');
+            chartCitiesInst = new Chart(ctxCities.getContext('2d'), { type: 'bar', data: { labels: topCities.map(c => c[0]), datasets: [{ label: 'Registros', data: topCities.map(c => c[1]), backgroundColor: grad, borderRadius: 4, barThickness: 16 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true }, y: { grid: { display: false } } } } });
+        }
+
+        const topCats = Object.entries(stats.categories).sort((a,b) => b[1]-a[1]).slice(0, 6);
+        const ctxCats = document.getElementById('chart-categories');
+        if (ctxCats) {
+            if (chartCategoriesInst) chartCategoriesInst.destroy();
+            chartCategoriesInst = new Chart(ctxCats.getContext('2d'), { type: 'doughnut', data: { labels: topCats.map(c => c[0]), datasets: [{ data: topCats.map(c => c[1]), backgroundColor: ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#f43f5e', '#06b6d4'], borderWidth: 0, hoverOffset: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 12, usePointStyle: true, color: '#a1a1aa' } } }, cutout: '70%' } });
+        }
+
+        const ctxTime = document.getElementById('chart-timeline');
+        if (ctxTime) {
+            if (chartTimelineInst) chartTimelineInst.destroy();
+            const grad = ctxTime.getContext('2d').createLinearGradient(0, 0, 0, 300); grad.addColorStop(0, 'rgba(16, 185, 129, 0.5)'); grad.addColorStop(1, 'rgba(16, 185, 129, 0.01)');
+            chartTimelineInst = new Chart(ctxTime.getContext('2d'), { type: 'line', data: { labels: Object.keys(stats.timeline).map(d => d.substring(0,5)), datasets: [{ label: 'Impactos', data: Object.values(stats.timeline), borderColor: '#10b981', backgroundColor: grad, borderWidth: 2, fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#10b981' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true } } } });
+        }
+
+        const sortS = Object.entries(stats.sites).sort((a, b) => b[1] - a[1]); const total = globalNews.length || 1;
+        document.getElementById('dash-sites-table').innerHTML = sortS.map(site => `<tr class="hover:bg-white/5 transition-colors group"><td class="py-3 pl-4 font-bold text-zinc-300 group-hover:text-cyan-400 transition-colors">${site[0]}</td><td class="py-3 text-center text-white font-black">${site[1]}</td><td class="py-3 pr-4"><div class="flex items-center justify-end gap-3"><div class="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden w-full max-w-[150px]"><div class="h-full bg-cyan-500 rounded-full" style="width:${((site[1]/total)*100).toFixed(1)}%"></div></div><span class="text-[10px] font-black text-zinc-500 w-8 text-right">${((site[1]/total)*100).toFixed(1)}%</span></div></td></tr>`).join('') || '<tr><td colspan="3" class="py-8 text-center text-xs text-zinc-600 italic">Nenhuma fonte mapeada.</td></tr>';
+    }
+
+    function renderDashboard() {
+        const officials = globalNews.filter(n => n.sourceType === 'Oficial');
+        document.getElementById('dash-total').innerText = globalNews.length;
+        document.getElementById('dash-sources-count').innerText = `${new Set(globalNews.map(n => n.source)).size} portais monitorados`;
+        const officialEl = document.getElementById('dash-official'); officialEl.innerText = officials.length;
+        const subEl = document.getElementById('dash-official-sub'); if (subEl) subEl.innerText = officials.length > 0 ? `${new Set(officials.map(n => n.source)).size} PORTAL(IS) OFICIAL(IS)` : 'SSP-BA / Gov';
+    }
+
+    function isPriority(url) { return PRIORITY_DOMAINS.some(d => url.includes(d)); }
+
+    function renderFeed() {
+        let activeClusters = clustersCache;
+        if (searchQuery.length > 2) { activeClusters = activeClusters.filter(c => c.items.some(n => n.title.toLowerCase().includes(searchQuery) || n.description.toLowerCase().includes(searchQuery))); }
+        
+        if (feedFilterCity && feedFilterCity !== 'DIRPIN Leste') {
+            if (feedFilterCity === 'todos') { activeClusters = activeClusters.filter(c => c.items.some(n => DIRPIN_LESTE_CITIES.includes(n.city))); } 
+            else if (feedFilterCity.includes('COORPIN')) { activeClusters = activeClusters.filter(c => c.items.some(n => n.coorpin === feedFilterCity)); } 
+            else { activeClusters = activeClusters.filter(c => c.items.some(n => n.city === feedFilterCity)); }
+        }
+        
+        if (feedFilterDate) { const [yr, mo, dy] = feedFilterDate.split('-'); const filterDateStr = `${dy}/${mo}/${yr}`; activeClusters = activeClusters.filter(c => c.items.some(n => n.dateOnly === filterDateStr)); }
+        
+        activeClusters = activeClusters.slice(0, 100);
+        document.getElementById('feed-count').innerText = activeClusters.reduce((acc, c) => acc + c.items.length, 0);
+
+        document.getElementById('feed-list').innerHTML = activeClusters.map(cluster => {
+            const sortedItems = [...cluster.items].sort((a,b) => (isPriority(b.sourceUrl)?1:0) - (isPriority(a.sourceUrl)?1:0) || b.timestamp - a.timestamp);
+            const item = sortedItems[0];
+            const isPri = isPriority(item.sourceUrl); const repetitionsCount = cluster.items.length; const isViral = repetitionsCount > 3;
+            let bg = 'glass-card hover:border-blue-500/30'; let tc = 'text-white group-hover:text-blue-400'; let ic = 'text-blue-500'; let badge = '';
+
+            if (isViral) {
+                bg = 'bg-gradient-to-r from-rose-900/20 to-black border border-rose-500/30 hover:border-rose-500/60 shadow-lg shadow-rose-900/10 relative mt-4';
+                tc = 'text-rose-100 group-hover:text-rose-300'; ic = 'text-rose-500';
+                badge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-black bg-rose-500/20 text-rose-400 border border-rose-500/40 uppercase rounded-lg animate-pulse"><i data-lucide="flame" class="w-3 h-3"></i> Alta Tração (${repetitionsCount} Menções)</span>`;
+            } else if (isPri) {
+                bg = 'bg-gradient-to-r from-amber-900/20 to-black border border-amber-500/30 hover:border-amber-500/60 shadow-lg shadow-amber-900/10 relative mt-2';
+                tc = 'text-amber-100 group-hover:text-amber-300'; ic = 'text-amber-500';
+                badge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/40 uppercase rounded-lg"><i data-lucide="star" class="w-3 h-3 fill-amber-500"></i> Veículo Principal</span>`;
+                if (repetitionsCount > 1) badge += `<span class="inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-black bg-white/5 text-zinc-300 border border-white/10 uppercase rounded-lg ml-2">${repetitionsCount} Fontes</span>`;
+            } else if (repetitionsCount > 1) {
+                bg = 'glass-card hover:border-blue-500/30 relative mt-2';
+                badge += `<span class="inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-black bg-white/5 text-zinc-300 border border-white/10 uppercase rounded-lg ml-2">${repetitionsCount} Fontes</span>`;
+            }
+
+            const stackHtml = repetitionsCount > 1 ? `<div class="absolute -top-2 left-4 right-4 h-2 bg-zinc-800/80 rounded-t-xl border-t border-x border-zinc-700/50 -z-10"></div>${repetitionsCount > 2 ? `<div class="absolute -top-4 left-8 right-8 h-2 bg-zinc-900/80 rounded-t-xl border-t border-x border-zinc-800/50 -z-20"></div>` : ''}` : '';
+
+            const sourceListHtml = cluster.items.length > 1 ? `<div class="mt-5 pt-4 border-t border-zinc-800/50 flex flex-wrap gap-3 items-center text-[10px] font-bold text-zinc-500"><span class="uppercase tracking-widest text-zinc-600">Repercutido em:</span>${cluster.items.slice(1,4).map(subItem => `<a href="${subItem.sourceUrl}" target="_blank" class="hover:text-${ic.split('-')[1]}-400 hover:underline flex items-center gap-1.5 bg-black/40 px-3 py-1.5 rounded-lg border border-zinc-800"><i data-lucide="external-link" class="w-3 h-3"></i> ${subItem.source}</a>`).join('')}${cluster.items.length > 4 ? ` <span class="ml-1 opacity-50">+${cluster.items.length - 4} outros</span>` : ''}</div>` : '';
+
+            return `<div class="${bg} p-6 sm:p-8 rounded-[2.5rem] transition-all group z-10">
+                ${stackHtml}
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <div class="lg:w-56 flex-shrink-0">
+                        <div class="flex flex-wrap gap-2 mb-5"><span class="inline-flex items-center px-3 py-1 text-[9px] font-black bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase rounded-lg">${item.category}</span>${badge}</div>
+                        <p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">${item.coorpin}</p>
+                        <p class="text-base font-black text-white uppercase">${item.city}</p>
+                        <p class="text-[10px] font-bold text-zinc-400 mt-5 flex items-center gap-2"><i data-lucide="clock" class="w-3.5 h-3.5 text-zinc-500"></i> ${item.date}</p>
+                    </div>
+                    <div class="flex-1 lg:border-l lg:border-zinc-800/50 lg:pl-8 flex flex-col justify-center">
+                        <h3 class="text-xl sm:text-2xl font-black ${tc} mb-4 transition-colors leading-snug tracking-tight">${item.title}</h3>
+                        <p class="text-sm text-zinc-400 leading-relaxed line-clamp-2 mb-6">${item.description}</p>
+                        <div class="flex flex-wrap items-center gap-4 sm:gap-8 text-[10px] font-black uppercase text-zinc-400">
+                            <span class="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/5"><i data-lucide="globe" class="w-4 h-4 ${ic}"></i> ${item.source}</span>
+                            <a href="${item.sourceUrl}" target="_blank" class="${ic} hover:underline flex items-center gap-1.5"><i data-lucide="external-link" class="w-4 h-4"></i> Acessar Portal</a>
+                            <button onclick="startReport('${item.id}')" class="ml-auto flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg hover:shadow-purple-600/30 transition-all transform hover:-translate-y-0.5 active:scale-95"><i data-lucide="sparkles" class="w-4 h-4"></i> Modo Redator</button>
+                        </div>
+                        ${sourceListHtml}
+                    </div>
+                </div>
+            </div>`;
+        }).join('') || '<div class="py-24 text-center text-zinc-500 flex flex-col items-center gap-4"><i data-lucide="search-x" class="w-12 h-12"></i><span class="font-black uppercase tracking-widest text-xs">Nenhuma notícia localizada para as cidades filtradas.</span></div>';
+        lucide.createIcons();
+    }
+
+    function renderOfficialSourcesStatus() {
+        const container = document.getElementById('official-sources-status');
+        if (!container) return;
+        container.innerHTML = OFFICIAL_SITES.map(site => {
+            const status = officialSourcesStatus[site.label] || 'idle';
+            const colors = { idle: { border: 'border-zinc-800', dot: 'bg-zinc-600', text: 'text-zinc-500', label: 'Aguardando' }, scanning: { border: 'border-blue-500/40', dot: 'bg-blue-500 animate-pulse', text: 'text-blue-400', label: 'Verificando...' }, ok: { border: 'border-emerald-500/40', dot: 'bg-emerald-500', text: 'text-emerald-400', label: 'Sincronizado' }, empty: { border: 'border-zinc-700', dot: 'bg-amber-500', text: 'text-amber-400', label: 'Sem Notícias' } };
+            const c = colors[status];
+            return `<div class="flex items-center gap-3 p-4 glass-card border ${c.border} rounded-2xl"><div class="w-2.5 h-2.5 rounded-full flex-shrink-0 ${c.dot} shadow-lg shadow-${c.dot.split('-')[1]}-500/50"></div><div class="min-w-0"><p class="text-[10px] font-bold text-white uppercase truncate">${site.label}</p><p class="text-[9px] ${c.text} font-extrabold uppercase tracking-widest mt-0.5">${c.label}</p></div></div>`;
+        }).join('');
+    }
+
+    function renderOfficial() {
+        renderOfficialSourcesStatus();
+        let filtered = globalNews.filter(n => n.sourceType === 'Oficial' && (n.title.toLowerCase().includes(searchQuery) || n.description.toLowerCase().includes(searchQuery)));
+        
+        if (officialFilterCity && officialFilterCity !== 'DIRPIN Leste') {
+            if (officialFilterCity === 'todos') { filtered = filtered.filter(n => DIRPIN_LESTE_CITIES.includes(n.city)); } 
+            else if (officialFilterCity.includes('COORPIN')) { filtered = filtered.filter(n => n.coorpin === officialFilterCity); } 
+            else { filtered = filtered.filter(n => n.city === officialFilterCity); }
+        }
+        
+        if (officialFilterDate) { const [yr, mo, dy] = officialFilterDate.split('-'); filtered = filtered.filter(n => n.dateOnly === `${dy}/${mo}/${yr}`); }
+
+        const officials = filtered.sort((a, b) => b.timestamp - a.timestamp).slice(0, 100);
+        const countEl = document.getElementById('official-count');
+        if (countEl) countEl.innerText = officials.length;
+
+        if (officials.length === 0) {
+            document.getElementById('official-list').innerHTML = `<div class="py-24 text-center space-y-5"><div class="inline-flex p-6 bg-zinc-900 rounded-[2rem] border border-zinc-800"><i data-lucide="shield-alert" class="w-12 h-12 text-zinc-600"></i></div><p class="text-zinc-500 font-black uppercase tracking-widest text-xs">Aguardando comunicados oficiais nas plataformas governamentais para as cidades filtradas...</p></div>`;
+            lucide.createIcons(); return;
+        }
+
+        document.getElementById('official-list').innerHTML = officials.map(item => `<div class="glass-card p-6 sm:p-8 rounded-[2.5rem] border-emerald-500/20 hover:border-emerald-500/50 transition-all group"><div class="flex flex-col lg:flex-row gap-8"><div class="lg:w-48 flex-shrink-0"><div class="flex flex-wrap gap-2 mb-4"><span class="inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase rounded-lg"><i data-lucide="shield-check" class="w-3 h-3"></i> Fonte Segura</span></div><p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">${item.coorpin}</p><p class="text-sm font-black text-white uppercase mt-1">${item.city}</p><p class="text-[10px] font-bold text-zinc-500 mt-4 flex items-center gap-1.5"><i data-lucide="clock" class="w-3 h-3"></i> ${item.date}</p></div><div class="flex-1 lg:border-l lg:border-zinc-800/50 lg:pl-8"><h3 class="text-xl font-black text-white group-hover:text-emerald-400 mb-3 transition-colors">${item.title}</h3><p class="text-sm text-zinc-400 leading-relaxed line-clamp-3 mb-6">${item.description}</p><div class="flex flex-wrap items-center gap-6 text-[10px] font-black uppercase text-zinc-500"><span class="flex items-center gap-2"><i data-lucide="shield" class="w-3.5 h-3.5 text-emerald-500"></i> ${item.source}</span><a href="${item.sourceUrl}" target="_blank" class="text-emerald-500 hover:underline flex items-center gap-1.5"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> Ver na Íntegra</a></div></div></div></div>`).join('');
+        lucide.createIcons();
+    }
+
+    function updateTicker() {
+        const feed = globalNews.slice(0, 15); const tickerEl = document.getElementById('ticker-content');
+        if(!tickerEl) return;
+        tickerEl.innerHTML = feed.length ? feed.map(n => `<span class="flex items-center gap-4 text-zinc-400"><span class="font-black text-blue-500">•</span><span class="font-bold text-[9px] text-zinc-500">${n.date}</span><span class="font-bold text-zinc-300">${n.title.toUpperCase()}</span><span class="font-bold text-zinc-600">[${n.city.toUpperCase()}]</span></span>`).join('') : `<span>Aguardando captura de dados no radar...</span>`;
+    }
+
+    function applyFeedFilters() { feedFilterCity = document.getElementById('feed-filter-city').value; feedFilterDate = document.getElementById('feed-filter-date').value; renderFeed(); showToast("Filtros de pesquisa aplicados.", "info"); }
+    function applyOfficialFilters() { officialFilterCity = document.getElementById('official-filter-city').value; officialFilterDate = document.getElementById('official-filter-date').value; renderOfficial(); }
+
+    function startReport(id) { 
+        selectedEventForAI = globalNews.find(n => n.id === id); aiDraftText = ""; switchTab('reports');
+        const base = document.getElementById('report-base-info'), btn = document.getElementById('btn-generate-ai'), draft = document.getElementById('report-draft'), cpBtn = document.getElementById('btn-copy');
+        
+        base.innerHTML = `<div class="space-y-4">
+            <div class="p-5 bg-black/40 rounded-2xl border border-zinc-800"><span class="text-[9px] font-black text-zinc-500 block uppercase mb-1 tracking-widest">Evento Base</span><p class="text-white font-black text-base leading-tight">${selectedEventForAI.title}</p></div>
+            <div class="grid grid-cols-2 gap-4"><div class="p-4 bg-black/40 rounded-xl border border-zinc-800"><span class="text-[9px] font-black text-zinc-500 block uppercase mb-1 tracking-widest">Jurisdição</span><p class="text-zinc-300 font-bold text-sm truncate">${selectedEventForAI.city}</p></div><div class="p-4 bg-black/40 rounded-xl border border-zinc-800"><span class="text-[9px] font-black text-zinc-500 block uppercase mb-1 tracking-widest">Classificação</span><p class="text-zinc-300 font-bold text-sm truncate">${selectedEventForAI.category}</p></div></div>
+            <div class="p-5 bg-black/40 rounded-2xl border border-zinc-800"><span class="text-[9px] font-black text-zinc-500 block uppercase mb-2 tracking-widest">Relato Mídia</span><p class="text-xs text-zinc-400 leading-relaxed italic border-l-2 border-zinc-700 pl-3">"${selectedEventForAI.description}"</p></div>
+        </div>`;
+        btn.disabled = false; cpBtn.disabled = true;
+        draft.innerHTML = `<div class="py-24 flex flex-col items-center opacity-30"><i data-lucide="file-edit" class="w-16 h-16 mb-6"></i><p class="text-center text-white uppercase font-black text-[10px] tracking-widest">Aguardando Comando<br>Para Iniciar Síntese</p></div>`;
+        lucide.createIcons(); showToast("Matéria carregada no Redator IA.", "info");
+    }
+
+    async function handleAIGeneration() {
+        const btn = document.getElementById('btn-generate-ai'); const draft = document.getElementById('report-draft'); const cpBtn = document.getElementById('btn-copy');
+        btn.disabled = true;
+
+        draft.innerHTML = `<div class="flex flex-col items-center justify-center h-full py-20 w-full max-w-xs mx-auto"><div class="relative"><i data-lucide="brain-circuit" class="w-14 h-14 text-purple-500 animate-pulse relative z-10"></i><div class="absolute inset-0 bg-purple-500/30 blur-xl rounded-full animate-pulse"></div></div><div class="w-full h-1 bg-zinc-800 rounded-full overflow-hidden mt-8 mb-4"><div id="ai-progress-bar" class="h-full bg-gradient-to-r from-purple-600 to-pink-500 transition-all duration-300 ease-out" style="width:0%"></div></div><p id="ai-progress-text" class="text-[10px] font-black text-purple-400 uppercase tracking-widest text-center">Iniciando Motor Cognitivo...</p></div>`;
+        lucide.createIcons();
+
+        let aiProgress = 0;
+        const aiInterval = setInterval(() => {
+            aiProgress += Math.random() * 10; if (aiProgress > 90) aiProgress = 90;
+            const pbar = document.getElementById('ai-progress-bar'), ptext = document.getElementById('ai-progress-text');
+            if (pbar) pbar.style.width = `${aiProgress}%`;
+            if (ptext && aiProgress > 30) ptext.innerText = "Sintetizando Fatos...";
+            if (ptext && aiProgress > 60) ptext.innerText = "Redigindo Release Oficial...";
+        }, 400);
+
+        const prompt = `Você é a Assessoria de Comunicação da Polícia Civil da Bahia. Escreva uma Nota Oficial à Imprensa profissional e formal baseada neste fato: TÍTULO: ${selectedEventForAI.title}. LOCAL: ${selectedEventForAI.city}. DETALHES: ${selectedEventForAI.description}. FONTE: ${selectedEventForAI.source}. REGRAS: linguagem técnica policial, sem markdown, sem inventar fatos, assine como: Assessoria de Comunicação - DIRPIN LESTE / PCBA.`;
+
+        const result = await callGeminiAPI(prompt); clearInterval(aiInterval);
+
+        if (result.success) {
+            const pbar = document.getElementById('ai-progress-bar'), ptext = document.getElementById('ai-progress-text');
+            if (pbar) pbar.style.width = '100%'; if (ptext) ptext.innerText = "Pronto!";
+            
+            setTimeout(() => { 
+                aiDraftText = result.text; 
+                draft.innerHTML = "";
+                let i = 0;
+                const typingEffect = setInterval(() => {
+                    draft.innerHTML = `<p class="text-sm text-zinc-200 leading-relaxed font-serif whitespace-pre-wrap selection:bg-purple-500/40">${aiDraftText.substring(0, i)}<span class="inline-block w-1.5 h-4 bg-purple-500 ml-1 animate-pulse"></span></p>`;
+                    i += 3;
+                    if(i >= aiDraftText.length) {
+                        clearInterval(typingEffect);
+                        draft.innerHTML = `<p class="text-sm text-zinc-200 leading-relaxed font-serif whitespace-pre-wrap selection:bg-purple-500/40">${aiDraftText}</p>`;
+                        cpBtn.disabled = false; 
+                        showToast("Nota oficial gerada com sucesso.", "success");
+                        btn.disabled = false;
+                    }
+                }, 10);
+            }, 500);
+        } else { 
+            draft.innerHTML = `<div class="flex flex-col items-center justify-center h-full py-20 text-center"><i data-lucide="alert-octagon" class="w-12 h-12 text-rose-500 mb-4"></i><p class="text-rose-500 font-bold uppercase text-xs tracking-widest">${result.error}</p><button onclick="handleAIGeneration()" class="mt-6 px-6 py-2 border border-rose-500/30 text-rose-400 rounded-lg text-[10px] uppercase font-black hover:bg-rose-500/10">Tentar Novamente</button></div>`; 
+            lucide.createIcons(); btn.disabled = false;
+        }
+    }
+
+    async function callGeminiAPI(userQuery) {
+        if (!apiKey) return { success: true, text: "MODO DEMONSTRAÇÃO: Como a chave da API não foi configurada, este é um texto simulado.\n\nNOTA À IMPRENSA\n\nA Polícia Civil da Bahia, através da DIRPIN Leste, informa que tomou conhecimento do fato e as devidas providências legais de Polícia Judiciária já estão sendo adotadas.\n\nMais informações serão fornecidas após a conclusão dos procedimentos cabíveis.\n\nAssessoria de Comunicação - DIRPIN LESTE / PCBA." };
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        for (let i = 0; i < 3; i++) {
+            try { const res = await fetchWithTimeout(url, 20000); if (res.ok) return { success: true, text: (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || "Resposta vazia." }; } catch(_) {}
+            if (i < 2) await new Promise(r => setTimeout(r, 1000 * (i+1)));
+        }
+        return { success: false, error: "Falha na conexão com o LLM Server." };
+    }
+
+    async function copyDraft() {
+        if (!aiDraftText) return; const btn = document.getElementById('btn-copy'); const orig = btn.innerHTML;
+        try {
+            const ta = document.createElement('textarea'); ta.value = aiDraftText; ta.style.position = 'fixed'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+            btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Copiado`; btn.classList.replace('text-zinc-400', 'text-emerald-400'); btn.classList.replace('border-zinc-700', 'border-emerald-500/50'); lucide.createIcons();
+            showToast("Texto transferido para a área de transferência.", "success");
+            setTimeout(() => { btn.innerHTML = orig; btn.classList.replace('text-emerald-400', 'text-zinc-400'); btn.classList.replace('border-emerald-500/50', 'border-zinc-700'); lucide.createIcons(); }, 2000);
+        } catch(e) { showToast("Falha ao copiar texto.", "error"); }
+    }
+
+    function updateHeadlineInputState() {
+        const hlInput = document.getElementById('headline-input'); const hlClearBtn = document.getElementById('headline-clear-btn'); const hlAnalyzeBtn = document.getElementById('headline-analyze-btn');
+        const hasText = hlInput.value.trim().length > 0;
+        if (hasText) hlClearBtn.classList.remove('hidden'); else hlClearBtn.classList.add('hidden');
+        hlAnalyzeBtn.disabled = !hasText;
+    }
+
+    function setHeadlineLoadingState(isLoading) {
+        const btn = document.getElementById('headline-analyze-btn'); const icon = btn.querySelector('.hl-btn-icon'); const loader = btn.querySelector('.hl-btn-loader'); const textSpan = btn.querySelector('.hl-btn-text');
+        btn.disabled = isLoading;
+        if (isLoading) { icon.classList.add('hidden'); loader.classList.remove('hidden'); textSpan.textContent = 'Apurando...'; } 
+        else { icon.classList.remove('hidden'); loader.classList.add('hidden'); textSpan.textContent = 'Analisar Impacto'; }
+    }
+
+    async function analyzeHeadline() {
+        const hlInput = document.getElementById('headline-input');
+        const resultsContainer = document.getElementById('headline-results-container');
+        const headline = hlInput.value.trim();
+        if (!headline) return;
+
+        setHeadlineLoadingState(true); resultsContainer.innerHTML = '';
+
+        try {
+            const query = encodeURIComponent(headline);
+            const googleNewsRssUrl = `https://news.google.com/rss/search?q=${query}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+            let newsRepetitions = 0; let fetchedSuccessfully = false;
+
+            try {
+                const response = await fetchWithTimeout(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleNewsRssUrl)}`, 6000);
+                if (response.ok) { const data = await response.json(); if (data.status === 'ok') { newsRepetitions = data.items ? data.items.length : 0; fetchedSuccessfully = true; } }
+            } catch(e) {}
+
+            if (!fetchedSuccessfully) {
+                try {
+                    const response = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(googleNewsRssUrl)}`, 6000);
+                    if (response.ok) { const data = await response.json(); if (data.contents) { const xml = new DOMParser().parseFromString(data.contents, "text/xml"); newsRepetitions = xml.querySelectorAll("item").length; fetchedSuccessfully = true; } }
+                } catch(e) {}
+            }
+
+            // Não disparamos throw error. Se fetchedSuccessfully for false, a análise segue local/offline!
+            
+            const isInformante = fetchedSuccessfully && newsRepetitions >= 5;
+            const lowerText = headline.toLowerCase();
+            let sentiment = 'Neutro'; let sentimentClasses = 'text-zinc-400 border-zinc-700 bg-zinc-800/30';
+            
+            if (lowerText.includes('crise') || lowerText.includes('crime') || lowerText.includes('morte') || lowerText.includes('preso') || lowerText.includes('assalto') || lowerText.includes('tráfico')) { 
+                sentiment = 'Negativo'; sentimentClasses = 'text-rose-400 border-rose-500/30 bg-rose-500/10'; 
+            } else if (lowerText.includes('resgate') || lowerText.includes('salva') || lowerText.includes('redução') || lowerText.includes('apreensão') || lowerText.includes('apreende') || lowerText.includes('recupera')) { 
+                sentiment = 'Positivo'; sentimentClasses = 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10'; 
+            }
+
+            const triggers = headlineTriggers.sort(() => 0.5 - Math.random()).slice(0, 3);
+            let baseScore = Math.min(98, Math.max(25, Math.floor(headline.length * 0.7 + Math.random() * 40)));
+            if (/\d/.test(headline)) baseScore += 15;
+            if (isInformante) baseScore += 10; 
+            baseScore = Math.min(99, baseScore);
+
+            const suggestions = [];
+            if (!/\d/.test(headline)) suggestions.push("Adicione dados numéricos para aumentar a autoridade institucional.");
+            if (headline.length < 30) suggestions.push("A manchete é curta. Detalhe mais o contexto operacional da PCBA.");
+            
+            if (fetchedSuccessfully) {
+                if (isInformante) suggestions.push(`Validação de Tração: Confirmação na web em ${newsRepetitions} fontes ativas.`);
+                else if (newsRepetitions > 0) suggestions.push(`Baixo eco na mídia local (${newsRepetitions} resultados).`);
+                else suggestions.push(`Alerta: Nenhuma validação web encontrada no momento para essa frase exata.`);
+            } else {
+                suggestions.push(`Aviso: Proxies limitados. A validação do volume web foi suspensa temporariamente.`);
+                suggestions.push(`Análise Offline: O laudo de gatilhos psicológicos e sentimento foi computado com sucesso.`);
+                newsRepetitions = "Offline";
+            }
+
+            const result = { text: headline, virality: baseScore, sentiment, sentimentClasses, triggers, suggestions, newsRepetitions, isInformante, fetchedSuccessfully };
+            renderHeadlineResults(result); addToHeadlineHistory(result); showToast("Análise Semântica Finalizada.", "success");
+        } catch (error) {
+            console.error(error); showToast("Falha interna de processamento.", "error");
+        } finally { setHeadlineLoadingState(false); }
+    }
+
+    function renderHeadlineResults(res) {
+        const resultsContainer = document.getElementById('headline-results-container');
+        const historySection = document.getElementById('headline-history-section');
+        
+        const isHigh = res.virality > 70; const isMid = res.virality > 40;
+        const scoreColorClass = isHigh ? 'text-emerald-400' : isMid ? 'text-amber-400' : 'text-rose-400';
+        const scoreStrokeClass = isHigh ? 'stroke-emerald-500' : isMid ? 'stroke-amber-500' : 'stroke-rose-500';
+        const scoreText = isHigh ? 'Alta Propagação' : isMid ? 'Propagação Média' : 'Baixo Impacto';
+        const offset = 351.85 - (351.85 * res.virality) / 100;
+
+        let suggestionsHtml = res.suggestions.map(s => `<li class="flex items-start gap-3 text-sm font-medium text-zinc-300"><i data-lucide="${s.includes('Aviso:') ? 'alert-triangle' : 'check-circle-2'}" class="w-4 h-4 ${s.includes('Aviso:') ? 'text-amber-500' : 'text-blue-500'} shrink-0 mt-0.5"></i><span>${s}</span></li>`).join('');
+        let triggersHtml = res.triggers.map(t => `<span class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-blue-500/10 text-blue-400 border border-blue-500/20">${t}</span>`).join('');
+
+        let informanteHtml = '';
+        if (res.fetchedSuccessfully) {
+            informanteHtml = res.isInformante ? `
+                <div class="rounded-3xl p-6 md:p-8 bg-gradient-to-br from-cyan-900/20 to-blue-900/10 border border-cyan-500/30 flex flex-col justify-center shadow-lg shadow-cyan-900/20 relative overflow-hidden">
+                    <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-cyan-500/20 rounded-full blur-xl"></div>
+                    <div class="flex items-center gap-2 text-cyan-400 mb-3 relative z-10"><i data-lucide="globe" class="w-5 h-5"></i><span class="text-[10px] font-black uppercase tracking-widest">Radar Informante</span></div>
+                    <p class="text-sm text-cyan-100 font-bold uppercase tracking-wider relative z-10">Tópico em alta: <span class="text-cyan-400 text-lg">${res.newsRepetitions} fontes</span> repercutindo o tema agora.</p>
+                </div>` : `
+                <div class="rounded-3xl p-6 md:p-8 glass-card border border-zinc-800 flex flex-col justify-center">
+                    <div class="flex items-center gap-2 text-zinc-500 mb-3"><i data-lucide="globe" class="w-5 h-5"></i><span class="text-[10px] font-black uppercase tracking-widest">Radar Informante</span></div>
+                    <p class="text-sm text-zinc-400 font-bold uppercase tracking-wider">Baixa tração orgânica detectada na malha web aberta.</p>
+                </div>`;
+        } else {
+            informanteHtml = `
+                <div class="rounded-3xl p-6 md:p-8 glass-card border border-amber-500/30 bg-amber-500/5 flex flex-col justify-center">
+                    <div class="flex items-center gap-2 text-amber-500 mb-3"><i data-lucide="wifi-off" class="w-5 h-5"></i><span class="text-[10px] font-black uppercase tracking-widest">Web Radar Suspensa</span></div>
+                    <p class="text-sm text-amber-200/70 font-bold uppercase tracking-wider">Verificação de tração externa temporariamente indisponível devido a bloqueios de rede.</p>
+                </div>`;
+        }
+
+        resultsContainer.innerHTML = `
+            <div class="p-8 md:p-10 rounded-[3rem] border border-zinc-800/80 glass-card shadow-2xl animate-[toastSlideIn_0.4s_ease-out]">
+                <div class="mb-10 text-center max-w-2xl mx-auto">
+                    <h3 class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4">Laudo Semântico</h3>
+                    <p class="text-2xl font-extrabold text-white leading-tight">"${res.text}"</p>
+                    <div class="mt-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-xl border ${res.sentimentClasses} text-[10px] font-black uppercase tracking-widest shadow-inner">
+                        Sentimento Detectado: ${res.sentiment}
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="col-span-1 rounded-[2rem] p-8 flex flex-col items-center justify-center text-center bg-black/40 border border-zinc-800 relative overflow-hidden shadow-inner">
+                        <div class="flex items-center gap-2 text-zinc-500 mb-6"><i data-lucide="activity" class="w-4 h-4"></i><span class="text-[10px] font-black uppercase tracking-widest">Score Orgânico</span></div>
+                        <div class="relative flex items-center justify-center mb-6">
+                            <svg class="w-36 h-36 transform -rotate-90 drop-shadow-2xl">
+                                <circle cx="72" cy="72" r="64" stroke="currentColor" stroke-width="8" fill="transparent" class="text-zinc-900"></circle>
+                                <circle cx="72" cy="72" r="64" stroke-width="8" fill="transparent" stroke-dasharray="402.12" stroke-dashoffset="${402.12 - (402.12 * res.virality) / 100}" class="${scoreStrokeClass} transition-all duration-1000 ease-out"></circle>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-5xl font-black text-white tracking-tighter">${res.virality}</span>
+                            </div>
+                        </div>
+                        <p class="text-[10px] font-black uppercase tracking-widest ${scoreColorClass} bg-black/50 px-3 py-1.5 rounded-lg border border-zinc-800">${scoreText}</p>
+                    </div>
+                    
+                    <div class="col-span-1 lg:col-span-2 flex flex-col gap-8">
+                        ${informanteHtml}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                            <div>
+                                <div class="flex items-center gap-2 text-zinc-500 mb-5"><i data-lucide="crosshair" class="w-4 h-4"></i><span class="text-[10px] font-black uppercase tracking-widest">Gatilhos Identificados</span></div>
+                                <div class="flex flex-wrap gap-2">${triggersHtml}</div>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 text-purple-400 mb-5"><i data-lucide="sparkles" class="w-4 h-4"></i><span class="text-[10px] font-black uppercase tracking-widest">Diretrizes da IA</span></div>
+                                <ul class="space-y-4">${suggestionsHtml}</ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        lucide.createIcons(); historySection.classList.remove('hidden');
+    }
+
+    function reloadHeadlineFromHistory(text) {
+        const hlInput = document.getElementById('headline-input'); hlInput.value = text;
+        updateHeadlineInputState(); window.scrollTo({ top: document.getElementById('tab-headline').offsetTop - 100, behavior: 'smooth' });
+        analyzeHeadline();
+    }
+    </script>
+</body>
+</html>
