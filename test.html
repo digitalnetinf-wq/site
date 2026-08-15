@@ -10,7 +10,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Tipografia Profissional -->
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --bg: #06080c;
@@ -1109,7 +1109,7 @@
                     <div class="kpi-sub" id="vg-aut-sub">casos elucidados</div>
                 </div>
             </div>
-            
+
             <div class="sec-label">Série Comparativa Anual</div>
             <div class="card mb20">
                 <div class="card-hd">
@@ -1343,7 +1343,7 @@
                     <option value="2025">2025</option>
                     <option value="2026" selected>2026</option>
                 </select>
-                
+
                 <span class="f-lbl" style="margin-left: 12px;">Mês:</span>
                 <select class="f-btn" id="mancha-mes" onchange="buildMANCHA()" style="outline: none; padding-right: 12px;">
                     <option value="todos" selected>TODOS</option>
@@ -1672,7 +1672,7 @@
                     <button class="f-btn active" data-group="ano" data-val="todos" onclick="setRegF('ano','todos',this)">TODOS</button>
                     <button class="f-btn" data-group="ano" data-val="2025" onclick="setRegF('ano','2025',this)">2025</button>
                     <button class="f-btn" data-group="ano" data-val="2026" onclick="setRegF('ano','2026',this)">2026</button>
-                    
+
                     <span class="f-lbl" style="margin-left: 12px;">Mês:</span>
                     <select class="f-btn" data-group="mes" onchange="setRegF('mes',this.value,this)" style="outline: none; padding-right: 12px;">
                         <option value="todos">TODOS</option>
@@ -1702,18 +1702,20 @@
                     <span class="card-tag" id="reg-tag">— registros</span>
                 </div>
                 <div class="card-body tbl-wrap" style="padding: 0;">
-                    <table style="width: 100%; min-width: 1700px;">
+                    <table style="width: 100%; min-width: 1900px;">
                         <thead>
                             <tr>
                                 <th>Nº</th>
                                 <th>Nome da Vítima</th>
                                 <th>Idade</th>
+                                <th>Gênero</th>
                                 <th>Nº Ocorrência</th>
                                 <th>Data</th>
                                 <th>Hora</th>
                                 <th>Autoria</th>
                                 <th>Motivo Identificado</th>
                                 <th>Meio Empregado</th>
+                                <th>Tipo de Arma / Calibre</th>
                                 <th>Tipificação</th>
                                 <th>Bairro / Distrito</th>
                                 <th>Logradouro</th>
@@ -1763,29 +1765,29 @@
 // ══════════════════════════════════════════════════════
 const DADOS_FALLBACK = [
     // --- DADOS 2025 (Históricos) ---
-    { n: "1", vitima: "JOÃO CARDOSO DOS SANTOS", idade: "24", ocorrencia: "BO-25-00142", data: "12/01/2025", hora: "21:30", sexo: "MASCULINO", autoria: "NÃO", motivo: "TRÁFICO DE DROGAS", meio: "ARMA DE FOGO", tipificacao: "HOMICÍDIO", bairro: "TOMBA", logradouro: "RUA POPULAR, 45", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2854,-38.9567", obs: "Vítima alvejada por disparos efetuados por dupla em motocicleta." },
-    { n: "2", vitima: "MARCOS VINÍCIUS SILVA DA COSTA", idade: "19", ocorrencia: "BO-25-00210", data: "28/01/2025", hora: "03:15", sexo: "MASCULINO", autoria: "SIM", motivo: "RIXA", meio: "ARMA BRANCA", tipificacao: "HOMICÍDIO", bairro: "CAMPO LIMPO", logradouro: "AVENIDA PRINCIPAL, S/N", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2421,-38.9688", obs: "Autor preso em flagrante delito após agressão física." },
-    { n: "3", vitima: "CARLA DIAS DE MENEZES", idade: "32", ocorrencia: "BO-25-00344", data: "14/02/2025", hora: "19:45", sexo: "FEMININO", autoria: "SIM", motivo: "PASSIONAL", meio: "ARMA BRANCA", tipificacao: "FEMINICÍDIO", bairro: "CENTRO", logradouro: "RUA CONCEIÇÃO, 120", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2592,-38.9610", obs: "Crime cometido pelo ex-companheiro na residência da vítima." },
-    { n: "4", vitima: "ANTONIO PINHEIRO SOUZA", idade: "48", ocorrencia: "BO-25-00411", data: "22/02/2025", hora: "11:20", sexo: "MASCULINO", autoria: "NÃO", motivo: "LATROCÍNIO", meio: "ARMA DE FOGO", tipificacao: "LATROCÍNIO", bairro: "MANGABEIRA", logradouro: "AV. AYRTON SENNA, 1800", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2351,-38.9324", obs: "Subtração de celular e veículo da vítima com disparo letal." },
-    { n: "5", vitima: "ROBERTO OLIVEIRA CONCEIÇÃO", idade: "27", ocorrencia: "BO-25-00512", data: "05/03/2025", hora: "23:55", sexo: "MASCULINO", autoria: "NÃO", motivo: "GUERRA DE FACÇÕES", meio: "ARMA DE FOGO", tipificacao: "HOMICÍDIO", bairro: "GEORGE AMÉRICO", logradouro: "RUA DA VALA, 12", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2289,-38.9612", obs: "Local conhecido pelo alto índice de tráfico de drogas." },
-    { n: "6", vitima: "LUIZ GUSTAVO ROCHA", idade: "17", ocorrencia: "BO-25-00620", data: "11/03/2025", hora: "14:10", sexo: "MASCULINO", autoria: "NÃO", motivo: "TRÁFICO DE DROGAS", meio: "ARMA DE FOGO", tipificacao: "HOMICÍDIO", bairro: "AVIÁRIO", logradouro: "RUA DO CONTORNO, 500", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2912,-38.9388", obs: "Adolescente envolvido com criminalidade local." },
-    { n: "7", vitima: "PAULO ROBERTO SOUZA", idade: "55", ocorrencia: "BO-25-00702", data: "15/03/2025", hora: "10:30", sexo: "MASCULINO", autoria: "NÃO", motivo: "RIXA", meio: "PAULADA", tipificacao: "LESÃO C.SEG. MORTE", bairro: "DISTRITO DE HUMILDES", logradouro: "FAZENDA MODELO", cidade: "FEIRA DE SANTANA", georeferencia: "-12.3340,-38.8890", obs: "Discussão iniciada em estabelecimento comercial (bar)." },
-    { n: "8", vitima: "GABRIEL NUNES FILHO", idade: "22", ocorrencia: "BO-25-00814", data: "04/04/2025", hora: "02:00", sexo: "MASCULINO", autoria: "NÃO", motivo: "TRÁFICO DE DROGAS", meio: "ARMA DE FOGO", tipificacao: "HOMICÍDIO", bairro: "QUEIMADINHA", logradouro: "RUA ALBERTO TORRES, S/N", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2530,-38.9520", obs: "Vítima com antecedentes criminais." },
-    { n: "9", vitima: "REINALDO SILVEIRA BARBOSA", idade: "30", ocorrencia: "BO-25-00911", data: "12/04/2025", hora: "21:00", sexo: "MASCULINO", autoria: "NÃO", motivo: "TRÁFICO DE DROGAS", meio: "ARMA DE FOGO", tipificacao: "HOMICÍDIO", bairro: "CENTRO", logradouro: "RUA SALVADOR, 12", cidade: "SANTO ESTÊVÃO", georeferencia: "-12.4312,-39.2510", obs: "Disparos em via pública por criminosos em automóvel." },
-    { n: "10", vitima: "JEAN SANTOS DE JESUS", idade: "25", ocorrencia: "BO-25-00990", data: "19/04/2025", hora: "18:20", sexo: "MASCULINO", autoria: "SIM", motivo: "VILIPÊNDIO", meio: "ARMA DE FOGO", tipificacao: "HOMICÍDIO", bairro: "CENTRO", logradouro: "RUA DA JAQUEIRA", cidade: "SÃO GONÇALO DOS CAMPOS", georeferencia: "-12.4288,-38.9691", obs: "Autor identificado e com prisão preventiva representada." },
+    { n: "1", vitima: "JOÃO CARDOSO DOS SANTOS", idade: "24", ocorrencia: "BO-25-00142", data: "12/01/2025", hora: "21:30", sexo: "MASCULINO", autoria: "NÃO", motivo: "TRÁFICO DE DROGAS", meio: "ARMA DE FOGO", tipo_arma: "PISTOLA 9MM", tipificacao: "HOMICÍDIO", bairro: "TOMBA", logradouro: "RUA POPULAR, 45", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2854,-38.9567", obs: "Vítima alvejada por disparos efetuados por dupla em motocicleta." },
+    { n: "2", vitima: "MARCOS VINÍCIUS SILVA DA COSTA", idade: "19", ocorrencia: "BO-25-00210", data: "28/01/2025", hora: "03:15", sexo: "MASCULINO", autoria: "SIM", motivo: "RIXA", meio: "ARMA BRANCA", tipo_arma: "FACA TIPO PEIXEIRA", tipificacao: "HOMICÍDIO", bairro: "CAMPO LIMPO", logradouro: "AVENIDA PRINCIPAL, S/N", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2421,-38.9688", obs: "Autor preso em flagrante delito após agressão física." },
+    { n: "3", vitima: "CARLA DIAS DE MENEZES", idade: "32", ocorrencia: "BO-25-00344", data: "14/02/2025", hora: "19:45", sexo: "FEMININO", autoria: "SIM", motivo: "PASSIONAL", meio: "ARMA BRANCA", tipo_arma: "FACA DE COZINHA", tipificacao: "FEMINICÍDIO", bairro: "CENTRO", logradouro: "RUA CONCEIÇÃO, 120", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2592,-38.9610", obs: "Crime cometido pelo ex-companheiro na residência da vítima." },
+    { n: "4", vitima: "ANTONIO PINHEIRO SOUZA", idade: "48", ocorrencia: "BO-25-00411", data: "22/02/2025", hora: "11:20", sexo: "MASCULINO", autoria: "NÃO", motivo: "LATROCÍNIO", meio: "ARMA DE FOGO", tipo_arma: "REVÓLVER .38", tipificacao: "LATROCÍNIO", bairro: "MANGABEIRA", logradouro: "AV. AYRTON SENNA, 1800", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2351,-38.9324", obs: "Subtração de celular e veículo da vítima com disparo letal." },
+    { n: "5", vitima: "ROBERTO OLIVEIRA CONCEIÇÃO", idade: "27", ocorrencia: "BO-25-00512", data: "05/03/2025", hora: "23:55", sexo: "MASCULINO", autoria: "NÃO", motivo: "GUERRA DE FACÇÕES", meio: "ARMA DE FOGO", tipo_arma: "PISTOLA .40", tipificacao: "HOMICÍDIO", bairro: "GEORGE AMÉRICO", logradouro: "RUA DA VALA, 12", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2289,-38.9612", obs: "Local conhecido pelo alto índice de tráfico de drogas." },
+    { n: "6", vitima: "LUIZ GUSTAVO ROCHA", idade: "17", ocorrencia: "BO-25-00620", data: "11/03/2025", hora: "14:10", sexo: "MASCULINO", autoria: "NÃO", motivo: "TRÁFICO DE DROGAS", meio: "ARMA DE FOGO", tipo_arma: "ESPINGARDA CAL 12", tipificacao: "HOMICÍDIO", bairro: "AVIÁRIO", logradouro: "RUA DO CONTORNO, 500", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2912,-38.9388", obs: "Adolescente envolvido com criminalidade local." },
+    { n: "7", vitima: "PAULO ROBERTO SOUZA", idade: "55", ocorrencia: "BO-25-00702", data: "15/03/2025", hora: "10:30", sexo: "MASCULINO", autoria: "NÃO", motivo: "RIXA", meio: "PAULADA", tipo_arma: "OBJETO CONTUNDENTE", tipificacao: "LESÃO C.SEG. MORTE", bairro: "DISTRITO DE HUMILDES", logradouro: "FAZENDA MODELO", cidade: "FEIRA DE SANTANA", georeferencia: "-12.3340,-38.8890", obs: "Discussão iniciada em estabelecimento comercial (bar)." },
+    { n: "8", vitima: "GABRIEL NUNES FILHO", idade: "22", ocorrencia: "BO-25-00814", data: "04/04/2025", hora: "02:00", sexo: "MASCULINO", autoria: "NÃO", motivo: "TRÁFICO DE DROGAS", meio: "ARMA DE FOGO", tipo_arma: "PISTOLA 9MM", tipificacao: "HOMICÍDIO", bairro: "QUEIMADINHA", logradouro: "RUA ALBERTO TORRES, S/N", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2530,-38.9520", obs: "Vítima com antecedentes criminais." },
+    { n: "9", vitima: "REINALDO SILVEIRA BARBOSA", idade: "30", ocorrencia: "BO-25-00911", data: "12/04/2025", hora: "21:00", sexo: "MASCULINO", autoria: "NÃO", motivo: "TRÁFICO DE DROGAS", meio: "ARMA DE FOGO", tipo_arma: "PISTOLA 9MM", tipificacao: "HOMICÍDIO", bairro: "CENTRO", logradouro: "RUA SALVADOR, 12", cidade: "SANTO ESTÊVÃO", georeferencia: "-12.4312,-39.2510", obs: "Disparos em via pública por criminosos em automóvel." },
+    { n: "10", vitima: "JEAN SANTOS DE JESUS", idade: "25", ocorrencia: "BO-25-00990", data: "19/04/2025", hora: "18:20", sexo: "MASCULINO", autoria: "SIM", motivo: "VILIPÊNDIO", meio: "ARMA DE FOGO", tipo_arma: "REVÓLVER .38", tipificacao: "HOMICÍDIO", bairro: "CENTRO", logradouro: "RUA DA JAQUEIRA", cidade: "SÃO GONÇALO DOS CAMPOS", georeferencia: "-12.4288,-38.9691", obs: "Autor identificado e com prisão preventiva representada." },
 
     // --- DADOS 2026 (Atuais) ---
-    { n: "11", vitima: "FERNANDO ALVES DOS SANTOS", idade: "21", ocorrencia: "BO-26-00014", data: "05/01/2026", hora: "19:50", sexo: "MASCULINO", autoria: "SIM", motivo: "TRAFICO DE DROGAS", meio: "ARMA DE FOGO", tipificacao: "HOMICÍDIO", bairro: "TOMBA", logradouro: "TRAVESSA PINTO, 99", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2880,-38.9540", obs: "Execução motivada por cobrança de dívida de tráfico. Autor preso." },
-    { n: "12", vitima: "MATEUS GOMES DE OLIVEIRA", idade: "28", ocorrencia: "BO-26-00102", data: "18/01/2026", hora: "23:10", sexo: "MASCULINO", autoria: "NÃO", motivo: "DISPUTA DE FACÇÕES", meio: "ARMA DE FOGO", tipificacao: "HOMICÍDIO", bairro: "QUEIMADINHA", logradouro: "RUA DA GRAMA, 34", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2541,-38.9502", obs: "Disparos efetuados por oponentes de facção rival." },
-    { n: "13", vitima: "SAMUEL COSTA NETO", idade: "15", ocorrencia: "BO-26-00155", data: "22/01/2026", hora: "15:40", sexo: "MASCULINO", autoria: "NÃO", motivo: "TRÁFICO DE DROGAS", meio: "ARMA DE FOGO", tipificacao: "HOMICÍDIO", bairro: "GEORGE AMÉRICO", logradouro: "RUA B, BL-04", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2275,-38.9599", obs: "Menor infrator executado em beco habitado." },
-    { n: "14", vitima: "BEATRIZ SANTOS DA CONCEIÇÃO", idade: "26", ocorrencia: "BO-26-00221", data: "04/02/2026", hora: "08:15", sexo: "FEMININO", autoria: "SIM", motivo: "PASSIONAL", meio: "ARMA BRANCA", tipificacao: "FEMINICÍDIO", bairro: "CASEB", logradouro: "RUA CONCORDIA, 410", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2490,-38.9410", obs: "Vítima asfixiada e ferida por arma branca pelo ex-marido." },
-    { n: "15", vitima: "LUCAS SILVA DE SOUZA", idade: "10", ocorrencia: "BO-26-00310", data: "10/02/2026", hora: "17:30", sexo: "MASCULINO", autoria: "NÃO", motivo: "BALA PERDIDA", meio: "ARMA DE FOGO", tipificacao: "HOMICÍDIO", bairro: "MANGABEIRA", logradouro: "AVENIDA IGUATEMI, S/N", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2322,-38.9301", obs: "Criança atingida durante tiroteio entre grupos criminosos." },
-    { n: "16", vitima: "WAGNER DOS SANTOS ARAÚJO", idade: "33", ocorrencia: "BO-26-00412", data: "26/02/2026", hora: "21:10", sexo: "MASCULINO", autoria: "NÃO", motivo: "TRÁFICO DE DROGAS", meio: "ARMA DE FOGO", tipificacao: "HOMICÍDIO", bairro: "CENTRO", logradouro: "RUA RUI BARBOSA", cidade: "CONCEIÇÃO DO JACUÍPE", georeferencia: "-12.3211,-38.7612", obs: "Execução sumária na porta de bar." },
-    { n: "17", vitima: "SÉRGIO AUGUSTO CARDOSO", idade: "42", ocorrencia: "BO-26-00499", data: "11/03/2026", hora: "03:45", sexo: "MASCULINO", autoria: "NÃO", motivo: "LATROCÍNIO", meio: "ARMA DE FOGO", tipificacao: "LATROCÍNIO", bairro: "CENTRO", logradouro: "AVENIDA GETÚLIO VARGAS", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2570,-38.9580", obs: "Assalto à estabelecimento comercial seguido de morte do vigia." },
-    { n: "18", vitima: "LEONARDO FREITAS LIMA", idade: "19", ocorrencia: "BO-26-00511", data: "22/03/2026", hora: "14:22", sexo: "MASCULINO", autoria: "NÃO", motivo: "DISPUTA DE FACÇÕES", meio: "ARMA DE FOGO", tipificacao: "HOMICÍDIO", bairro: "TOMBA", logradouro: "RUA EL SALVADOR", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2890,-38.9555", obs: "Vítima ligada à facção do Tomba." },
-    { n: "19", vitima: "LUANA MARQUES DE ALMEIDA", idade: "35", ocorrencia: "BO-26-00601", data: "05/04/2026", hora: "19:00", sexo: "FEMININO", autoria: "SIM", motivo: "PASSIONAL", meio: "ARMA DE FOGO", tipificacao: "FEMINICÍDIO", bairro: "CENTRO", logradouro: "AV. JURACY MAGALHÃES", cidade: "IRARÁ", georeferencia: "-12.0490,-38.7610", obs: "Feminicídio seguido de suicídio por parte do agressor." },
-    { n: "20", vitima: "CRISTIANO ROCHA MENDES", idade: "23", ocorrencia: "BO-26-00645", data: "12/04/2026", hora: "23:55", sexo: "MASCULINO", autoria: "NÃO", motivo: "TRÁFICO DE DROGAS", meio: "ARMA DE FOGO", tipificacao: "HOMICÍDIO", bairro: "CENTRO", logradouro: "RUA DO CONTORNO", cidade: "AMÉLIA RODRIGUES", georeferencia: "-12.3990,-38.7510", obs: "Vítima alvejada nas proximidades de posto de gasolina." },
-    { n: "21", vitima: "RODRIGO ALMEIDA PINTO", idade: "31", ocorrencia: "BO-26-00712", data: "01/05/2026", hora: "02:40", sexo: "MASCULINO", autoria: "SIM", motivo: "RIXA", meio: "PAULADA", tipificacao: "LESÃO C.SEG. MORTE", bairro: "DISTRITO DE HUMILDES", logradouro: "RUA GRANDE", cidade: "FEIRA DE SANTANA", georeferencia: "-12.3360,-38.8870", obs: "Briga generalizada em festa comunitária. Autor identificado." }
+    { n: "11", vitima: "FERNANDO ALVES DOS SANTOS", idade: "21", ocorrencia: "BO-26-00014", data: "05/01/2026", hora: "19:50", sexo: "MASCULINO", autoria: "SIM", motivo: "TRAFICO DE DROGAS", meio: "ARMA DE FOGO", tipo_arma: "PISTOLA .40", tipificacao: "HOMICÍDIO", bairro: "TOMBA", logradouro: "TRAVESSA PINTO, 99", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2880,-38.9540", obs: "Execução motivada por cobrança de dívida de tráfico. Autor preso." },
+    { n: "12", vitima: "MATEUS GOMES DE OLIVEIRA", idade: "28", ocorrencia: "BO-26-00102", data: "18/01/2026", hora: "23:10", sexo: "MASCULINO", autoria: "NÃO", motivo: "DISPUTA DE FACÇÕES", meio: "ARMA DE FOGO", tipo_arma: "PISTOLA 9MM", tipificacao: "HOMICÍDIO", bairro: "QUEIMADINHA", logradouro: "RUA DA GRAMA, 34", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2541,-38.9502", obs: "Disparos efetuados por oponentes de facção rival." },
+    { n: "13", vitima: "SAMUEL COSTA NETO", idade: "15", ocorrencia: "BO-26-00155", data: "22/01/2026", hora: "15:40", sexo: "MASCULINO", autoria: "NÃO", motivo: "TRÁFICO DE DROGAS", meio: "ARMA DE FOGO", tipo_arma: "REVÓLVER .38", tipificacao: "HOMICÍDIO", bairro: "GEORGE AMÉRICO", logradouro: "RUA B, BL-04", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2275,-38.9599", obs: "Menor infrator executado em beco habitado." },
+    { n: "14", vitima: "BEATRIZ SANTOS DA CONCEIÇÃO", idade: "26", ocorrencia: "BO-26-00221", data: "04/02/2026", hora: "08:15", sexo: "FEMININO", autoria: "SIM", motivo: "PASSIONAL", meio: "ARMA BRANCA", tipo_arma: "FACA TIPO PEIXEIRA", tipificacao: "FEMINICÍDIO", bairro: "CASEB", logradouro: "RUA CONCORDIA, 410", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2490,-38.9410", obs: "Vítima asfixiada e ferida por arma branca pelo ex-marido." },
+    { n: "15", vitima: "LUCAS SILVA DE SOUZA", idade: "10", ocorrencia: "BO-26-00310", data: "10/02/2026", hora: "17:30", sexo: "MASCULINO", autoria: "NÃO", motivo: "BALA PERDIDA", meio: "ARMA DE FOGO", tipo_arma: "FUZIL 5.56", tipificacao: "HOMICÍDIO", bairro: "MANGABEIRA", logradouro: "AVENIDA IGUATEMI, S/N", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2322,-38.9301", obs: "Criança atingida durante tiroteio entre grupos criminosos." },
+    { n: "16", vitima: "WAGNER DOS SANTOS ARAÚJO", idade: "33", ocorrencia: "BO-26-00412", data: "26/02/2026", hora: "21:10", sexo: "MASCULINO", autoria: "NÃO", motivo: "TRÁFICO DE DROGAS", meio: "ARMA DE FOGO", tipo_arma: "PISTOLA 9MM", tipificacao: "HOMICÍDIO", bairro: "CENTRO", logradouro: "RUA RUI BARBOSA", cidade: "CONCEIÇÃO DO JACUÍPE", georeferencia: "-12.3211,-38.7612", obs: "Execução sumária na porta de bar." },
+    { n: "17", vitima: "SÉRGIO AUGUSTO CARDOSO", idade: "42", ocorrencia: "BO-26-00499", data: "11/03/2026", hora: "03:45", sexo: "MASCULINO", autoria: "NÃO", motivo: "LATROCÍNIO", meio: "ARMA DE FOGO", tipo_arma: "REVÓLVER .38", tipificacao: "LATROCÍNIO", bairro: "CENTRO", logradouro: "AVENIDA GETÚLIO VARGAS", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2570,-38.9580", obs: "Assalto à estabelecimento comercial seguido de morte do vigia." },
+    { n: "18", vitima: "LEONARDO FREITAS LIMA", idade: "19", ocorrencia: "BO-26-00511", data: "22/03/2026", hora: "14:22", sexo: "MASCULINO", autoria: "NÃO", motivo: "DISPUTA DE FACÇÕES", meio: "ARMA DE FOGO", tipo_arma: "PISTOLA .40", tipificacao: "HOMICÍDIO", bairro: "TOMBA", logradouro: "RUA EL SALVADOR", cidade: "FEIRA DE SANTANA", georeferencia: "-12.2890,-38.9555", obs: "Vítima ligada à facção do Tomba." },
+    { n: "19", vitima: "LUANA MARQUES DE ALMEIDA", idade: "35", ocorrencia: "BO-26-00601", data: "05/04/2026", hora: "19:00", sexo: "FEMININO", autoria: "SIM", motivo: "PASSIONAL", meio: "ARMA DE FOGO", tipo_arma: "REVÓLVER .38", tipificacao: "FEMINICÍDIO", bairro: "CENTRO", logradouro: "AV. JURACY MAGALHÃES", cidade: "IRARÁ", georeferencia: "-12.0490,-38.7610", obs: "Feminicídio seguido de suicídio por parte do agressor." },
+    { n: "20", vitima: "CRISTIANO ROCHA MENDES", idade: "23", ocorrencia: "BO-26-00645", data: "12/04/2026", hora: "23:55", sexo: "MASCULINO", autoria: "NÃO", motivo: "TRÁFICO DE DROGAS", meio: "ARMA DE FOGO", tipo_arma: "PISTOLA 9MM", tipificacao: "HOMICÍDIO", bairro: "CENTRO", logradouro: "RUA DO CONTORNO", cidade: "AMÉLIA RODRIGUES", georeferencia: "-12.3990,-38.7510", obs: "Vítima alvejada nas proximidades de posto de gasolina." },
+    { n: "21", vitima: "RODRIGO ALMEIDA PINTO", idade: "31", ocorrencia: "BO-26-00712", data: "01/05/2026", hora: "02:40", sexo: "MASCULINO", autoria: "SIM", motivo: "RIXA", meio: "PAULADA", tipo_arma: "PEDAÇO DE MADEIRA", tipificacao: "LESÃO C.SEG. MORTE", bairro: "DISTRITO DE HUMILDES", logradouro: "RUA GRANDE", cidade: "FEIRA DE SANTANA", georeferencia: "-12.3360,-38.8870", obs: "Briga generalizada em festa comunitária. Autor identificado." }
 ];
 
 // Ofuscação de validação de senha
@@ -1795,7 +1797,7 @@ function checkUnlock() {
     for(let i=0; i<input.length; i++) {
         enc += String.fromCharCode(input.charCodeAt(i) + 5);
     }
-    
+
     if(enc === "67;986:6") {
         document.getElementById('lock-screen').style.display = 'none';
         document.getElementById('app-content').style.display = 'block';
@@ -1897,7 +1899,7 @@ function parseCSV(text) {
 
             let matches = 0;
             let tempColIdx = {};
-            
+
             Object.entries(COL_MAP).forEach(function(entry) {
                 const key = entry[0];
                 const aliases = entry[1];
@@ -1938,7 +1940,7 @@ function parseCSV(text) {
             let dataStr = get('data');
             let mesNum = NaN, anoStr = '';
             let dia = NaN;
-            
+
             if (dataStr) {
                 let rawDate = dataStr.trim().split(/[ T]/)[0].replace(/[^\d\/\-]/g, '');
                 const mDMY = rawDate.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
@@ -1948,7 +1950,7 @@ function parseCSV(text) {
                     let p1 = parseInt(mDMY[1], 10);
                     let p2 = parseInt(mDMY[2], 10);
                     let p3 = parseInt(mDMY[3], 10);
-                    
+
                     if (p3 >= 2000 || (p3 >= 20 && p3 <= 99)) { 
                          anoStr = p3 < 100 ? '20' + String(p3).padStart(2, '0') : String(p3);
                          dia = p1;
@@ -1974,10 +1976,10 @@ function parseCSV(text) {
             const meio = get('meio') || '';
             const tip = get('tipificacao') || 'HOMICÍDIO';
             const sexo = get('sexo') || 'NÃO INFORMADO';
-            
+
             let latVal = NaN, lngVal = NaN;
             let geoStr = get('georef');
-            
+
             if (geoStr) {
                 let parts = geoStr.replace(/;/g, ',').split(',');
                 if (parts.length >= 2) {
@@ -1990,7 +1992,7 @@ function parseCSV(text) {
                 latVal = parseFloat(latStr);
                 lngVal = parseFloat(lngStr);
             }
-            
+
             rows.push({
                 n: get('n') || String(rows.length + 1),
                 vitima: get('vitima') || "REGISTRO " + (rows.length + 1),
@@ -2056,7 +2058,7 @@ async function reloadSheets() {
 
         const csvText = await response.text();
         if (!csvText || csvText.length < 10) throw new Error('A planilha remota retornou um arquivo nulo.');
-        
+
         if (csvText.trim().toLowerCase().startsWith('<html') || csvText.trim().toLowerCase().startsWith('<!doctype')) {
             throw new Error('Retorno HTML. Certifique-se da publicação em formato CSV.');
         }
@@ -2069,7 +2071,7 @@ async function reloadSheets() {
         console.error('Falha na integração direta, mantendo fallback de segurança offline:', error);
         setSheetsStatus('err', 'MODO OFFLINE (LOCAL)');
         showToast('Utilizando cache operacional local de contingência.', 'var(--accent2)');
-        
+
         initData();
         buildTab('visao-geral');
     }
@@ -2081,19 +2083,19 @@ function processSheetRows(rows) {
         sheetsLoadedAt = new Date();
         usingSheets = true;
         DB.registros = rows;
-        
+
         recalcStats();
-        
+
         const timeStr = sheetsLoadedAt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
         setSheetsStatus('ok', 'SINC LIVE · ' + sheetsRowCount + ' OCORRÊNCIAS · ' + timeStr);
         showToast('✓ Conectado: ' + sheetsRowCount + ' registros atualizados! · ' + timeStr, 'var(--green)');
-        
+
         const hsub = document.getElementById('hsub-txt');
         if(hsub) hsub.textContent = 'Inteligência Estratégica em Segurança · Feira de Santana / 1ª COORPIN · ' + DB.registros.length + ' Registros';
-        
+
         const footer = document.getElementById('footer-txt');
         if(footer) footer.textContent = 'PAINEL ANÁLISE CVLI · FEIRA DE SANTANA / 1ª COORPIN · ' + DB.registros.length + ' REGISTROS CONSOLIDADOS · SYNC ' + timeStr + ' · AGENTE IPC FÉLIX RILTON';
-        
+
         const activeTab = document.querySelector('.tab-btn.active');
         let activeTabName = 'visao-geral';
         if (activeTab) {
@@ -2157,7 +2159,7 @@ function recalcStats(){
     DB.cidades26={}; DB.bairros26={}; DB.meio26={}; DB.tipoArma26={}; DB.tipo26={}; DB.motivo26={};
     DB.coorpin25={}; DB.coorpin26={}; DB.meses25={}; DB.meses26={};
     DB.t25_coorpin=0; DB.t26_coorpin=0;
-    
+
     let maxM26 = -1;
     // Mês atual em tempo real (0=Jan ... 11=Dez) — atualiza sem esperar o mês fechar
     const _today = new Date();
@@ -2167,10 +2169,10 @@ function recalcStats(){
 
     DB.registros.forEach(function(r) {
         const is25=String(r.ano)==='2025', is26=String(r.ano)==='2026';
-        
+
         let mi = parseInt(r.mes, 10) - 1;
         if (isNaN(mi) || mi < 0 || mi > 11) return; 
-        
+
         if(!isCVLI(r.tipificacao)) return;
 
         if (is26 && mi > maxM26) maxM26 = mi;
@@ -2196,22 +2198,22 @@ function recalcStats(){
             }
             const meioBruto = String(r.meio || 'NÃO INFORMADO').toUpperCase().trim();
             DB.meio26[meioBruto]=(DB.meio26[meioBruto]||0)+1;
-            
+
             let tArma = String(r.tipo_arma || '').toUpperCase().trim();
             if (!tArma || tArma === 'NÃO INFORMADO' || tArma === 'NAO INFORMADO') {
                 tArma = meioBruto;
             }
             DB.tipoArma26[tArma] = (DB.tipoArma26[tArma] || 0) + 1;
-            
+
             let tipBruto = String(r.tipificacao || 'NÃO INFORMADO').toUpperCase().trim();
             DB.tipo26[tipBruto]=(DB.tipo26[tipBruto]||0)+1;
-            
+
             const mot=String(r.motivo||'').trim().toUpperCase();
             if(mot&&mot!=='NÃO'&&mot!=='NAO'&&mot!=='NÃO'&&mot.length>1) DB.motivo26[mot]=(DB.motivo26[mot]||0)+1;
             DB.t26_coorpin++;
         }
     });
-    
+
     if (maxM26 === -1) maxM26 = currentRealMonth;
     DB.maxM26 = maxM26;
     DB.limitMonth = currentRealMonth;
@@ -2220,12 +2222,12 @@ function recalcStats(){
     DB.t26_ytd = 0;
     DB.coorpin25_ytd = {};
     DB.coorpin26_ytd = {};
-    
+
     for (let i = 0; i <= DB.limitMonth; i++) {
         DB.t25_ytd += DB.coorpin_25[i] || 0;
         DB.t26_ytd += DB.coorpin_26[i] || 0;
     }
-    
+
     DB.registros.forEach(function(r) {
         let mi = parseInt(r.mes, 10) - 1;
         if (mi >= 0 && mi <= DB.limitMonth && isCVLI(r.tipificacao)) {
@@ -2239,9 +2241,13 @@ function recalcStats(){
 // ══════════════════════════════════════════════════════
 // MONTAGEM DE GRÁFICOS (CHART.JS) E MAPAS (LEAFLET)
 // ══════════════════════════════════════════════════════
-Chart.defaults.color='#8492a6';
-Chart.defaults.borderColor='rgba(30, 38, 56, 0.5)';
-Chart.defaults.font.family='DM Sans';
+const ChartDefaults = {
+    color: '#8492a6',
+    borderColor: 'rgba(30, 38, 56, 0.5)',
+    font: { family: 'DM Sans' }
+};
+Object.assign(Chart.defaults, ChartDefaults);
+
 const M=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const P=['#ff4a5a','#ff7e40','#ffd60a','#3b82f6','#10b981','#a855f7','#06b6d4','#f59e0b','#ec4899','#64748b'];
 const TT={backgroundColor:'#0d111a',borderColor:'#1e2638',borderWidth:1,titleColor:'#f1f3f9',bodyColor:'#8492a6',padding:12,cornerRadius:8};
@@ -2268,7 +2274,7 @@ function showTab(id,btn){
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
     targetPage.classList.add('active');
     if(btn) btn.classList.add('active');
-    
+
     setTimeout(function() {
         if(id === 'mancha' && mapInstance) {
             mapInstance.invalidateSize();
@@ -2294,7 +2300,7 @@ function buildVG(){
     const mediaIdade26=idades26.length?(idades26.reduce(function(a,b) { return a+b; },0)/idades26.length):0;
     const autoriaSim26=regs26.filter(function(r) { return String(r.autoria||'').toUpperCase().includes('SIM'); }).length;
     const pctAutoria26=regs26.length?Math.round((autoriaSim26/regs26.length)*100):0;
-    
+
     if(document.getElementById('vg-t')) document.getElementById('vg-t').textContent=DB.feira_25.reduce(function(a,b) { return a+b; },0);
     if(document.getElementById('vg-26')) document.getElementById('vg-26').textContent=DB.feira_26.reduce(function(a,b) { return a+b; },0);
     if(document.getElementById('vg-idade')) document.getElementById('vg-idade').textContent=mediaIdade26 ? mediaIdade26.toFixed(1) + ' anos' : '—';
@@ -2307,7 +2313,7 @@ function buildVG(){
 
     const f25=DB.feira_25,f26=DB.feira_26;
     const c25=DB.coorpin_25,c26=DB.coorpin_26;
-    
+
     const compContainer = document.getElementById('vg-comp');
     if(compContainer){
             compContainer.innerHTML=M.map(function(m,i){
@@ -2345,20 +2351,20 @@ function buildVG(){
 function buildEV(){
     const pico25=Math.max(...DB.coorpin_25, 0), picoM25=DB.coorpin_25.indexOf(pico25);
     const pico26=Math.max(...DB.coorpin_26, 0), picoM26=DB.coorpin_26.indexOf(pico26);
-    
+
     if(document.getElementById('ev-tot25')) document.getElementById('ev-tot25').textContent=DB.t25_ytd;
     if(document.getElementById('ev-tot26')) document.getElementById('ev-tot26').textContent=DB.t26_ytd;
-    
+
     const mName = M[DB.limitMonth] || 'Atual';
     if(document.getElementById('ev-tot25-sub')) document.getElementById('ev-tot25-sub').textContent='COORPIN (Jan–' + mName.toUpperCase() + ')';
     if(document.getElementById('ev-tot26-sub')) document.getElementById('ev-tot26-sub').textContent='COORPIN (Jan–' + mName.toUpperCase() + ')';
-    
+
     if(document.getElementById('ev-pico25')) document.getElementById('ev-pico25').textContent=pico25;
     if(document.getElementById('ev-pico26')) document.getElementById('ev-pico26').textContent=pico26;
-    
+
     const p25Sub = document.querySelector('#ev-pico25')?.nextElementSibling;
     if(p25Sub) p25Sub.textContent = (M[picoM25] || '—') +' · pico histórico';
-    
+
     const p26Sub = document.querySelector('#ev-pico26')?.nextElementSibling;
     if(p26Sub) p26Sub.textContent = (M[picoM26] || '—') +' · pico atual';
 
@@ -2440,7 +2446,7 @@ function buildGEO(){
     const bairros=Object.entries(DB.bairros26).sort(function(a,b) { return b[1]-a[1]; });
     const totFeira=DB.feira_26.reduce(function(a,b) { return a+b; },0);
     const totOutros=DB.t26_coorpin-totFeira;
-    
+
     if(document.getElementById('geo-pior')) document.getElementById('geo-pior').textContent=cidades.length?cidades[0][0]:'—';
     if(document.getElementById('geo-pior-sub')) document.getElementById('geo-pior-sub').textContent=cidades.length? cidades[0][1] + " casos acumulados" : '—';
     if(document.getElementById('geo-afetados')) document.getElementById('geo-afetados').textContent=cidades.length;
@@ -2492,9 +2498,9 @@ function buildMANCHA() {
         if (mesFiltro !== 'todos' && String(r.mes) !== mesFiltro) return false;
         return true;
     });
-    
+
     let qtdFeminicidio = 0, qtdMenores = 0, qtdAdultos = 0, totalVitimasMap = 0;
-    
+
     // Satélite Híbrido com alta estabilidade
     if (!mapInstance) {
         mapInstance = L.map('map', {zoomControl: true, attributionControl: false}).setView([-12.266, -38.966], 12);
@@ -2543,7 +2549,7 @@ function buildMANCHA() {
         regsComCoords.forEach(function(r) {
             const coordKey = r.lat.toFixed(5) + ',' + r.lng.toFixed(5);
             const ocKey = String(r.ocorrencia || '').trim().toUpperCase();
-            
+
             let groupKey = coordKey + '||' + ocKey;
             if (!ocKey || ocKey === 'NÃO INFORMADA' || ocKey === 'NAO INFORMADA') {
                 groupKey = coordKey + '||' + r.n; 
@@ -2582,16 +2588,16 @@ function buildMANCHA() {
                 let idade = parseInt(r.idade);
                 let isMenor12 = !isNaN(idade) && idade < 12;
                 let isMenor18 = !isNaN(idade) && idade >= 12 && idade < 18;
-                
+
                 let color = '#ef4444'; 
                 if (isFeminicidio) { color = '#ec4899'; qtdFeminicidio += 1; }
                 else if (isMenor12) { color = '#ffd60a'; qtdMenores += 1; }
                 else if (isMenor18) { color = '#3b82f6'; qtdMenores += 1; }
                 else { qtdAdultos += 1; }
-                
+
                 totalVitimasMap += 1;
                 bonecos.push(color);
-                
+
                 // Tratamento e Fallback para a Exibição de Tipo de Arma/Calibre
                 let tArma = String(r.tipo_arma || '').toUpperCase().trim();
                 if (!tArma || tArma === 'NÃO INFORMADO' || tArma === 'NAO INFORMADA') {
@@ -2599,7 +2605,7 @@ function buildMANCHA() {
                 }
 
                 if (idx > 0) combinedPopup += '<hr style="border:0; border-top:1px dashed var(--border); margin:12px 0;">';
-                
+
                 combinedPopup += '<div style="font-size:12px; line-height:1.5; min-width:210px;">' +
                         '<strong style="color:var(--accent); font-size:13px; text-transform:uppercase;">' + r.vitima + '</strong><br>' +
                         '<span style="color:var(--muted)">Ocorrência:</span> <span class="mono" style="color:var(--blue); font-weight:700;">' + r.ocorrencia + '</span><br>' +
@@ -2623,12 +2629,12 @@ function buildMANCHA() {
 
             let combinedSvg = '<div style="display:flex; justify-content:center; align-items:flex-end;">';
             combinedSvg += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + viewBoxWidth + ' 512" style="width:' + svgWidth + 'px; height:26px; filter:drop-shadow(0px 3px 6px rgba(0,0,0,0.9));">';
-            
+
             bonecos.forEach(function(color, i) {
                 let translateX = i * overlapOffset;
                 combinedSvg += '<path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z" fill="' + color + '" stroke="#0d111a" stroke-width="18" stroke-linejoin="round" transform="translate(' + translateX + ', 0)" />';
             });
-            
+
             combinedSvg += '</svg></div>';
 
             let customMarker = L.divIcon({
@@ -2649,7 +2655,7 @@ function buildMANCHA() {
          const bounds = L.latLngBounds(regsComCoords.map(function(r) { return [r.lat, r.lng]; }));
          mapInstance.fitBounds(bounds, {padding: [40, 40], maxZoom: 15});
     }
-    
+
     if(document.getElementById('mancha-tot')) document.getElementById('mancha-tot').textContent = totalVitimasMap;
     if(document.getElementById('mancha-feminicidio')) document.getElementById('mancha-feminicidio').textContent = qtdFeminicidio;
     if(document.getElementById('mancha-menores')) document.getElementById('mancha-menores').textContent = qtdMenores;
@@ -2659,7 +2665,7 @@ function buildMANCHA() {
 function buildVIT(){
     const regs26=DB.registros.filter(function(r) { return String(r.ano)==='2026' && isCVLI(r.tipificacao); });
     let menores=0,jovens=0,somaIdade=0,qtdIdade=0,maxIdade=0;
-    
+
     const faixas={
         '0 a 5 anos': 0,
         '6 a 11 anos': 0,
@@ -2682,10 +2688,10 @@ function buildVIT(){
         if(!isNaN(id)&&id>=0){
             somaIdade+=id;qtdIdade++;
             if(id>maxIdade)maxIdade=id;
-            
+
             if(id<18) menores++;
             if(id>=18 && id<=24) jovens++;
-            
+
             if(id<=5) faixas['0 a 5 anos']++;
             else if(id<=11) faixas['6 a 11 anos']++;
             else if(id<=14) faixas['12 a 14 anos']++;
@@ -2696,12 +2702,12 @@ function buildVIT(){
             else if(id<=59) faixas['50 a 59 anos']++;
             else if(id<=69) faixas['60 a 69 anos']++;
             else faixas['70 + ANOS']++;
-            
+
             const meioBruto = String(r.meio || 'NÃO INFORMADO').toUpperCase().trim();
             if(!meiosIdade[meioBruto])meiosIdade[meioBruto]={soma:0,qtd:0};
             meiosIdade[meioBruto].soma+=id;meiosIdade[meioBruto].qtd++;
         }
-        
+
         let sx = String(r.sexo || 'NÃO INFORMADO').toUpperCase().trim();
         if (sx.includes('MASC') || sx === 'M') generos['MASCULINO']++;
         else if (sx.includes('FEM') || sx === 'F') generos['FEMININO']++;
@@ -2762,7 +2768,7 @@ function buildMOD(){
         else if(norm==='ARMA BRANCA')branca+=v;
         else outros+=v;
     });
-    
+
     if(document.getElementById('mod-fogo')) document.getElementById('mod-fogo').textContent=fogo;
     if(document.getElementById('mod-fogo-sub')) document.getElementById('mod-fogo-sub').textContent= (regs26.length?((fogo/regs26.length)*100).toFixed(0):0) + '% das ocorrências';
     if(document.getElementById('mod-branca')) document.getElementById('mod-branca').textContent=branca;
@@ -2773,11 +2779,11 @@ function buildMOD(){
 
     const me=Object.entries(DB.meio26).sort(function(a,b) { return b[1]-a[1]; });
     mkC('mod-meio',{type:'bar',data:{labels:me.map(function(e) { return e[0]; }),datasets:[{data:me.map(function(e) { return e[1]; }),backgroundColor:P,borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:10,weight:'600'}}}}}});
-    
+
     const macroPieData = {'ARMA DE FOGO': fogo, 'ARMA BRANCA': branca, 'OUTROS': outros};
     const macroArr = Object.entries(macroPieData).filter(function(e) { return e[1] > 0; });
     mkC('mod-pizza',{type:'doughnut',data:{labels:macroArr.map(function(e) { return e[0]; }),datasets:[{data:macroArr.map(function(e) { return e[1]; }),backgroundColor:['#ef4444', '#f59e0b', '#3b82f6'],borderWidth:0,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'right',labels:{color:'#8492a6',font:{size:9},boxWidth:8,padding:8}},tooltip:{...TT,callbacks:{label:function(c) { return " " + c.parsed + " (" + (regs26.length?((c.parsed/regs26.length)*100).toFixed(1):0) + "%)"; }}}}}});
-    
+
     const tpArmaArr=Object.entries(DB.tipoArma26).sort(function(a,b) { return b[1]-a[1]; });
     mkC('mod-tipo-arma',{type:'bar',data:{labels:tpArmaArr.map(function(e) { return e[0]; }),datasets:[{data:tpArmaArr.map(function(e) { return e[1]; }),backgroundColor:'#06b6d4',borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:10,weight:'600'}}}}}});
 
@@ -2792,11 +2798,11 @@ function buildMOD(){
 function buildCO(){
     if(document.getElementById('co-t25')) document.getElementById('co-t25').textContent=DB.t25_ytd;
     if(document.getElementById('co-t26')) document.getElementById('co-t26').textContent=DB.t26_ytd;
-    
+
     const mName = M[DB.limitMonth] || 'Atual';
     if(document.getElementById('co-t25-sub')) document.getElementById('co-t25-sub').textContent='Acumulado Jan–' + mName.toUpperCase();
     if(document.getElementById('co-t26-sub')) document.getElementById('co-t26-sub').textContent='Acumulado Jan–' + mName.toUpperCase();
-    
+
     const munis=new Set([...Object.keys(DB.coorpin25),...Object.keys(DB.coorpin26)]);
     if(document.getElementById('co-mun')) document.getElementById('co-mun').textContent=munis.size;
 
@@ -2811,7 +2817,7 @@ function buildCO(){
     if(document.getElementById('co-var-sub')) document.getElementById('co-var-sub').textContent='Jan–' + mName.toUpperCase() + ' 25 vs 26';
 
     const cities=Array.from(munis).sort(function(a,b) { return (DB.coorpin26[b]||0)-(DB.coorpin26[a]||0); });
-    
+
     const data25_ytd_chart = cities.map(function(c) { return DB.coorpin25_ytd[c] || 0; });
     const data26_ytd_chart = cities.map(function(c) { return DB.coorpin26_ytd[c] || 0; });
 
@@ -2833,9 +2839,9 @@ function buildCO(){
         return '<tr><td style="text-align:left; font-weight:700;">' + c + '</td><td class="mono font-semibold" style="color:var(--accent);">' + t25 + '</td><td class="mono font-bold" style="color:var(--blue);">' + t26 + '</td><td class="mono font-semibold">' + q1c25 + '</td><td class="mono font-semibold" style="color:var(--blue);">' + q1c26 + '</td><td class="mono font-bold" style="color:' + (d<0?'var(--green)':d>0?'var(--accent)':'var(--muted)') + ';">' + (d>0?'+':'') + d + '</td></tr>';
     }).join('');
     htmlTab += '</tbody></table>';
-    
+
     if(document.getElementById('co-tabela')) document.getElementById('co-tabela').innerHTML=htmlTab;
-    
+
     buildTABELAS();
 }
 
@@ -2885,7 +2891,7 @@ function buildTABELAS() {
         tipHtml += '<tr><td style="text-align:left; font-weight:600;">' + t + '</td><td>' + d25T[t] + '</td><td style="color:var(--blue);font-weight:700;">' + d26T[t] + '</td><td>' + calcVar(d25T[t], d26T[t]) + '</td></tr>';
     });
     tipHtml += '<tr class="total-row"><td style="text-align:left; font-weight:700;">TOTAL DE CASOS CVLI</td><td>' + t25T + '</td><td>' + t26T + '</td><td>' + calcVar(t25T, t26T) + '</td></tr></tbody>';
-    
+
     if(document.getElementById('tabela-comp-tip')) document.getElementById('tabela-comp-tip').innerHTML = tipHtml;
 
     // Atualiza badges de tempo real com horário atual
@@ -2906,7 +2912,7 @@ function buildTABELAS() {
         munHtml += '<tr><td style="text-align:left; font-weight:600;">' + c + '</td><td>' + v25 + '</td><td style="color:var(--blue);font-weight:700;">' + v26 + '</td><td>' + calcVar(v25, v26) + '</td></tr>';
     });
     munHtml += '<tr class="total-row"><td style="text-align:left; font-weight:700;">TOTAL GERAL DA COORPIN</td><td>' + t25T + '</td><td>' + t26T + '</td><td>' + calcVar(t25T, t26T) + '</td></tr></tbody>';
-    
+
     if(document.getElementById('tabela-comp-mun')) document.getElementById('tabela-comp-mun').innerHTML = munHtml;
 
     function getTableTip(ano) {
@@ -2966,7 +2972,7 @@ function buildTABELAS() {
                     if (!isNaN(mi) && mi >= 0 && mi <= 11) cvli25[mi]++;
                 }
             });
-            
+
             html += '<tr style="background:rgba(107,114,128,0.03);"><td style="font-weight:700;color:var(--text);font-style:italic;text-align:left;">variação % mensal (vs 2025)</td>';
             var tot25 = 0;
             for (var i = 0; i < 12; i++) {
@@ -3071,7 +3077,7 @@ function applyFilters() {
     });
     var tot = rData.length, pgs = Math.max(1, Math.ceil(tot / PG));
     rPage = Math.min(rPage, pgs);
-    
+
     if(document.getElementById('reg-filt-kpi')) document.getElementById('reg-filt-kpi').textContent = tot || 0;
     if(document.getElementById('reg-pg-kpi')) document.getElementById('reg-pg-kpi').textContent = rPage + '/' + pgs;
     if(document.getElementById('reg-tag')) document.getElementById('reg-tag').textContent = tot + ' ocorrências filtradas';
@@ -3084,24 +3090,49 @@ function renderRegTable(tot, pgs) {
     var pgs2 = pgs !== undefined ? pgs : Math.max(1, Math.ceil(rData.length / PG));
     var start = (rPage - 1) * PG;
     const tbody = document.getElementById('reg-tbody');
-    
+
     if(tbody) {
-            tbody.innerHTML = rData.slice(start, start + PG).map(function(r) {
-                var mb = r.meio_norm === 'ARMA DE FOGO' ? 'b-red' : r.meio_norm === 'ARMA BRANCA' ? 'b-orange' : 'b-muted';
-                var ab = String(r.autoria || '').toUpperCase().includes('SIM') ? 'b-green' : 'b-muted';
-                var safeLog = String(r.logradouro || '').replace(/\n/g, '<br>');
-                var safeObs = String(r.obs || '').replace(/\n/g, '<br>');
-                var geoDisplay = r.georeferencia ? r.georeferencia : (r.lat !== null && r.lng !== null ? r.lat + ', ' + r.lng : '—');
-                return '<tr><td class="mono font-bold" style="color:var(--muted);">' + r.n + '</td><td class="td-wrap" style="font-weight:700;">' + r.vitima + '</td><td class="mono font-semibold" style="text-align:center;">' + (r.idade || '—') + '</td><td><span class="badge b-blue" style="font-size:11px; letter-spacing: 0.5px;">' + (r.ocorrencia || 'NÃO INFORMADA') + '</span></td><td class="mono" style="color:var(--muted);">' + r.data + '</td><td class="mono">' + r.hora + '</td><td><span class="badge ' + ab + '">' + r.autoria + '</span></td><td style="font-size:11px; font-weight:600;">' + r.motivo + '</td><td><span class="badge ' + mb + '">' + r.meio + '</span></td><td style="font-size:11px; font-weight:600;">' + r.tipificacao + '</td><td style="font-size:11px;font-weight:700;color:var(--blue);">' + r.bairro + '</td><td class="td-wrap" style="font-size:11px;">' + safeLog + '</td><td style="font-size:11px;font-weight:700;">' + r.cidade + '</td><td class="mono" style="font-size:10px;color:var(--muted);white-space:nowrap;">' + geoDisplay + '</td><td class="td-wrap" style="font-size:11px;color:var(--muted);">' + safeObs + '</td></tr>';
-            }).join('');
+        tbody.innerHTML = rData.slice(start, start + PG).map(function(r) {
+            var mb = r.meio_norm === 'ARMA DE FOGO' ? 'b-red' : r.meio_norm === 'ARMA BRANCA' ? 'b-orange' : 'b-muted';
+            var ab = String(r.autoria || '').toUpperCase().includes('SIM') ? 'b-green' : 'b-muted';
+            var safeLog = String(r.logradouro || '').replace(/\n/g, '<br>');
+            var safeObs = String(r.obs || '').replace(/\n/g, '<br>');
+            var geoDisplay = r.georeferencia ? r.georeferencia : (r.lat !== null && r.lng !== null ? r.lat + ', ' + r.lng : '—');
+            
+            // Tratamento Dinâmico do Tipo de Arma / Calibre para a Tabela
+            var tArma = String(r.tipo_arma || '').toUpperCase().trim();
+            if (!tArma || tArma === 'NÃO INFORMADO' || tArma === 'NAO INFORMADA') {
+                tArma = r.meio_norm || r.meio || 'N/I';
+            }
+
+            return '<tr>' +
+                   '<td class="mono font-bold" style="color:var(--muted);">' + r.n + '</td>' +
+                   '<td class="td-wrap" style="font-weight:700;">' + r.vitima + '</td>' +
+                   '<td class="mono font-semibold" style="text-align:center;">' + (r.idade || '—') + '</td>' +
+                   '<td style="font-size:11px; text-align:center;">' + (r.sexo || 'N/I') + '</td>' +
+                   '<td><span class="badge b-blue" style="font-size:11px; letter-spacing: 0.5px;">' + (r.ocorrencia || 'NÃO INFORMADA') + '</span></td>' +
+                   '<td class="mono" style="color:var(--muted);">' + r.data + '</td>' +
+                   '<td class="mono">' + r.hora + '</td>' +
+                   '<td><span class="badge ' + ab + '">' + r.autoria + '</span></td>' +
+                   '<td style="font-size:11px; font-weight:600;">' + r.motivo + '</td>' +
+                   '<td><span class="badge ' + mb + '">' + r.meio + '</span></td>' +
+                   '<td style="font-size:11px; font-weight:600; color:var(--blue);">' + tArma + '</td>' +
+                   '<td style="font-size:11px; font-weight:600;">' + r.tipificacao + '</td>' +
+                   '<td style="font-size:11px;font-weight:700;color:var(--blue);">' + r.bairro + '</td>' +
+                   '<td class="td-wrap" style="font-size:11px;">' + safeLog + '</td>' +
+                   '<td style="font-size:11px;font-weight:700;">' + r.cidade + '</td>' +
+                   '<td class="mono" style="font-size:10px;color:var(--muted);white-space:nowrap;">' + geoDisplay + '</td>' +
+                   '<td class="td-wrap" style="font-size:11px;color:var(--muted);">' + safeObs + '</td>' +
+                   '</tr>';
+        }).join('');
     }
-    
+
     if(document.getElementById('reg-pg-info')) document.getElementById('reg-pg-info').textContent = 'Mostrando ' + (start + 1) + '–' + Math.min(start + PG, tot2) + ' de ' + tot2 + ' registros cadastrados';
-    
+
     var show = [];
     if (pgs2 <= 7) { for (var i = 1; i <= pgs2; i++) show.push(i); }
     else { show.push(1); if (rPage > 3) show.push('…'); for (var i = Math.max(2, rPage - 1); i <= Math.min(pgs2 - 1, rPage + 1); i++) show.push(i); if (rPage < pgs2 - 2) show.push('…'); show.push(pgs2); }
-    
+
     var ph = rPage > 1 ? '<div class="pg-btn" onclick="goPg(' + (rPage - 1) + ')">‹</div>' : '';
     show.forEach(function(p) { ph += p === '…' ? '<div class="pg-btn" style="cursor:default; background:transparent; border:none;">…</div>' : '<div class="pg-btn ' + (p === rPage ? 'active' : '') + '" onclick="goPg(' + p + ')"> ' + p + '</div>'; });
     if (rPage < pgs2) ph += '<div class="pg-btn" onclick="goPg(' + (rPage + 1) + ')">›</div>';
@@ -3115,3 +3146,10 @@ document.getElementById('hdate').textContent = new Date().toLocaleDateString('pt
 </script>
 </body>
 </html>
+```eof
+
+O código do arquivo único agora possui:
+1. Cabeçalho **Gênero** (logo após *Idade*).
+2. Cabeçalho **Tipo de Arma / Calibre** (logo após *Meio Empregado*).
+3. Aumento na largura base do cabeçalho de rolagem (`min-width: 1900px`) para comportar os dois novos campos sem comprimir as fontes.
+4. Lógica inserida dentro de `renderRegTable` que extrai as propriedades do objeto da planilha para preencher essas duas novas colunas, mantendo a regra de segurança visual e substitutos (Fallbacks) quando vêm em branco. (Assim como nos mapas, se "tipo de arma" estiver nulo na planilha, ele resgata automaticamente a categoria pai em *meio empregado*).
