@@ -2516,8 +2516,8 @@ function buildMANCHA() {
 
     if (modoFiltro === 'calor') {
         const heatPoints = regsComCoords.map(function(r) {
-            // Conta os dados de filtro para manter a interface alimentada
-            let isFeminicidio = normTipificacao(r.tipificacao) === 'FEMINICÍDIO';
+            // Verificação expandida para Feminicídio (procura tanto na Tipificação quanto no Motivo)
+            let isFeminicidio = normTipificacao(r.tipificacao) === 'FEMINICÍDIO' || String(r.tipificacao).toUpperCase().includes('FEMINI') || String(r.motivo).toUpperCase().includes('FEMINI');
             let idade = parseInt(r.idade);
             let isMenor = !isNaN(idade) && idade < 18;
             if (isFeminicidio) qtdFeminicidio++;
@@ -2525,17 +2525,17 @@ function buildMANCHA() {
             else qtdAdultos++;
             totalVitimasMap++;
 
-            // Retorna a localização com uma intensidade
             return [r.lat, r.lng, 1.0];
         });
 
-        heatLayer = L.heatLayer(heatPoints, {
-            radius: 25,
-            blur: 20,
-            maxZoom: 15,
-            gradient: {0.4: 'blue', 0.65: 'yellow', 1: 'red'}
-        }).addTo(mapInstance);
-
+        if (typeof L.heatLayer === 'function') {
+            heatLayer = L.heatLayer(heatPoints, {
+                radius: 25,
+                blur: 20,
+                maxZoom: 15,
+                gradient: {0.4: 'blue', 0.65: 'yellow', 1: 'red'}
+            }).addTo(mapInstance);
+        }
     } else {
         markerLayer = L.layerGroup().addTo(mapInstance);
 
@@ -2577,7 +2577,8 @@ function buildMANCHA() {
             let bonecos = [];
 
             m.victims.forEach(function(r, idx) {
-                let isFeminicidio = normTipificacao(r.tipificacao) === 'FEMINICÍDIO';
+                // Verificação expandida para Feminicídio
+                let isFeminicidio = normTipificacao(r.tipificacao) === 'FEMINICÍDIO' || String(r.tipificacao).toUpperCase().includes('FEMINI') || String(r.motivo).toUpperCase().includes('FEMINI');
                 let idade = parseInt(r.idade);
                 let isMenor12 = !isNaN(idade) && idade < 12;
                 let isMenor18 = !isNaN(idade) && idade >= 12 && idade < 18;
@@ -2590,6 +2591,12 @@ function buildMANCHA() {
                 
                 totalVitimasMap += 1;
                 bonecos.push(color);
+                
+                // Tratamento e Fallback para a Exibição de Tipo de Arma/Calibre
+                let tArma = String(r.tipo_arma || '').toUpperCase().trim();
+                if (!tArma || tArma === 'NÃO INFORMADO' || tArma === 'NAO INFORMADA') {
+                    tArma = r.meio_norm || r.meio || 'NÃO INFORMADO';
+                }
 
                 if (idx > 0) combinedPopup += '<hr style="border:0; border-top:1px dashed var(--border); margin:12px 0;">';
                 
@@ -2600,7 +2607,8 @@ function buildMANCHA() {
                         '<span style="color:var(--muted)">Gênero:</span> ' + (r.sexo || 'N/I') + '<br>' +
                         '<span style="color:var(--muted)">Data/Hora:</span> ' + r.data + (r.hora ? ' às ' + r.hora : '') + '<br>' +
                         '<span style="color:var(--muted)">Local:</span> ' + r.bairro + ' (' + r.cidade + ')<br>' +
-                        '<span style="color:var(--muted)">Instrumento:</span> ' + r.meio + '<br>' +
+                        '<span style="color:var(--muted)">Instrumento Base:</span> ' + r.meio + '<br>' +
+                        '<span style="color:var(--muted)">Tipo/Calibre:</span> <span style="color:#06b6d4; font-weight:700;">' + tArma + '</span><br>' +
                         '<span style="color:var(--muted)">Tipificação:</span> <span style="font-weight:700; ' + (isFeminicidio ? 'color:#ec4899;' : '') + '">' + r.tipificacao + '</span>' +
                         (r.obs ? '<div style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); font-size:11px; color:#f1f3f9; line-height:1.4;">' + r.obs.replace(/\n/g, '<br>') + '</div>' : '') +
                 '</div>';
@@ -3106,4 +3114,4 @@ function goPg(p) { rPage = p; applyFilters(); }
 document.getElementById('hdate').textContent = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
 </script>
 </body>
-</html>s
+</html>
