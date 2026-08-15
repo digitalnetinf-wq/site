@@ -1150,10 +1150,9 @@ async function reloadSheets() {
     try {
         // QUEBRA DE CACHE REFORÇADA PARA O GOOGLE SHEETS
         const ts = new Date().getTime();
-        const fetchUrl = SHEETS_CSV_URL + '?nocache=' + ts;
+        const fetchUrl = SHEETS_CSV_URL + '&nocache=' + ts;
         const response = await fetch(fetchUrl, { 
-            cache: 'no-store',
-            headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' }
+            cache: 'no-store'
         });
         
         if (!response.ok) throw new Error("Erro HTTP: " + response.status);
