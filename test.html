@@ -2476,12 +2476,15 @@ function buildGEO(){
 // ══════════════════════════════════════════════════════
 // MAPAS TÁTICOS DE IMAGEM DE SATÉLITE
 // ══════════════════════════════════════════════════════
+let heatLayer = null;
+
 function buildMANCHA() {
     const mapEl = document.getElementById('map');
     if (!mapEl || mapEl.clientWidth === 0) return; 
 
     const anoFiltro = document.getElementById('mancha-ano') ? document.getElementById('mancha-ano').value : 'todos';
     const mesFiltro = document.getElementById('mancha-mes') ? document.getElementById('mancha-mes').value : 'todos';
+    const modoFiltro = document.getElementById('mancha-modo') ? document.getElementById('mancha-modo').value : 'dispersao';
 
     const regsComCoords = DB.registros.filter(function(r) { 
         if (!isCVLI(r.tipificacao) || r.lat === null || r.lng === null) return false;
@@ -2502,106 +2505,137 @@ function buildMANCHA() {
     }
 
     mapInstance.invalidateSize(); 
-    if (markerLayer) mapInstance.removeLayer(markerLayer);
+    if (markerLayer) {
+        mapInstance.removeLayer(markerLayer);
+        markerLayer = null;
+    }
+    if (heatLayer) {
+        mapInstance.removeLayer(heatLayer);
+        heatLayer = null;
+    }
 
-    markerLayer = L.layerGroup().addTo(mapInstance);
-
-    const markersMap = {};
-    regsComCoords.forEach(function(r) {
-        const coordKey = r.lat.toFixed(5) + ',' + r.lng.toFixed(5);
-        const ocKey = String(r.ocorrencia || '').trim().toUpperCase();
-        
-        let groupKey = coordKey + '||' + ocKey;
-        if (!ocKey || ocKey === 'NÃO INFORMADA' || ocKey === 'NAO INFORMADA') {
-            groupKey = coordKey + '||' + r.n; 
-        }
-
-        if (!markersMap[groupKey]) {
-            markersMap[groupKey] = {
-                lat: r.lat,
-                lng: r.lng,
-                coordKey: coordKey,
-                victims: []
-            };
-        }
-        markersMap[groupKey].victims.push(r);
-    });
-
-    const usedCoords = {}; 
-    Object.values(markersMap).forEach(function(m) {
-        if (usedCoords[m.coordKey] === undefined) {
-            usedCoords[m.coordKey] = 0;
-        } else {
-            usedCoords[m.coordKey]++;
-            const count = usedCoords[m.coordKey];
-            const angle = count * (Math.PI * 2 / 6); 
-            const distance = 0.0003 * Math.ceil(count / 6); 
-            m.lat += Math.cos(angle) * distance;
-            m.lng += Math.sin(angle) * distance;
-        }
-
-        let combinedPopup = '<div style="max-height:280px; overflow-y:auto; padding-right:5px; font-family:\'DM Sans\', sans-serif;">';
-        let bonecos = [];
-
-        m.victims.forEach(function(r, idx) {
+    if (modoFiltro === 'calor') {
+        const heatPoints = regsComCoords.map(function(r) {
+            // Conta os dados de filtro para manter a interface alimentada
             let isFeminicidio = normTipificacao(r.tipificacao) === 'FEMINICÍDIO';
             let idade = parseInt(r.idade);
-            let isMenor12 = !isNaN(idade) && idade < 12;
-            let isMenor18 = !isNaN(idade) && idade >= 12 && idade < 18;
-            
-            let color = '#ef4444'; 
-            if (isFeminicidio) { color = '#ec4899'; qtdFeminicidio += 1; }
-            else if (isMenor12) { color = '#ffd60a'; qtdMenores += 1; }
-            else if (isMenor18) { color = '#3b82f6'; qtdMenores += 1; }
-            else { qtdAdultos += 1; }
-            
-            totalVitimasMap += 1;
-            bonecos.push(color);
+            let isMenor = !isNaN(idade) && idade < 18;
+            if (isFeminicidio) qtdFeminicidio++;
+            else if (isMenor) qtdMenores++;
+            else qtdAdultos++;
+            totalVitimasMap++;
 
-            if (idx > 0) combinedPopup += '<hr style="border:0; border-top:1px dashed var(--border); margin:12px 0;">';
-            
-            combinedPopup += '<div style="font-size:12px; line-height:1.5; min-width:210px;">' +
-                    '<strong style="color:var(--accent); font-size:13px; text-transform:uppercase;">' + r.vitima + '</strong><br>' +
-                    '<span style="color:var(--muted)">Ocorrência:</span> <span class="mono" style="color:var(--blue); font-weight:700;">' + r.ocorrencia + '</span><br>' +
-                    '<span style="color:var(--muted)">Idade:</span> ' + (r.idade || 'N/I') + ' anos<br>' +
-                    '<span style="color:var(--muted)">Gênero:</span> ' + (r.sexo || 'N/I') + '<br>' +
-                    '<span style="color:var(--muted)">Data/Hora:</span> ' + r.data + (r.hora ? ' às ' + r.hora : '') + '<br>' +
-                    '<span style="color:var(--muted)">Local:</span> ' + r.bairro + ' (' + r.cidade + ')<br>' +
-                    '<span style="color:var(--muted)">Instrumento:</span> ' + r.meio + '<br>' +
-                    '<span style="color:var(--muted)">Tipificação:</span> <span style="font-weight:700; ' + (isFeminicidio ? 'color:#ec4899;' : '') + '">' + r.tipificacao + '</span>' +
-                    (r.obs ? '<div style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); font-size:11px; color:#f1f3f9; line-height:1.4;">' + r.obs.replace(/\n/g, '<br>') + '</div>' : '') +
-            '</div>';
+            // Retorna a localização com uma intensidade
+            return [r.lat, r.lng, 1.0];
         });
 
-        combinedPopup += '</div>';
+        heatLayer = L.heatLayer(heatPoints, {
+            radius: 25,
+            blur: 20,
+            maxZoom: 15,
+            gradient: {0.4: 'blue', 0.65: 'yellow', 1: 'red'}
+        }).addTo(mapInstance);
 
-        let groupNumBonecos = bonecos.length;
-        let overlapOffset = 110; 
-        let viewBoxWidth = 192 + (groupNumBonecos - 1) * overlapOffset;
-        let svgWidth = Math.min(16 + (groupNumBonecos - 1) * 10, 150); 
+    } else {
+        markerLayer = L.layerGroup().addTo(mapInstance);
 
-        let combinedSvg = '<div style="display:flex; justify-content:center; align-items:flex-end;">';
-        combinedSvg += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + viewBoxWidth + ' 512" style="width:' + svgWidth + 'px; height:26px; filter:drop-shadow(0px 3px 6px rgba(0,0,0,0.9));">';
-        
-        bonecos.forEach(function(color, i) {
-            let translateX = i * overlapOffset;
-            combinedSvg += '<path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z" fill="' + color + '" stroke="#0d111a" stroke-width="18" stroke-linejoin="round" transform="translate(' + translateX + ', 0)" />';
+        const markersMap = {};
+        regsComCoords.forEach(function(r) {
+            const coordKey = r.lat.toFixed(5) + ',' + r.lng.toFixed(5);
+            const ocKey = String(r.ocorrencia || '').trim().toUpperCase();
+            
+            let groupKey = coordKey + '||' + ocKey;
+            if (!ocKey || ocKey === 'NÃO INFORMADA' || ocKey === 'NAO INFORMADA') {
+                groupKey = coordKey + '||' + r.n; 
+            }
+
+            if (!markersMap[groupKey]) {
+                markersMap[groupKey] = {
+                    lat: r.lat,
+                    lng: r.lng,
+                    coordKey: coordKey,
+                    victims: []
+                };
+            }
+            markersMap[groupKey].victims.push(r);
         });
-        
-        combinedSvg += '</svg></div>';
 
-        let customMarker = L.divIcon({
-            html: combinedSvg,
-            className: '', 
-            iconSize: [svgWidth, 26],
-            iconAnchor: [svgWidth / 2, 26], 
-            popupAnchor: [0, -22]
+        const usedCoords = {}; 
+        Object.values(markersMap).forEach(function(m) {
+            if (usedCoords[m.coordKey] === undefined) {
+                usedCoords[m.coordKey] = 0;
+            } else {
+                usedCoords[m.coordKey]++;
+                const count = usedCoords[m.coordKey];
+                const angle = count * (Math.PI * 2 / 6); 
+                const distance = 0.0003 * Math.ceil(count / 6); 
+                m.lat += Math.cos(angle) * distance;
+                m.lng += Math.sin(angle) * distance;
+            }
+
+            let combinedPopup = '<div style="max-height:280px; overflow-y:auto; padding-right:5px; font-family:\'DM Sans\', sans-serif;">';
+            let bonecos = [];
+
+            m.victims.forEach(function(r, idx) {
+                let isFeminicidio = normTipificacao(r.tipificacao) === 'FEMINICÍDIO';
+                let idade = parseInt(r.idade);
+                let isMenor12 = !isNaN(idade) && idade < 12;
+                let isMenor18 = !isNaN(idade) && idade >= 12 && idade < 18;
+                
+                let color = '#ef4444'; 
+                if (isFeminicidio) { color = '#ec4899'; qtdFeminicidio += 1; }
+                else if (isMenor12) { color = '#ffd60a'; qtdMenores += 1; }
+                else if (isMenor18) { color = '#3b82f6'; qtdMenores += 1; }
+                else { qtdAdultos += 1; }
+                
+                totalVitimasMap += 1;
+                bonecos.push(color);
+
+                if (idx > 0) combinedPopup += '<hr style="border:0; border-top:1px dashed var(--border); margin:12px 0;">';
+                
+                combinedPopup += '<div style="font-size:12px; line-height:1.5; min-width:210px;">' +
+                        '<strong style="color:var(--accent); font-size:13px; text-transform:uppercase;">' + r.vitima + '</strong><br>' +
+                        '<span style="color:var(--muted)">Ocorrência:</span> <span class="mono" style="color:var(--blue); font-weight:700;">' + r.ocorrencia + '</span><br>' +
+                        '<span style="color:var(--muted)">Idade:</span> ' + (r.idade || 'N/I') + ' anos<br>' +
+                        '<span style="color:var(--muted)">Gênero:</span> ' + (r.sexo || 'N/I') + '<br>' +
+                        '<span style="color:var(--muted)">Data/Hora:</span> ' + r.data + (r.hora ? ' às ' + r.hora : '') + '<br>' +
+                        '<span style="color:var(--muted)">Local:</span> ' + r.bairro + ' (' + r.cidade + ')<br>' +
+                        '<span style="color:var(--muted)">Instrumento:</span> ' + r.meio + '<br>' +
+                        '<span style="color:var(--muted)">Tipificação:</span> <span style="font-weight:700; ' + (isFeminicidio ? 'color:#ec4899;' : '') + '">' + r.tipificacao + '</span>' +
+                        (r.obs ? '<div style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); font-size:11px; color:#f1f3f9; line-height:1.4;">' + r.obs.replace(/\n/g, '<br>') + '</div>' : '') +
+                '</div>';
+            });
+
+            combinedPopup += '</div>';
+
+            let groupNumBonecos = bonecos.length;
+            let overlapOffset = 110; 
+            let viewBoxWidth = 192 + (groupNumBonecos - 1) * overlapOffset;
+            let svgWidth = Math.min(16 + (groupNumBonecos - 1) * 10, 150); 
+
+            let combinedSvg = '<div style="display:flex; justify-content:center; align-items:flex-end;">';
+            combinedSvg += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + viewBoxWidth + ' 512" style="width:' + svgWidth + 'px; height:26px; filter:drop-shadow(0px 3px 6px rgba(0,0,0,0.9));">';
+            
+            bonecos.forEach(function(color, i) {
+                let translateX = i * overlapOffset;
+                combinedSvg += '<path d="M96 0c35.346 0 64 28.654 64 64s-28.654 64-64 64-64-28.654-64-64S60.654 0 96 0m48 144h-11.36c-22.711 10.443-49.59 10.894-73.28 0H48c-26.51 0-48 21.49-48 48v136c0 13.255 10.745 24 24 24h16v136c0 13.255 10.745 24 24 24h64c13.255 0 24-10.745 24-24V352h16c13.255 0 24-10.745 24-24V192c0-26.51-21.49-48-48-48z" fill="' + color + '" stroke="#0d111a" stroke-width="18" stroke-linejoin="round" transform="translate(' + translateX + ', 0)" />';
+            });
+            
+            combinedSvg += '</svg></div>';
+
+            let customMarker = L.divIcon({
+                html: combinedSvg,
+                className: '', 
+                iconSize: [svgWidth, 26],
+                iconAnchor: [svgWidth / 2, 26], 
+                popupAnchor: [0, -22]
+            });
+
+            const marker = L.marker([m.lat, m.lng], { icon: customMarker });
+            marker.bindPopup(combinedPopup);
+            markerLayer.addLayer(marker);
         });
-
-        const marker = L.marker([m.lat, m.lng], { icon: customMarker });
-        marker.bindPopup(combinedPopup);
-        markerLayer.addLayer(marker);
-    });
+    }
 
     if (regsComCoords.length > 0) { 
          const bounds = L.latLngBounds(regsComCoords.map(function(r) { return [r.lat, r.lng]; }));
@@ -2633,6 +2667,7 @@ function buildVIT(){
     let autoriaCount={sim:0,nao:0};
     let motivos={};
     let meiosIdade={};
+    let generos={'MASCULINO': 0, 'FEMININO': 0, 'NÃO INFORMADO': 0};
 
     regs26.forEach(function(r){
         const id=parseInt(r.idade);
@@ -2658,6 +2693,12 @@ function buildVIT(){
             if(!meiosIdade[meioBruto])meiosIdade[meioBruto]={soma:0,qtd:0};
             meiosIdade[meioBruto].soma+=id;meiosIdade[meioBruto].qtd++;
         }
+        
+        let sx = String(r.sexo || 'NÃO INFORMADO').toUpperCase().trim();
+        if (sx.includes('MASC') || sx === 'M') generos['MASCULINO']++;
+        else if (sx.includes('FEM') || sx === 'F') generos['FEMININO']++;
+        else generos['NÃO INFORMADO']++;
+
         if(String(r.autoria||'').toUpperCase().includes('SIM'))autoriaCount.sim++;else autoriaCount.nao++;
         const mot=String(r.motivo||'').trim().toUpperCase();
         if(mot&&mot!=='NÃO'&&mot!=='NAO'&&mot!=='NÃO'&&mot.length>1){motivos[mot]=(motivos[mot]||0)+1;}
@@ -2668,6 +2709,15 @@ function buildVIT(){
     if(document.getElementById('vit-1824')) document.getElementById('vit-1824').textContent=jovens;
     if(document.getElementById('vit-media')) document.getElementById('vit-media').textContent=qtdIdade?(somaIdade/qtdIdade).toFixed(1) + ' anos':'—';
     if(document.getElementById('vit-max')) document.getElementById('vit-max').textContent=maxIdade ? maxIdade + ' anos' : '—';
+
+    // Gráfico de Gênero (Novo)
+    const genData = Object.entries(generos).filter(function(e) { return e[1] > 0; });
+    const genColors = genData.map(function(e) {
+        if (e[0] === 'MASCULINO') return '#3b82f6';
+        if (e[0] === 'FEMININO') return '#ec4899';
+        return '#8492a6';
+    });
+    mkC('vit-genero',{type:'pie',data:{labels:genData.map(function(e) { return e[0]; }),datasets:[{data:genData.map(function(e) { return e[1]; }),backgroundColor:genColors,borderWidth:0,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#8492a6',font:{size:10},boxWidth:10,padding:8}},tooltip:{...TT,callbacks:{label:function(c) { return " " + c.parsed + " (" + (regs26.length?((c.parsed/regs26.length)*100).toFixed(1):0) + "%)"; }}}}}});
 
     const feLabels=Object.keys(faixas);
     mkC('vit-faixa',{type:'bar',data:{labels:feLabels,datasets:[{data:feLabels.map(function(k) { return faixas[k]; }),backgroundColor:P,borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true}}}});
