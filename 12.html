@@ -1678,8 +1678,21 @@ function buildMOD(){
     const macroArr = Object.entries(macroPieData).filter(e=>e[1] > 0);
     mkC('mod-pizza',{type:'doughnut',data:{labels:macroArr.map(e=>e[0]),datasets:[{data:macroArr.map(e=>e[1]),backgroundColor:['#ef4444', '#f59e0b', '#3b82f6'],borderWidth:0,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'right',labels:{color:'#8492a6',font:{size:9},boxWidth:8,padding:8}},tooltip:{...TT,callbacks:{label:c=>" " + c.parsed + " (" + (regs26.length?((c.parsed/regs26.length)*100).toFixed(1):0) + "%)"}}}}});
 
-    // Gráfico de Tipos de Arma ajustado para pegar as top 15 com maior resiliência a dados
-    const tpArmaArr=Object.entries(DB.tipoArma26).sort((a,b)=>b[1]-a[1]).slice(0, 15);
+    // Gráfico de Tipos de Arma exibindo TODOS os itens com scroll automático se necessário
+    const tpArmaArr=Object.entries(DB.tipoArma26).sort((a,b)=>b[1]-a[1]);
+    const canvasArma = document.getElementById('mod-tipo-arma');
+    if(canvasArma) {
+        if(tpArmaArr.length > 10) {
+            canvasArma.style.maxHeight = 'none';
+            canvasArma.style.height = Math.max(280, tpArmaArr.length * 28) + 'px';
+            canvasArma.parentElement.style.maxHeight = '280px';
+            canvasArma.parentElement.style.overflowY = 'auto';
+        } else {
+            canvasArma.style.height = '100%';
+            canvasArma.style.maxHeight = '280px';
+            canvasArma.parentElement.style.overflowY = 'hidden';
+        }
+    }
     mkC('mod-tipo-arma',{type:'bar',data:{labels:tpArmaArr.map(e=>e[0]),datasets:[{data:tpArmaArr.map(e=>e[1]),backgroundColor:'#06b6d4',borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:10,weight:'600'}}}}}});
 
     const tiposArrMOD=Object.entries(DB.tipo26).sort((a,b)=>b[1]-a[1]);
