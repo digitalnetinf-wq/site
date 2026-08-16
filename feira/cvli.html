@@ -1398,14 +1398,17 @@ function buildMANCHA() {
             if (!tArma || tArma === 'NÃO INFORMADO' || tArma === 'NAO INFORMADA') tArma = r.meio_norm || r.meio || 'N/I';
 
             if (idx > 0) combinedPopup += '<hr style="border:0; border-top:1px dashed var(--border); margin:12px 0;">';
-            combinedPopup += '<div style="font-size:12px; line-height:1.5; min-width:210px;">' +
+            combinedPopup += '<div style="font-size:12px; line-height:1.5; min-width:240px;">' +
                     '<strong style="color:var(--accent); font-size:13px; text-transform:uppercase;">' + r.vitima + '</strong><br>' +
                     '<span style="color:var(--muted)">Ocorrência:</span> <span class="mono" style="color:var(--blue); font-weight:700;">' + r.ocorrencia + '</span><br>' +
-                    '<span style="color:var(--muted)">Idade/Gênero:</span> ' + (r.idade || 'N/I') + ' anos - ' + (r.sexo || 'N/I') + '<br>' +
                     '<span style="color:var(--muted)">Data/Hora:</span> ' + r.data + (r.hora ? ' às ' + r.hora : '') + '<br>' +
-                    '<span style="color:var(--muted)">Instrumento Base:</span> ' + r.meio + '<br>' +
-                    '<span style="color:var(--muted)">Tipo/Calibre:</span> <span style="color:#06b6d4; font-weight:700;">' + tArma + '</span><br>' +
-                    '<span style="color:var(--muted)">Tipificação:</span> <span style="font-weight:700; ' + (isFeminicidio ? 'color:#ec4899;' : '') + '">' + r.tipificacao + '</span>' +
+                    '<span style="color:var(--muted)">Idade/Gênero:</span> ' + (r.idade || 'N/I') + ' anos - ' + (r.sexo || 'N/I') + '<br>' +
+                    '<span style="color:var(--muted)">Local:</span> ' + (r.logradouro ? r.logradouro + ' - ' : '') + (r.bairro || 'N/I') + '<br>' +
+                    '<span style="color:var(--muted)">Tipificação:</span> <span style="font-weight:700; ' + (isFeminicidio ? 'color:#ec4899;' : '') + '">' + r.tipificacao + '</span><br>' +
+                    '<span style="color:var(--muted)">Motivo:</span> ' + (r.motivo || 'N/I') + '<br>' +
+                    '<span style="color:var(--muted)">Instrumento:</span> ' + r.meio + ' / <span style="color:#06b6d4; font-weight:700;">' + tArma + '</span><br>' +
+                    '<span style="color:var(--muted)">Autoria:</span> ' + (r.autoria || 'N/I') + '<br>' +
+                    (r.obs ? '<div style="margin-top:4px; padding-top:4px; border-top:1px dashed rgba(255,255,255,0.1);"><span style="color:var(--muted)">Obs:</span> <i style="color:var(--muted); font-size:11px;">' + r.obs + '</i></div>' : '') +
             '</div>';
         });
 
