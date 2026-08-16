@@ -495,17 +495,30 @@
                 </div>
             </div>
             <div class="g3">
+                <div class="card" style="grid-column: span 3;">
+                    <div class="card-hd"><span class="card-title">Resolução, Autoria e Fatores Motivadores (2026)</span><span class="card-tag">Policial / Inteligência</span></div>
+                    <div class="card-body">
+                        <div class="g2" style="margin-bottom: 0;">
+                            <div>
+                                <div style="position: relative; height: 180px; width: 100%;"><canvas id="vit-aut"></canvas></div>
+                                <div id="vit-aut-lbl" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;"></div>
+                            </div>
+                            <div>
+                                <div style="position: relative; height: 220px; width: 100%;"><canvas id="vit-motivo"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sec-label">Análise de Gênero (Comparativo Anual)</div>
+            <div class="g2">
                 <div class="card">
-                    <div class="card-hd"><span class="card-title">Resolução e Autoria (2026)</span><span class="card-tag">Policial</span></div>
-                    <div class="card-body"><div style="position: relative; height: 180px; width: 100%;"><canvas id="vit-aut"></canvas></div><div id="vit-aut-lbl" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;"></div></div>
+                    <div class="card-hd"><span class="card-title">Gênero das Vítimas (2025)</span><span class="card-tag">Estatística 2025</span></div>
+                    <div class="card-body"><div style="position: relative; height: 220px; width: 100%;"><canvas id="vit-genero-25"></canvas></div></div>
                 </div>
                 <div class="card">
-                    <div class="card-hd"><span class="card-title">Fatores Motivadores</span><span class="card-tag">Inteligência</span></div>
-                    <div class="card-body"><div style="position: relative; height: 220px; width: 100%;"><canvas id="vit-motivo"></canvas></div></div>
-                </div>
-                <div class="card">
-                    <div class="card-hd"><span class="card-title">Gênero das Vítimas</span><span class="card-tag">Estatística</span></div>
-                    <div class="card-body"><div style="position: relative; height: 220px; width: 100%;"><canvas id="vit-genero"></canvas></div></div>
+                    <div class="card-hd"><span class="card-title">Gênero das Vítimas (2026)</span><span class="card-tag green" id="tag-gen-live">⬤ TEMPO REAL</span></div>
+                    <div class="card-body"><div style="position: relative; height: 220px; width: 100%;"><canvas id="vit-genero-26"></canvas></div></div>
                 </div>
             </div>
         </div>
@@ -609,6 +622,8 @@
                         <option value="todos">TODOS</option>
                         <option value="MASCULINO">MASCULINO</option>
                         <option value="FEMININO">FEMININO</option>
+                        <option value="MULHER TRANS">MULHER TRANS</option>
+                        <option value="HOMEM TRANS">HOMEM TRANS</option>
                     </select>
 
                     <span class="f-lbl" style="margin-left: 12px;">Meio:</span>
@@ -1033,6 +1048,17 @@ function normTipificacao(t) {
 
 function isCVLI(t) { return ['HOMICÍDIO', 'FEMINICÍDIO', 'LESÃO C.SEG. MORTE', 'LATROCÍNIO'].includes(normTipificacao(t)); }
 
+function parseGenero(sx) {
+    sx = String(sx || 'NÃO INFORMADO').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    if (sx.includes('TRANS') || sx.includes('TRAVE')) {
+        if (sx.includes('MASC') || sx.includes('HOMEM') || sx === 'HT') return 'HOMEM TRANS';
+        return 'MULHER TRANS'; 
+    }
+    if (sx.includes('FEM') || sx === 'F' || sx === 'MULHER') return 'FEMININO';
+    if (sx.includes('MASC') || sx === 'M' || sx === 'HOMEM') return 'MASCULINO';
+    return 'NÃO INFORMADO';
+}
+
 function initData(){
     DB.registros = DADOS_FALLBACK.map(function(r) { return Object.assign({}, r, { meio_norm: normMeio(r.meio_norm||r.meio) }); });
     recalcStats();
@@ -1438,9 +1464,13 @@ function buildMANCHA() {
 
 function buildVIT(){
     const regs26=DB.registros.filter(r=>String(r.ano)==='2026' && isCVLI(r.tipificacao));
+    const regs25=DB.registros.filter(r=>String(r.ano)==='2025' && isCVLI(r.tipificacao));
+    
     let menores=0,jovens=0,somaIdade=0,qtdIdade=0,maxIdade=0;
     const faixas={'0 a 5 anos': 0,'6 a 11 anos': 0,'12 a 14 anos': 0,'15 a 17 anos': 0,'18 a 29 anos': 0,'30 a 39 anos': 0,'40 a 49 anos': 0,'50 a 59 anos': 0,'60 a 69 anos': 0,'70 + ANOS': 0};
-    let autoriaCount={sim:0,nao:0}, motivos={}, meiosIdade={}, generos={'MASCULINO': 0, 'FEMININO': 0, 'NÃO INFORMADO': 0};
+    let autoriaCount={sim:0,nao:0}, motivos={}, meiosIdade={};
+    let generos26={'MASCULINO': 0, 'FEMININO': 0, 'MULHER TRANS': 0, 'HOMEM TRANS': 0, 'NÃO INFORMADO': 0};
+    let generos25={'MASCULINO': 0, 'FEMININO': 0, 'MULHER TRANS': 0, 'HOMEM TRANS': 0, 'NÃO INFORMADO': 0};
 
     regs26.forEach(r => {
         const id=parseInt(r.idade);
@@ -1455,11 +1485,17 @@ function buildVIT(){
             if(!meiosIdade[meioBruto])meiosIdade[meioBruto]={soma:0,qtd:0};
             meiosIdade[meioBruto].soma+=id;meiosIdade[meioBruto].qtd++;
         }
-        let sx = String(r.sexo || 'NÃO INFORMADO').toUpperCase().trim();
-        if (sx.includes('MASC') || sx === 'M') generos['MASCULINO']++; else if (sx.includes('FEM') || sx === 'F') generos['FEMININO']++; else generos['NÃO INFORMADO']++;
+        let catGen = parseGenero(r.sexo);
+        generos26[catGen] = (generos26[catGen] || 0) + 1;
+        
         if(String(r.autoria||'').toUpperCase().includes('SIM')) autoriaCount.sim++; else autoriaCount.nao++;
         const mot=String(r.motivo||'').trim().toUpperCase();
         if(mot&&mot!=='NÃO'&&mot!=='NAO'&&mot.length>1) motivos[mot]=(motivos[mot]||0)+1;
+    });
+
+    regs25.forEach(r => {
+        let catGen = parseGenero(r.sexo);
+        generos25[catGen] = (generos25[catGen] || 0) + 1;
     });
 
     if(document.getElementById('vit-tot')) document.getElementById('vit-tot').textContent=regs26.length;
@@ -1468,9 +1504,76 @@ function buildVIT(){
     if(document.getElementById('vit-media')) document.getElementById('vit-media').textContent=qtdIdade?(somaIdade/qtdIdade).toFixed(1) + ' anos':'—';
     if(document.getElementById('vit-max')) document.getElementById('vit-max').textContent=maxIdade ? maxIdade + ' anos' : '—';
 
-    const genData = Object.entries(generos).filter(e=>e[1] > 0);
-    const genColors = genData.map(e=>e[0] === 'MASCULINO' ? '#3b82f6' : (e[0] === 'FEMININO' ? '#ec4899' : '#8492a6'));
-    mkC('vit-genero',{type:'pie',data:{labels:genData.map(e=>e[0]),datasets:[{data:genData.map(e=>e[1]),backgroundColor:genColors,borderWidth:0,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#8492a6',font:{size:10},boxWidth:10,padding:8}},tooltip:{...TT,callbacks:{label:c=>" " + c.parsed + " (" + (regs26.length?((c.parsed/regs26.length)*100).toFixed(1):0) + "%)"}}}}});
+    const getColor = (g) => g==='MASCULINO'?'#3b82f6':g==='FEMININO'?'#ec4899':g==='MULHER TRANS'?'#a855f7':g==='HOMEM TRANS'?'#0ea5e9':'#8492a6';
+    const genderOrder = ['MASCULINO', 'FEMININO', 'MULHER TRANS', 'HOMEM TRANS'];
+    
+    // Gráfico 2026
+    const genData26 = genderOrder.map(g => [g, generos26[g] || 0]);
+    if (generos26['NÃO INFORMADO'] > 0) genData26.push(['N/I', generos26['NÃO INFORMADO']]);
+    
+    mkC('vit-genero-26',{
+        type:'bar',
+        data:{
+            labels:genData26.map(e=>e[0]),
+            datasets:[{
+                data:genData26.map(e=>e[1]),
+                backgroundColor:genData26.map(e=>getColor(e[0])),
+                borderRadius:4,
+                borderSkipped:false
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{
+                legend:{display:false},
+                tooltip:{...TT,callbacks:{label:c=>" " + c.parsed.y + " (" + (regs26.length?((c.parsed.y/regs26.length)*100).toFixed(1):0) + "%)"}},
+                datalabels: {
+                    display: true, color: '#f1f3f9', anchor: 'end', align: 'top',
+                    font: { family: 'JetBrains Mono', size: 12, weight: 'bold' },
+                    formatter: function(value) { return value > 0 ? value : ''; }
+                }
+            },
+            scales:{
+                x:{grid:{display:false},ticks:{font:{size:9, weight: 'bold'}, maxRotation: 45, minRotation: 0}},
+                y:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true, grace: '20%'}
+            }
+        }
+    });
+
+    // Gráfico 2025
+    const genData25 = genderOrder.map(g => [g, generos25[g] || 0]);
+    if (generos25['NÃO INFORMADO'] > 0) genData25.push(['N/I', generos25['NÃO INFORMADO']]);
+    
+    mkC('vit-genero-25',{
+        type:'bar',
+        data:{
+            labels:genData25.map(e=>e[0]),
+            datasets:[{
+                data:genData25.map(e=>e[1]),
+                backgroundColor:genData25.map(e=>getColor(e[0])),
+                borderRadius:4,
+                borderSkipped:false
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{
+                legend:{display:false},
+                tooltip:{...TT,callbacks:{label:c=>" " + c.parsed.y + " (" + (regs25.length?((c.parsed.y/regs25.length)*100).toFixed(1):0) + "%)"}},
+                datalabels: {
+                    display: true, color: '#f1f3f9', anchor: 'end', align: 'top',
+                    font: { family: 'JetBrains Mono', size: 12, weight: 'bold' },
+                    formatter: function(value) { return value > 0 ? value : ''; }
+                }
+            },
+            scales:{
+                x:{grid:{display:false},ticks:{font:{size:9, weight: 'bold'}, maxRotation: 45, minRotation: 0}},
+                y:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true, grace: '20%'}
+            }
+        }
+    });
 
     const feLabels=Object.keys(faixas);
     mkC('vit-faixa',{type:'bar',data:{labels:feLabels,datasets:[{data:feLabels.map(k=>faixas[k]),backgroundColor:P,borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true}}}});
@@ -1759,9 +1862,7 @@ function applyFilters() {
         if (rF.ano !== 'todos' && String(r.ano).trim() !== String(rF.ano).trim()) return false;
         if (rF.mes !== 'todos' && String(r.mes) !== String(rF.mes)) return false;
         if (rF.sexo !== 'todos') {
-            let sx = String(r.sexo || '').toUpperCase();
-            if (rF.sexo === 'MASCULINO' && !sx.includes('MASC') && sx !== 'M') return false;
-            if (rF.sexo === 'FEMININO' && !sx.includes('FEM') && sx !== 'F') return false;
+            if (parseGenero(r.sexo) !== rF.sexo) return false;
         }
         if (rF.meio !== 'todos') {
             if (rF.meio === 'outros') { if (r.meio_norm === 'ARMA DE FOGO' || r.meio_norm === 'ARMA BRANCA') return false; }
