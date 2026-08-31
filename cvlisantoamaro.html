@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Análise CVLI - Secretaria de Segurança Pública</title>
+    <title>Painel de Análise CVLI - Santo Amaro / 3ª COORPIN</title>
     
     <!-- Bibliotecas de Visualização -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Adicionando SheetJS para ler o Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     
     <!-- Tipografia Profissional -->
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -264,6 +266,33 @@
 
         .footer { text-align: center; padding: 40px 24px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; background: rgba(13, 17, 26, 0.4); margin-top: 40px; }
 
+        /* Loader para arquivo local */
+        .file-upload-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: var(--panel2);
+            border: 1px dashed var(--blue);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .file-upload-btn {
+            background: var(--blue);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            border: none;
+            transition: background 0.2s;
+        }
+        .file-upload-btn:hover { background: #2563eb; }
+        #file-input { display: none; }
+
         @media(max-width: 1280px) { .cols-5 { grid-template-columns: repeat(3, 1fr); } .cols-4 { grid-template-columns: repeat(2, 1fr); } .gbig, .g3 { grid-template-columns: 1fr; } }
         @media(max-width: 768px) { .cols-5, .cols-4, .cols-3 { grid-template-columns: 1fr; } .g2 { grid-template-columns: 1fr; } .container { padding: 16px 12px; } .header { padding: 0 16px; flex-direction: column; height: auto; padding-top: 12px; padding-bottom: 12px; gap: 10px; } .hright { width: 100%; justify-content: space-between; } .tabs-nav { top: 120px; padding: 0 12px; } }
     </style>
@@ -291,15 +320,14 @@
             <div class="hlogo">CIV</div>
             <div>
                 <div class="htitle">Painel Analítico CVLI</div>
-                <!-- ATUALIZAÇÃO 1: CABEÇALHO 3ª COORPIN -->
                 <div class="hsub" id="hsub-txt">Inteligência Estratégica em Segurança · Santo Amaro / 3ª COORPIN</div>
             </div>
         </div>
         <div class="hright">
-            <div class="hdate" id="hdate">25 MAI 2026</div>
-            <div class="sheets-badge loading" id="sheets-badge" onclick="reloadSheets()" title="Forçar re-sincronização de dados">
+            <div class="hdate" id="hdate"></div>
+            <div class="sheets-badge loading" id="sheets-badge" onclick="reloadSheets()" title="Status dos Dados">
                 <div class="sheets-dot"></div>
-                <span id="sheets-status">SINCRONIZANDO...</span>
+                <span id="sheets-status">AGUARDANDO DADOS...</span>
             </div>
             <div class="live-badge">
                 <div class="live-dot"></div>CENTRAL ATIVA
@@ -334,300 +362,298 @@
         </button>
     </nav>
 
-    <!-- ABA 1: VISÃO GERAL -->
-    <div class="tab-page active" id="tab-visao-geral">
-        <div class="container">
-            <div class="kpi-grid cols-4">
-                <!-- ATUALIZAÇÃO 2: TÍTULOS DOS CARDS PARA SANTO AMARO -->
-                <div class="kpi-card red"><div class="kpi-lbl">Total Santo Amaro (2025)</div><div class="kpi-val red" id="vg-t">—</div><div class="kpi-sub">registros no ano anterior</div></div>
-                <div class="kpi-card blue"><div class="kpi-lbl">Total Santo Amaro (2026)</div><div class="kpi-val blue" id="vg-26">—</div><div class="kpi-sub">registros no ano atual</div></div>
-                <div class="kpi-card green"><div class="kpi-lbl">Média Etária (2026)</div><div class="kpi-val green" id="vg-idade">—</div><div class="kpi-sub">anos das vítimas</div></div>
-                <div class="kpi-card purple"><div class="kpi-lbl">Autoria Identificada (2026)</div><div class="kpi-val" id="vg-aut">—</div><div class="kpi-sub" id="vg-aut-sub">casos elucidados</div></div>
-            </div>
+    <div id="dashboard-content" style="display: none;">
+        <!-- ABA 1: VISÃO GERAL -->
+        <div class="tab-page active" id="tab-visao-geral">
+            <div class="container">
+                <div class="kpi-grid cols-4">
+                    <div class="kpi-card red"><div class="kpi-lbl">Total Santo Amaro (2025)</div><div class="kpi-val red" id="vg-t">—</div><div class="kpi-sub">registros no ano anterior</div></div>
+                    <div class="kpi-card blue"><div class="kpi-lbl">Total Santo Amaro (2026)</div><div class="kpi-val blue" id="vg-26">—</div><div class="kpi-sub">registros no ano atual</div></div>
+                    <div class="kpi-card green"><div class="kpi-lbl">Média Etária (2026)</div><div class="kpi-val green" id="vg-idade">—</div><div class="kpi-sub">anos das vítimas</div></div>
+                    <div class="kpi-card purple"><div class="kpi-lbl">Autoria Identificada (2026)</div><div class="kpi-val" id="vg-aut">—</div><div class="kpi-sub" id="vg-aut-sub">casos elucidados</div></div>
+                </div>
 
-            <div class="sec-label">Série Comparativa Anual</div>
-            <div class="card mb20">
-                <div class="card-hd"><span class="card-title">Evolução Mensal — Santo Amaro</span><span class="card-tag">Histórico 2025 vs 2026</span></div>
-                <div class="card-body">
-                    <div style="position: relative; height: 300px; width: 100%;"><canvas id="vg-mensal"></canvas></div>
-                </div>
-            </div>
-
-            <div class="g3">
-                <div class="card"><div class="card-hd"><span class="card-title">Distribuição Mensal COORPIN</span><span class="card-tag blue">Acompanhamento</span></div><div class="card-body" id="vg-comp-coorpin" style="max-height: 280px; overflow-y: auto;"></div></div>
-                <div class="card"><div class="card-hd"><span class="card-title">Comparação Mensal Santo Amaro</span><span class="card-tag">Acompanhamento</span></div><div class="card-body" id="vg-comp" style="max-height: 280px; overflow-y: auto;"></div></div>
-                <div class="card"><div class="card-hd"><span class="card-title">Zonas Críticas (Bairros S. Amaro)</span><span class="card-tag">Incidência total</span></div><div class="card-body" style="max-height: 280px; overflow-y: auto;"><div class="bar-list" id="vg-bairros"></div></div></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ABA 2: EVOLUÇÃO TEMPORAL -->
-    <div class="tab-page" id="tab-evolucao">
-        <div class="container">
-            <div class="kpi-grid cols-4">
-                <div class="kpi-card red"><div class="kpi-lbl">Acumulado COORPIN 2025</div><div class="kpi-val red" id="ev-tot25">—</div><div class="kpi-sub" id="ev-tot25-sub">Período correspondente</div></div>
-                <div class="kpi-card blue"><div class="kpi-lbl">Acumulado COORPIN 2026</div><div class="kpi-val blue" id="ev-tot26">—</div><div class="kpi-sub" id="ev-tot26-sub">Período correspondente</div></div>
-                <div class="kpi-card orange"><div class="kpi-lbl">Pico Mensal 2025</div><div class="kpi-val" id="ev-pico25" style="font-size: 28px;">—</div><div class="kpi-sub">casos em um mês</div></div>
-                <div class="kpi-card green"><div class="kpi-lbl">Pico Mensal 2026</div><div class="kpi-val green" id="ev-pico26" style="font-size: 28px;">—</div><div class="kpi-sub">casos em um mês</div></div>
-            </div>
-
-            <div class="sec-label">Série Histórica Detalhada</div>
-            <div class="card mb20">
-                <div class="card-hd"><span class="card-title">CVLI Absoluto Mensal — Municípios vs COORPIN</span><span class="card-tag">Completo</span></div>
-                <div class="card-body">
-                    <div style="position: relative; height: 320px; width: 100%;"><canvas id="ev-full"></canvas></div>
-                </div>
-            </div>
-
-            <div class="card mb20">
-                <div class="card-hd"><span class="card-title">Curva de Acumulação Histórica</span><span class="card-tag blue">COORPIN Total</span></div>
-                <div class="card-body">
-                    <div style="position: relative; height: 280px; width: 100%;"><canvas id="ev-acum"></canvas></div>
-                </div>
-            </div>
-
-            <div class="g2">
-                <div class="card">
-                    <div class="card-hd"><span class="card-title">Análise Trimestral Consolidade</span><span class="card-tag">Trimestres</span></div>
-                    <div class="card-body"><div style="position: relative; height: 240px; width: 100%;"><canvas id="ev-trim"></canvas></div></div>
-                </div>
-                <div class="card">
-                    <div class="card-hd"><span class="card-title">Análise Semestral Consolidada</span><span class="card-tag">Semestres</span></div>
-                    <div class="card-body"><div style="position: relative; height: 240px; width: 100%;"><canvas id="ev-sem"></canvas></div></div>
-                </div>
-            </div>
-
-            <div class="sec-label">Tabelas Acadêmicas Consolidadas</div>
-            <div class="card mb20"><div class="card-hd"><span class="card-title">Variação de Desempenho Mês a Mês</span><span class="card-tag">Consolidado</span></div><div class="card-body tbl-wrap" id="ev-tabela-mes"></div></div>
-            <div class="card mb20">
-                <!-- ATUALIZAÇÃO 3: TÍTULOS DOS CARDS -->
-                <div class="card-hd"><span class="card-title">Mapa de Calor Comparativo (Santo Amaro)</span><span class="card-tag">Percentual e Volume</span></div>
-                <div class="card-body">
-                    <div style="overflow-x: auto;"><div class="heatmap" id="ev-heatmap"></div></div>
-                    <div style="display: flex; gap: 12px; align-items: center; margin-top: 15px;">
-                        <span style="font-size: 11px; color: var(--muted); font-weight: 500;">Nível de Gravidade:</span>
-                        <div style="width: 14px; height: 14px; border-radius: 3px; background: rgba(16, 185, 129, 0.8)"></div><span style="font-size: 11px; color: var(--muted);">Moderado</span>
-                        <div style="width: 14px; height: 14px; border-radius: 3px; background: rgba(255, 214, 10, 0.8)"></div><span style="font-size: 11px; color: var(--muted);">Atenção</span>
-                        <div style="width: 14px; height: 14px; border-radius: 3px; background: rgba(239, 68, 68, 0.8)"></div><span style="font-size: 11px; color: var(--muted);">Crítico</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ABA 3: DISTRIBUIÇÃO GEOGRÁFICA -->
-    <div class="tab-page" id="tab-geografico">
-        <div class="container">
-            <div class="kpi-grid cols-4">
-                <div class="kpi-card red"><div class="kpi-lbl">Cidade com maior incidência</div><div class="kpi-val red" id="geo-pior" style="font-size: 20px; text-transform: uppercase;">—</div><div class="kpi-sub" id="geo-pior-sub">—</div></div>
-                <div class="kpi-card orange"><div class="kpi-lbl">Municípios com Ocorrência (2026)</div><div class="kpi-val" id="geo-afetados">—</div><div class="kpi-sub">com casos confirmados</div></div>
-                <!-- ATUALIZAÇÃO 4: TÍTULOS DOS CARDS -->
-                <div class="kpi-card blue"><div class="kpi-lbl">Total Santo Amaro (2026)</div><div class="kpi-val blue" id="geo-tot-feira">—</div><div class="kpi-sub">casos confirmados</div></div>
-                <div class="kpi-card green"><div class="kpi-lbl">Demais Cidades (2026)</div><div class="kpi-val green" id="geo-tot-outros">—</div><div class="kpi-sub">soma do interior</div></div>
-            </div>
-            <div class="sec-label">Visualização de Cobertura Espacial</div>
-            <div class="gbig">
-                <div class="card">
-                    <div class="card-hd"><span class="card-title">Ranking Absoluto por Cidade (2026)</span><span class="card-tag">Visão Geral</span></div>
-                    <div class="card-body"><div style="position: relative; height: 380px; width: 100%;"><canvas id="geo-horiz"></canvas></div></div>
-                </div>
-                <div class="card">
-                    <div class="card-hd"><span class="card-title">Bairros Afetados (Santo Amaro)</span><span class="card-tag blue">Ranking Completo</span></div>
-                    <div class="card-body" style="max-height: 380px; overflow-y: auto;"><div class="bar-list" id="geo-barlist"></div></div>
-                </div>
-            </div>
-            <div class="g2">
-                <div class="card">
-                    <div class="card-hd"><span class="card-title">Distribuição por Zonas Críticas (Santo Amaro)</span><span class="card-tag">Zonal</span></div>
-                    <div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="geo-zona"></canvas></div></div>
-                </div>
-                <div class="card">
-                    <div class="card-hd"><span class="card-title">Participação por Cidade no Total 3ª COORPIN</span><span class="card-tag">Proporção %</span></div>
-                    <div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="geo-pizza"></canvas></div></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ABA 4: MANCHA CRIMINAL -->
-    <div class="tab-page" id="tab-mancha">
-        <div class="container">
-            <div class="kpi-grid cols-4">
-                <div class="kpi-card blue"><div class="kpi-lbl">Ocorrências Georreferenciadas</div><div class="kpi-val blue" id="mancha-tot">—</div><div class="kpi-sub">mapeados no sistema</div></div>
-                <div class="kpi-card" style="border-top-color: #ec4899;"><div class="kpi-lbl">Feminicídios Mapeados</div><div class="kpi-val" style="color: #ec4899;" id="mancha-feminicidio">—</div><div class="kpi-sub">identificados na mancha (rosa)</div></div>
-                <div class="kpi-card yellow"><div class="kpi-lbl">Vítimas Juvenis (< 18 Anos)</div><div class="kpi-val yellow" id="mancha-menores">—</div><div class="kpi-sub">menores (amarelo e azul)</div></div>
-                <div class="kpi-card red"><div class="kpi-lbl">Casos Gerais</div><div class="kpi-val red" id="mancha-adultos">—</div><div class="kpi-sub">ocorrências padrão (vermelho)</div></div>
-            </div>
-            <div class="filter-bar" style="justify-content: flex-start; gap: 12px; margin-bottom: 24px;">
-                <span class="f-lbl">Ano:</span><select class="f-btn" id="mancha-ano" onchange="buildMANCHA()" style="outline: none;"><option value="todos">TODOS</option><option value="2025">2025</option><option value="2026" selected>2026</option></select>
-                <span class="f-lbl" style="margin-left: 12px;">Mês:</span><select class="f-btn" id="mancha-mes" onchange="buildMANCHA()" style="outline: none;"><option value="todos" selected>TODOS</option><option value="1">JANEIRO</option><option value="2">FEVEREIRO</option><option value="3">MARÇO</option><option value="4">ABRIL</option><option value="5">MAIO</option><option value="6">JUNHO</option><option value="7">JULHO</option><option value="8">AGOSTO</option><option value="9">SETEMBRO</option><option value="10">OUTUBRO</option><option value="11">NOVEMBRO</option><option value="12">DEZEMBRO</option></select>
-            </div>
-            <div class="card mb20">
-                <div class="card-hd" style="flex-wrap: wrap; gap: 12px;">
-                    <div><span class="card-title">Mapa de Dispersão Espacial</span><span class="card-tag">SATÉLITE HÍBRIDO</span></div>
-                    <div style="display: flex; gap: 16px; font-size: 11px; font-family: 'JetBrains Mono', monospace; flex-wrap: wrap;">
-                        <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; background: #ec4899; border-radius: 50%;"></span> Feminicídio</span>
-                        <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; background: #ffd60a; border-radius: 50%;"></span> Infantil (&lt;12a)</span>
-                        <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; background: #3b82f6; border-radius: 50%;"></span> Adolescente (12-17a)</span>
-                        <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; background: #ef4444; border-radius: 50%;"></span> Adulto (18+)</span>
-                    </div>
-                </div>
-                <div class="card-body" style="padding: 0;"><div id="map" style="width: 100%; height: 620px;"></div></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ABA 5: DEMOGRAFIA DAS VÍTIMAS -->
-    <div class="tab-page" id="tab-vitimas">
-        <div class="container">
-            <div class="kpi-grid cols-5">
-                <div class="kpi-card red"><div class="kpi-lbl">Total Vítimas Analisadas</div><div class="kpi-val red" id="vit-tot">—</div><div class="kpi-sub">registradas no período</div></div>
-                <div class="kpi-card orange"><div class="kpi-lbl">Vítimas Juvenis (2026)</div><div class="kpi-val" id="vit-menor">—</div><div class="kpi-sub">com idade &lt; 18 anos</div></div>
-                <div class="kpi-card yellow"><div class="kpi-lbl">Jovens Adultos (18 a 24a)</div><div class="kpi-val" id="vit-1824">—</div><div class="kpi-sub">população vulnerável</div></div>
-                <div class="kpi-card blue"><div class="kpi-lbl">Idade Média (2026)</div><div class="kpi-val blue" id="vit-media">—</div><div class="kpi-sub">dos registros identificados</div></div>
-                <div class="kpi-card green"><div class="kpi-lbl">Idade Máxima (2026)</div><div class="kpi-val green" id="vit-max">—</div><div class="kpi-sub">registro de maior idade</div></div>
-            </div>
-            <div class="sec-label">Análise de Estrutura Demográfica</div>
-            <div class="g2">
-                <div class="card">
-                    <div class="card-hd"><span class="card-title">Divisão Detalhada por Faixa Etária (2026)</span><span class="card-tag">Distribuição</span></div>
-                    <div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="vit-faixa"></canvas></div></div>
-                </div>
-                <div class="card">
-                    <div class="card-hd"><span class="card-title">Curva Populacional e Pirâmide de Risco (2026)</span><span class="card-tag">Concentração</span></div>
-                    <div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="vit-piramide"></canvas></div></div>
-                </div>
-            </div>
-            <div class="g3">
-                <div class="card" style="grid-column: span 3;">
-                    <div class="card-hd"><span class="card-title">Resolução, Autoria e Fatores Motivadores (2026)</span><span class="card-tag">Policial / Inteligência</span></div>
+                <div class="sec-label">Série Comparativa Anual</div>
+                <div class="card mb20">
+                    <div class="card-hd"><span class="card-title">Evolução Mensal — Santo Amaro</span><span class="card-tag">Histórico 2025 vs 2026</span></div>
                     <div class="card-body">
-                        <div class="g2" style="margin-bottom: 0;">
-                            <div>
-                                <div style="position: relative; height: 180px; width: 100%;"><canvas id="vit-aut"></canvas></div>
-                                <div id="vit-aut-lbl" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;"></div>
-                            </div>
-                            <div>
-                                <div style="position: relative; height: 220px; width: 100%;"><canvas id="vit-motivo"></canvas></div>
-                            </div>
+                        <div style="position: relative; height: 300px; width: 100%;"><canvas id="vg-mensal"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="g3">
+                    <div class="card"><div class="card-hd"><span class="card-title">Distribuição Mensal COORPIN</span><span class="card-tag blue">Acompanhamento</span></div><div class="card-body" id="vg-comp-coorpin" style="max-height: 280px; overflow-y: auto;"></div></div>
+                    <div class="card"><div class="card-hd"><span class="card-title">Comparação Mensal Santo Amaro</span><span class="card-tag">Acompanhamento</span></div><div class="card-body" id="vg-comp" style="max-height: 280px; overflow-y: auto;"></div></div>
+                    <div class="card"><div class="card-hd"><span class="card-title">Zonas Críticas (Bairros S. Amaro)</span><span class="card-tag">Incidência total</span></div><div class="card-body" style="max-height: 280px; overflow-y: auto;"><div class="bar-list" id="vg-bairros"></div></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 2: EVOLUÇÃO TEMPORAL -->
+        <div class="tab-page" id="tab-evolucao">
+            <div class="container">
+                <div class="kpi-grid cols-4">
+                    <div class="kpi-card red"><div class="kpi-lbl">Acumulado COORPIN 2025</div><div class="kpi-val red" id="ev-tot25">—</div><div class="kpi-sub" id="ev-tot25-sub">Período correspondente</div></div>
+                    <div class="kpi-card blue"><div class="kpi-lbl">Acumulado COORPIN 2026</div><div class="kpi-val blue" id="ev-tot26">—</div><div class="kpi-sub" id="ev-tot26-sub">Período correspondente</div></div>
+                    <div class="kpi-card orange"><div class="kpi-lbl">Pico Mensal 2025</div><div class="kpi-val" id="ev-pico25" style="font-size: 28px;">—</div><div class="kpi-sub">casos em um mês</div></div>
+                    <div class="kpi-card green"><div class="kpi-lbl">Pico Mensal 2026</div><div class="kpi-val green" id="ev-pico26" style="font-size: 28px;">—</div><div class="kpi-sub">casos em um mês</div></div>
+                </div>
+
+                <div class="sec-label">Série Histórica Detalhada</div>
+                <div class="card mb20">
+                    <div class="card-hd"><span class="card-title">CVLI Absoluto Mensal — Municípios vs COORPIN</span><span class="card-tag">Completo</span></div>
+                    <div class="card-body">
+                        <div style="position: relative; height: 320px; width: 100%;"><canvas id="ev-full"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="card mb20">
+                    <div class="card-hd"><span class="card-title">Curva de Acumulação Histórica</span><span class="card-tag blue">COORPIN Total</span></div>
+                    <div class="card-body">
+                        <div style="position: relative; height: 280px; width: 100%;"><canvas id="ev-acum"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="g2">
+                    <div class="card">
+                        <div class="card-hd"><span class="card-title">Análise Trimestral Consolidade</span><span class="card-tag">Trimestres</span></div>
+                        <div class="card-body"><div style="position: relative; height: 240px; width: 100%;"><canvas id="ev-trim"></canvas></div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-hd"><span class="card-title">Análise Semestral Consolidada</span><span class="card-tag">Semestres</span></div>
+                        <div class="card-body"><div style="position: relative; height: 240px; width: 100%;"><canvas id="ev-sem"></canvas></div></div>
+                    </div>
+                </div>
+
+                <div class="sec-label">Tabelas Acadêmicas Consolidadas</div>
+                <div class="card mb20"><div class="card-hd"><span class="card-title">Variação de Desempenho Mês a Mês</span><span class="card-tag">Consolidado</span></div><div class="card-body tbl-wrap" id="ev-tabela-mes"></div></div>
+                <div class="card mb20">
+                    <div class="card-hd"><span class="card-title">Mapa de Calor Comparativo (Santo Amaro)</span><span class="card-tag">Percentual e Volume</span></div>
+                    <div class="card-body">
+                        <div style="overflow-x: auto;"><div class="heatmap" id="ev-heatmap"></div></div>
+                        <div style="display: flex; gap: 12px; align-items: center; margin-top: 15px;">
+                            <span style="font-size: 11px; color: var(--muted); font-weight: 500;">Nível de Gravidade:</span>
+                            <div style="width: 14px; height: 14px; border-radius: 3px; background: rgba(16, 185, 129, 0.8)"></div><span style="font-size: 11px; color: var(--muted);">Moderado</span>
+                            <div style="width: 14px; height: 14px; border-radius: 3px; background: rgba(255, 214, 10, 0.8)"></div><span style="font-size: 11px; color: var(--muted);">Atenção</span>
+                            <div style="width: 14px; height: 14px; border-radius: 3px; background: rgba(239, 68, 68, 0.8)"></div><span style="font-size: 11px; color: var(--muted);">Crítico</span>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="sec-label">Análise de Gênero (Comparativo Anual)</div>
-            <div class="g2">
-                <div class="card">
-                    <div class="card-hd"><span class="card-title">Gênero das Vítimas (2025)</span><span class="card-tag">Estatística 2025</span></div>
-                    <div class="card-body"><div style="position: relative; height: 220px; width: 100%;"><canvas id="vit-genero-25"></canvas></div></div>
-                </div>
-                <div class="card">
-                    <div class="card-hd"><span class="card-title">Gênero das Vítimas (2026)</span><span class="card-tag green" id="tag-gen-live">⬤ TEMPO REAL</span></div>
-                    <div class="card-body"><div style="position: relative; height: 220px; width: 100%;"><canvas id="vit-genero-26"></canvas></div></div>
-                </div>
-            </div>
         </div>
-    </div>
 
-    <!-- ABA 6: MODALIDADES -->
-    <div class="tab-page" id="tab-modalidade">
-        <div class="container">
-            <div class="kpi-grid cols-4">
-                <div class="kpi-card red"><div class="kpi-lbl">Arma de Fogo (2026)</div><div class="kpi-val red" id="mod-fogo">—</div><div class="kpi-sub" id="mod-fogo-sub">% dos crimes totais</div></div>
-                <div class="kpi-card orange"><div class="kpi-lbl">Arma Branca (2026)</div><div class="kpi-val" id="mod-branca">—</div><div class="kpi-sub" id="mod-branca-sub">% dos crimes totais</div></div>
-                <div class="kpi-card blue"><div class="kpi-lbl">Outras Causas (2026)</div><div class="kpi-val blue" id="mod-lesao">—</div><div class="kpi-sub" id="mod-lesao-sub">% dos crimes totais</div></div>
-                <div class="kpi-card yellow"><div class="kpi-lbl">Tipificações de CVLI (2026)</div><div class="kpi-val" id="mod-outros">—</div><div class="kpi-sub" id="mod-outros-sub">tipos enquadrados</div></div>
-            </div>
-            <div class="sec-label">Análise de Métodos e Instrumentos</div>
-            <div class="g3">
-                <div class="card">
-                    <div class="card-hd"><span class="card-title">Divisão por Meio (Macro)</span><span class="card-tag">Pizza</span></div>
-                    <div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="mod-pizza"></canvas></div></div>
+        <!-- ABA 3: DISTRIBUIÇÃO GEOGRÁFICA -->
+        <div class="tab-page" id="tab-geografico">
+            <div class="container">
+                <div class="kpi-grid cols-4">
+                    <div class="kpi-card red"><div class="kpi-lbl">Cidade com maior incidência</div><div class="kpi-val red" id="geo-pior" style="font-size: 20px; text-transform: uppercase;">—</div><div class="kpi-sub" id="geo-pior-sub">—</div></div>
+                    <div class="kpi-card orange"><div class="kpi-lbl">Municípios com Ocorrência (2026)</div><div class="kpi-val" id="geo-afetados">—</div><div class="kpi-sub">com casos confirmados</div></div>
+                    <div class="kpi-card blue"><div class="kpi-lbl">Total Santo Amaro (2026)</div><div class="kpi-val blue" id="geo-tot-feira">—</div><div class="kpi-sub">casos confirmados</div></div>
+                    <div class="kpi-card green"><div class="kpi-lbl">Demais Cidades (2026)</div><div class="kpi-val green" id="geo-tot-outros">—</div><div class="kpi-sub">soma do interior</div></div>
                 </div>
-                <div class="card" style="grid-column: span 2;">
-                    <div class="card-hd"><span class="card-title">Tipos de Armas / Calibres Específicos (2026)</span><span class="card-tag blue">Detalhamento</span></div>
-                    <div class="card-body" style="overflow-y: auto;">
-                        <div id="wrap-arma" style="position: relative; height: 280px; width: 100%;"><canvas id="mod-tipo-arma"></canvas></div>
+                <div class="sec-label">Visualização de Cobertura Espacial</div>
+                <div class="gbig">
+                    <div class="card">
+                        <div class="card-hd"><span class="card-title">Ranking Absoluto por Cidade (2026)</span><span class="card-tag">Visão Geral</span></div>
+                        <div class="card-body"><div style="position: relative; height: 380px; width: 100%;"><canvas id="geo-horiz"></canvas></div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-hd"><span class="card-title">Bairros Afetados (Santo Amaro)</span><span class="card-tag blue">Ranking Completo</span></div>
+                        <div class="card-body" style="max-height: 380px; overflow-y: auto;"><div class="bar-list" id="geo-barlist"></div></div>
+                    </div>
+                </div>
+                <div class="g2">
+                    <div class="card">
+                        <div class="card-hd"><span class="card-title">Distribuição por Zonas Críticas (Santo Amaro)</span><span class="card-tag">Zonal</span></div>
+                        <div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="geo-zona"></canvas></div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-hd"><span class="card-title">Participação por Cidade no Total 3ª COORPIN</span><span class="card-tag">Proporção %</span></div>
+                        <div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="geo-pizza"></canvas></div></div>
                     </div>
                 </div>
             </div>
-            <div class="g3">
-                <div class="card">
-                    <div class="card-hd"><span class="card-title">Instrumento Geral Registrado</span><span class="card-tag">Frequência</span></div>
-                    <div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="mod-meio"></canvas></div></div>
+        </div>
+
+        <!-- ABA 4: MANCHA CRIMINAL -->
+        <div class="tab-page" id="tab-mancha">
+            <div class="container">
+                <div class="kpi-grid cols-4">
+                    <div class="kpi-card blue"><div class="kpi-lbl">Ocorrências Georreferenciadas</div><div class="kpi-val blue" id="mancha-tot">—</div><div class="kpi-sub">mapeados no sistema</div></div>
+                    <div class="kpi-card" style="border-top-color: #ec4899;"><div class="kpi-lbl">Feminicídios Mapeados</div><div class="kpi-val" style="color: #ec4899;" id="mancha-feminicidio">—</div><div class="kpi-sub">identificados na mancha (rosa)</div></div>
+                    <div class="kpi-card yellow"><div class="kpi-lbl">Vítimas Juvenis (< 18 Anos)</div><div class="kpi-val yellow" id="mancha-menores">—</div><div class="kpi-sub">menores (amarelo e azul)</div></div>
+                    <div class="kpi-card red"><div class="kpi-lbl">Casos Gerais</div><div class="kpi-val red" id="mancha-adultos">—</div><div class="kpi-sub">ocorrências padrão (vermelho)</div></div>
                 </div>
-                <div class="card"><div class="card-hd"><span class="card-title">Tipificação Criminal (2026)</span><span class="card-tag">Delito</span></div><div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="mod-tipo"></canvas></div></div></div>
-                <div class="card"><div class="card-hd"><span class="card-title">Motivação Associada</span><span class="card-tag">Correlação</span></div><div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="mod-motivo"></canvas></div></div></div>
-            </div>
-            
-            <div class="sec-label" style="margin-top: 35px;">Mapeamento Tático Específico</div>
-            <div class="card mb20">
-                <div class="card-hd"><span class="card-title">Tipos de Armas por Zonas e Bairros (2026)</span><span class="card-tag blue">Cruzamento Completo</span></div>
-                <div class="card-body" style="overflow-y: auto; max-height: 500px;">
-                    <div id="wrap-bairro-arma" style="position: relative; height: 420px; width: 100%;"><canvas id="mod-bairro-arma"></canvas></div>
+                <div class="filter-bar" style="justify-content: flex-start; gap: 12px; margin-bottom: 24px;">
+                    <span class="f-lbl">Ano:</span><select class="f-btn" id="mancha-ano" onchange="buildMANCHA()" style="outline: none;"><option value="todos">TODOS</option><option value="2025">2025</option><option value="2026" selected>2026</option></select>
+                    <span class="f-lbl" style="margin-left: 12px;">Mês:</span><select class="f-btn" id="mancha-mes" onchange="buildMANCHA()" style="outline: none;"><option value="todos" selected>TODOS</option><option value="1">JANEIRO</option><option value="2">FEVEREIRO</option><option value="3">MARÇO</option><option value="4">ABRIL</option><option value="5">MAIO</option><option value="6">JUNHO</option><option value="7">JULHO</option><option value="8">AGOSTO</option><option value="9">SETEMBRO</option><option value="10">OUTUBRO</option><option value="11">NOVEMBRO</option><option value="12">DEZEMBRO</option></select>
+                </div>
+                <div class="card mb20">
+                    <div class="card-hd" style="flex-wrap: wrap; gap: 12px;">
+                        <div><span class="card-title">Mapa de Dispersão Espacial</span><span class="card-tag">SATÉLITE HÍBRIDO</span></div>
+                        <div style="display: flex; gap: 16px; font-size: 11px; font-family: 'JetBrains Mono', monospace; flex-wrap: wrap;">
+                            <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; background: #ec4899; border-radius: 50%;"></span> Feminicídio</span>
+                            <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; background: #ffd60a; border-radius: 50%;"></span> Infantil (&lt;12a)</span>
+                            <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; background: #3b82f6; border-radius: 50%;"></span> Adolescente (12-17a)</span>
+                            <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; background: #ef4444; border-radius: 50%;"></span> Adulto (18+)</span>
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding: 0;"><div id="map" style="width: 100%; height: 620px;"></div></div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- ABA 7: COORPIN -->
-    <div class="tab-page" id="tab-coorpin">
-        <div class="container">
-            <div class="kpi-grid cols-4">
-                <div class="kpi-card red"><div class="kpi-lbl">COORPIN Acumulado 2025</div><div class="kpi-val red" id="co-t25">—</div><div class="kpi-sub" id="co-t25-sub">Até o mês atual</div></div>
-                <div class="kpi-card blue"><div class="kpi-lbl">COORPIN Acumulado 2026</div><div class="kpi-val blue" id="co-t26">—</div><div class="kpi-sub" id="co-t26-sub">Até o mês atual</div></div>
-                <div class="kpi-card orange"><div class="kpi-lbl">Municípios Cadastrados</div><div class="kpi-val" id="co-mun">—</div><div class="kpi-sub">na jurisdição</div></div>
-                <div class="kpi-card green"><div class="kpi-lbl">Variação Geral Acumulada</div><div class="kpi-val green" id="co-var">—</div><div class="kpi-sub" id="co-var-sub">2025 vs 2026</div></div>
+        <!-- ABA 5: DEMOGRAFIA DAS VÍTIMAS -->
+        <div class="tab-page" id="tab-vitimas">
+            <div class="container">
+                <div class="kpi-grid cols-5">
+                    <div class="kpi-card red"><div class="kpi-lbl">Total Vítimas Analisadas</div><div class="kpi-val red" id="vit-tot">—</div><div class="kpi-sub">registradas no período</div></div>
+                    <div class="kpi-card orange"><div class="kpi-lbl">Vítimas Juvenis (2026)</div><div class="kpi-val" id="vit-menor">—</div><div class="kpi-sub">com idade &lt; 18 anos</div></div>
+                    <div class="kpi-card yellow"><div class="kpi-lbl">Jovens Adultos (18 a 24a)</div><div class="kpi-val" id="vit-1824">—</div><div class="kpi-sub">população vulnerável</div></div>
+                    <div class="kpi-card blue"><div class="kpi-lbl">Idade Média (2026)</div><div class="kpi-val blue" id="vit-media">—</div><div class="kpi-sub">dos registros identificados</div></div>
+                    <div class="kpi-card green"><div class="kpi-lbl">Idade Máxima (2026)</div><div class="kpi-val green" id="vit-max">—</div><div class="kpi-sub">registro de maior idade</div></div>
+                </div>
+                <div class="sec-label">Análise de Estrutura Demográfica</div>
+                <div class="g2">
+                    <div class="card">
+                        <div class="card-hd"><span class="card-title">Divisão Detalhada por Faixa Etária (2026)</span><span class="card-tag">Distribuição</span></div>
+                        <div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="vit-faixa"></canvas></div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-hd"><span class="card-title">Curva Populacional e Pirâmide de Risco (2026)</span><span class="card-tag">Concentração</span></div>
+                        <div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="vit-piramide"></canvas></div></div>
+                    </div>
+                </div>
+                <div class="g3">
+                    <div class="card" style="grid-column: span 3;">
+                        <div class="card-hd"><span class="card-title">Resolução, Autoria e Fatores Motivadores (2026)</span><span class="card-tag">Policial / Inteligência</span></div>
+                        <div class="card-body">
+                            <div class="g2" style="margin-bottom: 0;">
+                                <div>
+                                    <div style="position: relative; height: 180px; width: 100%;"><canvas id="vit-aut"></canvas></div>
+                                    <div id="vit-aut-lbl" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;"></div>
+                                </div>
+                                <div>
+                                    <div style="position: relative; height: 220px; width: 100%;"><canvas id="vit-motivo"></canvas></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sec-label">Análise de Gênero (Comparativo Anual)</div>
+                <div class="g2">
+                    <div class="card">
+                        <div class="card-hd"><span class="card-title">Gênero das Vítimas (2025)</span><span class="card-tag">Estatística 2025</span></div>
+                        <div class="card-body"><div style="position: relative; height: 220px; width: 100%;"><canvas id="vit-genero-25"></canvas></div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-hd"><span class="card-title">Gênero das Vítimas (2026)</span><span class="card-tag green" id="tag-gen-live">⬤ TEMPO REAL</span></div>
+                        <div class="card-body"><div style="position: relative; height: 220px; width: 100%;"><canvas id="vit-genero-26"></canvas></div></div>
+                    </div>
+                </div>
             </div>
-            <div class="sec-label">Análise Territorial Regionalizada</div>
-            <div class="card mb20"><div class="card-hd"><span class="card-title">Distribuição Anual por Município</span><span class="card-tag">Comparativo YTD</span></div><div class="card-body"><div style="position: relative; height: 360px; width: 100%;"><canvas id="co-mun-comp"></canvas></div></div></div>
-            <div class="card mb20"><div class="card-hd"><span class="card-title">Tendência Mensal Consolidada</span><span class="card-tag">Série Histórica</span></div><div class="card-body"><div style="position: relative; height: 360px; width: 100%;"><canvas id="co-evolucao"></canvas></div></div></div>
-            <div class="card mb20"><div class="card-hd"><span class="card-title">Tabela Comparativa Consolidada</span><span class="card-tag">Acumulado</span></div><div class="card-body tbl-wrap" id="co-tabela"></div></div>
-            
-            <div class="sec-label" style="margin-top: 35px;">Matrizes de Desempenho e Produtividade</div>
-            <div class="g2">
-                <div class="card"><div class="card-hd"><span class="card-title">Desempenho por Enquadramento Legal</span><span class="card-tag green" id="tag-tip-live">⬤ TEMPO REAL</span></div><div class="card-body tbl-wrap" style="padding: 0;"><table class="excel-table" id="tabela-comp-tip"></table></div></div>
-                <div class="card"><div class="card-hd"><span class="card-title">Variação Geográfica Territorial</span><span class="card-tag green" id="tag-mun-live">⬤ TEMPO REAL</span></div><div class="card-body tbl-wrap" style="padding: 0;"><table class="excel-table" id="tabela-comp-mun"></table></div></div>
-            </div>
-            <div class="sec-label" style="margin-top: 35px;">Tabelas Analíticas Completas</div>
-            <div class="card mb20"><div class="card-hd"><span class="card-title">Produtividade Criminal 2025 (Por Enquadramento)</span><span class="card-tag">Histórico</span></div><div class="card-body tbl-wrap" style="padding: 0;"><table class="excel-table" id="tabela-tip-2025"></table></div></div>
-            <div class="card mb20"><div class="card-hd"><span class="card-title">Produtividade Criminal 2026 (Por Enquadramento)</span><span class="card-tag green" id="tag-tip26-live">⬤ TEMPO REAL</span></div><div class="card-body tbl-wrap" style="padding: 0;"><table class="excel-table" id="tabela-tip-2026"></table></div></div>
-            <div class="card mb20"><div class="card-hd"><span class="card-title">Histórico de Ocorrências por Município 2025</span><span class="card-tag">Histórico</span></div><div class="card-body tbl-wrap" style="padding: 0;"><table class="excel-table" id="tabela-mun-2025"></table></div></div>
-            <div class="card mb20"><div class="card-hd"><span class="card-title">Histórico de Ocorrências por Município 2026</span><span class="card-tag green" id="tag-mun26-live">⬤ TEMPO REAL</span></div><div class="card-body tbl-wrap" style="padding: 0;"><table class="excel-table" id="tabela-mun-2026"></table></div></div>
         </div>
-    </div>
 
-    <!-- ABA 8: BANCO DE DADOS REGISTROS -->
-    <div class="tab-page" id="tab-registros">
-        <div class="container">
-            <div class="kpi-grid cols-3">
-                <div class="kpi-card red"><div class="kpi-lbl">Total Geral Cadastrado</div><div class="kpi-val red" id="reg-tot-kpi">—</div><div class="kpi-sub">registros consolidados</div></div>
-                <div class="kpi-card blue"><div class="kpi-lbl">Filtros Ativos</div><div class="kpi-val blue" id="reg-filt-kpi">—</div><div class="kpi-sub">linhas selecionadas</div></div>
-                <div class="kpi-card green"><div class="kpi-lbl">Página Corrente</div><div class="kpi-val green" id="reg-pg-kpi">—</div><div class="kpi-sub">de páginas totais</div></div>
+        <!-- ABA 6: MODALIDADES -->
+        <div class="tab-page" id="tab-modalidade">
+            <div class="container">
+                <div class="kpi-grid cols-4">
+                    <div class="kpi-card red"><div class="kpi-lbl">Arma de Fogo (2026)</div><div class="kpi-val red" id="mod-fogo">—</div><div class="kpi-sub" id="mod-fogo-sub">% dos crimes totais</div></div>
+                    <div class="kpi-card orange"><div class="kpi-lbl">Arma Branca (2026)</div><div class="kpi-val" id="mod-branca">—</div><div class="kpi-sub" id="mod-branca-sub">% dos crimes totais</div></div>
+                    <div class="kpi-card blue"><div class="kpi-lbl">Outras Causas (2026)</div><div class="kpi-val blue" id="mod-lesao">—</div><div class="kpi-sub" id="mod-lesao-sub">% dos crimes totais</div></div>
+                    <div class="kpi-card yellow"><div class="kpi-lbl">Tipificações de CVLI (2026)</div><div class="kpi-val" id="mod-outros">—</div><div class="kpi-sub" id="mod-outros-sub">tipos enquadrados</div></div>
+                </div>
+                <div class="sec-label">Análise de Métodos e Instrumentos</div>
+                <div class="g3">
+                    <div class="card">
+                        <div class="card-hd"><span class="card-title">Divisão por Meio (Macro)</span><span class="card-tag">Pizza</span></div>
+                        <div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="mod-pizza"></canvas></div></div>
+                    </div>
+                    <div class="card" style="grid-column: span 2;">
+                        <div class="card-hd"><span class="card-title">Tipos de Armas / Calibres Específicos (2026)</span><span class="card-tag blue">Detalhamento</span></div>
+                        <div class="card-body" style="overflow-y: auto;">
+                            <div id="wrap-arma" style="position: relative; height: 280px; width: 100%;"><canvas id="mod-tipo-arma"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="g3">
+                    <div class="card">
+                        <div class="card-hd"><span class="card-title">Instrumento Geral Registrado</span><span class="card-tag">Frequência</span></div>
+                        <div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="mod-meio"></canvas></div></div>
+                    </div>
+                    <div class="card"><div class="card-hd"><span class="card-title">Tipificação Criminal (2026)</span><span class="card-tag">Delito</span></div><div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="mod-tipo"></canvas></div></div></div>
+                    <div class="card"><div class="card-hd"><span class="card-title">Motivação Associada</span><span class="card-tag">Correlação</span></div><div class="card-body"><div style="position: relative; height: 280px; width: 100%;"><canvas id="mod-motivo"></canvas></div></div></div>
+                </div>
+                
+                <div class="sec-label" style="margin-top: 35px;">Mapeamento Tático Específico</div>
+                <div class="card mb20">
+                    <div class="card-hd"><span class="card-title">Tipos de Armas por Zonas e Bairros (2026)</span><span class="card-tag blue">Cruzamento Completo</span></div>
+                    <div class="card-body" style="overflow-y: auto; max-height: 500px;">
+                        <div id="wrap-bairro-arma" style="position: relative; height: 420px; width: 100%;"><canvas id="mod-bairro-arma"></canvas></div>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <div class="filter-bar" style="justify-content: space-between;">
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <span class="f-lbl">Ano:</span>
-                    <button class="f-btn active" data-group="ano" data-val="todos" onclick="setRegF('ano','todos',this)">TODOS</button>
-                    <button class="f-btn" data-group="ano" data-val="2025" onclick="setRegF('ano','2025',this)">2025</button>
-                    <button class="f-btn" data-group="ano" data-val="2026" onclick="setRegF('ano','2026',this)">2026</button>
+        <!-- ABA 7: COORPIN -->
+        <div class="tab-page" id="tab-coorpin">
+            <div class="container">
+                <div class="kpi-grid cols-4">
+                    <div class="kpi-card red"><div class="kpi-lbl">COORPIN Acumulado 2025</div><div class="kpi-val red" id="co-t25">—</div><div class="kpi-sub" id="co-t25-sub">Até o mês atual</div></div>
+                    <div class="kpi-card blue"><div class="kpi-lbl">COORPIN Acumulado 2026</div><div class="kpi-val blue" id="co-t26">—</div><div class="kpi-sub" id="co-t26-sub">Até o mês atual</div></div>
+                    <div class="kpi-card orange"><div class="kpi-lbl">Municípios Cadastrados</div><div class="kpi-val" id="co-mun">—</div><div class="kpi-sub">na jurisdição</div></div>
+                    <div class="kpi-card green"><div class="kpi-lbl">Variação Geral Acumulada</div><div class="kpi-val green" id="co-var">—</div><div class="kpi-sub" id="co-var-sub">2025 vs 2026</div></div>
+                </div>
+                <div class="sec-label">Análise Territorial Regionalizada</div>
+                <div class="card mb20"><div class="card-hd"><span class="card-title">Distribuição Anual por Município</span><span class="card-tag">Comparativo YTD</span></div><div class="card-body"><div style="position: relative; height: 360px; width: 100%;"><canvas id="co-mun-comp"></canvas></div></div></div>
+                <div class="card mb20"><div class="card-hd"><span class="card-title">Tendência Mensal Consolidada</span><span class="card-tag">Série Histórica</span></div><div class="card-body"><div style="position: relative; height: 360px; width: 100%;"><canvas id="co-evolucao"></canvas></div></div></div>
+                <div class="card mb20"><div class="card-hd"><span class="card-title">Tabela Comparativa Consolidada</span><span class="card-tag">Acumulado</span></div><div class="card-body tbl-wrap" id="co-tabela"></div></div>
+                
+                <div class="sec-label" style="margin-top: 35px;">Matrizes de Desempenho e Produtividade</div>
+                <div class="g2">
+                    <div class="card"><div class="card-hd"><span class="card-title">Desempenho por Enquadramento Legal</span><span class="card-tag green" id="tag-tip-live">⬤ TEMPO REAL</span></div><div class="card-body tbl-wrap" style="padding: 0;"><table class="excel-table" id="tabela-comp-tip"></table></div></div>
+                    <div class="card"><div class="card-hd"><span class="card-title">Variação Geográfica Territorial</span><span class="card-tag green" id="tag-mun-live">⬤ TEMPO REAL</span></div><div class="card-body tbl-wrap" style="padding: 0;"><table class="excel-table" id="tabela-comp-mun"></table></div></div>
+                </div>
+                <div class="sec-label" style="margin-top: 35px;">Tabelas Analíticas Completas</div>
+                <div class="card mb20"><div class="card-hd"><span class="card-title">Produtividade Criminal 2025 (Por Enquadramento)</span><span class="card-tag">Histórico</span></div><div class="card-body tbl-wrap" style="padding: 0;"><table class="excel-table" id="tabela-tip-2025"></table></div></div>
+                <div class="card mb20"><div class="card-hd"><span class="card-title">Produtividade Criminal 2026 (Por Enquadramento)</span><span class="card-tag green" id="tag-tip26-live">⬤ TEMPO REAL</span></div><div class="card-body tbl-wrap" style="padding: 0;"><table class="excel-table" id="tabela-tip-2026"></table></div></div>
+                <div class="card mb20"><div class="card-hd"><span class="card-title">Histórico de Ocorrências por Município 2025</span><span class="card-tag">Histórico</span></div><div class="card-body tbl-wrap" style="padding: 0;"><table class="excel-table" id="tabela-mun-2025"></table></div></div>
+                <div class="card mb20"><div class="card-hd"><span class="card-title">Histórico de Ocorrências por Município 2026</span><span class="card-tag green" id="tag-mun26-live">⬤ TEMPO REAL</span></div><div class="card-body tbl-wrap" style="padding: 0;"><table class="excel-table" id="tabela-mun-2026"></table></div></div>
+            </div>
+        </div>
 
-                    <span class="f-lbl" style="margin-left: 12px;">Mês:</span>
-                    <select class="f-btn" data-group="mes" onchange="setRegF('mes',this.value,this)" style="outline: none;">
-                        <option value="todos">TODOS</option>
-                        <option value="1">JANEIRO</option><option value="2">FEVEREIRO</option><option value="3">MARÇO</option>
-                        <option value="4">ABRIL</option><option value="5">MAIO</option><option value="6">JUNHO</option>
-                        <option value="7">JULHO</option><option value="8">AGOSTO</option><option value="9">SETEMBRO</option>
-                        <option value="10">OUTUBRO</option><option value="11">NOVEMBRO</option><option value="12">DEZEMBRO</option>
-                    </select>
+        <!-- ABA 8: BANCO DE DADOS REGISTROS -->
+        <div class="tab-page" id="tab-registros">
+            <div class="container">
+                <div class="kpi-grid cols-3">
+                    <div class="kpi-card red"><div class="kpi-lbl">Total Geral Cadastrado</div><div class="kpi-val red" id="reg-tot-kpi">—</div><div class="kpi-sub">registros consolidados</div></div>
+                    <div class="kpi-card blue"><div class="kpi-lbl">Filtros Ativos</div><div class="kpi-val blue" id="reg-filt-kpi">—</div><div class="kpi-sub">linhas selecionadas</div></div>
+                    <div class="kpi-card green"><div class="kpi-lbl">Página Corrente</div><div class="kpi-val green" id="reg-pg-kpi">—</div><div class="kpi-sub">de páginas totais</div></div>
+                </div>
 
-                    <span class="f-lbl" style="margin-left: 12px;">Gênero:</span>
-                    <select class="f-btn" data-group="sexo" onchange="setRegF('sexo',this.value,this)" style="outline: none;">
-                        <option value="todos">TODOS</option>
-                        <option value="MASCULINO">MASCULINO</option>
-                        <option value="FEMININO">FEMININO</option>
-                        <option value="MULHER TRANS">MULHER TRANS</option>
-                        <option value="HOMEM TRANS">HOMEM TRANS</option>
+                <div class="filter-bar" style="justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <span class="f-lbl">Ano:</span>
+                        <button class="f-btn active" data-group="ano" data-val="todos" onclick="setRegF('ano','todos',this)">TODOS</button>
+                        <button class="f-btn" data-group="ano" data-val="2025" onclick="setRegF('ano','2025',this)">2025</button>
+                        <button class="f-btn" data-group="ano" data-val="2026" onclick="setRegF('ano','2026',this)">2026</button>
+
+                        <span class="f-lbl" style="margin-left: 12px;">Mês:</span>
+                        <select class="f-btn" data-group="mes" onchange="setRegF('mes',this.value,this)" style="outline: none;">
+                            <option value="todos">TODOS</option>
+                            <option value="1">JANEIRO</option><option value="2">FEVEREIRO</option><option value="3">MARÇO</option>
+                            <option value="4">ABRIL</option><option value="5">MAIO</option><option value="6">JUNHO</option>
+                            <option value="7">JULHO</option><option value="8">AGOSTO</option><option value="9">SETEMBRO</option>
+                            <option value="10">OUTUBRO</option><option value="11">NOVEMBRO</option><option value="12">DEZEMBRO</option>
+                        </select>
+
+                        <span class="f-lbl" style="margin-left: 12px;">Gênero:</span>
+                        <select class="f-btn" data-group="sexo" onchange="setRegF('sexo',this.value,this)" style="outline: none;">
+                            <option value="todos">TODOS</option>
+                            <option value="MASCULINO">MASCULINO</option>
+                            <option value="FEMININO">FEMININO</option>
+                            <option value="MULHER TRANS">MULHER TRANS</option>
+                            <option value="HOMEM TRANS">HOMEM TRANS</option>
                     </select>
 
                     <span class="f-lbl" style="margin-left: 12px;">Meio:</span>
@@ -639,89 +665,69 @@
             </div>
 
             <div class="search-box">
-                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-                <input type="text" id="reg-search" placeholder="Pesquisar por nome de vítima, bairro, ocorrência policial ou cidade..." oninput="applyFilters()">
-            </div>
+                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    <input type="text" id="reg-search" placeholder="Pesquisar por nome de vítima, bairro, ocorrência policial ou cidade..." oninput="applyFilters()">
+                </div>
 
-            <div class="card mb20">
-                <div class="card-hd">
-                    <span class="card-title">Matriz Integrada de Dados Operacionais — CVLI</span>
-                    <span class="card-tag" id="reg-tag">— registros</span>
-                </div>
-                <div class="card-body tbl-wrap" style="padding: 0;">
-                    <table style="width: 100%; min-width: 1800px;">
-                        <thead>
-                            <tr>
-                                <th>Nº</th>
-                                <th>Nome da Vítima</th>
-                                <th>Idade</th>
-                                <th style="color: var(--blue);">Gênero</th>
-                                <th>Nº Ocorrência</th>
-                                <th>Data</th>
-                                <th>Hora</th>
-                                <th>Autoria</th>
-                                <th>Motivo Identificado</th>
-                                <th>Meio Empregado</th>
-                                <th style="color: var(--blue);">Tipo de Arma / Calibre</th>
-                                <th>Tipificação</th>
-                                <th>Bairro / Distrito</th>
-                                <th>Logradouro</th>
-                                <th>Cidade</th>
-                                <th>Coordenadas Georref</th>
-                                <th>Informações Adicionais (Obs)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="reg-tbody"></tbody>
-                    </table>
-                </div>
-                <div style="padding: 16px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-                    <div class="pg-info" id="reg-pg-info">—</div>
-                    <div class="pagination" id="reg-pg"></div>
+                <div class="card mb20">
+                    <div class="card-hd">
+                        <span class="card-title">Matriz Integrada de Dados Operacionais — CVLI</span>
+                        <span class="card-tag" id="reg-tag">— registros</span>
+                    </div>
+                    <div class="card-body tbl-wrap" style="padding: 0;">
+                        <table style="width: 100%; min-width: 1800px;">
+                            <thead>
+                                <tr>
+                                    <th>Nº</th>
+                                    <th>Nome da Vítima</th>
+                                    <th>Idade</th>
+                                    <th style="color: var(--blue);">Gênero</th>
+                                    <th>Nº Ocorrência</th>
+                                    <th>Data</th>
+                                    <th>Hora</th>
+                                    <th>Autoria</th>
+                                    <th>Motivo Identificado</th>
+                                    <th>Meio Empregado</th>
+                                    <th style="color: var(--blue);">Tipo de Arma / Calibre</th>
+                                    <th>Tipificação</th>
+                                    <th>Bairro / Distrito</th>
+                                    <th>Logradouro</th>
+                                    <th>Cidade</th>
+                                    <th>Coordenadas Georref</th>
+                                    <th>Informações Adicionais (Obs)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reg-tbody"></tbody>
+                        </table>
+                    </div>
+                    <div style="padding: 16px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                        <div class="pg-info" id="reg-pg-info">—</div>
+                        <div class="pagination" id="reg-pg"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- ATUALIZAÇÃO 5: RODAPÉ -->
-    <div class="footer" id="footer-txt">SECRETARIA DE SEGURANÇA PÚBLICA · SANTO AMARO / 3ª COORPIN · MODO TEMPO REAL · DESENVOLVIDO POR IPC FÉLIX RILTON</div>
+        <div class="footer" id="footer-txt">SECRETARIA DE SEGURANÇA PÚBLICA · SANTO AMARO / 3ª COORPIN · MODO LOCAL · DESENVOLVIDO POR IPC FÉLIX RILTON</div>
+    </div>
+    
     <div class="toast" id="toast"></div>
-
-    <div id="diag-modal" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px;">
-        <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 30px; max-width: 550px; width: 100%; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
-            <div style="font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; margin-bottom: 8px; color: var(--accent);">FALHA NA SINC. PLANILHA</div>
-            <div style="font-size: 11px; color: var(--muted); margin-bottom: 15px; font-family: 'JetBrains Mono', monospace;" id="diag-error-detail"></div>
-            <div style="font-size: 13px; color: var(--text); margin-bottom: 24px; line-height: 1.8;">
-                <strong>O que pode estar ocorrendo?</strong><br>
-                <span style="color: var(--accent2)">•</span> <strong>Segurança do Navegador (Bloqueio CORS):</strong> Rodar este painel direto do seu computador usando <code>file:///</code> bloqueia o carregamento por segurança. Utilize um servidor web local ou extensão como <em>Live Server</em> no VS Code.<br>
-                <span style="color: var(--accent2)">•</span> <strong>Configurações da Planilha:</strong> Certifique-se de que a planilha do Google foi publicada usando o menu <em>Arquivo > Compartilhar > Publicar na Web</em> e configurando o formato de exportação para <strong>CSV (Valores separados por vírgula)</strong>.
-            </div>
-            <div style="display: flex; gap: 12px;">
-                <button onclick="document.getElementById('diag-modal').style.display='none'; reloadSheets();" style="flex: 1; padding: 12px; background: var(--accent); border: none; border-radius: 8px; color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 18px; cursor: pointer; transition: background 0.2s;">RECONECTAR AGORA</button>
-                <button onclick="document.getElementById('diag-modal').style.display='none';" style="padding: 12px 20px; background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); cursor: pointer;">MANTER OFFLINE</button>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
-const DADOS_FALLBACK = [
-    // ATUALIZADO: Cidade de fallback para Santo Amaro
-    { n: "1", vitima: "JOÃO CARDOSO DOS SANTOS", idade: "24", ocorrencia: "BO-25-00142", data: "12/01/2025", hora: "21:30", sexo: "MASCULINO", autoria: "NÃO", motivo: "TRÁFICO DE DROGAS", meio: "ARMA DE FOGO", tipo_arma: "PISTOLA 9MM", tipificacao: "HOMICÍDIO", bairro: "CENTRO", logradouro: "RUA POPULAR, 45", cidade: "SANTO AMARO", georeferencia: "-12.5447,-38.7126", obs: "Vítima alvejada por disparos efetuados por dupla em motocicleta." }
-];
+const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSb2UoyK7UayCc2nPX2vgQ8sQyAtz3iF08P03cyUoclc-CgzY_XevweMcTTxu5YHQ/pub?output=csv';
 
 function checkUnlock() {
     const input = document.getElementById('pwd-input').value;
     let enc = "";
-    // Hint to unlock: type "12643151" to evaluate correctly
+    // Hint: 12643151
     for(let i=0; i<input.length; i++) { enc += String.fromCharCode(input.charCodeAt(i) + 5); }
 
     if(enc === "67;986:6") {
         document.getElementById('lock-screen').style.display = 'none';
         document.getElementById('app-content').style.display = 'block';
-        initData();
-        buildVG();
+        document.getElementById('dashboard-content').style.display = 'block';
         reloadSheets();
-        if(mapInstance) { setTimeout(function() { mapInstance.invalidateSize(); }, 200); }
     } else {
         const err = document.getElementById('pwd-err');
         err.style.display = 'block';
@@ -729,11 +735,98 @@ function checkUnlock() {
         document.getElementById('pwd-input').focus();
     }
 }
-
 document.getElementById('pwd-input').addEventListener('keypress', function(e) { if(e.key === 'Enter') checkUnlock(); });
 
-// ATENÇÃO: Substitua por sua chave real da planilha da 3ª COORPIN!
-const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR4GEkGuMYUps-dtON9h4BBww0t3pVatdwiRVVMlO6JTrqopXCX0kB1CERvifPlew/pub?output=csv'; // <- MUDAR AQUI PARA A NOVA PLANILHA
+// Variáveis Globais de Estado
+let DB = { registros: [] };
+let mapInstance = null, markerLayer = null;
+const CR = {};
+let currentDataLength = 0;
+let sheetsLoadedAt = null, sheetsRowCount = 0;
+
+// Configuração do Chart.js
+Chart.register(ChartDataLabels);
+Object.assign(Chart.defaults, { color: '#8492a6', borderColor: 'rgba(30, 38, 56, 0.5)', font: { family: 'DM Sans' } });
+Chart.defaults.plugins.datalabels = { display: false };
+const M=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const P=['#ff4a5a','#ff7e40','#ffd60a','#3b82f6','#10b981','#a855f7','#06b6d4','#f59e0b','#ec4899','#64748b'];
+const TT = { enabled: true, backgroundColor: 'rgba(13, 17, 26, 0.95)', borderColor: 'rgba(59, 130, 246, 0.5)', borderWidth: 1.5, titleColor: '#8492a6', bodyColor: '#ffffff', titleFont: { family: 'DM Sans', size: 12, weight: 'bold' }, bodyFont: { family: 'JetBrains Mono', size: 14, weight: 'bold' }, padding: 14, cornerRadius: 8, boxPadding: 6, usePointStyle: true };
+
+// Resize handler
+let resizeTimer;
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+        if (mapInstance) mapInstance.invalidateSize();
+        for (let id in CR) { if (CR[id]) CR[id].resize(); }
+    }, 250);
+});
+
+// UI Helpers
+function mkC(id,cfg){ try { if(CR[id]) CR[id].destroy(); const el=document.getElementById(id); if(!el) return; CR[id]=new Chart(el.getContext('2d'),cfg); } catch(e) { } }
+function showToast(msg, color) {
+    if (!color) color = 'var(--green)';
+    const t = document.getElementById('toast');
+    if(t) {
+        t.innerHTML = '<span style="color:' + color + ';font-size:14px;">●</span> ' + msg;
+        t.classList.add('show');
+        setTimeout(function() { t.classList.remove('show'); }, 5000);
+    }
+}
+function setSheetsStatus(state, text) {
+    const badge = document.getElementById('sheets-badge'), status = document.getElementById('sheets-status');
+    if(badge) badge.className = "sheets-badge " + state;
+    if(status) status.textContent = text;
+}
+
+// Navegação de Abas
+function showTab(id,btn){
+    if(DB.registros.length === 0) return; // Previne navegação se não houver dados
+    const targetPage = document.getElementById('tab-'+id); if(!targetPage) return; 
+    document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    targetPage.classList.add('active'); if(btn) btn.classList.add('active');
+    setTimeout(function() { if(id === 'mancha' && mapInstance) mapInstance.invalidateSize(); buildTab(id); }, 50);
+}
+
+function buildTab(t){
+    if(t==='visao-geral') buildVG(); else if(t==='evolucao') buildEV(); else if(t==='geografico') buildGEO();
+    else if(t==='mancha') buildMANCHA(); else if(t==='vitimas') buildVIT(); else if(t==='modalidade') buildMOD();
+    else if(t==='coorpin') buildCO(); else if(t==='registros') buildREG();
+}
+
+// Normalização de Dados (Mantidas originais)
+function normMeio(m){
+    m = String(m||'').toUpperCase().trim();
+    if(m.includes('FOGO') || m==='AF' || m.includes('DISPARO')) return 'ARMA DE FOGO';
+    if(m.includes('BRAN') || m.includes('FACA') || m.includes('PERFURO') || m.includes('CORTANTE') || m.includes('FACAO') || m.includes('ESTOQUE')) return 'ARMA BRANCA';
+    return 'OUTROS';
+}
+
+function normTipificacao(t) {
+    if (!t) return 'HOMICÍDIO'; 
+    var clean = String(t).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    if (clean.includes('FEMINIC')) return 'FEMINICÍDIO';
+    if (clean.includes('LATROC')) return 'LATROCÍNIO';
+    if (clean.includes('LESAO') || clean.includes('SEGUIDA DE MORTE') || clean.includes('ESPANCAMENTO')) return 'LESÃO C.SEG. MORTE';
+    if (clean.includes('HOMICIDIO') || clean.includes('HOMICID') || clean.includes('EXECUCAO')) return 'HOMICÍDIO';
+    return String(t).toUpperCase().trim();
+}
+function isCVLI(t) { return ['HOMICÍDIO', 'FEMINICÍDIO', 'LESÃO C.SEG. MORTE', 'LATROCÍNIO'].includes(normTipificacao(t)); }
+function parseGenero(sx) {
+    sx = String(sx || 'NÃO INFORMADO').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    if (sx.includes('TRANS') || sx.includes('TRAVE')) {
+        if (sx.includes('MASC') || sx.includes('HOMEM') || sx === 'HT') return 'HOMEM TRANS';
+        return 'MULHER TRANS'; 
+    }
+    if (sx.includes('FEM') || sx === 'F' || sx === 'MULHER') return 'FEMININO';
+    if (sx.includes('MASC') || sx === 'M' || sx === 'HOMEM') return 'MASCULINO';
+    return 'NÃO INFORMADO';
+}
+
+// ==========================================
+// LÓGICA DE LEITURA DA PLANILHA ONLINE
+// ==========================================
 
 const COL_MAP = {
     n: ['n','#','nº','num','numero','id','ordem'],
@@ -901,7 +994,6 @@ function parseCSV(text) {
             const tip = get('tipificacao') || 'HOMICÍDIO';
             const sexo = get('sexo') || 'NÃO INFORMADO';
             
-            // ATUALIZAÇÃO 6: CIDADE POLO - SANTO AMARO
             let cid = String(get('cidade') || 'SANTO AMARO').toUpperCase().trim();
             if(cid === 'SANTO AMARO' || cid === 'S.A.' || cid === 'SAMARO') cid = 'SANTO AMARO';
 
@@ -952,27 +1044,6 @@ function parseCSV(text) {
     }
 }
 
-let sheetsLoadedAt = null, sheetsRowCount = 0, usingSheets = false;
-const DB = { registros: [] };
-let mapInstance = null, markerLayer = null;
-const CR = {};
-
-function setSheetsStatus(state, text) {
-    const badge = document.getElementById('sheets-badge'), status = document.getElementById('sheets-status');
-    if(badge) badge.className = "sheets-badge " + state;
-    if(status) status.textContent = text;
-}
-
-function showToast(msg, color) {
-    if (!color) color = 'var(--green)';
-    const t = document.getElementById('toast');
-    if(t) {
-        t.innerHTML = '<span style="color:' + color + ';font-size:14px;">●</span> ' + msg;
-        t.classList.add('show');
-        setTimeout(function() { t.classList.remove('show'); }, 5000);
-    }
-}
-
 async function reloadSheets(silent = false) {
     if (!silent) {
         setSheetsStatus('loading', 'SINCRONIZANDO PLANILHA...');
@@ -996,16 +1067,15 @@ async function reloadSheets(silent = false) {
     } catch (error) {
         console.error('Falha na integração direta:', error);
         if (!silent) {
-            setSheetsStatus('err', 'MODO OFFLINE (LOCAL)');
-            showToast('Utilizando cache operacional local de contingência.', 'var(--accent2)');
-            initData(); buildTab('visao-geral');
+            setSheetsStatus('err', 'ERRO NA SINCRONIZAÇÃO');
+            showToast('Erro ao carregar dados remotos.', 'var(--red)');
         }
     }
 }
 
 function processSheetRows(rows, silent = false) {
     try {
-        sheetsRowCount = rows.length; sheetsLoadedAt = new Date(); usingSheets = true; DB.registros = rows;
+        sheetsRowCount = rows.length; sheetsLoadedAt = new Date(); DB.registros = rows;
         recalcStats();
         
         const timeStr = sheetsLoadedAt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
@@ -1014,7 +1084,6 @@ function processSheetRows(rows, silent = false) {
         if (!silent) showToast('✓ Conectado: ' + sheetsRowCount + ' registros atualizados! · ' + timeStr, 'var(--green)');
 
         const hsub = document.getElementById('hsub-txt');
-        // ATUALIZAÇÃO 7: SUBTÍTULO
         if(hsub) hsub.textContent = 'Inteligência Estratégica em Segurança · Santo Amaro / 3ª COORPIN · ' + DB.registros.length + ' Registros';
 
         const activeTab = document.querySelector('.tab-btn.active');
@@ -1038,51 +1107,16 @@ setInterval(function() {
     if (document.getElementById('app-content').style.display !== 'none') reloadSheets(true);
 }, 300000);
 
-function normMeio(m){
-    m = String(m||'').toUpperCase().trim();
-    if(m.includes('FOGO') || m==='AF' || m.includes('DISPARO')) return 'ARMA DE FOGO';
-    if(m.includes('BRAN') || m.includes('FACA') || m.includes('PERFURO') || m.includes('CORTANTE') || m.includes('FACAO') || m.includes('ESTOQUE')) return 'ARMA BRANCA';
-    return 'OUTROS';
-}
-
-function normTipificacao(t) {
-    if (!t) return 'HOMICÍDIO'; 
-    var clean = String(t).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-    if (clean.includes('FEMINIC')) return 'FEMINICÍDIO';
-    if (clean.includes('LATROC')) return 'LATROCÍNIO';
-    if (clean.includes('LESAO') || clean.includes('SEGUIDA DE MORTE') || clean.includes('ESPANCAMENTO')) return 'LESÃO C.SEG. MORTE';
-    if (clean.includes('HOMICIDIO') || clean.includes('HOMICID') || clean.includes('EXECUCAO')) return 'HOMICÍDIO';
-    return String(t).toUpperCase().trim();
-}
-
-function isCVLI(t) { return ['HOMICÍDIO', 'FEMINICÍDIO', 'LESÃO C.SEG. MORTE', 'LATROCÍNIO'].includes(normTipificacao(t)); }
-
-function parseGenero(sx) {
-    sx = String(sx || 'NÃO INFORMADO').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-    if (sx.includes('TRANS') || sx.includes('TRAVE')) {
-        if (sx.includes('MASC') || sx.includes('HOMEM') || sx === 'HT') return 'HOMEM TRANS';
-        return 'MULHER TRANS'; 
-    }
-    if (sx.includes('FEM') || sx === 'F' || sx === 'MULHER') return 'FEMININO';
-    if (sx.includes('MASC') || sx === 'M' || sx === 'HOMEM') return 'MASCULINO';
-    return 'NÃO INFORMADO';
-}
-
-function initData(){
-    DB.registros = DADOS_FALLBACK.map(function(r) { return Object.assign({}, r, { meio_norm: normMeio(r.meio_norm||r.meio) }); });
-    recalcStats();
-}
-
+// Recalculo Estatístico (Mantido Original)
 function recalcStats(){
     const init12=function() { return Array(12).fill(0); };
-    // Mantemos as variáveis internas 'feira_25' e 'feira_26' para evitar refatoração massiva de todo o script,
-    // mas elas AGORA representam SANTO AMARO.
     DB.feira_25=init12(); DB.feira_26=init12(); DB.coorpin_25=init12(); DB.coorpin_26=init12();
     DB.cidades26={}; DB.bairros26={}; DB.meio26={}; DB.tipoArma26={}; DB.tipo26={}; DB.motivo26={};
     DB.coorpin25={}; DB.coorpin26={}; DB.meses25={}; DB.meses26={}; DB.t25_coorpin=0; DB.t26_coorpin=0;
 
     let maxM26 = -1;
     const _today = new Date();
+    // Logic kept for 2026 current year assumption
     const currentRealMonth = (_today.getFullYear() >= 2026) ? (_today.getFullYear() === 2026 ? _today.getMonth() : 11) : 11;
 
     DB.registros.forEach(function(r) {
@@ -1092,12 +1126,11 @@ function recalcStats(){
 
         if (is26 && mi > maxM26) maxM26 = mi;
         
-        // ATUALIZAÇÃO 8: LÓGICA DE CIDADE POLO PARA ESTATÍSTICAS
         const cid=String(r.cidade||'SANTO AMARO').toUpperCase().trim();
 
         if(is25){
             DB.coorpin_25[mi]++; 
-            if(cid==='SANTO AMARO') DB.feira_25[mi]++; // feira_X agora é S. Amaro na lógica interna
+            if(cid==='SANTO AMARO') DB.feira_25[mi]++;
             DB.coorpin25[cid]=(DB.coorpin25[cid]||0)+1;
             if(!DB.meses25[cid]) DB.meses25[cid]=init12();
             DB.meses25[cid][mi]++; DB.t25_coorpin++;
@@ -1140,7 +1173,6 @@ function recalcStats(){
     DB.registros.forEach(function(r) {
         let mi = parseInt(r.mes, 10) - 1;
         if (mi >= 0 && mi <= DB.limitMonth && isCVLI(r.tipificacao)) {
-            // Ajuste aqui também
             const cid = String(r.cidade || 'SANTO AMARO').toUpperCase().trim();
             if (String(r.ano) === '2025') DB.coorpin25_ytd[cid] = (DB.coorpin25_ytd[cid] || 0) + 1;
             if (String(r.ano) === '2026') DB.coorpin26_ytd[cid] = (DB.coorpin26_ytd[cid] || 0) + 1;
@@ -1148,57 +1180,9 @@ function recalcStats(){
     });
 }
 
-Chart.register(ChartDataLabels);
-Object.assign(Chart.defaults, { color: '#8492a6', borderColor: 'rgba(30, 38, 56, 0.5)', font: { family: 'DM Sans' } });
-Chart.defaults.plugins.datalabels = { display: false };
-
-const M=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-const P=['#ff4a5a','#ff7e40','#ffd60a','#3b82f6','#10b981','#a855f7','#06b6d4','#f59e0b','#ec4899','#64748b'];
-
-const TT = {
-    enabled: true,
-    backgroundColor: 'rgba(13, 17, 26, 0.95)',
-    borderColor: 'rgba(59, 130, 246, 0.5)',
-    borderWidth: 1.5,
-    titleColor: '#8492a6',
-    bodyColor: '#ffffff',
-    titleFont: { family: 'DM Sans', size: 12, weight: 'bold' },
-    bodyFont: { family: 'JetBrains Mono', size: 14, weight: 'bold' },
-    padding: 14,
-    cornerRadius: 8,
-    boxPadding: 6,
-    usePointStyle: true
-};
-
-let resizeTimer;
-window.addEventListener('resize', function() {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function() {
-        if (mapInstance) mapInstance.invalidateSize();
-        for (let id in CR) {
-            if (CR[id]) CR[id].resize();
-        }
-    }, 250);
-});
-
-function mkC(id,cfg){
-    try { if(CR[id]) CR[id].destroy(); const el=document.getElementById(id); if(!el) return; CR[id]=new Chart(el.getContext('2d'),cfg); } catch(e) { }
-}
-
-function showTab(id,btn){
-    const targetPage = document.getElementById('tab-'+id); if(!targetPage) return; 
-    document.querySelectorAll('.tab-page').forEach(function(p) { p.classList.remove('active'); });
-    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-    targetPage.classList.add('active'); if(btn) btn.classList.add('active');
-    setTimeout(function() { if(id === 'mancha' && mapInstance) mapInstance.invalidateSize(); buildTab(id); }, 50);
-}
-
-function buildTab(t){
-    if(t==='visao-geral') buildVG(); else if(t==='evolucao') buildEV(); else if(t==='geografico') buildGEO();
-    else if(t==='mancha') buildMANCHA(); else if(t==='vitimas') buildVIT(); else if(t==='modalidade') buildMOD();
-    else if(t==='coorpin') buildCO(); else if(t==='registros') buildREG();
-}
-
+// ==========================================
+// FUNÇÕES DE CONSTRUÇÃO DE ABAS (MANTIDAS)
+// ==========================================
 function buildVG(){
     const regs26=DB.registros.filter(function(r) { return String(r.ano)==='2026' && isCVLI(r.tipificacao); });
     const idades26=regs26.map(function(r) { return parseInt(r.idade); }).filter(function(i) { return !isNaN(i)&&i>0; });
@@ -1214,7 +1198,6 @@ function buildVG(){
     const maskFuture = function(arr) { return arr.map(function(v, i) { return i > DB.limitMonth ? null : (v || 0); }); };
 
     mkC('vg-mensal',{type:'line',data:{labels:M,datasets:[
-        // ATUALIZAÇÃO 9: NOMES NO GRÁFICO
         {label:'S. Amaro 2025',data:DB.feira_25,borderColor:'#ff4a5a',backgroundColor:'rgba(255,74,90,0.04)',borderWidth:2.5,tension:.4,fill:true,pointRadius:3},
         {label:'S. Amaro 2026 (YTD)',data:maskFuture(DB.feira_26),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.05)',borderWidth:2.5,tension:.4,fill:true,borderDash:[5,3],pointRadius:4}
     ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#8492a6',font:{size:11,weight:'bold'},boxWidth:12,padding:12}},tooltip:TT},scales:{x:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true}}}});
@@ -1274,7 +1257,6 @@ function buildEV(){
 
     mkC('ev-full',{type:'line',data:{labels:M,datasets:[
         {label:'COORPIN 2025',data:DB.coorpin_25,borderColor:'#ff4a5a',backgroundColor:'rgba(255,74,90,0.03)',borderWidth:2,tension:.4,fill:true,pointRadius:4},
-        // ATUALIZAÇÃO 10: NOMES
         {label:'S. Amaro 2025',data:DB.feira_25,borderColor:'#ff7e40',backgroundColor:'transparent',borderWidth:1.5,tension:.4,fill:false,borderDash:[3,2],pointRadius:3},
         {label:'COORPIN 2026',data:maskFuture(DB.coorpin_26),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.05)',borderWidth:2,tension:.4,fill:true,borderDash:[6,3],pointRadius:4},
         {label:'S. Amaro 2026',data:maskFuture(DB.feira_26),borderColor:'#10b981',backgroundColor:'transparent',borderWidth:1.5,tension:.4,fill:false,borderDash:[3,2],pointRadius:3}
@@ -1290,7 +1272,6 @@ function buildEV(){
     const allV=[...DB.feira_25,...DB.feira_26.filter(function(v, i) { return v>0 && i <= DB.limitMonth; })];
     const maxV=Math.max(...allV)||1;
     let h='<div class="hm-cell hm-hdr"></div>'; M.forEach(function(m) { h += '<div class="hm-cell hm-hdr">' + m + '</div>'; });
-    // ATUALIZAÇÃO 11: NOMES DO HEATMAP
     [{lbl:'S. Amaro 2025',data:DB.feira_25},{lbl:'S. Amaro 2026',data:DB.feira_26}].forEach(function(row){
         h += '<div class="hm-cell hm-lbl">' + row.lbl + '</div>';
         row.data.forEach(function(v, i){
@@ -1338,7 +1319,6 @@ function buildEV(){
     const sem26=[safeSum(DB.coorpin_26.slice(0,6)),safeSum(DB.coorpin_26.slice(6,12))];
     mkC('ev-sem',{type:'bar',data:{labels:['1º Semestre','2º Semestre'],datasets:[{label:'2025',data:sem25,backgroundColor:'rgba(255, 74, 90, 0.85)',borderRadius:4},{label:'2026',data:sem26,backgroundColor:'rgba(59, 130, 246, 0.85)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#8492a6',font:{size:10},boxWidth:12}},tooltip:TT},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(30, 38, 56, 0.3)'},beginAtZero:true}}}});
 
-    // ATUALIZAÇÃO 12: NOME TABELA
     let htmlTab='<table><thead><tr><th>Período</th><th>S. Amaro 2025</th><th>S. Amaro 2026</th><th>Var. S. Amaro</th><th>COORPIN 2025</th><th>COORPIN 2026</th><th>Var. COORPIN</th></tr></thead><tbody>';
     M.forEach(function(m,i){
         if(i > DB.limitMonth) return;
@@ -1354,7 +1334,6 @@ function buildEV(){
 function buildGEO(){
     const todasCidades = new Set();
     DB.registros.forEach(r => {
-        // ATUALIZAÇÃO 13
         if(isCVLI(r.tipificacao)) todasCidades.add(String(r.cidade || 'SANTO AMARO').toUpperCase().trim());
     });
     const cidades = Array.from(todasCidades).map(c => [c, DB.cidades26[c] || 0]).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
@@ -1375,7 +1354,6 @@ function buildGEO(){
         barList.innerHTML=bairros.map((entry,i)=>'<div class="bar-item"><div class="bar-row"><span class="bar-lbl" style="font-size:11px;font-weight:600;">' + entry[0] + '</span><span class="bar-val font-semibold">' + entry[1] + '</span></div><div class="bar-track"><div class="bar-fill" style="width:' + (entry[1]/max*100).toFixed(1) + '%;background:' + P[i%P.length] + '"></div></div></div>').join('');
     }
 
-    // ATUALIZAÇÃO 14: ZONAS E BAIRROS GENÉRICOS (Ajustar com bairros reais de SA se necessário)
     const zonasDef={'CENTRO':'CENTRO','SACRAMENTO':'ZONA NORTE','TRAPICHE':'ZONA SUL', 'ACUPE':'DISTRITOS/RURAL', 'BOM JESUS DOS POBRES':'DISTRITOS/RURAL'};
     let zv={'ZONA SUL':0,'ZONA NORTE':0,'CENTRO':0,'DISTRITOS/RURAL':0,'OUTROS BAIRROS':0};
     Object.entries(DB.bairros26).forEach(entry=>{
@@ -1395,7 +1373,7 @@ function buildMANCHA() {
     const anoFiltro = document.getElementById('mancha-ano') ? document.getElementById('mancha-ano').value : 'todos';
     const mesFiltro = document.getElementById('mancha-mes') ? document.getElementById('mancha-mes').value : 'todos';
     const regsComCoords = DB.registros.filter(r => { 
-        if (!isCVLI(r.tipificacao) || r.lat === null || r.lng === null) return false;
+        if (!isCVLI(r.tipificacao) || r.lat === null || r.lng === null || isNaN(r.lat) || isNaN(r.lng)) return false;
         if (anoFiltro !== 'todos' && String(r.ano) !== anoFiltro) return false;
         if (mesFiltro !== 'todos' && String(r.mes) !== mesFiltro) return false;
         return true;
@@ -1404,7 +1382,6 @@ function buildMANCHA() {
     let qtdFeminicidio = 0, qtdMenores = 0, qtdAdultos = 0, totalVitimasMap = 0;
 
     if (!mapInstance) {
-        // ATUALIZAÇÃO 15: CENTRO DO MAPA PARA SANTO AMARO (-12.5447, -38.7126)
         mapInstance = L.map('map', {zoomControl: true, attributionControl: false}).setView([-12.5447, -38.7126], 12);
         L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: '&copy; Google Maps' }).addTo(mapInstance);
     }
@@ -1478,6 +1455,9 @@ function buildMANCHA() {
     if (regsComCoords.length > 0) { 
          const bounds = L.latLngBounds(regsComCoords.map(r => [r.lat, r.lng]));
          mapInstance.fitBounds(bounds, {padding: [40, 40], maxZoom: 15});
+    } else {
+        // Fallback default view if no coordinates match filter
+        mapInstance.setView([-12.5447, -38.7126], 12);
     }
 
     if(document.getElementById('mancha-tot')) document.getElementById('mancha-tot').textContent = totalVitimasMap;
@@ -1531,7 +1511,6 @@ function buildVIT(){
     const getColor = (g) => g==='MASCULINO'?'#3b82f6':g==='FEMININO'?'#ec4899':g==='MULHER TRANS'?'#a855f7':g==='HOMEM TRANS'?'#0ea5e9':'#8492a6';
     const genderOrder = ['MASCULINO', 'FEMININO', 'MULHER TRANS', 'HOMEM TRANS'];
     
-    // Gráfico 2026
     const genData26 = genderOrder.map(g => [g, generos26[g] || 0]);
     if (generos26['NÃO INFORMADO'] > 0) genData26.push(['N/I', generos26['NÃO INFORMADO']]);
     
@@ -1539,33 +1518,19 @@ function buildVIT(){
         type:'bar',
         data:{
             labels:genData26.map(e=>e[0]),
-            datasets:[{
-                data:genData26.map(e=>e[1]),
-                backgroundColor:genData26.map(e=>getColor(e[0])),
-                borderRadius:4,
-                borderSkipped:false
-            }]
+            datasets:[{ data:genData26.map(e=>e[1]), backgroundColor:genData26.map(e=>getColor(e[0])), borderRadius:4, borderSkipped:false }]
         },
         options:{
-            responsive:true,
-            maintainAspectRatio:false,
+            responsive:true, maintainAspectRatio:false,
             plugins:{
                 legend:{display:false},
                 tooltip:{...TT,callbacks:{label:c=>" " + c.parsed.y + " (" + (regs26.length?((c.parsed.y/regs26.length)*100).toFixed(1):0) + "%)"}},
-                datalabels: {
-                    display: true, color: '#f1f3f9', anchor: 'end', align: 'top',
-                    font: { family: 'JetBrains Mono', size: 12, weight: 'bold' },
-                    formatter: function(value) { return value > 0 ? value : ''; }
-                }
+                datalabels: { display: true, color: '#f1f3f9', anchor: 'end', align: 'top', font: { family: 'JetBrains Mono', size: 12, weight: 'bold' }, formatter: function(value) { return value > 0 ? value : ''; } }
             },
-            scales:{
-                x:{grid:{display:false},ticks:{font:{size:9, weight: 'bold'}, maxRotation: 45, minRotation: 0}},
-                y:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true, grace: '20%'}
-            }
+            scales:{ x:{grid:{display:false},ticks:{font:{size:9, weight: 'bold'}, maxRotation: 45, minRotation: 0}}, y:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true, grace: '20%'} }
         }
     });
 
-    // Gráfico 2025
     const genData25 = genderOrder.map(g => [g, generos25[g] || 0]);
     if (generos25['NÃO INFORMADO'] > 0) genData25.push(['N/I', generos25['NÃO INFORMADO']]);
     
@@ -1573,29 +1538,16 @@ function buildVIT(){
         type:'bar',
         data:{
             labels:genData25.map(e=>e[0]),
-            datasets:[{
-                data:genData25.map(e=>e[1]),
-                backgroundColor:genData25.map(e=>getColor(e[0])),
-                borderRadius:4,
-                borderSkipped:false
-            }]
+            datasets:[{ data:genData25.map(e=>e[1]), backgroundColor:genData25.map(e=>getColor(e[0])), borderRadius:4, borderSkipped:false }]
         },
         options:{
-            responsive:true,
-            maintainAspectRatio:false,
+            responsive:true, maintainAspectRatio:false,
             plugins:{
                 legend:{display:false},
                 tooltip:{...TT,callbacks:{label:c=>" " + c.parsed.y + " (" + (regs25.length?((c.parsed.y/regs25.length)*100).toFixed(1):0) + "%)"}},
-                datalabels: {
-                    display: true, color: '#f1f3f9', anchor: 'end', align: 'top',
-                    font: { family: 'JetBrains Mono', size: 12, weight: 'bold' },
-                    formatter: function(value) { return value > 0 ? value : ''; }
-                }
+                datalabels: { display: true, color: '#f1f3f9', anchor: 'end', align: 'top', font: { family: 'JetBrains Mono', size: 12, weight: 'bold' }, formatter: function(value) { return value > 0 ? value : ''; } }
             },
-            scales:{
-                x:{grid:{display:false},ticks:{font:{size:9, weight: 'bold'}, maxRotation: 45, minRotation: 0}},
-                y:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true, grace: '20%'}
-            }
+            scales:{ x:{grid:{display:false},ticks:{font:{size:9, weight: 'bold'}, maxRotation: 45, minRotation: 0}}, y:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true, grace: '20%'} }
         }
     });
 
@@ -1653,35 +1605,26 @@ function buildMOD(){
     if(sortedMot.length>0)mkC('mod-motivo',{type:'bar',data:{labels:sortedMot.map(e=>e[0]),datasets:[{data:sortedMot.map(e=>e[1]),backgroundColor:'#ff4a5a',borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:10,weight:'600'}}}}}});
     else{const el=document.getElementById('mod-motivo');if(el)el.parentNode.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px;">Maioria dos registros sem motivação identificada.</div>';}
 
-    // --- NOVO GRÁFICO: CRUZAMENTO BAIRRO VS ARMA ---
     const bairroArmaData = {};
     const topBairrosCount = {};
 
     regs26.forEach(r => {
         let b = String(r.bairro || 'NÃO INFORMADO').toUpperCase().trim();
-        // ATUALIZAÇÃO 16
         if(String(r.cidade).toUpperCase().includes('SANTO AMARO')) {
             let tArma = String(r.tipo_arma || '').toUpperCase().trim();
             if (!tArma || tArma === 'NÃO INFORMADO' || tArma === 'NAO INFORMADA') {
-                tArma = normMeio(r.meio); // Usa Arma de Fogo/Branca genérica caso não tenha calibre
+                tArma = normMeio(r.meio);
             }
-
             topBairrosCount[b] = (topBairrosCount[b] || 0) + 1;
             if (!bairroArmaData[b]) bairroArmaData[b] = {};
             bairroArmaData[b][tArma] = (bairroArmaData[b][tArma] || 0) + 1;
         }
     });
 
-    const sortedBairros = Object.entries(topBairrosCount)
-        .sort((a, b) => b[1] - a[1])
-        .map(e => e[0]);
-
+    const sortedBairros = Object.entries(topBairrosCount).sort((a, b) => b[1] - a[1]).map(e => e[0]);
     const uniqueWeapons = new Set();
-    sortedBairros.forEach(b => {
-        Object.keys(bairroArmaData[b]).forEach(w => uniqueWeapons.add(w));
-    });
+    sortedBairros.forEach(b => { Object.keys(bairroArmaData[b]).forEach(w => uniqueWeapons.add(w)); });
     
-    // Sort weapons by overall frequency across all neighborhoods
     const weaponsArray = Array.from(uniqueWeapons).sort((w1, w2) => {
         let sum1 = 0, sum2 = 0;
         sortedBairros.forEach(b => { sum1 += (bairroArmaData[b][w1] || 0); sum2 += (bairroArmaData[b][w2] || 0); });
@@ -1689,39 +1632,19 @@ function buildMOD(){
     });
 
     const datasetsBairroArma = weaponsArray.map((w, i) => {
-        return {
-            label: w,
-            data: sortedBairros.map(b => bairroArmaData[b][w] || 0),
-            backgroundColor: P[i % P.length],
-            borderWidth: 1,
-            borderColor: 'rgba(13, 17, 26, 0.8)', // Linha divisória fina para destacar as fatias empilhadas
-            borderRadius: 2
-        };
+        return { label: w, data: sortedBairros.map(b => bairroArmaData[b][w] || 0), backgroundColor: P[i % P.length], borderWidth: 1, borderColor: 'rgba(13, 17, 26, 0.8)', borderRadius: 2 };
     });
 
     const wrapBairroArma = document.getElementById('wrap-bairro-arma');
-    if(wrapBairroArma) {
-        wrapBairroArma.style.height = Math.max(420, sortedBairros.length * 28) + 'px';
-    }
+    if(wrapBairroArma) { wrapBairroArma.style.height = Math.max(420, sortedBairros.length * 28) + 'px'; }
 
     mkC('mod-bairro-arma', {
         type: 'bar',
-        data: {
-            labels: sortedBairros,
-            datasets: datasetsBairroArma
-        },
+        data: { labels: sortedBairros, datasets: datasetsBairroArma },
         options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: { stacked: true, grid: { color: 'rgba(30, 38, 56, 0.3)' }, ticks: { font: { size: 10 } } },
-                y: { stacked: true, grid: { display: false }, ticks: { font: { size: 10, weight: '600' } } }
-            },
-            plugins: {
-                legend: { display: true, position: 'bottom', labels: { color: '#8492a6', font: { size: 10, weight: 'bold' }, boxWidth: 12, padding: 15 } },
-                tooltip: TT
-            }
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            scales: { x: { stacked: true, grid: { color: 'rgba(30, 38, 56, 0.3)' }, ticks: { font: { size: 10 } } }, y: { stacked: true, grid: { display: false }, ticks: { font: { size: 10, weight: '600' } } } },
+            plugins: { legend: { display: true, position: 'bottom', labels: { color: '#8492a6', font: { size: 10, weight: 'bold' }, boxWidth: 12, padding: 15 } }, tooltip: TT }
         }
     });
 }
@@ -1787,7 +1710,6 @@ function buildTABELAS() {
 
     DB.registros.forEach(r=>{
         var mi = parseInt(r.mes, 10) - 1; if (isNaN(mi) || mi > limitMonth || !isCVLI(r.tipificacao)) return;
-        // ATUALIZAÇÃO 17
         var tip = normTipificacao(r.tipificacao), cid = String(r.cidade || 'SANTO AMARO').toUpperCase().trim();
         if (String(r.ano) === '2025') { if (d25T[tip] !== undefined) { d25T[tip]++; t25T++; } d25M[cid] = (d25M[cid] || 0) + 1; } 
         else if (String(r.ano) === '2026') { if (d26T[tip] !== undefined) { d26T[tip]++; t26T++; } d26M[cid] = (d26M[cid] || 0) + 1; }
@@ -1801,7 +1723,6 @@ function buildTABELAS() {
     ['tag-tip-live','tag-mun-live','tag-tip26-live','tag-mun26-live'].forEach(id=>{ var el = document.getElementById(id); if (el) el.textContent = _liveTxt; });
 
     var munHtml = '<thead><tr><th>MUNICÍPIO DA COORPIN</th><th>2025 (' + periodoLabel + ')</th><th>2026 (' + periodoLabel + ')</th><th>VARIAÇÃO %</th></tr></thead><tbody>';
-    // ATUALIZAÇÃO 18
     var allCids = Object.keys(Object.assign({}, d25M, d26M)).sort((a,b)=>{ if (a === 'SANTO AMARO') return -1; if (b === 'SANTO AMARO') return 1; return a.localeCompare(b); });
     allCids.forEach(c=>{ var v25 = d25M[c] || 0, v26 = d26M[c] || 0; munHtml += '<tr><td style="text-align:left; font-weight:600;">' + c + '</td><td>' + v25 + '</td><td style="color:var(--blue);font-weight:700;">' + v26 + '</td><td>' + calcVar(v25, v26) + '</td></tr>'; });
     munHtml += '<tr class="total-row"><td style="text-align:left; font-weight:700;">TOTAL GERAL DA COORPIN</td><td>' + t25T + '</td><td>' + t26T + '</td><td>' + calcVar(t25T, t26T) + '</td></tr></tbody>';
@@ -1843,13 +1764,11 @@ function buildTABELAS() {
         DB.registros.forEach(r=>{
             if (String(r.ano) === String(ano) && isCVLI(r.tipificacao)) {
                 var mi = parseInt(r.mes, 10) - 1; if (!isNaN(mi) && mi >= 0 && mi <= 11) {
-                    // ATUALIZAÇÃO 19
                     var cid = String(r.cidade || 'SANTO AMARO').toUpperCase().trim();
                     if (!munData[cid]) munData[cid] = Array(12).fill(0); munData[cid][mi]++;
                 }
             }
         });
-        // ATUALIZAÇÃO 20
         var cidades = Object.keys(munData).sort((a,b)=>{ if (a === 'SANTO AMARO') return -1; if (b === 'SANTO AMARO') return 1; return a.localeCompare(b); });
         var html = mesesHeaderAbsolute + '<tbody>', cvliMensal = Array(12).fill(0), totalGeral = 0;
         cidades.forEach(cid=>{
