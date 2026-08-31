@@ -732,7 +732,8 @@ function checkUnlock() {
 
 document.getElementById('pwd-input').addEventListener('keypress', function(e) { if(e.key === 'Enter') checkUnlock(); });
 
-const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR4GEkGuMYUps-dtON9h4BBww0t3pVatdwiRVVMlO6JTrqopXCX0kB1CERvifPlew/pub?output=csv'; // <- URL ATUALIZADA
+// ATENÇÃO: Substitua por sua chave real da planilha da 3ª COORPIN!
+const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR4GEkGuMYUps-dtON9h4BBww0t3pVatdwiRVVMlO6JTrqopXCX0kB1CERvifPlew/pub?output=csv'; // <- MUDAR AQUI PARA A NOVA PLANILHA
 
 const COL_MAP = {
     n: ['n','#','nº','num','numero','id','ordem'],
