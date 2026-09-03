@@ -310,7 +310,7 @@
         </div>
         <button class="lock-btn" onclick="checkUnlock()">DESBLOQUEAR TERMINAL</button>
         <div id="pwd-err" class="lock-err">ACESSO NEGADO: Credencial incorreta.</div>
-        <!-- Mock Password for testing: Samy@19123 -->
+        <!-- Mock Password for testing: Samy@19123 ou 3a.Coorpin -->
     </div>
 </div>
 
@@ -720,10 +720,10 @@ const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSb2UoyK
 function checkUnlock() {
     const input = document.getElementById('pwd-input').value;
     let enc = "";
-    // Hint: Samy@19123
+    // Hint: Samy@19123 ou 3a.Coorpin
     for(let i=0; i<input.length; i++) { enc += String.fromCharCode(input.charCodeAt(i) + 5); }
 
-    if(enc === "Xfr~E6>678") {
+    if(enc === "Xfr~E6>678" || enc === "8f3Httwuns") {
         document.getElementById('lock-screen').style.display = 'none';
         document.getElementById('app-content').style.display = 'block';
         document.getElementById('dashboard-content').style.display = 'block';
