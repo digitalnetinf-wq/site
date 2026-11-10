@@ -458,6 +458,7 @@
             <div class="filter-bar" style="justify-content: flex-start; gap: 12px; margin-bottom: 24px;">
                 <span class="f-lbl">Ano:</span><select class="f-btn" id="mancha-ano" onchange="buildMANCHA()" style="outline: none;"><option value="todos">TODOS</option><option value="2025">2025</option><option value="2026" selected>2026</option></select>
                 <span class="f-lbl" style="margin-left: 12px;">Mês:</span><select class="f-btn" id="mancha-mes" onchange="buildMANCHA()" style="outline: none;"><option value="todos" selected>TODOS</option><option value="1">JANEIRO</option><option value="2">FEVEREIRO</option><option value="3">MARÇO</option><option value="4">ABRIL</option><option value="5">MAIO</option><option value="6">JUNHO</option><option value="7">JULHO</option><option value="8">AGOSTO</option><option value="9">SETEMBRO</option><option value="10">OUTUBRO</option><option value="11">NOVEMBRO</option><option value="12">DEZEMBRO</option></select>
+                <span class="f-lbl" style="margin-left: 12px;">Cidade:</span><select class="f-btn" id="mancha-cidade" onchange="buildMANCHA()" style="outline: none;"><option value="todos" selected>TODAS</option></select>
             </div>
             <div class="card mb20">
                 <div class="card-hd" style="flex-wrap: wrap; gap: 12px;">
@@ -1122,6 +1123,7 @@ function recalcStats(){
         DB.t25_ytd += DB.coorpin_25[i] || 0; DB.t26_ytd += DB.coorpin_26[i] || 0;
     }
 
+    const citySet = new Set();
     DB.registros.forEach(function(r) {
         let mi = parseInt(r.mes, 10) - 1;
         if (mi >= 0 && mi <= DB.limitMonth && isCVLI(r.tipificacao)) {
@@ -1129,7 +1131,18 @@ function recalcStats(){
             if (String(r.ano) === '2025') DB.coorpin25_ytd[cid] = (DB.coorpin25_ytd[cid] || 0) + 1;
             if (String(r.ano) === '2026') DB.coorpin26_ytd[cid] = (DB.coorpin26_ytd[cid] || 0) + 1;
         }
+        
+        if (isCVLI(r.tipificacao) && r.lat !== null) {
+            citySet.add(String(r.cidade || 'FEIRA DE SANTANA').toUpperCase().trim());
+        }
     });
+    
+    const citySelect = document.getElementById('mancha-cidade');
+    if (citySelect) {
+        const currentVal = citySelect.value;
+        citySelect.innerHTML = '<option value="todos">TODAS</option>' + Array.from(citySet).sort().map(c => '<option value="' + c + '">' + c + '</option>').join('');
+        if (Array.from(citySet).includes(currentVal)) citySelect.value = currentVal;
+    }
 }
 
 Chart.register(ChartDataLabels);
@@ -1372,10 +1385,12 @@ function buildMANCHA() {
 
     const anoFiltro = document.getElementById('mancha-ano') ? document.getElementById('mancha-ano').value : 'todos';
     const mesFiltro = document.getElementById('mancha-mes') ? document.getElementById('mancha-mes').value : 'todos';
+    const cidadeFiltro = document.getElementById('mancha-cidade') ? document.getElementById('mancha-cidade').value : 'todos';
     const regsComCoords = DB.registros.filter(r => { 
         if (!isCVLI(r.tipificacao) || r.lat === null || r.lng === null) return false;
         if (anoFiltro !== 'todos' && String(r.ano) !== anoFiltro) return false;
         if (mesFiltro !== 'todos' && String(r.mes) !== mesFiltro) return false;
+        if (cidadeFiltro !== 'todos' && String(r.cidade).toUpperCase().trim() !== cidadeFiltro) return false;
         return true;
     });
 
