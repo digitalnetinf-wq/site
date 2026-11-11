@@ -448,12 +448,11 @@
     <!-- ABA 4: MANCHA CRIMINAL -->
     <div class="tab-page" id="tab-mancha">
         <div class="container">
-            <div class="kpi-grid cols-5">
+            <div class="kpi-grid cols-4">
                 <div class="kpi-card blue"><div class="kpi-lbl">Ocorrências Georreferenciadas</div><div class="kpi-val blue" id="mancha-tot">—</div><div class="kpi-sub">mapeados no sistema</div></div>
                 <div class="kpi-card" style="border-top-color: #ec4899;"><div class="kpi-lbl">Feminicídios Mapeados</div><div class="kpi-val" style="color: #ec4899;" id="mancha-feminicidio">—</div><div class="kpi-sub">identificados na mancha (rosa)</div></div>
-                <div class="kpi-card yellow"><div class="kpi-lbl">Infantil (&lt; 12a)</div><div class="kpi-val yellow" id="mancha-infantil">—</div><div class="kpi-sub">pontos em amarelo</div></div>
-                <div class="kpi-card blue"><div class="kpi-lbl">Adolescente (12-17a)</div><div class="kpi-val blue" id="mancha-adolescente">—</div><div class="kpi-sub">pontos em azul</div></div>
-                <div class="kpi-card red"><div class="kpi-lbl">Adulto (18+)</div><div class="kpi-val red" id="mancha-adultos">—</div><div class="kpi-sub">ocorrências padrão (vermelho)</div></div>
+                <div class="kpi-card yellow"><div class="kpi-lbl">Vítimas Juvenis (< 18 Anos)</div><div class="kpi-val yellow" id="mancha-menores">—</div><div class="kpi-sub">menores (amarelo e azul)</div></div>
+                <div class="kpi-card red"><div class="kpi-lbl">Casos Gerais</div><div class="kpi-val red" id="mancha-adultos">—</div><div class="kpi-sub">ocorrências padrão (vermelho)</div></div>
             </div>
             <div class="filter-bar" style="justify-content: flex-start; gap: 12px; margin-bottom: 24px;">
                 <span class="f-lbl">Ano:</span><select class="f-btn" id="mancha-ano" onchange="buildMANCHA()" style="outline: none;"><option value="todos">TODOS</option><option value="2025">2025</option><option value="2026" selected>2026</option></select>
@@ -974,17 +973,7 @@ async function reloadSheets(silent = false) {
 
     try {
         const fetchUrl = SHEETS_CSV_URL + '&nocache=' + new Date().getTime();
-        let response;
-        
-        try {
-            // Tenta o acesso direto primeiro
-            response = await fetch(fetchUrl, { cache: 'no-store' });
-        } catch (fetchErr) {
-            // Se falhar por bloqueio de CORS, tenta através de um proxy
-            console.warn("Acesso direto bloqueado por CORS. Tentando rota alternativa (Proxy)...");
-            const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(fetchUrl);
-            response = await fetch(proxyUrl, { cache: 'no-store' });
-        }
+        const response = await fetch(fetchUrl, { cache: 'no-store' });
         
         if (!response.ok) throw new Error("Erro HTTP: " + response.status);
 
@@ -997,18 +986,11 @@ async function reloadSheets(silent = false) {
 
         processSheetRows(rows, silent);
     } catch (error) {
-        console.error('Falha na integração:', error);
+        console.error('Falha na integração direta:', error);
         if (!silent) {
             setSheetsStatus('err', 'MODO OFFLINE (LOCAL)');
             showToast('Utilizando cache operacional local de contingência.', 'var(--accent2)');
-            initData(); 
-            buildTab('visao-geral');
-            
-            const diagModal = document.getElementById('diag-modal');
-            if (diagModal) {
-                document.getElementById('diag-error-detail').textContent = error.toString() + ' (Bloqueio ou Planilha privada)';
-                diagModal.style.display = 'flex';
-            }
+            initData(); buildTab('visao-geral');
         }
     }
 }
@@ -1396,7 +1378,7 @@ function buildMANCHA() {
         return true;
     });
 
-    let qtdFeminicidio = 0, qtdInfantil = 0, qtdAdolescente = 0, qtdAdultos = 0, totalVitimasMap = 0;
+    let qtdFeminicidio = 0, qtdMenores = 0, qtdAdultos = 0, totalVitimasMap = 0;
 
     if (!mapInstance) {
         mapInstance = L.map('map', {zoomControl: true, attributionControl: false}).setView([-12.266, -38.966], 12);
@@ -1433,8 +1415,8 @@ function buildMANCHA() {
 
             let color = '#ef4444'; 
             if (isFeminicidio) { color = '#ec4899'; qtdFeminicidio += 1; }
-            else if (isMenor12) { color = '#ffd60a'; qtdInfantil += 1; }
-            else if (isMenor18) { color = '#3b82f6'; qtdAdolescente += 1; }
+            else if (isMenor12) { color = '#ffd60a'; qtdMenores += 1; }
+            else if (isMenor18) { color = '#3b82f6'; qtdMenores += 1; }
             else { qtdAdultos += 1; }
             totalVitimasMap += 1; bonecos.push(color);
 
@@ -1476,8 +1458,7 @@ function buildMANCHA() {
 
     if(document.getElementById('mancha-tot')) document.getElementById('mancha-tot').textContent = totalVitimasMap;
     if(document.getElementById('mancha-feminicidio')) document.getElementById('mancha-feminicidio').textContent = qtdFeminicidio;
-    if(document.getElementById('mancha-infantil')) document.getElementById('mancha-infantil').textContent = qtdInfantil;
-    if(document.getElementById('mancha-adolescente')) document.getElementById('mancha-adolescente').textContent = qtdAdolescente;
+    if(document.getElementById('mancha-menores')) document.getElementById('mancha-menores').textContent = qtdMenores;
     if(document.getElementById('mancha-adultos')) document.getElementById('mancha-adultos').textContent = qtdAdultos;
 }
 
