@@ -458,7 +458,6 @@
             <div class="filter-bar" style="justify-content: flex-start; gap: 12px; margin-bottom: 24px;">
                 <span class="f-lbl">Ano:</span><select class="f-btn" id="mancha-ano" onchange="buildMANCHA()" style="outline: none;"><option value="todos">TODOS</option><option value="2025">2025</option><option value="2026" selected>2026</option></select>
                 <span class="f-lbl" style="margin-left: 12px;">Mês:</span><select class="f-btn" id="mancha-mes" onchange="buildMANCHA()" style="outline: none;"><option value="todos" selected>TODOS</option><option value="1">JANEIRO</option><option value="2">FEVEREIRO</option><option value="3">MARÇO</option><option value="4">ABRIL</option><option value="5">MAIO</option><option value="6">JUNHO</option><option value="7">JULHO</option><option value="8">AGOSTO</option><option value="9">SETEMBRO</option><option value="10">OUTUBRO</option><option value="11">NOVEMBRO</option><option value="12">DEZEMBRO</option></select>
-                <span class="f-lbl" style="margin-left: 12px;">Cidade:</span><select class="f-btn" id="mancha-cidade" onchange="buildMANCHA()" style="outline: none;"><option value="todos" selected>TODAS</option></select>
             </div>
             <div class="card mb20">
                 <div class="card-hd" style="flex-wrap: wrap; gap: 12px;">
@@ -735,9 +734,9 @@ const COL_MAP = {
     vitima: ['vitima','nome','victim', 'nomedavitima', 'vitimas'],
     idade: ['idade','age', 'idadedavitima'],
     ocorrencia: ['ocorrencia','oc','bopm','numeroocorrencia','guia','bo','registro','boletim', 'ip', 'inquerito'],
-    data: ['data','date','dataocorrencia','dia', 'datadoobito', 'datafato'],
+    data: ['data','date','dataocorrencia','dia', 'datadoobito', 'datafato', 'datadofato', 'dtfato', 'dtocorrencia', 'datacrime'],
     hora: ['hora','hour','horario', 'horadofato'],
-    mes_col: ['mes', 'mês', 'month'], 
+    mes_col: ['mes', 'mês', 'month', 'mesfato'], 
     ano_col: ['ano', 'year'],
     sexo: ['sexo','genero','gênero','gender'],
     autoria: ['autoria','autoridentificado','autor', 'autoriaconhecida'],
@@ -806,20 +805,31 @@ function parseCSV(text) {
             Object.entries(COL_MAP).forEach(function(entry) {
                 const key = entry[0];
                 const aliases = entry[1];
-                const idx = rawHeaders.findIndex(function(h) {
+                
+                // 1. Tenta correspondência exata primeiro
+                let idx = rawHeaders.findIndex(function(h) {
                     const cleanH = h.replace(/[^a-z0-9]/g, ''); 
-                    return aliases.some(function(a) {
-                        const cleanA = a.replace(/[^a-z0-9]/g, '');
-                        if (cleanH === cleanA) return true;
-                        
-                        if (cleanA.length > 3 && cleanH.includes(cleanA)) {
-                            if (cleanA === 'tipo' && cleanH.includes('arma')) return false;
-                            if (cleanA === 'meio' && cleanH.includes('arma')) return false;
-                            return true;
-                        }
-                        return false;
-                    });
+                    return aliases.some(a => cleanH === a.replace(/[^a-z0-9]/g, ''));
                 });
+                
+                // 2. Tenta correspondência parcial (includes) se não achar exata
+                if (idx === -1) {
+                    idx = rawHeaders.findIndex(function(h) {
+                        const cleanH = h.replace(/[^a-z0-9]/g, ''); 
+                        return aliases.some(function(a) {
+                            const cleanA = a.replace(/[^a-z0-9]/g, '');
+                            if (cleanA.length >= 4 && cleanH.includes(cleanA)) {
+                                if (cleanA === 'tipo' && cleanH.includes('arma')) return false;
+                                if (cleanA === 'meio' && cleanH.includes('arma')) return false;
+                                // Evita confundir Data do Fato com Data de Nascimento/Registro
+                                if (cleanA === 'data' && (cleanH.includes('nasc') || cleanH.includes('registro') || cleanH.includes('inclusao'))) return false;
+                                return true;
+                            }
+                            return false;
+                        });
+                    });
+                }
+                
                 if (idx >= 0 && tempColIdx[key] === undefined) { 
                      tempColIdx[key] = idx; 
                      matches++; 
@@ -849,6 +859,16 @@ function parseCSV(text) {
             
             let mesNum = NaN, anoStr = '', dia = NaN;
 
+            // BUSCA VARREDORA: Se não achou a coluna de data, procura em qualquer coluna da linha por um padrão de data
+            if (!dataStr) {
+                for (let j = 0; j < cols.length; j++) {
+                    if (cols[j] && typeof cols[j] === 'string' && (cols[j].match(/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/) || cols[j].match(/\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/))) {
+                        dataStr = cols[j].trim();
+                        break;
+                    }
+                }
+            }
+
             if (explAno) {
                 anoStr = explAno.replace(/[^\d]/g, '');
                 if (anoStr.length === 2) anoStr = '20' + anoStr;
@@ -861,36 +881,48 @@ function parseCSV(text) {
             }
 
             if (dataStr) {
-                let rawDate = dataStr.trim().split(/[ T]/)[0].replace(/[^\d\/\-]/g, '');
-                const mDMY = rawDate.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-                const mYMD = rawDate.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
-
-                if (mDMY) { 
-                    let p1 = parseInt(mDMY[1], 10), p2 = parseInt(mDMY[2], 10), p3 = parseInt(mDMY[3], 10);
-                    if (p3 >= 2000 || (p3 >= 20 && p3 <= 99)) { 
-                         if (!anoStr) anoStr = p3 < 100 ? '20' + String(p3).padStart(2, '0') : String(p3);
-                         dia = p1; 
-                         if (isNaN(mesNum)) mesNum = p2;
-                         if (mesNum > 12) { dia = p2; mesNum = p1; }
+                let numParts = dataStr.match(/\d+/g);
+                if (numParts && numParts.length >= 3) {
+                    let p1 = parseInt(numParts[0], 10), p2 = parseInt(numParts[1], 10), p3 = parseInt(numParts[2], 10);
+                    // Entende dd/mm/yyyy ou yyyy/mm/dd
+                    if (p3 >= 1000) {
+                         anoStr = String(p3); mesNum = p2; dia = p1;
+                    } else if (p1 >= 1000) {
+                         anoStr = String(p1); mesNum = p2; dia = p3;
+                    } else if (p3 >= 0 && p3 < 100) {
+                         anoStr = '20' + String(p3).padStart(2, '0'); mesNum = p2; dia = p1;
                     }
-                } else if (mYMD) { 
-                     if (isNaN(mesNum)) mesNum = parseInt(mYMD[2], 10); 
-                     if (!anoStr) anoStr = mYMD[1]; 
-                     dia = parseInt(mYMD[3], 10);
+                }
+                
+                // fallback para meses por extenso se falhar
+                let mMatchText = dataStr.toLowerCase().match(/(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)/);
+                if (mMatchText && isNaN(mesNum)) {
+                     mesNum = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'].indexOf(mMatchText[1]) + 1;
+                }
+                
+                // Tratamento extra para Data Serial (Excel)
+                if (numParts && numParts.length === 1) {
+                    let p1 = parseInt(numParts[0], 10);
+                    if (p1 > 30000 && p1 < 60000) {
+                        let dObj = new Date(Math.round((p1 - 25569) * 86400 * 1000));
+                        dia = dObj.getUTCDate();
+                        mesNum = dObj.getUTCMonth() + 1;
+                        anoStr = String(dObj.getUTCFullYear());
+                    }
                 }
             }
 
             const oc = get('ocorrencia') || '';
             if (!anoStr) {
-                if (oc.includes('-26-') || oc.includes('2026')) { anoStr = '2026'; if(isNaN(mesNum)) mesNum = 1; }
-                else if (oc.includes('-25-') || oc.includes('2025')) { anoStr = '2025'; if(isNaN(mesNum)) mesNum = 1; }
+                if (oc.includes('-26-') || oc.includes('2026')) { anoStr = '2026'; }
+                else if (oc.includes('-25-') || oc.includes('2025')) { anoStr = '2025'; }
+                else { anoStr = '2026'; } // Assumir 2026 se não houver outra referência
             }
 
+            if (isNaN(mesNum)) mesNum = 1;
             if (isNaN(dia) || dia < 1 || dia > 31) dia = 1; 
 
-            if (!isNaN(mesNum) && mesNum >= 1 && mesNum <= 12 && anoStr) {
-                dataStr = String(dia).padStart(2, '0') + '/' + String(mesNum).padStart(2, '0') + '/' + anoStr;
-            } else { mesNum = NaN; }
+            dataStr = String(dia).padStart(2, '0') + '/' + String(mesNum).padStart(2, '0') + '/' + anoStr;
 
             const meio = get('meio') || '';
             const tip = get('tipificacao') || 'HOMICÍDIO';
@@ -975,7 +1007,17 @@ async function reloadSheets(silent = false) {
 
     try {
         const fetchUrl = SHEETS_CSV_URL + '&nocache=' + new Date().getTime();
-        const response = await fetch(fetchUrl, { cache: 'no-store' });
+        let response;
+        
+        try {
+            // Tenta o acesso direto primeiro
+            response = await fetch(fetchUrl, { cache: 'no-store' });
+        } catch (fetchErr) {
+            // Se falhar por bloqueio de CORS, tenta através de um proxy
+            console.warn("Acesso direto bloqueado por CORS. Tentando rota alternativa (Proxy)...");
+            const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(fetchUrl);
+            response = await fetch(proxyUrl, { cache: 'no-store' });
+        }
         
         if (!response.ok) throw new Error("Erro HTTP: " + response.status);
 
@@ -988,11 +1030,18 @@ async function reloadSheets(silent = false) {
 
         processSheetRows(rows, silent);
     } catch (error) {
-        console.error('Falha na integração direta:', error);
+        console.error('Falha na integração:', error);
         if (!silent) {
             setSheetsStatus('err', 'MODO OFFLINE (LOCAL)');
             showToast('Utilizando cache operacional local de contingência.', 'var(--accent2)');
-            initData(); buildTab('visao-geral');
+            initData(); 
+            buildTab('visao-geral');
+            
+            const diagModal = document.getElementById('diag-modal');
+            if (diagModal) {
+                document.getElementById('diag-error-detail').textContent = error.toString() + ' (Bloqueio ou Planilha privada)';
+                diagModal.style.display = 'flex';
+            }
         }
     }
 }
@@ -1072,7 +1121,7 @@ function recalcStats(){
     DB.cidades26={}; DB.bairros26={}; DB.meio26={}; DB.tipoArma26={}; DB.tipo26={}; DB.motivo26={};
     DB.coorpin25={}; DB.coorpin26={}; DB.meses25={}; DB.meses26={}; DB.t25_coorpin=0; DB.t26_coorpin=0;
 
-    let maxM26 = -1;
+    let maxM25 = -1, maxM26 = -1;
     const _today = new Date();
     const currentRealMonth = (_today.getFullYear() >= 2026) ? (_today.getFullYear() === 2026 ? _today.getMonth() : 11) : 11;
 
@@ -1081,6 +1130,7 @@ function recalcStats(){
         let mi = parseInt(r.mes, 10) - 1;
         if (isNaN(mi) || mi < 0 || mi > 11 || !isCVLI(r.tipificacao)) return; 
 
+        if (is25 && mi > maxM25) maxM25 = mi;
         if (is26 && mi > maxM26) maxM26 = mi;
         const cid=String(r.cidade||'FEIRA DE SANTANA').toUpperCase().trim();
 
@@ -1114,35 +1164,26 @@ function recalcStats(){
         }
     });
 
-    if (maxM26 === -1) maxM26 = currentRealMonth;
-    DB.maxM26 = maxM26; DB.limitMonth = currentRealMonth; DB.t25_ytd = 0; DB.t26_ytd = 0;
+    DB.limitMonth25 = maxM25 === -1 ? 11 : maxM25;
+    DB.limitMonth26 = maxM26 === -1 ? currentRealMonth : maxM26;
+    DB.limitMonth = Math.max(DB.limitMonth25, DB.limitMonth26); 
     
+    DB.t25_ytd = 0; DB.t26_ytd = 0;
     DB.coorpin25_ytd = {}; DB.coorpin26_ytd = {};
 
-    for (let i = 0; i <= DB.limitMonth; i++) {
+    const compareLimit = DB.limitMonth26;
+    for (let i = 0; i <= compareLimit; i++) {
         DB.t25_ytd += DB.coorpin_25[i] || 0; DB.t26_ytd += DB.coorpin_26[i] || 0;
     }
 
-    const citySet = new Set();
     DB.registros.forEach(function(r) {
         let mi = parseInt(r.mes, 10) - 1;
-        if (mi >= 0 && mi <= DB.limitMonth && isCVLI(r.tipificacao)) {
+        if (mi >= 0 && mi <= compareLimit && isCVLI(r.tipificacao)) {
             const cid = String(r.cidade || 'FEIRA DE SANTANA').toUpperCase().trim();
             if (String(r.ano) === '2025') DB.coorpin25_ytd[cid] = (DB.coorpin25_ytd[cid] || 0) + 1;
             if (String(r.ano) === '2026') DB.coorpin26_ytd[cid] = (DB.coorpin26_ytd[cid] || 0) + 1;
         }
-        
-        if (isCVLI(r.tipificacao) && r.lat !== null) {
-            citySet.add(String(r.cidade || 'FEIRA DE SANTANA').toUpperCase().trim());
-        }
     });
-    
-    const citySelect = document.getElementById('mancha-cidade');
-    if (citySelect) {
-        const currentVal = citySelect.value;
-        citySelect.innerHTML = '<option value="todos">TODAS</option>' + Array.from(citySet).sort().map(c => '<option value="' + c + '">' + c + '</option>').join('');
-        if (Array.from(citySet).includes(currentVal)) citySelect.value = currentVal;
-    }
 }
 
 Chart.register(ChartDataLabels);
@@ -1208,19 +1249,36 @@ function buildVG(){
     if(document.getElementById('vg-idade')) document.getElementById('vg-idade').textContent=mediaIdade26 ? mediaIdade26.toFixed(1) + ' anos' : '—';
     if(document.getElementById('vg-aut')) document.getElementById('vg-aut').textContent=pctAutoria26+'%';
 
-    const maskFuture = function(arr) { return arr.map(function(v, i) { return i > DB.limitMonth ? null : (v || 0); }); };
+    const mask25 = function(arr) { return arr.map(function(v, i) { return i > DB.limitMonth25 ? null : (v || 0); }); };
+    const mask26 = function(arr) { return arr.map(function(v, i) { return i > DB.limitMonth26 ? null : (v || 0); }); };
 
-    mkC('vg-mensal',{type:'line',data:{labels:M,datasets:[
-        {label:'Feira 2025',data:DB.feira_25,borderColor:'#ff4a5a',backgroundColor:'rgba(255,74,90,0.04)',borderWidth:2.5,tension:.4,fill:true,pointRadius:3},
-        {label:'Feira 2026 (YTD)',data:maskFuture(DB.feira_26),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.05)',borderWidth:2.5,tension:.4,fill:true,borderDash:[5,3],pointRadius:4}
-    ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#8492a6',font:{size:11,weight:'bold'},boxWidth:12,padding:12}},tooltip:TT},scales:{x:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true}}}});
+    mkC('vg-mensal',{
+        type:'line',
+        data:{
+            labels:M,
+            datasets:[
+                {label:'Feira 2025',data:mask25(DB.feira_25),borderColor:'#ff4a5a',backgroundColor:'rgba(255,74,90,0.04)',borderWidth:2.5,tension:.4,fill:true,pointRadius:3, spanGaps: false},
+                {label:'Feira 2026',data:mask26(DB.feira_26),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.05)',borderWidth:2.5,tension:.4,fill:true,borderDash:[5,3],pointRadius:4, spanGaps: false}
+            ]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            interaction:{mode:'index',intersect:false},
+            plugins:{legend:{labels:{color:'#8492a6',font:{size:11,weight:'bold'},boxWidth:12,padding:12}},tooltip:TT},
+            scales:{
+                x:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}}},
+                y:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true}
+            }
+        }
+    });
 
     const f25=DB.feira_25, f26=DB.feira_26, c25=DB.coorpin_25, c26=DB.coorpin_26;
 
     const compContainer = document.getElementById('vg-comp');
     if(compContainer){
             compContainer.innerHTML=M.map(function(m,i){
-                if(i > DB.limitMonth) return '';
+                if(i > DB.limitMonth26) return '';
                 if(f25[i]===0&&f26[i]===0) return'';
                 const v25=f25[i],v26=f26[i],tot=v25+v26||1,p25=Math.round(v25/tot*100),p26=100-p25;
                 const d=v26-v25,col=d>0?'var(--accent)':d<0?'var(--green)':'var(--muted)',icon=d>0?'▲':d<0?'▼':'=';
@@ -1231,7 +1289,7 @@ function buildVG(){
     const compCoorpin = document.getElementById('vg-comp-coorpin');
     if(compCoorpin){
             compCoorpin.innerHTML=M.map(function(m,i){
-                if(i > DB.limitMonth) return '';
+                if(i > DB.limitMonth26) return '';
                 if(c25[i]===0&&c26[i]===0) return'';
                 const v25=c25[i],v26=c26[i],tot=v25+v26||1,p25=Math.round(v25/tot*100),p26=100-p25;
                 const d=v26-v25,col=d>0?'var(--accent)':d<0?'var(--green)':'var(--muted)',icon=d>0?'▲':d<0?'▼':'=';
@@ -1266,14 +1324,31 @@ function buildEV(){
     const p26Sub = document.querySelector('#ev-pico26')?.nextElementSibling;
     if(p26Sub) p26Sub.textContent = (M[picoM26] || '—') +' · pico atual';
 
-    const maskFuture = function(arr) { return arr.map(function(v, i) { return i > DB.limitMonth ? null : (v || 0); }); };
+    const mask25 = function(arr) { return arr.map(function(v, i) { return i > DB.limitMonth25 ? null : (v || 0); }); };
+    const mask26 = function(arr) { return arr.map(function(v, i) { return i > DB.limitMonth26 ? null : (v || 0); }); };
 
-    mkC('ev-full',{type:'line',data:{labels:M,datasets:[
-        {label:'COORPIN 2025',data:DB.coorpin_25,borderColor:'#ff4a5a',backgroundColor:'rgba(255,74,90,0.03)',borderWidth:2,tension:.4,fill:true,pointRadius:4},
-        {label:'Feira 2025',data:DB.feira_25,borderColor:'#ff7e40',backgroundColor:'transparent',borderWidth:1.5,tension:.4,fill:false,borderDash:[3,2],pointRadius:3},
-        {label:'COORPIN 2026',data:maskFuture(DB.coorpin_26),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.05)',borderWidth:2,tension:.4,fill:true,borderDash:[6,3],pointRadius:4},
-        {label:'Feira 2026',data:maskFuture(DB.feira_26),borderColor:'#10b981',backgroundColor:'transparent',borderWidth:1.5,tension:.4,fill:false,borderDash:[3,2],pointRadius:3}
-    ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#8492a6',font:{size:10,weight:'600'},boxWidth:12,padding:10}},tooltip:TT},scales:{x:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true}}}});
+    mkC('ev-full',{
+        type:'line',
+        data:{
+            labels:M,
+            datasets:[
+                {label:'COORPIN 2025',data:mask25(DB.coorpin_25),borderColor:'#ff4a5a',backgroundColor:'rgba(255,74,90,0.03)',borderWidth:2,tension:.4,fill:true,pointRadius:4, spanGaps: false},
+                {label:'Feira 2025',data:mask25(DB.feira_25),borderColor:'#ff7e40',backgroundColor:'transparent',borderWidth:1.5,tension:.4,fill:false,borderDash:[3,2],pointRadius:3, spanGaps: false},
+                {label:'COORPIN 2026',data:mask26(DB.coorpin_26),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.05)',borderWidth:2,tension:.4,fill:true,borderDash:[6,3],pointRadius:4, spanGaps: false},
+                {label:'Feira 2026',data:mask26(DB.feira_26),borderColor:'#10b981',backgroundColor:'transparent',borderWidth:1.5,tension:.4,fill:false,borderDash:[3,2],pointRadius:3, spanGaps: false}
+            ]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            interaction:{mode:'index',intersect:false},
+            plugins:{legend:{labels:{color:'#8492a6',font:{size:10,weight:'600'},boxWidth:12,padding:10}},tooltip:TT},
+            scales:{
+                x:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}}},
+                y:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true}
+            }
+        }
+    });
 
     let s=0;const a25=DB.coorpin_25.map(function(v) { return (s+=(v||0),s); });
     let s2=0;const a26=DB.coorpin_26.map(function(v, i) { if(i > DB.limitMonth) return null; return (s2+=(v||0),s2); });
@@ -1290,8 +1365,9 @@ function buildEV(){
         row.data.forEach(function(v, i){
             let bg = 'rgba(255,255,255,0.02)', tc = '#8492a6', content = '—';
             
-            if (row.lbl === 'Feira 2026' && i > DB.limitMonth) {
-                content = '';
+            let lmt = row.lbl === 'Feira 2026' ? DB.limitMonth26 : DB.limitMonth25;
+            if (i > lmt) {
+                h += '<div class="hm-cell" style="background:transparent; border-color:transparent;"></div>';
             } else {
                 let val = v || 0;
                 if(val > 0) {
@@ -1306,9 +1382,12 @@ function buildEV(){
                 } else {
                     const v25 = DB.feira_25[i] || 0;
                     let varPct = '';
-                    if(v25===0 && val===0){ varPct = '-'; }
-                    else if(v25===0){ varPct = '+100%'; }
-                    else if(val===0){ 
+                    if(v25===0 && val===0){ 
+                        varPct = '-'; 
+                    } else if(v25===0 && val > 0){ 
+                        varPct = '+' + val; 
+                        bg = 'rgba(255, 74, 90, 0.85)'; tc = '#fff'; 
+                    } else if(val===0){ 
                         varPct = '-100%'; 
                         bg = 'rgba(16, 185, 129, 0.8)'; tc = '#fff'; 
                     } else {
@@ -1317,8 +1396,8 @@ function buildEV(){
                     }
                     content = val + '<br><small style="opacity:0.9;font-size:9px;font-weight:bold;">' + varPct + '</small>';
                 }
+                h += '<div class="hm-cell" style="background:' + bg + ';color:' + tc + ';flex-direction:column;line-height:1.15;font-weight:600;">' + content + '</div>';
             }
-            h += '<div class="hm-cell" style="background:' + bg + ';color:' + tc + ';flex-direction:column;line-height:1.15;font-weight:600;">' + content + '</div>';
         });
     });
     const evHeatmap = document.getElementById('ev-heatmap'); if(evHeatmap) evHeatmap.innerHTML=h;
@@ -1334,7 +1413,7 @@ function buildEV(){
 
     let htmlTab='<table><thead><tr><th>Período</th><th>Feira 2025</th><th>Feira 2026</th><th>Var. Feira</th><th>COORPIN 2025</th><th>COORPIN 2026</th><th>Var. COORPIN</th></tr></thead><tbody>';
     M.forEach(function(m,i){
-        if(i > DB.limitMonth) return;
+        if(i > Math.max(DB.limitMonth25, DB.limitMonth26)) return;
         const f25=DB.feira_25[i]||0,f26=DB.feira_26[i]||0,c25=DB.coorpin_25[i]||0,c26=DB.coorpin_26[i]||0;
         if(c25===0&&c26===0)return;
         const df=f26-f25,dc=c26-c25;
@@ -1385,12 +1464,10 @@ function buildMANCHA() {
 
     const anoFiltro = document.getElementById('mancha-ano') ? document.getElementById('mancha-ano').value : 'todos';
     const mesFiltro = document.getElementById('mancha-mes') ? document.getElementById('mancha-mes').value : 'todos';
-    const cidadeFiltro = document.getElementById('mancha-cidade') ? document.getElementById('mancha-cidade').value : 'todos';
     const regsComCoords = DB.registros.filter(r => { 
         if (!isCVLI(r.tipificacao) || r.lat === null || r.lng === null) return false;
         if (anoFiltro !== 'todos' && String(r.ano) !== anoFiltro) return false;
         if (mesFiltro !== 'todos' && String(r.mes) !== mesFiltro) return false;
-        if (cidadeFiltro !== 'todos' && String(r.cidade).toUpperCase().trim() !== cidadeFiltro) return false;
         return true;
     });
 
@@ -1739,11 +1816,12 @@ function buildCO(){
 
     mkC('co-mun-comp',{type:'bar',data:{labels:cities,datasets:[{label:'2025 (Jan-' + mName + ')',data:data25_ytd_chart,backgroundColor:'rgba(255, 74, 90, 0.85)',borderRadius:4},{label:'2026 (Jan-' + mName + ')',data:data26_ytd_chart,backgroundColor:'rgba(59, 130, 246, 0.85)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8492a6',font:{size:10,weight:'600'},boxWidth:12}},tooltip:TT},scales:{x:{grid:{display:false},ticks:{font:{size:9,weight:'bold'},maxRotation:45}},y:{grid:{color:'rgba(30, 38, 56, 0.3)'},ticks:{font:{size:10}},beginAtZero:true}}}});
 
-    const maskFuture = function(arr) { return arr.map(function(v, i) { return i > DB.limitMonth ? null : (v || 0); }); };
+    const mask25_co = function(arr) { return arr.map(function(v, i) { return i > DB.limitMonth25 ? null : (v || 0); }); };
+    const mask26_co = function(arr) { return arr.map(function(v, i) { return i > DB.limitMonth26 ? null : (v || 0); }); };
 
     mkC('co-evolucao',{type:'line',data:{labels:M,datasets:cities.flatMap((c,i) => [
-        {label: c + " (25)",data:DB.meses25[c]||Array(12).fill(0),borderColor:P[i%P.length],backgroundColor:'transparent',borderWidth:1,tension:.4,borderDash:[3,3],pointRadius:2},
-        {label: c + " (26)",data:maskFuture(DB.meses26[c]||Array(12).fill(0)),borderColor:P[i%P.length],backgroundColor:'transparent',borderWidth:3,tension:.4,pointRadius:4}
+        {label: c + " (25)",data:mask25_co(DB.meses25[c]||Array(12).fill(0)),borderColor:P[i%P.length],backgroundColor:'transparent',borderWidth:1,tension:.4,borderDash:[3,3],pointRadius:2, spanGaps: false},
+        {label: c + " (26)",data:mask26_co(DB.meses26[c]||Array(12).fill(0)),borderColor:P[i%P.length],backgroundColor:'transparent',borderWidth:3,tension:.4,pointRadius:4, spanGaps: false}
     ])},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#8492a6',font:{size:9,weight:'600'},boxWidth:10,padding:8}},tooltip:TT},scales:{x:{grid:{color:'rgba(30, 38, 56, 0.3)'}},y:{grid:{color:'rgba(30, 38, 56, 0.3)'},beginAtZero:true}}}});
 
     let htmlTab='<table><thead><tr><th>Município de Jurisdição</th><th>Total 2025</th><th>Total 2026</th><th>1º Tri 2025</th><th>1º Tri 2026</th><th>Variação Trimestral</th></tr></thead><tbody>';
@@ -1759,7 +1837,7 @@ function buildCO(){
 }
 
 function buildTABELAS() {
-    const limitMonth = DB.limitMonth !== undefined ? DB.limitMonth : new Date().getMonth();
+    const limitMonth = DB.limitMonth26 !== undefined ? DB.limitMonth26 : new Date().getMonth();
     const mName = M[limitMonth] || 'Atual';
     const _now = new Date();
     const _liveLabel = _now.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).toUpperCase() + ' ' + _now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
